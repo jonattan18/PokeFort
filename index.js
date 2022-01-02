@@ -58,7 +58,7 @@ client.on('message', async (message) => {
         prefix = data.Prefix.toLowerCase();
 
         //Getting the data from the user model
-        await user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) return console.log(err);
             if (!user) return;
             user_available = true;
