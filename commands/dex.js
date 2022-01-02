@@ -448,11 +448,10 @@ function create_pagination(message, dex_pokemons, description_string = "", field
             }).sort(function (p, t) {
                 return t[1] - p[1];
             });
-            obj_arr = [];
-            for (i = 0; i < obj.length; i++) {
-                for (j = 0; j < obj[i][1]; j++) {
-                    obj_arr.push(obj[i][0]);
-                }
+            for (var i = obj.length - 1; i >= 0; i--) {
+                var index = dex_pokemons.findIndex(it => it["Pokemon Id"] === obj[i][0]);
+                var new_pokemon = dex_pokemons.splice(index, 1);
+                dex_pokemons = new_pokemon.concat(dex_pokemons);
             }
         }
 
