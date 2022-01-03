@@ -510,7 +510,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
                         UserID: message.author.id,
                         Message: JSON.stringify(msg),
                         Embed: global_embed,
-                        CurrentPage: 1
+                        CurrentPage: page
                     });
                     channel.save();
                 } else {
