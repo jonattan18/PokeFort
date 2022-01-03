@@ -107,25 +107,25 @@ client.on('message', async (message) => {
             // Update message count
             (async () => {
                 message.channel.messages.fetch({ limit: 2 }).then(messages => {
-
-                    //       if (messages.last().author.id != message.author.id) {
-                    channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-                        let channel_id = message.channel.id;
-                        var message_count = channel.MessageCount + 1;
-                        var spawn_limit = channel.SpawnLimit;
-                        if (spawn_limit == 0) {
-                            spawn_limit = getRandomInt(7, 15);
-                        }
-                        if (spawn_limit == message_count) {
-                            spawn_limit = 0;
-                            message_count = 0;
-                            spawn_pokemon(message, prefix); // Spawn Pokemon
-                        }
-                        channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
-                            if (err) { console.log(err) }
+                    //[SPAM SYSTEM]
+                    if (messages.last().author.id != message.author.id) {
+                        channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                            let channel_id = message.channel.id;
+                            var message_count = channel.MessageCount + 1;
+                            var spawn_limit = channel.SpawnLimit;
+                            if (spawn_limit == 0) {
+                                spawn_limit = getRandomInt(10, 20);
+                            }
+                            if (spawn_limit == message_count) {
+                                spawn_limit = 0;
+                                message_count = 0;
+                                spawn_pokemon(message, prefix); // Spawn Pokemon
+                            }
+                            channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
+                                if (err) { console.log(err) }
+                            });
                         });
-                    });
-                    //   }
+                    }
                 }).catch(console.error);
             })();
         }

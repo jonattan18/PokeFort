@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     //Check if its dex arguements
-    if (args.length == 0) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
+    if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
     if (args[0] == "--rewards") { rewards(bot, message, args, prefix, user_available, pokemons); return; }
     if (args[0] == "claim" && args[1] == "all") { claim_all(bot, message, args, prefix, user_available, pokemons); return; }
     if (args[0] == "claim" && args[1] != "all") { claim(bot, message, args, prefix, user_available, pokemons); return; }
@@ -303,7 +303,8 @@ function dex_pokemons(bot, message, args, prefix, user_available, pokemons) {
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
     dex_pokemons = dex_pokemons.concat(galarian_pokemons).concat(alolan_pokemons);
-    create_pagination(message, dex_pokemons);
+    if (isInt(args[0])) { var page = args[0] - 1 }
+    create_pagination(message, dex_pokemons, "", "", page);
 }
 
 // To print all pokemons based on generation.
@@ -382,7 +383,7 @@ function dex_uncaught(bot, message, args, prefix, user_available, pokemons) {
         for (var i = 0; i < user_pokemons.length; i++) {
             dex_pokemons = dex_pokemons.filter(it => it["Pokemon Id"] != user_pokemons[i]["PokemonId"].toString());
         }
-        create_pagination(message, dex_pokemons, "", "", dex_pokemons.length);
+        create_pagination(message, dex_pokemons, "", "", 0, dex_pokemons.length);
     });
 }
 
@@ -402,7 +403,7 @@ function dex_caught(bot, message, args, prefix, user_available, pokemons) {
         }
         new_dex_pokemons = _.uniqBy(new_dex_pokemons, 'Pokemon Id');
         var total_pokemons_uncaught = dex_pokemons.length - _.uniq(new_dex_pokemons).length;
-        create_pagination(message, new_dex_pokemons, "", "", total_pokemons_uncaught);
+        create_pagination(message, new_dex_pokemons, "", "", 0, total_pokemons_uncaught);
     });
 }
 
@@ -419,11 +420,11 @@ function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
     dex_pokemons = dex_pokemons.concat(galarian_pokemons).concat(alolan_pokemons);
 
-    create_pagination(message, dex_pokemons, "", "", 0, true);
+    create_pagination(message, dex_pokemons, "", "", 0, 0, true);
 }
 
 // Function to create pages in embeds.
-function create_pagination(message, dex_pokemons, description_string = "", field_prefix = "", total_pokemons_uncaught = 0, orderd = false) {
+function create_pagination(message, dex_pokemons, description_string = "", field_prefix = "", page = 0, total_pokemons_uncaught = 0, orderd = false) {
     //Get user data from database
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
@@ -494,8 +495,10 @@ function create_pagination(message, dex_pokemons, description_string = "", field
             else { global_embed[i].setDescription(`You have not caught ${not_caught_count} ${description_string}pokemons.\n`); }
         }
 
+        if(page > global_embed.length - 1) { return message.channel.send('No page found.') }
+
         // Send message to channel.
-        message.channel.send(global_embed[0]).then(msg => {
+        message.channel.send(global_embed[page]).then(msg => {
             if (global_embed.length == 1) return;
             channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
                 if (err) return console.log(err);
