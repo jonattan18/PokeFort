@@ -11,6 +11,7 @@ const guild_model = require('./models/guild')
 const logger_model = require('./models/logger');
 const channel_model = require('./models/channel');
 const user_model = require('./models/user');
+const { floor } = require('lodash');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());

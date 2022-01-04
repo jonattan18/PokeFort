@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name); // Searching in English Name.
             if (pokemon.length == 0) {
                 dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name); // Searching in Germany Name.
-                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize().includes(given_name))); // Searching in Japanese Name.
+                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() === given_name)); // Searching in Japanese Name.
                 fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name); // Searching in French Name.
                 if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
             }
@@ -52,7 +52,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in English Name.
             if (pokemon.length == 0) {
                 dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in Germany Name.
-                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize().includes(given_name)) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
+                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() === given_name) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
                 fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in French Name.
                 if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
             }
