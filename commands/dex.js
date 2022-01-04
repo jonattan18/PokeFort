@@ -46,23 +46,23 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (form.length == 1) { form = form[0] }
     else if (form.length == 2) { form = form[1]; isshiny = true; }
 
-    let given_name = args.join(" ");
+    let given_name = args.join(" ")._normalize();
 
     if (form == "" || form == "Shiny") {
-        var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === given_name.toLowerCase()); // Searching in English Name.
+        var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name); // Searching in English Name.
         if (pokemon.length == 0) {
-            dr_pokemon = pokemons.filter(it => it["dr_name"].toLowerCase() === given_name.toLowerCase()); // Searching in Germany Name.
-            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase().includes(given_name.toLowerCase()))); // Searching in Japanese Name.
-            fr_pokemon = pokemons.filter(it => it["fr_name"].toLowerCase() === given_name.toLowerCase()); // Searching in French Name.
+            dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name); // Searching in Germany Name.
+            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize().includes(given_name))); // Searching in Japanese Name.
+            fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name); // Searching in French Name.
             if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
         }
     }
     else {
-        var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in English Name.
+        var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in English Name.
         if (pokemon.length == 0) {
-            dr_pokemon = pokemons.filter(it => it["dr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in Germany Name.
-            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase().includes(given_name.toLowerCase())) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
-            fr_pokemon = pokemons.filter(it => it["fr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in French Name.
+            dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in Germany Name.
+            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize().includes(given_name)) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
+            fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in French Name.
             if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
         }
     }
@@ -490,7 +490,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
             else { global_embed[i].setDescription(`You have not caught ${not_caught_count} ${description_string}pokemons.\n`); }
         }
 
-        if(page > global_embed.length - 1) { return message.channel.send('No page found.') }
+        if (page > global_embed.length - 1) { return message.channel.send('No page found.') }
 
         // Send message to channel.
         message.channel.send(global_embed[page]).then(msg => {
@@ -542,6 +542,11 @@ function isInt(value) {
     }
     x = parseFloat(value);
     return (x | 0) === x;
+}
+
+// Word search normalizer.
+String.prototype._normalize = function () {
+    return this.valueOf().normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 module.exports.config = {

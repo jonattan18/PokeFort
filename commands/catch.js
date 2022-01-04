@@ -13,13 +13,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     else if (args[0].toLowerCase() == "galarian") { form = "Galar"; args.splice(0, 1) }
     else { form = "NULL"; }
 
-    let given_name = args.join(" ");
+    let given_name = args.join(" ")._normalize();
 
-    var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in English Name.
+    var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in English Name.
     if (pokemon.length == 0) {
-        dr_pokemon = pokemons.filter(it => it["dr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in Germany Name.
-        jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase() == given_name.toLowerCase()) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
-        fr_pokemon = pokemons.filter(it => it["fr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in French Name.
+        dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in Germany Name.
+        jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() == given_name) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
+        fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in French Name.
         if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is the wrong pokemon!"); return; };
     }
 
@@ -106,6 +106,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
     });
 
+}
+
+// Word search normalizer.
+String.prototype._normalize = function () {
+    return this.valueOf().normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 module.exports.config = {
