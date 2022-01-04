@@ -50,6 +50,7 @@ client.on('message', async (message) => {
     var messageArray = message.content.split(' ');
     var cmd = messageArray[0].toLowerCase();
     var args = messageArray.slice(1);
+    args = args.filter(function(e){return e}); // Remove empty values from args
 
     //Getting Prefix from database
     await guild_model.findOne({ GuildID: message.guild.id }, (err, data) => {

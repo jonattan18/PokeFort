@@ -1,8 +1,3 @@
-// Optimzize code.
-// Optimzize code.
-// Optimzize code.
-// Optimzize code.
-// Optimzize code.
 const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash'); // Array sorting module.
 
@@ -57,7 +52,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === given_name.toLowerCase()); // Searching in English Name.
         if (pokemon.length == 0) {
             dr_pokemon = pokemons.filter(it => it["dr_name"].toLowerCase() === given_name.toLowerCase()); // Searching in Germany Name.
-            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase() == given_name.toLowerCase())); // Searching in Japanese Name.
+            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase().includes(given_name.toLowerCase()))); // Searching in Japanese Name.
             fr_pokemon = pokemons.filter(it => it["fr_name"].toLowerCase() === given_name.toLowerCase()); // Searching in French Name.
             if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
         }
@@ -66,7 +61,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in English Name.
         if (pokemon.length == 0) {
             dr_pokemon = pokemons.filter(it => it["dr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in Germany Name.
-            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase() == given_name.toLowerCase()) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
+            jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x.toLowerCase().includes(given_name.toLowerCase())) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
             fr_pokemon = pokemons.filter(it => it["fr_name"].toLowerCase() === given_name.toLowerCase() && it["Alternate Form Name"] === form); // Searching in French Name.
             if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
         }

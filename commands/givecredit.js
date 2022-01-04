@@ -3,9 +3,9 @@ const user_model = require('../models/user');
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
-    if (args.length == 0 || args.length < 3) { return; }
+    if (args.length == 0 || args.length < 2) { return; }
     var user_id = args[0].substring(args[0].length, 3).slice(0, -1);
-    var amount = args[2];
+    var amount = args[1];
     if (!isInt(amount)) { return; }
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
