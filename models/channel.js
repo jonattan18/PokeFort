@@ -8,6 +8,8 @@ const ChannelSchema = new mongoose.Schema({
     PokemonID: {type: Number, default: 0},
     Shiny: {type: Boolean, default: false},
     PokemonLevel : Number,
+    PokemonNature: Number,
+    PokemonIV: Array,
     Hint: {type: Number, default: 0},
     Pagination : [{
         UserID: Number,

@@ -58,6 +58,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             CatchedOn: Date.now(),
                             Experience: 0,
                             Level: channel.PokemonLevel,
+                            Nature: channel.PokemonNature,
+                            IV: channel.PokemonIV,
                             Shiny: channel.Shiny,
                             Reason: "Catched",
                         });

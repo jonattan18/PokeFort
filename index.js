@@ -13,6 +13,21 @@ const channel_model = require('./models/channel');
 const user_model = require('./models/user');
 const { floor } = require('lodash');
 
+/*
+HP_IV = 22;
+Atk_IV = 17;
+level = 1;
+hp_base = 70;
+atk_base = 85;
+EV = 0;
+var hp = floor(0.01 * (2 * hp_base + HP_IV + floor(0.25 * EV)) * level) + level + 10
+console.log(hp);
+var atk = (floor(0.01 * (2 * atk_base + Atk_IV + floor(0.25 * EV)) * level) + 5);
+console.log(atk);
+//var atk = floor(0.01 * (2 * base + IV + floor(0.25 * EV)) * level) + 5;
+//console.log((percent/100 * stat).toFixed(2));
+*/
+
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
 const mythical_pokemons = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
@@ -51,7 +66,7 @@ client.on('message', async (message) => {
     var messageArray = message.content.split(' ');
     var cmd = messageArray[0].toLowerCase();
     var args = messageArray.slice(1);
-    args = args.filter(function(e){return e}); // Remove empty values from args
+    args = args.filter(function (e) { return e }); // Remove empty values from args
 
     //Getting Prefix from database
     await guild_model.findOne({ GuildID: message.guild.id }, (err, data) => {
@@ -214,6 +229,24 @@ function spawn_pokemon(message, prefix) {
     else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
     var image_url = './assets/images/' + image_name;
 
+    // Pokemon Nature
+    let random_nature = getRandomInt(1, 26);
+
+    // IV creation
+    var IV = [];
+    while (true) {
+        let hp_iv = getRandomInt(0, 31);
+        let atk_iv = getRandomInt(0, 31);
+        let def_iv = getRandomInt(0, 31);
+        let spa_iv = getRandomInt(0, 31);
+        let spd_iv = getRandomInt(0, 31);
+        let spe_iv = getRandomInt(0, 31);
+        let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
+        IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
+        if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
+        break;
+    }
+
     // Create embed message
     let embed = new Discord.MessageEmbed();
     embed.attachFiles(image_url)
@@ -224,7 +257,7 @@ function spawn_pokemon(message, prefix) {
     message.channel.send(embed);
 
     // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0 }, function (err, user) {
+    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
 }

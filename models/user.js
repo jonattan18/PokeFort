@@ -12,6 +12,8 @@ const ChannelSchema = new mongoose.Schema({
         Nickname: String,
         CatchedOn: { type: Number, default: Date.now() },
         Experience: Number,
+        IV: Array,
+        Nature : Number,
         Level: Number,
         Shiny: Boolean,
         Reason: String
