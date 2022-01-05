@@ -11,22 +11,6 @@ const guild_model = require('./models/guild')
 const logger_model = require('./models/logger');
 const channel_model = require('./models/channel');
 const user_model = require('./models/user');
-const { floor } = require('lodash');
-
-/*
-HP_IV = 22;
-Atk_IV = 17;
-level = 1;
-hp_base = 70;
-atk_base = 85;
-EV = 0;
-var hp = floor(0.01 * (2 * hp_base + HP_IV + floor(0.25 * EV)) * level) + level + 10
-console.log(hp);
-var atk = (floor(0.01 * (2 * atk_base + Atk_IV + floor(0.25 * EV)) * level) + 5);
-console.log(atk);
-//var atk = floor(0.01 * (2 * base + IV + floor(0.25 * EV)) * level) + 5;
-//console.log((percent/100 * stat).toFixed(2));
-*/
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -165,7 +149,7 @@ client.on('guildCreate', guild => {
 function redirect_command(command, prefix) {
     // Commands to redirect
     command = command.slice(prefix.length);
-    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"]];
+    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"]];
     redirect_list = redirect_list.filter(it => it[0] == command);
     if (redirect_list.length > 0) {
         var index = redirect_list.findIndex(it => it[0] == command);

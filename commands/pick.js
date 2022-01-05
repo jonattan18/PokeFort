@@ -40,7 +40,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 PokeCredits: 0,
                 Pokemons: {
                     PokemonId: pokemon["Pokemon Id"],
-                    Nickname: pokemon["Pokemon Name"],
+                    Nickname: "",
                     CatchedOn: Date.now(),
                     Experience: 0,
                     IV: IV,
