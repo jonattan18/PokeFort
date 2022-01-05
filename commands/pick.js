@@ -5,7 +5,7 @@ const user_model = require('../models/user');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (args.length == 0) { message.channel.send("You have not mentioned any pokemon! Use ``" + prefix + "start <pokemon>``"); return; }
-    const starter_pokemon = ["Bulbasaur", "Charmander", "Squirtle", "Chikorita", "Cyndaquil", "Totodile", "Treecko", "Torchic", "Mudkip", "Turtwig", "Chimchar", "Piplup", "Snivy", "Tepig", "Oshawott", "Chespin", "Fennekin", "Froakie", "Rowlet", "Litten", "Popplio", "Grookey",  "Scorbunny", "Sobble"];
+    const starter_pokemon = ["Bulbasaur", "Charmander", "Squirtle", "Chikorita", "Cyndaquil", "Totodile", "Treecko", "Torchic", "Mudkip", "Turtwig", "Chimchar", "Piplup", "Snivy", "Tepig", "Oshawott", "Chespin", "Fennekin", "Froakie", "Rowlet", "Litten", "Popplio", "Grookey", "Scorbunny", "Sobble"];
     if (starter_pokemon.some(x => x.toLowerCase() == args[0].toLowerCase()) == false) { message.channel.send("You have mentioned invalid pokemon!"); return; }
     var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === args[0].toLowerCase());
     pokemon = pokemon[0];
@@ -14,6 +14,25 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) console.log(err);
         // If usser not found create new one.
         if (!user) {
+
+            // IV creation
+            var IV = [];
+            while (true) {
+                let hp_iv = getRandomInt(0, 31);
+                let atk_iv = getRandomInt(0, 31);
+                let def_iv = getRandomInt(0, 31);
+                let spa_iv = getRandomInt(0, 31);
+                let spd_iv = getRandomInt(0, 31);
+                let spe_iv = getRandomInt(0, 31);
+                let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
+                IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
+                if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
+                break;
+            }
+
+            // Pokemon Nature
+            let random_nature = getRandomInt(1, 26);
+
             let new_user = new user_model({
                 UserID: message.author.id,
                 Started: true,
@@ -24,19 +43,34 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     Nickname: pokemon["Pokemon Name"],
                     CatchedOn: Date.now(),
                     Experience: 0,
+                    IV: IV,
+                    Nature: random_nature,
                     Level: 1,
                     Shiny: false,
                     Reason: "Starter"
                 }
             });
             new_user.save(function (err, saved) {
-                user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { Selected: saved.id } }, { new: true }, (err, updated) => {
-                    if (err) { console.log(err) }
+                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+
+                    // ID of starter pokemon.
+                    var pokemon_id = user.Pokemons[0]._id;
+
+                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { Selected: pokemon_id } }, { new: true }, (err, updated) => {
+                        if (err) { console.log(err) }
+                    });
                 });
             });
             message.channel.send("Congratulations! " + pokemon["Pokemon Name"] + " is your first pokemon! Type ``" + prefix + "info`` to see it!");
         } else { message.channel.send(`You have already picked a pokemon!`); return; }
     });
+}
+
+// Random Value
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
 module.exports.config = {
