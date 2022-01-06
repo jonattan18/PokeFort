@@ -97,8 +97,26 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     embed.setColor("#1cb99a");
     message.channel.send(embed);
 
+    // Pokemon Nature
+    let random_nature = getRandomInt(1, 26);
+
+    // IV creation
+    var IV = [];
+    while (true) {
+        let hp_iv = getRandomInt(0, 31);
+        let atk_iv = getRandomInt(0, 31);
+        let def_iv = getRandomInt(0, 31);
+        let spa_iv = getRandomInt(0, 31);
+        let spd_iv = getRandomInt(0, 31);
+        let spe_iv = getRandomInt(0, 31);
+        let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
+        IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
+        if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
+        break;
+    }
+
     // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0 }, function (err, user) {
+    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
 }
