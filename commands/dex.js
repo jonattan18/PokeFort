@@ -490,7 +490,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
             else { global_embed[i].setDescription(`You have not caught ${not_caught_count} ${description_string}pokemons.\n`); }
         }
 
-        if (page > global_embed.length - 1) { return message.channel.send('No page found.') }
+        if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }
 
         // Send message to channel.
         message.channel.send(global_embed[page]).then(msg => {

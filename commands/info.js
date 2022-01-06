@@ -128,31 +128,31 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Function to get the nature from number.
 function nature_of(int) {
-    if (1) { return ["Adament", 0, 10, 0, -10, 0, 0] }
-    if (2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
-    if (3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
-    if (4) { return ["Brave", 0, 10, 0, 0, 0, -10] }
-    if (5) { return ["Calm", 0, -10, 0, 0, 10, 0] }
-    if (6) { return ["Careful", 0, 0, 0, -10, 10, 0] }
-    if (7) { return ["Docile", 0, 0, 0, 0, 0, 0] }
-    if (8) { return ["Gentle", 0, 0, -10, 0, 10, 0] }
-    if (9) { return ["Hardy", 0, 0, 0, 0, 0, 0] }
-    if (10) { return ["Hasty", 0, 0, -10, 0, 0, 10] }
-    if (11) { return ["Impish", 0, 0, 10, -10, 0, 0] }
-    if (12) { return ["Jolly", 0, 0, 0, -10, 0, 10] }
-    if (13) { return ["Lax", 0, 10, 0, 0, -10, 0] }
-    if (14) { return ["Lonely", 0, 10, -10, 0, 0, 0] }
-    if (15) { return ["Mild", 0, 0, -10, 10, 0, 0] }
-    if (16) { return ["Modest", 0, 0, 0, 10, 0, -10] }
-    if (17) { return ["Naive", 0, 0, 0, 0, -10, 10] }
-    if (18) { return ["Naughty", 0, 10, 0, 0, -10, 0] }
-    if (19) { return ["Quiet", 0, 0, 0, 10, 0, -10] }
-    if (20) { return ["Quirky", 0, 0, 0, 0, 0, 0] }
-    if (21) { return ["Rash", 0, 0, 0, 10, -10, 0] }
-    if (22) { return ["Relaxed", 0, 0, 10, 0, 0, -10] }
-    if (23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
-    if (24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
-    if (25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+    if (int == 1) { return ["Adament", 0, 10, 0, -10, 0, 0] }
+    else if (int == 2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
+    else if (int == 3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
+    else if (int == 4) { return ["Brave", 0, 10, 0, 0, 0, -10] }
+    else if (int == 5) { return ["Calm", 0, -10, 0, 0, 10, 0] }
+    else if (int == 6) { return ["Careful", 0, 0, 0, -10, 10, 0] }
+    else if (int == 7) { return ["Docile", 0, 0, 0, 0, 0, 0] }
+    else if (int == 8) { return ["Gentle", 0, 0, -10, 0, 10, 0] }
+    else if (int == 9) { return ["Hardy", 0, 0, 0, 0, 0, 0] }
+    else if (int == 10) { return ["Hasty", 0, 0, -10, 0, 0, 10] }
+    else if (int == 11) { return ["Impish", 0, 0, 10, -10, 0, 0] }
+    else if (int == 12) { return ["Jolly", 0, 0, 0, -10, 0, 10] }
+    else if (int == 13) { return ["Lax", 0, 10, 0, 0, -10, 0] }
+    else if (int == 14) { return ["Lonely", 0, 10, -10, 0, 0, 0] }
+    else if (int == 15) { return ["Mild", 0, 0, -10, 10, 0, 0] }
+    else if (int == 16) { return ["Modest", 0, 0, 0, 10, 0, -10] }
+    else if (int == 17) { return ["Naive", 0, 0, 0, 0, -10, 10] }
+    else if (int == 18) { return ["Naughty", 0, 10, 0, 0, -10, 0] }
+    else if (int == 19) { return ["Quiet", 0, 0, 0, 10, 0, -10] }
+    else if (int == 20) { return ["Quirky", 0, 0, 0, 0, 0, 0] }
+    else if (int == 21) { return ["Rash", 0, 0, 0, 10, -10, 0] }
+    else if (int == 22) { return ["Relaxed", 0, 0, 10, 0, 0, -10] }
+    else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
+    else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
+    else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
 }
 
 // Exp to level up.

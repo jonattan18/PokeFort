@@ -35,7 +35,30 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         user.Selected = selected_pokemon._id;
         user.save();
-        message.channel.send(`You have selected your level ${selected_pokemon.Level} ${selected_pokemon.Nickname}!`);
+
+        if (selected_pokemon.Nickname == "") {
+            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
+
+            //Get Pokemon Name from Pokemon ID.
+            if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
+                var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
+            }
+            else {
+                var temp_name = "";
+                if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
+                else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
+                else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
+                else { temp_name = pokemon_db["Pokemon Name"]; }
+                var pokemon_name = temp_name;
+            }
+            if(selected_pokemon.Shiny) { pokemon_name = "Shiny " + pokemon_name; }
+            message.channel.send(`You have selected your level ${selected_pokemon.Level} ${pokemon_name}!`);
+        }
+        else {
+            var pokemon_name = selected_pokemon.Nickname;
+            if(selected_pokemon.Shiny) { pokemon_name = "Shiny " + pokemon_name; }
+            message.channel.send(`You have selected your level ${selected_pokemon.Level} ${pokemon_name}!`);
+        }
     });
 }
 

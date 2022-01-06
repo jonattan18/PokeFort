@@ -2,10 +2,13 @@ const Discord = require('discord.js'); // For Embedded Message.
 
 // Models
 const user_model = require('../models/user');
+const channel_model = require('../models/channel');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
+    if(isInt(args[0])) { page = args[0]; }
+    else { page = 1; }
     //Get user data.
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (!user) return;
@@ -49,11 +52,37 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             embed.setTitle(`**${username}'s Pokémon:**`)
             embed.setColor(message.member.displayHexColor)
             embed.setDescription(description);
-
+            embed.setFooter(`Page ${a + 1}/${chunked_pokemons.length}. You have ${user_pokemons.length} Pokemon.`);
             global_embed.push(embed);
         }
 
-        message.channel.send(global_embed[0]);
+        page = page - 1;
+        if (page > global_embed.length - 1  || page < 0) { return message.channel.send('No page found.') }
+
+        // Send message to channel.
+        message.channel.send(global_embed[page]).then(msg => {
+            if (global_embed.length == 1) return;
+            channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+                var Pagination = channel.Pagination;
+                var user_page = Pagination.filter(it => it.UserID == message.author.id)[0];
+                if (!user_page) {
+                    channel.Pagination.push({
+                        UserID: message.author.id,
+                        Message: JSON.stringify(msg),
+                        Embed: global_embed,
+                        CurrentPage: page
+                    });
+                    channel.save();
+                } else {
+                    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Pagination.$[elem].Message": JSON.stringify(msg), "Pagination.$[elem].Embed": global_embed, "Pagination.$[elem].CurrentPage": 1, "Pagination.$[elem].Timestamp": Date.now() } }, { arrayFilters: [{ "elem.UserID": message.author.id }] }, (err, channel) => {
+                        if (err) return console.log(err);
+                        if (!channel) return;
+                    });
+                }
+            });
+        });
     });
 
 }
@@ -72,6 +101,16 @@ function chunkArray(myArray, chunk_size) {
     }
 
     return tempArray;
+}
+
+// Check if value is int.
+function isInt(value) {
+    var x;
+    if (isNaN(value)) {
+        return false;
+    }
+    x = parseFloat(value);
+    return (x | 0) === x;
 }
 
 module.exports.config = {

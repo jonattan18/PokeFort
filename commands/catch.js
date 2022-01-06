@@ -52,13 +52,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         if (splitted_number.length == 3 && splitted_number[1] == 0 && splitted_number[2] == 0) { credit_amount = 3500; }
                         if (splitted_number.length == 4 && splitted_number[1] == 0 && splitted_number[2] == 0 && splitted_number[3] == 0) { credit_amount = 35000; }
 
-                        // Pokemon Name
-                        var temp_name = "";
-                        if (pokemon["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon["Pokemon Name"]; }
-                        else if (pokemon["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon["Pokemon Name"]; }
-                        var shiny_pokemon = channel.Shiny ? " Shiny " : " ";
-                        message_pokemon_name = shiny_pokemon + temp_name;
-
                         user.Pokemons.push({
                             PokemonId: pokemon["Pokemon Id"],
                             Nickname: '',
@@ -96,11 +89,21 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         user.save();
 
                         var message_string = "";
-                        if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel}${message_pokemon_name}! Added to Pokèdex.`; }
-                        else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel}${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
-                        else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel}${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
-                        else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel}${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
-                        else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel}${message_pokemon_name}!`; }
+
+                        // Pokemon Name
+                        var temp_name = "";
+                        if (pokemon["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon["Pokemon Name"]; }
+                        else if (pokemon["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon["Pokemon Name"]; }
+                        else if (pokemon["Alternate Form Name"] != "NULL") { temp_name = pokemon["Alternate Form Name"] + " " + pokemon["Pokemon Name"]; }
+                        else { temp_name = pokemon["Pokemon Name"]; }
+                        var message_pokemon_name = temp_name;
+                        if(channel.Shiny){ message_pokemon_name = "Shiny " + message_pokemon_name; }
+
+                        if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
+                        else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
+                        else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
+                        else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
+                        else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
                         message.channel.send(message_string);
                     }
                 });
