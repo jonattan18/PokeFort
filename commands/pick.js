@@ -36,6 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             let new_user = new user_model({
                 UserID: message.author.id,
                 Started: true,
+                OrderType: "Number",
                 Joined: Date.now(),
                 PokeCredits: 0,
                 Pokemons: {

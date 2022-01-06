@@ -4,6 +4,7 @@ const ChannelSchema = new mongoose.Schema({
     UserID: Number,
     Started: Boolean,
     Joined: Number,
+    OrderType: String,
     PokeCredits: Number,
     Selected: String,
     Admin: { type: Number, default: 0 },
