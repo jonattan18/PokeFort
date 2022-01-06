@@ -25,7 +25,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             for (i = 0; i < user_pokemons.length; i++) {
                 user_pokemons[i]["Total_IV"] = parseFloat(total_iv(user_pokemons[i].IV));
             }
-            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['dsc']);
+            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['desc']);
         }
         else if (order_type == "Number") { user_pokemons = user_pokemons; }
         else if (order_type == "Alphabet") {
