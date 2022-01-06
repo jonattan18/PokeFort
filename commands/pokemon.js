@@ -25,7 +25,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             for (i = 0; i < user_pokemons.length; i++) {
                 user_pokemons[i]["Total_IV"] = parseFloat(total_iv(user_pokemons[i].IV));
             }
-            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['asc']);
+            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['dsc']);
         }
         else if (order_type == "Number") { user_pokemons = user_pokemons; }
         else if (order_type == "Alphabet") {
@@ -163,7 +163,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For pk --hpiv command.
-        else if (args[0] == '--hpiv' || args[0] == "--hp") {
+        else if (args[0] == '--hpiv') {
             var filtered_pokemons = [];
             if (args.length == 1) {
                 message.channel.send("Please specify a value.");
