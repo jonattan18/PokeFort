@@ -76,17 +76,17 @@ client.on('message', async (message) => {
     //Getting the data from the user model
     await user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
-        if (!user) return;
-        user_available = true;
-    });
+        if (user) { user_available = true; }
 
-    // Check if the message starts with the prefix.
-    if (message.content.toLowerCase().startsWith(prefix)) {
-        cmd = redirect_command(cmd, prefix);
-        const commandfile = client.commands.get(cmd.slice(prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(prefix.length)));
-        if (!commandfile) return;
-        commandfile.run(client, message, args, prefix, user_available, pokemons);
-    }
+
+        // Check if the message starts with the prefix.
+        if (message.content.toLowerCase().startsWith(prefix)) {
+            cmd = redirect_command(cmd, prefix);
+            const commandfile = client.commands.get(cmd.slice(prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(prefix.length)));
+            if (!commandfile) return;
+            commandfile.run(client, message, args, prefix, user_available, pokemons);
+        }
+    });
 
     //#region Catch Sytem
     //check if database exists
