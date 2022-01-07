@@ -335,6 +335,26 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             });
         }
 
+        // For pk --evolution command.
+        else if (args[0] == "--evolution" || args[0] == "--e") {
+            var filtered_pokemons = [];
+            if (args.length == 2) {
+                var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
+                var pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
+                if (pre_evolution) {  
+                    var newpoke = pokemons.filter(it => it["Pokemon Id"] == pre_evolution["Pokemon Id"])[0];
+
+                    if(newpoke["Pre-Evolution Pokemon Id"]) {
+                        filtered_pokemons.push(user_pokemons.filter(pokemon => pokemon.PokemonId == newpoke["Pre-Evolution Pokemon Id"])[0]);
+                    }
+
+                    filtered_pokemons.push(user_pokemons.filter(pokemon => pokemon.PokemonId == parseInt(newpoke["Pokemon Id"]))[0]);
+                }
+                pagination(message, pokemons, filtered_pokemons)
+            }
+            else { return message.channel.send("Invalid argument syntax.") }
+        }
+
     });
 }
 

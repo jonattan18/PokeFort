@@ -108,7 +108,7 @@ client.on('message', async (message) => {
             (async () => {
                 message.channel.messages.fetch({ limit: 2 }).then(messages => {
                     //[SPAM SYSTEM]
-                    if (messages.last().author.id != message.author.id) {
+               //     if (messages.last().author.id != message.author.id) {
                         channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
                             let channel_id = message.channel.id;
                             var message_count = channel.MessageCount + 1;
@@ -125,7 +125,7 @@ client.on('message', async (message) => {
                                 if (err) { console.log(err) }
                             });
                         });
-                    }
+                 //   }
                 }).catch(console.error);
             })();
         }
