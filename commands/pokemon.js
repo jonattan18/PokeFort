@@ -291,9 +291,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For pk --triple command.
         else if (args[0] == "--trip" || args[0] == "--triple") {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3));
+            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                var filtered_pokemons = [];
+                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3, args[1]));
                 pagination(message, pokemons, filtered_pokemons);
             }
             else { return message.channel.send("Invalid argument syntax.") }
@@ -301,9 +301,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For pk --quadra command.
         else if (args[0] == "--quad" || args[0] == "--quadra") {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4));
+            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                var filtered_pokemons = [];
+                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4, args[1]));
                 pagination(message, pokemons, filtered_pokemons);
             }
             else { return message.channel.send("Invalid argument syntax.") }
@@ -311,9 +311,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For pk --penta command.
         else if (args[0] == "--pent" || args[0] == "--penta") {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5));
+            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                var filtered_pokemons = [];
+                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5, args[1]));
                 pagination(message, pokemons, filtered_pokemons);
             }
             else { return message.channel.send("Invalid argument syntax.") }
@@ -344,16 +344,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
 
                 var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
-                if(pre_evolution) filtered_pokemons.push(parseInt(pre_evolution["Pokemon Id"]));
+                if (pre_evolution) filtered_pokemons.push(parseInt(pre_evolution["Pokemon Id"]));
 
                 var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
-                if(pre_pre_evolution) filtered_pokemons.push(parseInt(pre_pre_evolution["Pokemon Id"]));
+                if (pre_pre_evolution) filtered_pokemons.push(parseInt(pre_pre_evolution["Pokemon Id"]));
 
-                if(pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
-                if(post_evolution) filtered_pokemons.push(parseInt(post_evolution["Pokemon Id"]));
+                if (pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
+                if (post_evolution) filtered_pokemons.push(parseInt(post_evolution["Pokemon Id"]));
 
-                if(pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
-                if(post_post_evolution) filtered_pokemons.push(parseInt(post_post_evolution["Pokemon Id"]));
+                if (pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
+                if (post_post_evolution) filtered_pokemons.push(parseInt(post_post_evolution["Pokemon Id"]));
 
                 duo_filtered_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
                 pagination(message, pokemons, duo_filtered_pokemons)
@@ -446,11 +446,17 @@ function total_iv(iv) {
 }
 
 // Check if any value has repeated number of times.
-function has_repeated(array, times) {
+function has_repeated(array, times, number) {
     const counts = {};
+    var array_counts = [];
     array.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
-    const hasValue = Object.values(counts).includes(times);
-    return hasValue;
+    for (i = 0; i < Object.keys(counts).length; i++) {
+        if (Object.keys(counts)[i] === number && counts[Object.keys(counts)[i]] == times) {
+            array_counts.push(Object.keys(counts)[i]);
+        }
+    }
+    if (array_counts.length > 0) { return true; }
+    else { return false; }
 }
 
 // Chunk array into equal parts.
