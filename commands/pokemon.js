@@ -4,6 +4,7 @@ const _ = require('lodash');
 // Models
 const user_model = require('../models/user');
 const channel_model = require('../models/channel');
+const { each } = require('lodash');
 
 var static_user_pokemons = null;
 
@@ -340,17 +341,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var filtered_pokemons = [];
             if (args.length == 2) {
                 var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-                var pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
-                if (pre_evolution) {  
-                    var newpoke = pokemons.filter(it => it["Pokemon Id"] == pre_evolution["Pokemon Id"])[0];
+                filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
 
-                    if(newpoke["Pre-Evolution Pokemon Id"]) {
-                        filtered_pokemons.push(user_pokemons.filter(pokemon => pokemon.PokemonId == newpoke["Pre-Evolution Pokemon Id"])[0]);
-                    }
+                var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
+                if(pre_evolution) filtered_pokemons.push(parseInt(pre_evolution["Pokemon Id"]));
 
-                    filtered_pokemons.push(user_pokemons.filter(pokemon => pokemon.PokemonId == parseInt(newpoke["Pokemon Id"]))[0]);
-                }
-                pagination(message, pokemons, filtered_pokemons)
+                var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
+                if(pre_pre_evolution) filtered_pokemons.push(parseInt(pre_pre_evolution["Pokemon Id"]));
+
+                if(pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
+                if(post_evolution) filtered_pokemons.push(parseInt(post_evolution["Pokemon Id"]));
+
+                if(pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
+                if(post_post_evolution) filtered_pokemons.push(parseInt(post_post_evolution["Pokemon Id"]));
+
+                duo_filtered_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
+                pagination(message, pokemons, duo_filtered_pokemons)
             }
             else { return message.channel.send("Invalid argument syntax.") }
         }
