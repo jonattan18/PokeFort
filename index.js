@@ -158,13 +158,13 @@ client.on('message', async (message) => {
 
                                 // Get pokemon name from ID.
                                 var pokemon_name = get_pokemon_name(pokemon_id, selected_pokemon);
-
+                                var pokemon_name_bottom = get_pokemon_name(pokemon_id, selected_pokemon, true);
                                 //Update level and send message.
                                 pokemon_level += 1;
                                 pokemon_current_xp = 0;
 
                                 var embed = new Discord.MessageEmbed();
-                                embed.addField(`Your ${pokemon_name} has levelled up!`, `${pokemon_name} is now level ${pokemon_level}!`, false);
+                                embed.addField(`Your ${pokemon_name} has levelled up!`, `${pokemon_name_bottom} is now level ${pokemon_level}!`, false);
                                 embed.setColor("#1cb99a");
 
                                 // Get pokemon evolution.
@@ -177,8 +177,8 @@ client.on('message', async (message) => {
                                     if (pokemon_level >= pokemon_evolve_lvl) {
                                         var new_pokemon_id = pokemons.filter(it => it["Pokedex Number"] == pokemon_evolve_id)[0]["Pokemon Id"];
                                         pokemon_id = new_pokemon_id;
-                                        var new_pokemon_name = get_pokemon_name(new_pokemon_id, selected_pokemon);
-                                        embed.addField(`What ? ${pokemon_name} is evolving!`, `Your ${pokemon_name} evolved into ${new_pokemon_name}`, false);
+                                        var new_pokemon_name = get_pokemon_name(new_pokemon_id, selected_pokemon, true);
+                                        embed.addField(`What ? ${pokemon_name} is evolving!`, `Your ${pokemon_name_bottom} evolved into ${new_pokemon_name}`, false);
                                     }
                                 }
                                 message.channel.send(embed);
@@ -202,7 +202,7 @@ client.on('message', async (message) => {
 });
 
 // Get pokemon name from pokemon ID.
-function get_pokemon_name(pokemon_id, selected_pokemon) {
+function get_pokemon_name(pokemon_id, selected_pokemon, star_shiny = false) {
     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
     if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
         var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
@@ -215,7 +215,7 @@ function get_pokemon_name(pokemon_id, selected_pokemon) {
         else { temp_name = pokemon_db["Pokemon Name"]; }
         var pokemon_name = temp_name;
     }
-    if (selected_pokemon.Shiny) { pokemon_name = ':star: ' + pokemon_name; }
+    if (selected_pokemon.Shiny) { if(star_shiny) { pokemon_name = ':star: ' + pokemon_name; } else { pokemon_name = 'Shiny ' + pokemon_name; } }
     return pokemon_name;
 }
 
