@@ -215,7 +215,7 @@ function get_pokemon_name(pokemon_id, selected_pokemon) {
         else { temp_name = pokemon_db["Pokemon Name"]; }
         var pokemon_name = temp_name;
     }
-    if (selected_pokemon.Shiny) { pokemon_name += 'Shiny ' }
+    if (selected_pokemon.Shiny) { pokemon_name = ':star: ' + pokemon_name; }
     return pokemon_name;
 }
 
