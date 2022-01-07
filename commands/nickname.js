@@ -9,8 +9,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (!user) return;
         if (err) console.log(err);
 
-
-
         var user_pokemons = user.Pokemons;
         var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
         var _id = selected_pokemon._id;
