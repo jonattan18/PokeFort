@@ -4,7 +4,6 @@ const _ = require('lodash');
 // Models
 const user_model = require('../models/user');
 const channel_model = require('../models/channel');
-const { each } = require('lodash');
 
 var static_user_pokemons = null;
 
@@ -21,6 +20,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var user_pokemons = user.Pokemons;
         var order_type = user.OrderType;
 
+        // Ordering Pokemons based on user.
         if (order_type == "Level") { user_pokemons = _.orderBy(user_pokemons, ['Level'], ['asc']); }
         else if (order_type == "IV") {
             for (i = 0; i < user_pokemons.length; i++) {
@@ -49,14 +49,50 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             pagination(message, pokemons, user_pokemons);
         }
 
+        // Multi commmand controller.
+        var error = [];
+        var total_args = args.join(" ").replace(/--/g, ",--").split(",");
+        total_args = _.without(total_args, "", " ");
+        for (j = 0; j < total_args.length; j++) {
+            new_args = total_args[j].split(" ").filter(it => it != "");
+            error[0] = new_args[0];
+            if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--l") || _.isEqual(new_args[0], "--legendary"))) { legendary(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--trip") || _.isEqual(new_args[0], "--triple"))) { triple(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--double"))) { double(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
+            else { message.channel.send("Invalid command."); return; }
+
+            // Check if error occurred in previous loop
+            if (error.length > 1) {
+                message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                break;
+            }
+            if (j == total_args.length - 1) { pagination(message, pokemons, user_pokemons); }
+        }
+
         // For pk --shiny command.
-        if (args.length == 1 && args[0] == '--shiny' || args[0] == "--s") {
+        function shiny(args) {
             user_pokemons = user_pokemons.filter(pokemon => pokemon.Shiny);
-            pagination(message, pokemons, user_pokemons);
         }
 
         // For pk --legendary command.
-        else if (args.length == 1 && args[0] == '--legendary' || args[0] == "--l") {
+        function legendary(args) {
             var filtered_pokemons = [];
             for (i = 0; i < user_pokemons.length; i++) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId.toString())[0];
@@ -64,23 +100,25 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     filtered_pokemons.push(user_pokemons[i]);
                 }
             }
-            pagination(message, pokemons, filtered_pokemons);
+            user_pokemons = filtered_pokemons;
         }
 
         // For pk --mythical command.
-        else if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Legendary Type"] === "Mythical" && pokemon_db["Alternate Form Name"] === "NULL") {
-                    filtered_pokemons.push(user_pokemons[i]);
+        function mythical(args) {
+            if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
+                var filtered_pokemons = [];
+                for (i = 0; i < user_pokemons.length; i++) {
+                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                    if (pokemon_db["Legendary Type"] === "Mythical" && pokemon_db["Alternate Form Name"] === "NULL") {
+                        filtered_pokemons.push(user_pokemons[i]);
+                    }
                 }
+                user_pokemons = filtered_pokemons;
             }
-            pagination(message, pokemons, filtered_pokemons);
         }
 
         // For pk --ultrabeast command.
-        else if (args.length == 1 && args[0] == '--ultrabeast' || args[0] == "--ub") {
+        function ultrabeast(args) {
             var filtered_pokemons = [];
             for (i = 0; i < user_pokemons.length; i++) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
@@ -88,11 +126,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     filtered_pokemons.push(user_pokemons[i]);
                 }
             }
-            pagination(message, pokemons, filtered_pokemons);
+            user_pokemons = filtered_pokemons;
         }
 
         // For pk --alolan command.
-        else if (args.length == 1 && args[0] == '--alolan' || args[0] == "--a") {
+        function alolan(args) {
             var filtered_pokemons = [];
             for (i = 0; i < user_pokemons.length; i++) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
@@ -100,11 +138,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     filtered_pokemons.push(user_pokemons[i]);
                 }
             }
-            pagination(message, pokemons, filtered_pokemons);
+            user_pokemons = filtered_pokemons;
         }
 
         // For pk --galarian command.
-        else if (args.length == 1 && args[0] == '--galarian' || args[0] == "--g") {
+        function galarian(args) {
             var filtered_pokemons = [];
             for (i = 0; i < user_pokemons.length; i++) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
@@ -112,215 +150,214 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     filtered_pokemons.push(user_pokemons[i]);
                 }
             }
-            pagination(message, pokemons, filtered_pokemons);
+            user_pokemons = filtered_pokemons;
         }
 
         // For pk --nickname command.
-        else if (args.length == 2 && args[0] == '--nickname' || args[0] == "--nn") {
+        function nickname(args) {
             user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args[1].toLowerCase());
-            pagination(message, pokemons, user_pokemons);
         }
 
         // For pk --level command.
-        else if (args[0] == '--level' || args[0] == "--lvl") {
+        function level(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --iv command.
-        else if (args[0] == '--iv') {
+        function iv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
                 filtered_pokemons = user_pokemons.filter(pokemon => total_iv(pokemon.IV) == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
                 filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) > parseFloat(args[2]));
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
                 filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) < parseFloat(args[2]));
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --hpiv command.
-        else if (args[0] == '--hpiv') {
+        function hp_iv() {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --atkiv command.
-        else if (args[0] == '--attackiv' || args[0] == "--atkiv") {
+        function atkiv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --defiv command.
-        else if (args[0] == '--defenseiv' || args[0] == "--defiv") {
+        function defiv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --spatkiv command.
-        else if (args[0] == '--specialattackiv' || args[0] == "--spatkiv") {
+        function spatkiv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --spdefiv command.
-        else if (args[0] == '--specialdefenseiv' || args[0] == "--spdefiv") {
+        function spdefiv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --speediv command.
-        else if (args[0] == '--speediv' || args[0] == "--spiv") {
+        function spdiv(args) {
             var filtered_pokemons = [];
             if (args.length == 1) {
-                message.channel.send("Please specify a value.");
+                return error[1] = [false, "Please specify a value."]
             }
             else if (args.length == 2 && isInt(args[1])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] == args[1]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] > args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] < args[2]);
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --triple command.
-        else if (args[0] == "--trip" || args[0] == "--triple") {
+        function triple(args) {
             if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                 var filtered_pokemons = [];
                 filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3, args[1]));
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --quadra command.
-        else if (args[0] == "--quad" || args[0] == "--quadra") {
+        function quadra(args) {
             if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                 var filtered_pokemons = [];
                 filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4, args[1]));
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --penta command.
-        else if (args[0] == "--pent" || args[0] == "--penta") {
+        function penta(args) {
             if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                 var filtered_pokemons = [];
                 filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5, args[1]));
-                pagination(message, pokemons, filtered_pokemons);
+                user_pokemons = filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
         // For pk --order command.
-        else if (args[0] == "--order") {
+        if (args[0] == "--order") {
             if (args.length != 2) { return message.channel.send("Invalid argument syntax.") }
             var order_type = "";
             if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
@@ -337,10 +374,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For pk --evolution command.
-        else if (args[0] == "--evolution" || args[0] == "--e") {
+        function evolution(args) {
             var filtered_pokemons = [];
             if (args.length == 2) {
                 var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
+                if(found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
                 filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
 
                 var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
@@ -356,9 +394,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (post_post_evolution) filtered_pokemons.push(parseInt(post_post_evolution["Pokemon Id"]));
 
                 duo_filtered_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
-                pagination(message, pokemons, duo_filtered_pokemons)
+                user_pokemons = duo_filtered_pokemons;
             }
-            else { return message.channel.send("Invalid argument syntax.") }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
     });
