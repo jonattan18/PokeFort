@@ -62,7 +62,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
+            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
@@ -153,9 +154,26 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             user_pokemons = filtered_pokemons;
         }
 
+        // For pk --type command.
+        function type(args) {
+            var filtered_pokemons = [];
+            for (i = 0; i < user_pokemons.length; i++) {
+                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                if (pokemon_db["Primary Type"].toLowerCase() == args[1].toLowerCase() || pokemon_db["Secondary Type"].toLowerCase() == args[1].toLowerCase()) {
+                    filtered_pokemons.push(user_pokemons[i]);
+                }
+            }
+            user_pokemons = filtered_pokemons;
+        }
+
         // For pk --nickname command.
         function nickname(args) {
-            user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args[1].toLowerCase());
+            if (args.length == 1) {
+                user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
+            } else {
+                args = args.slice(1);
+                user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());
+            }
         }
 
         // For pk --level command.
@@ -378,7 +396,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var filtered_pokemons = [];
             if (args.length == 2) {
                 var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-                if(found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
+                if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
                 filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
 
                 var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
