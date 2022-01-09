@@ -59,6 +59,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
+            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
             else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
@@ -68,6 +69,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--limit") || _.isEqual(new_args[0], "--l"))) { limit(new_args); }
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--trip") || _.isEqual(new_args[0], "--triple"))) { triple(new_args); }
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--double"))) { double(new_args); }
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
@@ -159,6 +161,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             for (i = 0; i < user_pokemons.length; i++) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
                 if (pokemon_db["Primary Type"].toLowerCase() == args[1].toLowerCase() || pokemon_db["Secondary Type"].toLowerCase() == args[1].toLowerCase()) {
+                    filtered_pokemons.push(user_pokemons[i]);
+                }
+            }
+            user_pokemons = filtered_pokemons;
+        }
+
+        // For pk --name command.
+        function name(args) {
+            var filtered_pokemons = [];
+            for (i = 0; i < user_pokemons.length; i++) {
+                var user_name = args.slice(1).join(" ").toLowerCase();
+                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                if (pokemon_db["Pokemon Name"].toLowerCase() == user_name) {
                     filtered_pokemons.push(user_pokemons[i]);
                 }
             }
@@ -339,6 +354,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
                 filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] < args[2]);
                 user_pokemons = filtered_pokemons;
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
+        }
+
+        // For pk --limit command.
+        function limit(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                user_pokemons = user_pokemons.slice(0, args[1]);
             }
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
