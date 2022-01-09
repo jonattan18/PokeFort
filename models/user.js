@@ -17,6 +17,7 @@ const ChannelSchema = new mongoose.Schema({
         Nature : Number,
         Level: Number,
         Shiny: Boolean,
+        Moves: Array,
         Reason: String
     }],
     DexRewards: [{
