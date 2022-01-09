@@ -148,43 +148,52 @@ client.on('message', async (message) => {
             user_model.findOne({ UserID: message.author.id }, (err, user) => {
                 if (err) return console.log(err);
                 if (user) {
-                    // Update xp
+
+                    //#region Update XP
                     var user_pokemons = user.Pokemons;
                     var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
                     var _id = selected_pokemon._id;
                     var pokemon_id = selected_pokemon.PokemonId;
-                    var pokemon_current_xp = selected_pokemon.Experience;
+                    var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
                     var pokemon_level = selected_pokemon.Level;
-                    pokemon_current_xp += getRandomInt(1, 100);
+                    var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
+                    var old_pokemon_name_star = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, true);
 
-                    if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
+                    var old_pokemon_exp = pokemon_current_xp;
+                    var leveled_up = false;
+                    var evolved = false;
+                    var new_evolved_name = "";
+                    while (pokemon_current_xp > 0) {
+                        if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
+                            leveled_up = true;
 
-                        // Get pokemon name from ID.
-                        var pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
-                        var pokemon_name_bottom = get_pokemon_name(load_pokemons, selected_pokemon.PokemonId, true);
-                        //Update level and send message.
-                        pokemon_level += 1;
-                        pokemon_current_xp = 0;
+                            //Update level and send message.
+                            pokemon_level += 1;
+                            pokemon_current_xp -= exp_to_level(pokemon_level);
 
-                        var embed = new Discord.MessageEmbed();
-                        embed.addField(`Your ${pokemon_name} has levelled up!`, `${pokemon_name_bottom} is now level ${pokemon_level}!`, false);
-                        embed.setColor("#1cb99a");
+                            if (pokemon_level == 100) {
+                                pokemon_level = 100;
+                                pokemon_current_xp = 0;
+                                break;
+                            }
 
-                        // Get pokemon evolution.
-                        var pokemon_db = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-                        var pokemon_dex_number = pokemon_db["Pokedex Number"];
-                        var pokemon_evolve = evolutions.filter(it => it["evolved_species_id"] == pokemon_dex_number + 1 && it["evolution_trigger_id"] == "Level")[0];
-                        if (pokemon_evolve) {
-                            var pokemon_evolve_id = pokemon_evolve["evolved_species_id"];
-                            var pokemon_evolve_lvl = pokemon_evolve["minimum_level"];
-                            if (pokemon_level >= pokemon_evolve_lvl) {
-                                var new_pokemon_id = load_pokemons.filter(it => it["Pokedex Number"] == pokemon_evolve_id)[0]["Pokemon Id"];
-                                pokemon_id = new_pokemon_id;
-                                var new_pokemon_name = get_pokemon_name(load_pokemons, new_pokemon_id, selected_pokemon, true);
-                                embed.addField(`What ? ${pokemon_name} is evolving!`, `Your ${pokemon_name_bottom} evolved into ${new_pokemon_name}`, false);
+                            // Get pokemon evolution.
+                            var evo_tree = evolution_tree(load_pokemons, pokemon_id);
+                            var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                            if (next_evolutions != undefined && next_evolutions.length > 0) {
+                                next_evolutions = next_evolutions[0];
+                                var required_level = next_evolutions[1].match(/\d/g).join("");
+                                if (pokemon_level >= required_level) {
+                                    var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon);
+                                    pokemon_id = next_evolutions[0];
+                                    evolved = true;
+                                    new_evolved_name = new_pokemon_name;
+                                }
                             }
                         }
-                        message.channel.send(embed);
+                        else {
+                            break;
+                        }
                     }
 
                     // Update database
@@ -194,6 +203,17 @@ client.on('message', async (message) => {
                     }, (err, user) => {
                         if (err) { console.log(err) }
                     });
+
+                    //#endregion
+
+                    if (leveled_up || evolved) {
+                        var embed = new Discord.MessageEmbed()
+                    }
+                    if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
+                    if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
+                    if (evolved || leveled_up) {
+                        message.channel.send(embed);
+                    }
                 }
             });
         }
@@ -333,6 +353,28 @@ function spawn_pokemon(message, prefix) {
     channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
+}
+
+// Get evolution tree of pokemons.
+function evolution_tree(pokemons, pokemon_id) {
+    var filtered_pokemons = [];
+    var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == pokemon_id)[0];
+    if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
+    filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
+
+    var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
+    if (pre_evolution) filtered_pokemons.push([parseInt(pre_evolution["Pokemon Id"]), pre_evolution["Evolution Details"]]);
+
+    var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
+    if (pre_pre_evolution) filtered_pokemons.push([parseInt(pre_pre_evolution["Pokemon Id"]), pre_pre_evolution["Evolution Details"]]);
+
+    if (pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
+    if (post_evolution) filtered_pokemons.push([parseInt(post_evolution["Pokemon Id"]), post_evolution["Evolution Details"]]);
+
+    if (pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
+    if (post_post_evolution) filtered_pokemons.push([parseInt(post_post_evolution["Pokemon Id"]), post_post_evolution["Evolution Details"]]);
+
+    return filtered_pokemons;
 }
 
 // Logging System

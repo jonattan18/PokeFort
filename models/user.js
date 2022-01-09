@@ -33,6 +33,19 @@ const ChannelSchema = new mongoose.Schema({
         Moves: Array,
         Reason: String
     }],
+    Recycled: [{
+        PokemonId: Number,
+        Nickname: String,
+        CatchedOn: Number,
+        RecycledOn: { type: Number, default: Date.now() },
+        Experience: Number,
+        IV: Array,
+        Nature: Number,
+        Level: Number,
+        Shiny: Boolean,
+        Moves: Array,
+        Reason: String
+    }],
     DexRewards: [{
         PokemonId: Number,
         RewardName: String,

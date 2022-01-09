@@ -16,14 +16,35 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
             var user_prompt = channel.Prompt;
             if (user_prompt.UserID != message.author.id) { message.channel.send('No prompt asked for to use ``cancel`` command.'); return; }
             if (user_prompt.Reason == "Release") { release(message, prefix, user_prompt); return; }
+            if (user_prompt.Reason == "Recycle") { recycle(message, prefix, user_prompt); return; }
 
         });
     });
 }
 
 // Function to release pokemon.
+function recycle(message, prefix, user_prompt) {
+    var old_date = user_prompt.Timestamp;
+    var current_date = Date.now();
+
+    if ((current_date - old_date) / 1000 > 120) {
+        message.channel.send('No pokemons are in recycle state to cancel. Please use ``' + prefix + 'recycle`` !');
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
+            if (err) console.log(err);
+        });
+        return;
+    }
+
+    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
+        if (err) console.log(err);
+        message.channel.send(`You cancelled the recycle. Pokemon Spared!`);
+        return;
+    });
+}
+
+// Function to release pokemon.
 function release(message, prefix, user_prompt) {
-      var old_date = user_prompt.Timestamp;
+    var old_date = user_prompt.Timestamp;
     var current_date = Date.now();
 
     if ((current_date - old_date) / 1000 > 120) {
