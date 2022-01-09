@@ -6,7 +6,6 @@ const user_model = require('../models/user');
 const channel_model = require('../models/channel');
 
 var static_user_pokemons = null;
-
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
@@ -17,37 +16,33 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) console.log(err);
 
         static_user_pokemons = user.Pokemons;
+
         var user_pokemons = user.Pokemons;
-        var order_type = user.OrderType;
+        var user_selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
 
-        // Ordering Pokemons based on user.
-        if (order_type == "Level") { user_pokemons = _.orderBy(user_pokemons, ['Level'], ['asc']); }
-        else if (order_type == "IV") {
-            for (i = 0; i < user_pokemons.length; i++) {
-                user_pokemons[i]["Total_IV"] = parseFloat(total_iv(user_pokemons[i].IV));
-            }
-            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['desc']);
-        }
-        else if (order_type == "Number") { user_pokemons = user_pokemons; }
-        else if (order_type == "Alphabet") {
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                var temp_name = "";
-                if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                else { temp_name = pokemon_db["Pokemon Name"]; }
-                var pokemon_name = temp_name;
-                user_pokemons[i]["Name"] = pokemon_name;
-            }
-            user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
+        // If no arguments
+        if (args.length == 0) {
+            return message.channel.send("Please mention pokemon number or ``latest`` to release latest pokemon.");
         }
 
-        // For only pk command.
-        if (args.length == 0 || (args.length == 1 && isInt(args[0]))) {
-            if (args.length == 1) { page = parseInt(args[0]); }
-            pagination(message, pokemons, user_pokemons);
+        // If arguments is latest or l
+        else if (args[0].toLowerCase() == "l" || args[0].toLowerCase() == "latest") {
+            var selected_pokemon = user_pokemons[user_pokemons.length - 1];
         }
+
+        // If arguments is number
+        else if (isInt(args[0])) {
+            if (typeof user_pokemons[args[0] - 1] != 'undefined') {
+                var selected_pokemon = user_pokemons[args[0] - 1];
+            }
+            else {
+                return message.channel.send("No pokemon exists with that number.");
+            }
+        }
+
+        //      if (selected_pokemon._id == user_selected_pokemon._id) {
+        //          message.channel.send("You can't release your selected pokemon.");
+        //      }
 
         // Multi commmand controller.
         var error = [];
@@ -384,23 +379,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For pk --order command.
-        if (args[0] == "--order") {
-            if (args.length != 2) { return message.channel.send("Invalid argument syntax.") }
-            var order_type = "";
-            if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
-            else if (args[1].toLowerCase() == "level") { order_type = "Level"; }
-            else if (args[1].toLowerCase() == "alphabet") { order_type = "Alphabet"; }
-            else if (args[1].toLowerCase() == "number") { order_type = "Number"; }
-
-            user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { OrderType: order_type } }, { new: true }, (err, doc) => {
-                if (err) { console.log(err); }
-                else {
-                    message.channel.send("Pokemon Order updated.");
-                }
-            });
-        }
-
         // For pk --evolution command.
         function evolution(args) {
             var filtered_pokemons = [];
@@ -428,6 +406,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
     });
+    
 }
 
 // Function for pagination.
@@ -525,6 +504,19 @@ function has_repeated(array, times, number) {
     else { return false; }
 }
 
+// Check if given value is float.
+function isFloat(x) { return !!(x % 1); }
+
+// Check if value is int.
+function isInt(value) {
+    var x;
+    if (isNaN(value)) {
+        return false;
+    }
+    x = parseFloat(value);
+    return (x | 0) === x;
+}
+
 // Chunk array into equal parts.
 function chunkArray(myArray, chunk_size) {
     var index = 0;
@@ -540,20 +532,7 @@ function chunkArray(myArray, chunk_size) {
     return tempArray;
 }
 
-// Check if given value is float.
-function isFloat(x) { return !!(x % 1); }
-
-// Check if value is int.
-function isInt(value) {
-    var x;
-    if (isNaN(value)) {
-        return false;
-    }
-    x = parseFloat(value);
-    return (x | 0) === x;
-}
-
 module.exports.config = {
-    name: "pokemon",
+    name: "release",
     aliases: []
 }

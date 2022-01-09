@@ -11,6 +11,7 @@ const ChannelSchema = new mongoose.Schema({
     PokemonNature: Number,
     PokemonIV: Array,
     Hint: {type: Number, default: 0},
+    ReleasePrompt : Array,
     Pagination : [{
         UserID: Number,
         Message: Array,
