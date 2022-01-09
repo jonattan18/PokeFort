@@ -287,41 +287,41 @@ function dex_galarian(bot, message, args, prefix, user_available, pokemons) {
 
 // To print all pokemons
 function dex_pokemons(bot, message, args, prefix, user_available, pokemons) {
-    var alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
-    for (i = 0; i < alolan_pokemons.length; i++) {
-        alolan_pokemons[i]["Pokemon Name"] = "Alolan " + alolan_pokemons[i]["Pokemon Name"]
+    var new_alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
+    for (i = 0; i < new_alolan_pokemons.length; i++) {
+        new_alolan_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_alolan_pokemons[i]["Pokemon Id"]);
     }
-    var galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
-    for (i = 0; i < galarian_pokemons.length; i++) {
-        galarian_pokemons[i]["Pokemon Name"] = "Galarian " + galarian_pokemons[i]["Pokemon Name"]
+    var new_galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
+    for (i = 0; i < new_galarian_pokemons.length; i++) {
+        new_galarian_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_galarian_pokemons[i]["Pokemon Id"]);
     }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
-    dex_pokemons = dex_pokemons.concat(galarian_pokemons).concat(alolan_pokemons);
+    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons);
     if (isInt(args[0])) { var page = args[0] - 1 }
     create_pagination(message, dex_pokemons, "", "", page);
 }
 
 // To print all pokemons based on generation.
 function dex_generation(bot, message, args, prefix, user_available, pokemons) {
-    var pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
+    var filtered_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     var generation = args[1];
     if (generation == 1) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 0 && it["Pokedex Number"] < 152);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 0 && it["Pokedex Number"] < 152);
     } else if (generation == 2) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 151 && it["Pokedex Number"] < 252);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 151 && it["Pokedex Number"] < 252);
     } else if (generation == 3) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 251 && it["Pokedex Number"] < 387);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 251 && it["Pokedex Number"] < 387);
     } else if (generation == 4) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 386 && it["Pokedex Number"] < 494);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 386 && it["Pokedex Number"] < 494);
     } else if (generation == 5) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 493 && it["Pokedex Number"] < 651);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 493 && it["Pokedex Number"] < 651);
     } else if (generation == 6) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 650 && it["Pokedex Number"] < 722);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 650 && it["Pokedex Number"] < 722);
     } else if (generation == 7) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 721 && it["Pokedex Number"] < 810);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 721 && it["Pokedex Number"] < 810);
     } else if (generation == 8) {
-        var dex_pokemons = pokemons.filter(it => it["Pokedex Number"] > 809 && it["Pokedex Number"] < 899);
+        var dex_pokemons = filtered_pokemons.filter(it => it["Pokedex Number"] > 809 && it["Pokedex Number"] < 899);
     } else { return message.channel.send("Invalid generation value."); }
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
     create_pagination(message, dex_pokemons);
@@ -329,10 +329,10 @@ function dex_generation(bot, message, args, prefix, user_available, pokemons) {
 
 // To print all pokemon based on type.
 function dex_type(bot, message, args, prefix, user_available, pokemons) {
-    var pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
+    var filtered_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     var type = args[1];
-    var primary_types = pokemons.filter(it => it["Primary Type"].toLowerCase() === type.toLowerCase());
-    var secondary_types = pokemons.filter(it => it["Secondary Type"].toLowerCase() === type.toLowerCase());
+    var primary_types = filtered_pokemons.filter(it => it["Primary Type"].toLowerCase() === type.toLowerCase());
+    var secondary_types = filtered_pokemons.filter(it => it["Secondary Type"].toLowerCase() === type.toLowerCase());
     var dex_pokemons = primary_types.concat(secondary_types);
     if (dex_pokemons.length == 0) return message.channel.send("Invalid type value.");
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
@@ -341,9 +341,9 @@ function dex_type(bot, message, args, prefix, user_available, pokemons) {
 
 // To print pokemon based on name.
 function dex_name(bot, message, args, prefix, user_available, pokemons) {
-    var pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
+    var filtered_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     var name = args[1];
-    var dex_pokemons = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === name.toLowerCase());
+    var dex_pokemons = filtered_pokemons.filter(it => it["Pokemon Name"].toLowerCase() === name.toLowerCase());
     if (dex_pokemons.length == 0) return message.channel.send("Invalid type value.");
     create_pagination(message, dex_pokemons);
 }
@@ -403,17 +403,17 @@ function dex_caught(bot, message, args, prefix, user_available, pokemons) {
 }
 
 function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
-    var alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
-    for (i = 0; i < alolan_pokemons.length; i++) {
-        alolan_pokemons[i]["Pokemon Name"] = "Alolan " + alolan_pokemons[i]["Pokemon Name"]
+    var new_alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
+    for (i = 0; i < new_alolan_pokemons.length; i++) {
+        new_alolan_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_alolan_pokemons[i]["Pokemon Id"]);
     }
-    var galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
-    for (i = 0; i < galarian_pokemons.length; i++) {
-        galarian_pokemons[i]["Pokemon Name"] = "Galarian " + galarian_pokemons[i]["Pokemon Name"]
+    var new_galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
+    for (i = 0; i < new_galarian_pokemons.length; i++) {
+        new_galarian_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_galarian_pokemons[i]["Pokemon Id"]);
     }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
-    dex_pokemons = dex_pokemons.concat(galarian_pokemons).concat(alolan_pokemons);
+    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons);
 
     create_pagination(message, dex_pokemons, "", "", 0, 0, true);
 }
@@ -517,6 +517,24 @@ function create_pagination(message, dex_pokemons, description_string = "", field
             });
         });
     });
+}
+
+// Get pokemon name from pokemon ID.
+function get_pokemon_name(pokemons, pokemon_id) {
+    var pokemon_name = "";
+    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
+        pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
+    }
+    else {
+        var temp_name = "";
+        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
+        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
+        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
+        else { temp_name = pokemon_db["Pokemon Name"]; }
+        pokemon_name = temp_name;
+    }
+    return pokemon_name;
 }
 
 // Chunk array into equal parts.

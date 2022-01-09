@@ -5,19 +5,24 @@ const ChannelSchema = new mongoose.Schema({
     ChannelName: String,
     MessageCount: Number,
     SpawnLimit: Number,
-    PokemonID: {type: Number, default: 0},
-    Shiny: {type: Boolean, default: false},
-    PokemonLevel : Number,
+    PokemonID: { type: Number, default: 0 },
+    Shiny: { type: Boolean, default: false },
+    PokemonLevel: Number,
     PokemonNature: Number,
     PokemonIV: Array,
-    Hint: {type: Number, default: 0},
-    ReleasePrompt : Array,
-    Pagination : [{
+    Hint: { type: Number, default: 0 },
+    Prompt: {
+        UserID: Number,
+        Pokemons: Array,
+        Timestamp: Number,
+        Reason: String
+    },
+    Pagination: [{
         UserID: Number,
         Message: Array,
         Embed: Array,
-        Timestamp: {type: Number, default: Date.now()},
-        CurrentPage : {type: Number, default: 1}
+        Timestamp: { type: Number, default: Date.now() },
+        CurrentPage: { type: Number, default: 1 }
     }]
 });
 

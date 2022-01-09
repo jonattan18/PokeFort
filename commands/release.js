@@ -16,9 +16,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) console.log(err);
 
         static_user_pokemons = user.Pokemons;
-
         var user_pokemons = user.Pokemons;
-        var user_selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
 
         // If no arguments
         if (args.length == 0) {
@@ -27,22 +25,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // If arguments is latest or l
         else if (args[0].toLowerCase() == "l" || args[0].toLowerCase() == "latest") {
-            var selected_pokemon = user_pokemons[user_pokemons.length - 1];
+            var selected_pokemon = [user_pokemons[user_pokemons.length - 1]];
+            return release(message, pokemons, selected_pokemon, prefix);
         }
 
         // If arguments is number
         else if (isInt(args[0])) {
             if (typeof user_pokemons[args[0] - 1] != 'undefined') {
-                var selected_pokemon = user_pokemons[args[0] - 1];
+                var selected_pokemon = [user_pokemons[args[0] - 1]];
+                return release(message, pokemons, selected_pokemon, prefix);
             }
             else {
                 return message.channel.send("No pokemon exists with that number.");
             }
         }
-
-        //      if (selected_pokemon._id == user_selected_pokemon._id) {
-        //          message.channel.send("You can't release your selected pokemon.");
-        //      }
 
         // Multi commmand controller.
         var error = [];
@@ -89,7 +85,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (is_not) {
                 user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
             }
-            if (j == total_args.length - 1) { pagination(message, pokemons, user_pokemons); }
+            if (j == total_args.length - 1) { release(message, pokemons, user_pokemons, prefix); }
         }
 
         // For pk --shiny command.
@@ -406,82 +402,63 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
     });
-    
+
 }
 
-// Function for pagination.
-function pagination(message, pokemons, user_pokemons) {
-
+// Function for release.
+function release(message, pokemons, user_pokemons, prefix) {
     if (user_pokemons.length == 0) { message.channel.send("Pokemons not found."); return; }
 
-    var chunked_pokemons = chunkArray(user_pokemons, 20);
-    var global_embed = [];
-    for (a = 0; a < chunked_pokemons.length; a++) {
-        if (chunked_pokemons[a] == undefined) break;
-
-        var description = "";
-        for (i = 0; i < chunked_pokemons[a].length; i++) {
-
-            //Get Pokemon Name from Pokemon ID.
-            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == chunked_pokemons[a][i].PokemonId)[0];
-            if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-                var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-            }
-            else {
-                var temp_name = "";
-                if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                else { temp_name = pokemon_db["Pokemon Name"]; }
-                var pokemon_name = temp_name;
-            }
-            if (chunked_pokemons[a][i].Shiny) { pokemon_name += ' :star:' }
-
-            var total_iv = ((chunked_pokemons[a][i].IV[0] + chunked_pokemons[a][i].IV[1] + chunked_pokemons[a][i].IV[2] + chunked_pokemons[a][i].IV[3] + chunked_pokemons[a][i].IV[4] + chunked_pokemons[a][i].IV[5]) / 186 * 100).toFixed(2);
-            var pokemon_number = static_user_pokemons.findIndex(x => x === chunked_pokemons[a][i]);
-            if (chunked_pokemons[a][i].Nickname != "") {
-                description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}% | Nickname: ${chunked_pokemons[a][i].Nickname}\n`;
-            }
-            else { description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}%\n`; }
-        }
-
-        // Create embed message
-        var username = message.author.username;
-        let embed = new Discord.MessageEmbed();
-        embed.setTitle(`**${username}'s Pokémon:**`)
-        embed.setColor(message.member.displayHexColor)
-        embed.setDescription(description);
-        embed.setFooter(`Page ${a + 1}/${chunked_pokemons.length}. You have ${user_pokemons.length} Pokemon.`);
-        global_embed.push(embed);
+    // Collecting pokemon ids.
+    var pokemon_ids = [];
+    for (var i = 0; i < user_pokemons.length; i++) {
+        pokemon_ids.push(user_pokemons[i]._id);
     }
 
-    page = page - 1;
-    if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }
+    var description = "";
+    var display_pokemons = user_pokemons.slice(0, 20);
+    for (let i = 0; i < display_pokemons.length; i++) {
+        const element = display_pokemons[i];
+        var pokemon_name = get_pokemon_name(pokemons, element["PokemonId"], element, true);
+        description += `Level ${element["Level"]} ${pokemon_name}\n`;
+    }
+    if (user_pokemons.length > 20) { description += `\n+${user_pokemons.length - 20} other pokemons` }
 
-    // Send message to channel.
-    message.channel.send(global_embed[page]).then(msg => {
-        if (global_embed.length == 1) return;
+    // Create a new Message embed.
+    let embed = new Discord.MessageEmbed();
+    embed.setTitle(`Are you sure you want to release all these pokemons?`);
+    embed.setDescription(description);
+    embed.setColor(message.member.displayHexColor);
+    embed.setFooter(`Type ${prefix}confirm to continue or ${prefix}cancel to cancel.`);
+
+    message.channel.send(embed).then(msg => {
         channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
             if (err) return console.log(err);
             if (!channel) return;
-            var Pagination = channel.Pagination;
-            var user_page = Pagination.filter(it => it.UserID == message.author.id)[0];
-            if (!user_page) {
-                channel.Pagination.push({
-                    UserID: message.author.id,
-                    Message: JSON.stringify(msg),
-                    Embed: global_embed,
-                    CurrentPage: page
-                });
-                channel.save();
-            } else {
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Pagination.$[elem].Message": JSON.stringify(msg), "Pagination.$[elem].Embed": global_embed, "Pagination.$[elem].CurrentPage": 1, "Pagination.$[elem].Timestamp": Date.now() } }, { arrayFilters: [{ "elem.UserID": message.author.id }] }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
-                });
-            }
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt.UserID": message.author.id, "Prompt.Pokemons": pokemon_ids, "Prompt.Timestamp": Date.now(), "Prompt.Reason": "Release" } }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+            });
         });
     });
+}
+
+// Get pokemon name from pokemon ID.
+function get_pokemon_name(pokemons, pokemon_id, selected_pokemon, star_shiny = false) {
+    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
+        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
+    }
+    else {
+        var temp_name = "";
+        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
+        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
+        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
+        else { temp_name = pokemon_db["Pokemon Name"]; }
+        var pokemon_name = temp_name;
+    }
+    if (selected_pokemon.Shiny) { if (star_shiny) { pokemon_name = ':star: ' + pokemon_name; } else { pokemon_name = 'Shiny ' + pokemon_name; } }
+    return pokemon_name;
 }
 
 // Calculate total iv from iv array.

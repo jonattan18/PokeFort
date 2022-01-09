@@ -8,7 +8,7 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
     await user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user) {
-            var balance = user.PokeCredits;
+            var balance = user.PokeCredits.toLocaleString();
             var username = message.author.username;
             let embed = new Discord.MessageEmbed();
             embed.setTitle(`${username}'s balance:`);

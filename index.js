@@ -5,7 +5,6 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 const { loadCommands } = require('./utils/loadCommands');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const { performance } = require('perf_hooks');
 
 // Models
 const guild_model = require('./models/guild')
@@ -46,6 +45,9 @@ loadCommands(client);
 
 client.on('message', async (message) => {
     if (message.author.bot) return;
+
+    // Loading Pokemons Data
+    var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
 
     // Initialize Variables
     var prefix = config.DEFAULT_PREFIX;
@@ -88,7 +90,7 @@ client.on('message', async (message) => {
             cmd = redirect_command(cmd, prefix);
             const commandfile = client.commands.get(cmd.slice(prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(prefix.length)));
             if (!commandfile) return;
-            commandfile.run(client, message, args, prefix, user_available, pokemons);
+            commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }
         else {
             advance_xp(message, user_available); // Increase XP
@@ -158,8 +160,8 @@ client.on('message', async (message) => {
                     if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
 
                         // Get pokemon name from ID.
-                        var pokemon_name = get_pokemon_name(pokemon_id, selected_pokemon);
-                        var pokemon_name_bottom = get_pokemon_name(pokemon_id, selected_pokemon, true);
+                        var pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
+                        var pokemon_name_bottom = get_pokemon_name(load_pokemons, selected_pokemon.PokemonId, true);
                         //Update level and send message.
                         pokemon_level += 1;
                         pokemon_current_xp = 0;
@@ -169,16 +171,16 @@ client.on('message', async (message) => {
                         embed.setColor("#1cb99a");
 
                         // Get pokemon evolution.
-                        var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+                        var pokemon_db = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
                         var pokemon_dex_number = pokemon_db["Pokedex Number"];
                         var pokemon_evolve = evolutions.filter(it => it["evolved_species_id"] == pokemon_dex_number + 1 && it["evolution_trigger_id"] == "Level")[0];
                         if (pokemon_evolve) {
                             var pokemon_evolve_id = pokemon_evolve["evolved_species_id"];
                             var pokemon_evolve_lvl = pokemon_evolve["minimum_level"];
                             if (pokemon_level >= pokemon_evolve_lvl) {
-                                var new_pokemon_id = pokemons.filter(it => it["Pokedex Number"] == pokemon_evolve_id)[0]["Pokemon Id"];
+                                var new_pokemon_id = load_pokemons.filter(it => it["Pokedex Number"] == pokemon_evolve_id)[0]["Pokemon Id"];
                                 pokemon_id = new_pokemon_id;
-                                var new_pokemon_name = get_pokemon_name(new_pokemon_id, selected_pokemon, true);
+                                var new_pokemon_name = get_pokemon_name(load_pokemons, new_pokemon_id, selected_pokemon, true);
                                 embed.addField(`What ? ${pokemon_name} is evolving!`, `Your ${pokemon_name_bottom} evolved into ${new_pokemon_name}`, false);
                             }
                         }
@@ -200,8 +202,8 @@ client.on('message', async (message) => {
 });
 
 // Get pokemon name from pokemon ID.
-function get_pokemon_name(pokemon_id, selected_pokemon, star_shiny = false) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+function get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, star_shiny = false) {
+    var pokemon_db = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
     if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
         var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
     }

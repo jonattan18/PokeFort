@@ -46,7 +46,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         // For only pk command.
         if (args.length == 0 || (args.length == 1 && isInt(args[0]))) {
             if (args.length == 1) { page = parseInt(args[0]); }
-            pagination(message, pokemons, user_pokemons);
+            return pagination(message, pokemons, user_pokemons);
         }
 
         // Multi commmand controller.
