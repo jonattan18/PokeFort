@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const fs = require('fs'); // To read json file.
-const { title } = require('process');
 const user_model = require('../models/user.js'); // To get user model.
 
 // To get pokemon moves data.
