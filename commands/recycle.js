@@ -151,6 +151,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             user_pokemons = filtered_pokemons;
         }
 
+        // For pk --favourite command.
+        function favourite(args) {
+            user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
+        }
+
         // For pk --type command.
         function type(args) {
             var filtered_pokemons = [];
