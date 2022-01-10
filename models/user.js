@@ -6,6 +6,7 @@ const ChannelSchema = new mongoose.Schema({
     Joined: Number,
     OrderType: String,
     PokeCredits: Number,
+    Silence: Boolean,
     Selected: String,
     Redeems: Number,
     Shards: Number,

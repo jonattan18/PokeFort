@@ -209,10 +209,13 @@ client.on('message', async (message) => {
                     if (leveled_up || evolved) {
                         var embed = new Discord.MessageEmbed()
                     }
-                    if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
-                    if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
-                    if (evolved || leveled_up) {
-                        message.channel.send(embed);
+
+                    if (user.Silence == false || user.Silence == undefined) {
+                        if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
+                        if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
+                        if (evolved || leveled_up) {
+                            message.channel.send(embed);
+                        }
                     }
                 }
             });
