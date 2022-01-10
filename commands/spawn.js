@@ -116,7 +116,7 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     }
 
     // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
+    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, SpawnLimit: 30, MessageCount: 0 }, function (err, user) {
         if (err) { console.log(err) }
     });
 }
