@@ -16,7 +16,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             user_model.findOneAndUpdate({ UserID: user_id }, { $inc: { Redeems: amount } }, (err, user_3) => {
                 if (err) return console.log(err);
                 bot.users.fetch(user_id).then(user_data => {
-                    message.channel.send(`${user_data.username}'s Redeem increased by ${amount}. Balance: ${parseInt(user_3.Redeems) + parseInt(amount)}`);
+                    var old_redeems = user_data.redeems == undefined ? 0 : user_data.redeems;
+                    message.channel.send(`${user_data.username}'s Redeem increased by ${amount}. Balance: ${old_redeems + parseInt(amount)}`);
                 });
             });
         });
