@@ -29,7 +29,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         // For only release int type command.
         else if (onlyNumbers(args)) {
             user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-            return recycle(message, pokemons, user_pokemons, prefix, user);
+            return release(message, pokemons, user_pokemons, prefix, user);
         }
 
         // Multi commmand controller.

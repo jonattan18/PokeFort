@@ -44,10 +44,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For only pk command.
-        if (args.length == 0 || onlyNumbers(args)) {
-            if (args.length != 0) {
-                user_pokemons = static_user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-            }
+        if (args.length == 0 || isInt(args[0])) {
+            page = parseInt(args[0]);
             return pagination(message, pokemons, user_pokemons);
         }
 
