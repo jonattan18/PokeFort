@@ -49,6 +49,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
             return pagination(message, pokemons, user_pokemons);
         }
+        else 
+        {
+            return message.channel.send(`Invalid command! Use ${prefix}fav to see all favourite pokemons!`);
+        }
 
     });
 }

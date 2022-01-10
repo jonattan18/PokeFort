@@ -28,7 +28,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For only recycle int type command
-        else if (args.some(i => !Number.isInteger(i))) {
+        else if (onlyNumbers(args)) {
             user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
             return recycle(message, pokemons, user_pokemons, prefix, user);
         }
@@ -53,6 +53,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
             else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
             else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
@@ -541,6 +542,12 @@ function chunkArray(myArray, chunk_size) {
     }
 
     return tempArray;
+}
+
+function onlyNumbers(array) {
+    return array.every(element => {
+        return !isNaN(element);
+    });
 }
 
 module.exports.config = {
