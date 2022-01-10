@@ -8,9 +8,11 @@ const ChannelSchema = new mongoose.Schema({
     PokeCredits: Number,
     Selected: String,
     Redeems: Number,
+    Shards: Number,
     DailyStreak: Number,
     RaidsCompleted: Number,
     WishingPieces: Number,
+    Badges: Array,
     Admin: { type: Number, default: 0 },
     Pokemons: [{
         PokemonId: Number,

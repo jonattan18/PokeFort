@@ -20,6 +20,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var total_pokemons = user.Pokemons.length;
             var raids_completed = user.RaidsCompleted == undefined ? 0 : user.RaidsCompleted;
             var daily_streak = user.DailyStreak == undefined ? 0 : user.DailyStreak;
+            var badges = user.Badges.length == 0 ? "None" : user.Badges.join(', ');
+            var shards = user.Shards == undefined ? 0 : user.Shards;
 
             // Create embed for user profile
             const embed = new Discord.MessageEmbed()
@@ -29,12 +31,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             embed.setDescription('**Date Started:** ' + date_started
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems
+                + '\n**Shards:** ' + shards
                 + '\n**Wishing Pieces:** ' + wishing_pieces
                 + '\n**Total Pokémon Caught:** ' + total_pokemons_catched
                 + '\n**Total Shiny Pokémon Caught:** ' + total_pokemons_shiny
                 + '\n**Total Pokémon:** ' + total_pokemons
                 + '\n**Total Raids Completed:** ' + raids_completed
-                + '\n**Daily Streak:** ' + daily_streak)
+                + '\n**Daily Streak:** ' + daily_streak
+                + '\n**Badge:** ' + badges)
 
             message.channel.send(embed);
 
