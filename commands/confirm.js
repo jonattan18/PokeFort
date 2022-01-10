@@ -116,7 +116,7 @@ function recycle(message, user_prompt, user, load_pokemons) {
             embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
             if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
             else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
-            else { embed.addField(`**${old_pokemon_name} experience increased!**`, `${old_pokemon_name}'s experience is increased by ${old_pokemon_exp}`, false); }
+            else { embed.addField(`**${old_pokemon_name} xp increased!**`, `${old_pokemon_name}'s xp is now ${old_pokemon_exp}`, false); }
             embed.setColor(message.member.displayHexColor)
             message.channel.send(embed);
         });

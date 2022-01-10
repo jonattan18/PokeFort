@@ -26,15 +26,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             return release(message, pokemons, selected_pokemon, prefix);
         }
 
-        // If arguments is number
-        else if (isInt(args[0])) {
-            if (typeof user_pokemons[args[0] - 1] != 'undefined') {
-                var selected_pokemon = [user_pokemons[args[0] - 1]];
-                return release(message, pokemons, selected_pokemon, prefix);
-            }
-            else {
-                return message.channel.send("No pokemon exists with that number.");
-            }
+        // For only release int type command.
+        else if (args.some(i => !Number.isInteger(i))) {
+            user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
+            return recycle(message, pokemons, user_pokemons, prefix, user);
         }
 
         // Multi commmand controller.

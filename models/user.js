@@ -18,7 +18,8 @@ const ChannelSchema = new mongoose.Schema({
         Level: Number,
         Shiny: Boolean,
         Moves: Array,
-        Reason: String
+        Reason: String,
+        Favourite: Boolean,
     }],
     Released: [{
         PokemonId: Number,

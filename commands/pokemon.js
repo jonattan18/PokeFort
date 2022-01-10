@@ -7,7 +7,7 @@ const channel_model = require('../models/channel');
 
 var static_user_pokemons = null;
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
+module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     page = 1;
@@ -44,8 +44,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For only pk command.
-        if (args.length == 0 || (args.length == 1 && isInt(args[0]))) {
-            if (args.length == 1) { page = parseInt(args[0]); }
+        if (args.length == 0 || args.some(i => !Number.isInteger(i))) {
+            if (args.length != 0) {
+                user_pokemons = static_user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
+            }
             return pagination(message, pokemons, user_pokemons);
         }
 
