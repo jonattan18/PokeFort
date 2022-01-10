@@ -1,6 +1,7 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const fs = require('fs'); // To read json file.
 const user_model = require('../models/user.js'); // To get user model.
+const _ = require('lodash'); // For utils
 
 // To get pokemon moves data.
 const moves = JSON.parse(fs.readFileSync('./assets/moves.json').toString());
@@ -47,7 +48,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (level_based.length == 0) { continue; }
             total_moves_list.push(level_based);
             if (level_based.some(it => it <= pokemon_level)) {
-                var name = moves_details[Object.keys(learnset)[i]]["name"];
+                var move_detail_current = moves_details[Object.keys(learnset)[i]];
+                var name = move_detail_current["name"];
+                if(_.isEqual(move_detail_current["category"], "Status")) { name += " :lock:"; }
                 valid_moves_list.push(name);
             }
         }
