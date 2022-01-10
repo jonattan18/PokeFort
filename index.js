@@ -260,7 +260,7 @@ client.on('guildCreate', guild => {
 function redirect_command(command, prefix) {
     // Commands to redirect
     command = command.slice(prefix.length);
-    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["m", "moves"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"]];
+    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["m", "moves"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"]];
     redirect_list = redirect_list.filter(it => it[0] == command);
     if (redirect_list.length > 0) {
         var index = redirect_list.findIndex(it => it[0] == command);
