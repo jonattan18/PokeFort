@@ -234,7 +234,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For pk --hpiv command.
-        function hp_iv() {
+        function hpiv() {
             var filtered_pokemons = [];
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
