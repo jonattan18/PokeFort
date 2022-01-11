@@ -54,6 +54,6 @@ function trade(bot, message, prefix, channel, user) {
 }
 
 module.exports.config = {
-    name: "accept",
+    name: "c",
     aliases: []
 }
