@@ -38,14 +38,22 @@ function trade(message, trade_prompt, user, channel_data) {
     }
 
     if (current_user == 1) {
-        if (trade_prompt.User1IConfirm == true) {
-            if (trade_prompt.User1IConfirm == true && trade_prompt.User2IConfirm == true) {
-                change_trade(message, trade_prompt);
-            } else {
-                message.channel.send(`You have already confirmed the trade!`);
-            }
+        if (trade_prompt.User1IConfirm == false && trade_prompt.User2IConfirm == true) {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1IConfirm": true } }, { new: true }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+                message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
+                    var new_embed = message_old.embeds[0];
+                    new_embed.fields[0].name += " | :white_check_mark:";
+                    message_old.edit(new_embed);
+                    change_trade(message, trade_prompt);
+                });
+            });
         }
-        else {
+        else if (trade_prompt.User1IConfirm == true && trade_prompt.User2IConfirm == false) {
+            message.channel.send(`You have already confirmed the trade!`);
+        }
+        else if (trade_prompt.User1IConfirm == false && trade_prompt.User2IConfirm == false) {
             channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1IConfirm": true } }, { new: true }, (err, channel) => {
                 if (err) return console.log(err);
                 if (!channel) return;
@@ -58,14 +66,22 @@ function trade(message, trade_prompt, user, channel_data) {
         }
     }
     else if (current_user == 2) {
-        if (trade_prompt.User2IConfirm == true) {
-            if (trade_prompt.User1IConfirm == true && trade_prompt.User2IConfirm == true) {
-                change_trade(message, trade_prompt);
-            } else {
-                message.channel.send(`You have already confirmed the trade!`);
-            }
+        if (trade_prompt.User2IConfirm == false && trade_prompt.User1IConfirm == true) {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2IConfirm": true } }, { new: true }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+                message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
+                    var new_embed = message_old.embeds[0];
+                    new_embed.fields[1].name += " | :white_check_mark:";
+                    message_old.edit(new_embed);
+                    change_trade(message, trade_prompt);
+                });
+            });
         }
-        else {
+        else if (trade_prompt.User2IConfirm == true && trade_prompt.User1IConfirm == false) {
+            message.channel.send(`You have already confirmed the trade!`);
+        }
+        else if (trade_prompt.User1IConfirm == false && trade_prompt.User2IConfirm == false) {
             channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2IConfirm": true } }, { new: true }, (err, channel) => {
                 if (err) return console.log(err);
                 if (!channel) return;
