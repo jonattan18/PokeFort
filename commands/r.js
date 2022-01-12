@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (err) console.log(err);
 
             if (channel.AcceptPrompt == undefined) { message.channel.send('There is no trade offer started.'); return; }
-            //  if ((Date.now() - channel.Trade.Timestamp) / 1000 > 120) { message.channel.send('Trade time expired.'); return; }
+            if ((Date.now() - channel.Trade.Timestamp) / 1000 > 120) { message.channel.send('Trade time expired.'); return; }
             if (channel.AcceptPrompt == "Trade" && channel.Trade.Accepted == true && (channel.Trade.User1ID == message.author.id || channel.Trade.User2ID == message.author.id)) {
                 if (args[0].toLowerCase() == "add") return add(bot, message, args.splice(1), pokemons, channel, user);
                 else if (args[0].toLowerCase() == "remove") return remove(bot, message, args.splice(1), pokemons, channel, user);

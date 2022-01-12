@@ -11,7 +11,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     var user2id = "";
     if (args.length == 0) { message.channel.send(`No user mentioned to start trade.`); return; }
     user2id = args[0].replace(/[<@!>]/g, '');
-  //  if (user1id == user2id) { message.channel.send(`You can't trade with yourself!`); return; }
+    if (user1id == user2id) { message.channel.send(`You can't trade with yourself!`); return; }
 
     //Get user data.
     user_model.findOne({ UserID: user1id }, (err, user) => {

@@ -1,5 +1,6 @@
 const Discord = require('discord.js'); // For message embed.
 const fs = require('fs'); // To read file.
+const _ = require('lodash'); // for utils
 
 // Models
 const user_model = require('../models/user');
@@ -45,7 +46,7 @@ function trade(message, trade_prompt, user, channel_data) {
             }
         }
         else {
-            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1IConfirm": true } }, { upsert: true }, (err, channel) => {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1IConfirm": true } }, { new: true }, (err, channel) => {
                 if (err) return console.log(err);
                 if (!channel) return;
                 message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
@@ -65,7 +66,7 @@ function trade(message, trade_prompt, user, channel_data) {
             }
         }
         else {
-            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2IConfirm": true } }, { upsert: true }, (err, channel) => {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2IConfirm": true } }, { new: true }, (err, channel) => {
                 if (err) return console.log(err);
                 if (!channel) return;
                 message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
@@ -80,7 +81,163 @@ function trade(message, trade_prompt, user, channel_data) {
 
 // Function to change items in trade.
 function change_trade(message, trade_prompt) {
-    
+
+    //#region Transfer credits.
+    var user_1_credits = trade_prompt.Credits.User1 == undefined ? 0 : trade_prompt.Credits.User1;
+    var user_2_credits = trade_prompt.Credits.User2 == undefined ? 0 : trade_prompt.Credits.User2;
+    if (user_1_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.PokeCredits - user_1_credits) < 0) { return message.channel.send(`You don't have enough credits to complete the trade!`); }
+            var new_user_1_credit = user.PokeCredits - user_1_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { PokeCredits: user_1_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { PokeCredits: new_user_1_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    if (user_2_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User2ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.PokeCredits - user_2_credits) < 0) { return message.channel.send(`You don't have enough credits to complete the trade!`); }
+            var new_user_2_credit = user.PokeCredits - user_2_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { PokeCredits: user_2_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { PokeCredits: new_user_2_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    //#endregion
+
+    //#region Transfer redeems.
+    var user_1_credits = trade_prompt.Redeems.User1 == undefined ? 0 : trade_prompt.Redeems.User1;
+    var user_2_credits = trade_prompt.Redeems.User2 == undefined ? 0 : trade_prompt.Redeems.User2;
+    if (user_1_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.Redeems - user_1_credits) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
+            var new_user_1_credit = user.Redeems - user_1_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Redeems: user_1_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Redeems: new_user_1_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    if (user_2_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User2ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.Redeems - user_2_credits) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
+            var new_user_2_credit = user.Redeems - user_2_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Redeems: user_2_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Redeems: new_user_2_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    //#endregion
+
+    //#region Transfer shards.
+    var user_1_credits = trade_prompt.Shards.User1 == undefined ? 0 : trade_prompt.Shards.User1;
+    var user_2_credits = trade_prompt.Shards.User2 == undefined ? 0 : trade_prompt.Shards.User2;
+    if (user_1_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.Shards - user_1_credits) < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
+            var new_user_1_credit = user.Shards - user_1_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Shards: user_1_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Shards: new_user_1_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    if (user_2_credits > 0) {
+        // Get user 1 credits.
+        user_model.findOne({ UserID: trade_prompt.User2ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            if ((user.Shards - user_2_credits) < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
+            var new_user_2_credit = user.Shards - user_2_credits;
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Shards: user_2_credits } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Shards: new_user_2_credit } }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+        });
+    }
+    //#endregion
+
+    //#region Transfer Pokemons.
+    var user_1_items = trade_prompt.User1Items == undefined ? [] : trade_prompt.User1Items;
+    var user_2_items = trade_prompt.User2Items == undefined ? [] : trade_prompt.User2Items;
+    if (user_1_items.length > 0) {
+        // Get user 1 trade items.
+        user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            var pokemons_to_add = [];
+            for (i = 0; i < user_1_items.length; i++) {
+                var user_pokemons = user.Pokemons;
+                var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_1_items[i]))[0];
+                if (user_pokemon_to_add != undefined) pokemons_to_add.push(user_pokemon_to_add);
+            }
+            var new_user_pokemon_to_update = _.differenceBy(user.Pokemons, pokemons_to_add, JSON.stringify);
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Pokemons: new_user_pokemon_to_update } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $push: { Pokemons: pokemons_to_add } }, { new: true }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+
+        });
+    }
+    if (user_2_items.length > 0) {
+        // Get user 1 trade items.
+        user_model.findOne({ UserID: trade_prompt.User2ID }, (err, user) => {
+            if (err) return console.log(err);
+            if (!user) return;
+            var pokemons_to_add = [];
+            for (i = 0; i < user_2_items.length; i++) {
+                var user_pokemons = user.Pokemons;
+                var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_2_items[i]))[0];
+                if (user_pokemon_to_add != undefined) pokemons_to_add.push(user_pokemon_to_add);
+            }
+            var new_user_pokemon_to_update = _.differenceBy(user.Pokemons, pokemons_to_add, JSON.stringify);
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Pokemons: new_user_pokemon_to_update } }, { new: true }, (err, user) => {
+                if (err) return console.log(err);
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $push: { Pokemons: pokemons_to_add } }, { new: true }, (err, user) => {
+                    if (err) return console.log(err);
+                });
+            });
+
+        });
+    }
+    //#endregion
+
+    channel_model.findOneAndUpdate({ ChannelID: trade_prompt.ChannelID }, { $set: { AcceptPrompt: null, Trade: new Object } }, { new: true }, (err, channel) => {
+        if (err) return console.log(err);
+        message.channel.send(`Trade has been confirmed.`);
+    });
 }
 
 // Function to recycle pokemon.
