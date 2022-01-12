@@ -31,7 +31,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             //Check if any other traders are in the channel.
-            else if ((channel.Trade.User1ID == userid || channel.Trade.User2ID == userid) && channel.Accepted == true && ((Date.now() - channel.Timestamp) / 1000 < 120)) {
+            else if ((channel.Trade.User1ID == userid || channel.Trade.User2ID == userid) && channel.Trade.Accepted == true && ((Date.now() - channel.Trade.Timestamp) / 1000 < 120)) {
                 message.channel.send(`You cancelled ongoing trade!`);
                 return cancel_trade();
             }

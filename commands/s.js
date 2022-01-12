@@ -32,15 +32,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     });
 }
 
-// Function to add redeems to trade.
+// Function to add Shards to trade.
 function add(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
-        var old_credit = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
+        var old_credit = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
     } else {
         current_user = 2;
-        var old_credit = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
+        var old_credit = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
     }
 
     if (!isInt(args[0])) { return message.channel.send('Invalid Syntax!'); }
@@ -49,15 +49,15 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
 
     var new_credit = old_credit + amount;
 
-    if (new_credit > user_data.Redeems) { return message.channel.send('You do not have enough Redeems!'); }
+    if (new_credit > user_data.Shards) { return message.channel.send('You do not have enough Shards!'); }
 
     if (current_user == 1) {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Redeems.User1": new_credit } }, { upsert: true }, (err, channel) => {
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Shards.User1": new_credit } }, { upsert: true }, (err, channel) => {
             if (err) return console.log(err);
             if (!channel) return;
         });
     } else {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Redeems.User2": new_credit } }, { upsert: true }, (err, channel) => {
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Shards.User2": new_credit } }, { upsert: true }, (err, channel) => {
             if (err) return console.log(err);
             if (!channel) return;
         });
@@ -77,15 +77,15 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
 
 }
 
-// Function to remove redeems from trade.
+// Function to remove Shards from trade.
 function remove(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
-        var old_credit = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
+        var old_credit = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
     } else {
         current_user = 2;
-        var old_credit = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
+        var old_credit = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
     }
 
     if (!isInt(args[0])) { return message.channel.send('Invalid Syntax!'); }
@@ -97,12 +97,12 @@ function remove(bot, message, args, pokemons, channel_data, user_data) {
     if (new_credit < 0) { return message.channel.send('Invalid amount to remove!'); }
 
     if (current_user == 1) {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Redeems.User1": new_credit } }, { upsert: true }, (err, channel) => {
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Shards.User1": new_credit } }, { upsert: true }, (err, channel) => {
             if (err) return console.log(err);
             if (!channel) return;
         });
     } else {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Redeems.User2": new_credit } }, { upsert: true }, (err, channel) => {
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Shards.User2": new_credit } }, { upsert: true }, (err, channel) => {
             if (err) return console.log(err);
             if (!channel) return;
         });
@@ -141,19 +141,19 @@ function get_message(current_user, channel_data, embed_field, new_credit) {
     var extra_msg = "";
     if (current_user == 1) {
         var credits = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
-        var shards = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
+        var redeems = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
         var line_counter = embed_field.split(/\r\n|\r|\n/).length
         if (credits > 0) { extra_msg += `${line_counter} | ${credits} Credits\n`; line_counter++; }
-        if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Redeems\n`; line_counter++; }
-        if (shards > 0) { extra_msg += `${line_counter} | ${shards} Shards\n`; line_counter++; }
+        if (redeems > 0) { extra_msg += `${line_counter} | ${redeems} Redeems\n`; line_counter++; }
+        if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Shards\n`; line_counter++; }
     }
     if (current_user == 2) {
         var credits = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
-        var shards = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
+        var redeems = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
         var line_counter = embed_field.split(/\r\n|\r|\n/).length;
         if (credits > 0) { extra_msg += `${line_counter} | ${credits} Credits\n`; line_counter++; }
-        if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Redeems\n`; line_counter++; }
-        if (shards > 0) { extra_msg += `${line_counter} | ${shards} Shards\n`; line_counter++; }
+        if (redeems > 0) { extra_msg += `${line_counter} | ${redeems} Redeems\n`; line_counter++; }
+        if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Shards\n`; line_counter++; }
     }
 
     return embed_field + extra_msg;
@@ -166,6 +166,6 @@ function isInt(value) {
 }
 
 module.exports.config = {
-    name: "r",
+    name: "s",
     aliases: []
 }

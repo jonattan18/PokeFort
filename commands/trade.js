@@ -10,8 +10,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     var user1id = message.author.id;
     var user2id = "";
     if (args.length == 0) { message.channel.send(`No user mentioned to start trade.`); return; }
-    if (args.length == 1) { user2id = args[0].substring(args[0].length, 3).slice(0, -1); }
-    if (user1id == user2id) { message.channel.send(`You can't trade with yourself!`); return; }
+    user2id = args[0].replace(/[<@!>]/g, '');
+  //  if (user1id == user2id) { message.channel.send(`You can't trade with yourself!`); return; }
 
     //Get user data.
     user_model.findOne({ UserID: user1id }, (err, user) => {
@@ -28,19 +28,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (!channel) return;
 
                 //Check if user1 is already trading.
-                if ((channel.Trade.User1ID == user1id || channel.Trade.User2ID == user1id) && channel.Trade.Accepted == true && ((Date.now() - channel.Timestamp) / 1000 > 120)) {
+                if ((channel.Trade.User1ID == user1id || channel.Trade.User2ID == user1id) && channel.Trade.Accepted == true && ((Date.now() - channel.Trade.Timestamp) / 1000 < 120)) {
                     message.channel.send(`You are already trading with someone!`);
                     return;
                 }
 
                 //Check if user2 is already trading.
-                if ((channel.Trade.User1ID == user2id || channel.Trade.User2ID == user2id) && channel.Trade.Accepted == true && ((Date.now() - channel.Timestamp) / 1000 > 120)) {
+                if ((channel.Trade.User1ID == user2id || channel.Trade.User2ID == user2id) && channel.Trade.Accepted == true && ((Date.now() - channel.Trade.Timestamp) / 1000 < 120)) {
                     message.channel.send(`Mentioned user is already trading with someone!`);
                     return;
                 }
 
                 //Check if any other traders are in the channel.
-                if (channel.Accepted == true && ((Date.now() - channel.Timestamp) / 1000 < 120)) {
+                if (channel.Trade.Accepted == true && ((Date.now() - channel.Trade.Timestamp) / 1000 < 120)) {
                     message.channel.send(`There is already a trade going on!`);
                     return;
                 }

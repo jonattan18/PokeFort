@@ -103,12 +103,12 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     // IV creation
     var IV = [];
     while (true) {
-        let hp_iv = getRandomInt(0, 31);
-        let atk_iv = getRandomInt(0, 31);
-        let def_iv = getRandomInt(0, 31);
-        let spa_iv = getRandomInt(0, 31);
-        let spd_iv = getRandomInt(0, 31);
-        let spe_iv = getRandomInt(0, 31);
+        let hp_iv = getRandomInt(0, 32);
+        let atk_iv = getRandomInt(0, 32);
+        let def_iv = getRandomInt(0, 32);
+        let spa_iv = getRandomInt(0, 32);
+        let spd_iv = getRandomInt(0, 32);
+        let spe_iv = getRandomInt(0, 32);
         let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
         IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
         if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }

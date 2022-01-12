@@ -17,12 +17,70 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (err) console.log(err);
 
             var user_prompt = channel.Prompt;
+            var trade_prompt = channel.Trade;
+            if (user_prompt.UserID != message.author.id && (trade_prompt.User1ID == message.author.id || trade_prompt.User2ID == message.author.id) && (Date.now() - trade_prompt.Timestamp) / 1000 < 120) { return trade(message, trade_prompt, user, channel) }
             if (user_prompt.UserID != message.author.id) { message.channel.send('No prompt asked for to use ``confirm`` command.'); return; }
             if (user_prompt.Reason == "Release") { release(message, user_prompt, user); return; }
             if (user_prompt.Reason == "Recycle") { recycle(message, user_prompt, user, pokemons); return; }
 
         });
     });
+}
+
+// Function to trade pokemon.
+function trade(message, trade_prompt, user, channel_data) {
+    var current_user = 0;
+    if (message.author.id == channel_data.Trade.User1ID) {
+        current_user = 1;
+    } else {
+        current_user = 2;
+    }
+
+    if (current_user == 1) {
+        if (trade_prompt.User1IConfirm == true) {
+            if (trade_prompt.User1IConfirm == true && trade_prompt.User2IConfirm == true) {
+                change_trade(message, trade_prompt);
+            } else {
+                message.channel.send(`You have already confirmed the trade!`);
+            }
+        }
+        else {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1IConfirm": true } }, { upsert: true }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+                message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
+                    var new_embed = message_old.embeds[0];
+                    new_embed.fields[0].name += " | :white_check_mark:";
+                    message_old.edit(new_embed);
+                });
+            });
+        }
+    }
+    else if (current_user == 2) {
+        if (trade_prompt.User2IConfirm == true) {
+            if (trade_prompt.User1IConfirm == true && trade_prompt.User2IConfirm == true) {
+                change_trade(message, trade_prompt);
+            } else {
+                message.channel.send(`You have already confirmed the trade!`);
+            }
+        }
+        else {
+            channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2IConfirm": true } }, { upsert: true }, (err, channel) => {
+                if (err) return console.log(err);
+                if (!channel) return;
+                message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
+                    var new_embed = message_old.embeds[0];
+                    new_embed.fields[1].name += " | :white_check_mark:";
+                    message_old.edit(new_embed);
+                });
+            });
+        }
+    }
+}
+
+// Function to change items in trade.
+function change_trade(message, trade_prompt) {
+    
 }
 
 // Function to recycle pokemon.

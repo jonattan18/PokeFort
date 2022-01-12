@@ -94,6 +94,28 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
     var user1name = "";
     var user2name = "";
 
+    var extra_msg = "";
+
+    // Extra Messages
+    if (current_user == 1) {
+        var credits = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
+        var redeems = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
+        var shards = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
+        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+    }
+    if (current_user == 2) {
+        var credits = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
+        var redeems = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
+        var shards = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
+        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+    }
+
     bot.users.fetch(user1id).then(user_data => {
         user1name = user_data.username;
 
@@ -103,9 +125,9 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
             message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
                 var new_embed = message_old.embeds[0];
                 if (current_user == 1) {
-                    new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + '```', inline: false };
+                    new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
                 } else {
-                    new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + '```', inline: false };
+                    new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
                 }
                 message_old.edit(new_embed);
             }).catch(console.error);
@@ -172,6 +194,28 @@ function remove(bot, message, args, pokemons, channel_data, user_data) {
     var user1name = "";
     var user2name = "";
 
+    var extra_msg = "";
+
+    // Extra Messages
+    if (current_user == 1) {
+        var credits = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
+        var redeems = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
+        var shards = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
+        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+    }
+    if (current_user == 2) {
+        var credits = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
+        var redeems = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
+        var shards = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
+        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+    }
+
     bot.users.fetch(user1id).then(user_data => {
         user1name = user_data.username;
 
@@ -181,9 +225,9 @@ function remove(bot, message, args, pokemons, channel_data, user_data) {
             message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
                 var new_embed = message_old.embeds[0];
                 if (current_user == 1) {
-                    new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + '```', inline: false };
+                    new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
                 } else {
-                    new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + '```', inline: false };
+                    new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
                 }
                 message_old.edit(new_embed);
             }).catch(console.error);

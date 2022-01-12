@@ -13,14 +13,26 @@ const ChannelSchema = new mongoose.Schema({
     Hint: { type: Number, default: 0 },
     AcceptPrompt: String,
     Trade: {
-        User1ID: Number,
-        User2ID: Number,
+        User1ID: String,
+        User2ID: String,
         Accepted: Boolean,
         User1Items: Array,
         User2Items: Array,
         User1IConfirm: Boolean,
         User2IConfirm: Boolean,
-        MessageID : String,
+        Credits: {
+            User1: Number,
+            User2: Number
+        },
+        Redeems: {
+            User1: Number,
+            User2: Number
+        },
+        Shards: {
+            User1: Number,
+            User2: Number
+        },
+        MessageID: String,
         Timestamp: { type: Number, default: Date.now() }
     },
     Prompt: {
