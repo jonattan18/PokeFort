@@ -49,7 +49,7 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
 
     var new_credit = old_credit + amount;
 
-    if (new_credit > user_data.Shards) { return message.channel.send('You do not have enough Shards!'); }
+    if (new_credit > user_data.Shards || user_data.Shards == undefined || user_data.Shards == NaN) { return message.channel.send('You do not have enough Shards!'); }
 
     if (current_user == 1) {
         channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Shards.User1": new_credit } }, { upsert: true }, (err, channel) => {
