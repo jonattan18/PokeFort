@@ -49,7 +49,7 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
 
     var new_credit = old_credit + amount;
 
-    if (new_credit > user_data.Redeems) { return message.channel.send('You do not have enough Redeems!'); }
+    if (new_credit > user_data.Redeems || user_data.Redeems == undefined || user_data.Redeems == NaN) { return message.channel.send('You do not have enough Redeems!'); }
 
     if (current_user == 1) {
         channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.Redeems.User1": new_credit } }, { upsert: true }, (err, channel) => {
