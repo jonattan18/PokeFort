@@ -250,7 +250,7 @@ function change_trade(message, trade_prompt) {
         }
         //#endregion
 
-        channel_model.findOneAndUpdate({ ChannelID: trade_prompt.ChannelID }, { $set: { AcceptPrompt: "", Trade: new Object } }, { new: true }, (err, channel) => {
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { AcceptPrompt: "", Trade: new Object } }, (err, channel) => {
             if (err) return console.log(err);
             message.channel.send(`Trade has been confirmed.`);
         });
