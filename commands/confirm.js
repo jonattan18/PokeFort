@@ -143,7 +143,8 @@ function change_trade(message, trade_prompt) {
             if (!user) return;
             if ((user.Redeems - user_1_credits) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
             var new_user_1_credit = user.Redeems - user_1_credits;
-            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Redeems: user_1_credits } }, { new: true }, (err, user) => {
+            console.log(new_user_1_credit);
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Redeems: user_1_credits } }, { upsert: true }, (err, user) => {
                 if (err) return console.log(err);
                 user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Redeems: new_user_1_credit } }, (err, user) => {
                     if (err) return console.log(err);
@@ -158,7 +159,8 @@ function change_trade(message, trade_prompt) {
             if (!user) return;
             if ((user.Redeems - user_2_credits) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
             var new_user_2_credit = user.Redeems - user_2_credits;
-            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Redeems: user_2_credits } }, { new: true }, (err, user) => {
+            console.log(new_user_2_credit);
+            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Redeems: user_2_credits } }, { upsert: true }, (err, user) => {
                 if (err) return console.log(err);
                 user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Redeems: new_user_2_credit } }, (err, user) => {
                     if (err) return console.log(err);
