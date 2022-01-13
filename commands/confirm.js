@@ -108,9 +108,11 @@ function change_trade(message, trade_prompt) {
             if (!user) return;
             if ((user.PokeCredits - user_1_credits) < 0) { return message.channel.send(`You don't have enough credits to complete the trade!`); }
             var new_user_1_credit = user.PokeCredits - user_1_credits;
+            console.log(new_user_1_credit);
+            console.log(user_1_credits);
             user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { PokeCredits: user_1_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { PokeCredits: new_user_1_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { PokeCredits: new_user_1_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
@@ -125,7 +127,7 @@ function change_trade(message, trade_prompt) {
             var new_user_2_credit = user.PokeCredits - user_2_credits;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { PokeCredits: user_2_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { PokeCredits: new_user_2_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { PokeCredits: new_user_2_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
@@ -145,7 +147,7 @@ function change_trade(message, trade_prompt) {
             var new_user_1_credit = user.Redeems - user_1_credits;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Redeems: user_1_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Redeems: new_user_1_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Redeems: new_user_1_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
@@ -160,7 +162,7 @@ function change_trade(message, trade_prompt) {
             var new_user_2_credit = user.Redeems - user_2_credits;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Redeems: user_2_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Redeems: new_user_2_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Redeems: new_user_2_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
@@ -180,7 +182,7 @@ function change_trade(message, trade_prompt) {
             var new_user_1_credit = user.Shards - user_1_credits;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Shards: user_1_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Shards: new_user_1_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Shards: new_user_1_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
@@ -195,7 +197,7 @@ function change_trade(message, trade_prompt) {
             var new_user_2_credit = user.Shards - user_2_credits;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $inc: { Shards: user_2_credits } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
-                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Shards: new_user_2_credit } }, (err, user) => {
+                user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Shards: new_user_2_credit } }, { new: true }, (err, user) => {
                     if (err) return console.log(err);
                 });
             });
