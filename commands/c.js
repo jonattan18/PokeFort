@@ -37,9 +37,11 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
+        if (channel_data.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_credit = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
     } else {
         current_user = 2;
+        if (channel_data.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_credit = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
     }
 
@@ -82,9 +84,11 @@ function remove(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
+        if (channel_data.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_credit = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
     } else {
         current_user = 2;
+        if (channel_data.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_credit = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
     }
 

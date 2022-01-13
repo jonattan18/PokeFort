@@ -38,9 +38,11 @@ function add(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
+        if (channel_data.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_items = channel_data.Trade.User1Items == undefined ? [] : channel_data.Trade.User1Items;
     } else {
         current_user = 2;
+        if (channel_data.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_items = channel_data.Trade.User2Items == undefined ? [] : channel_data.Trade.User2Items;
     }
     var user_pokemons = user_data.Pokemons;
@@ -140,9 +142,11 @@ function remove(bot, message, args, pokemons, channel_data, user_data) {
     var current_user = 0;
     if (message.author.id == channel_data.Trade.User1ID) {
         current_user = 1;
+        if (channel_data.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_items = channel_data.Trade.User1Items == undefined ? [] : channel_data.Trade.User1Items;
     } else {
         current_user = 2;
+        if (channel_data.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
         var old_items = channel_data.Trade.User2Items == undefined ? [] : channel_data.Trade.User2Items;
     }
     var user_pokemons = user_data.Pokemons;
