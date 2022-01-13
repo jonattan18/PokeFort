@@ -102,6 +102,7 @@ function change_trade(message, trade_prompt) {
     var user_1_credits = trade_prompt.Credits.User1 == undefined ? 0 : trade_prompt.Credits.User1;
     var user_2_credits = trade_prompt.Credits.User2 == undefined ? 0 : trade_prompt.Credits.User2;
     if (user_1_credits > 0) {
+        console.log(user_1_credits);
         // Get user 1 credits.
         user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
             if (err) return console.log(err);
