@@ -176,7 +176,7 @@ function change_trade(message, trade_prompt) {
         user_model.findOne({ UserID: trade_prompt.User1ID }, (err, user) => {
             if (err) return console.log(err);
             if (!user) return;
-            if (user.Shards - user_2_shards < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
+            if (user.Shards - user_1_shards < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
             var new_user_1_credit = user.Shards - user_1_shards;
             user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $inc: { Shards: user_1_shards } }, { new: true }, (err, user) => {
                 if (err) return console.log(err);
