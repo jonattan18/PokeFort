@@ -8,7 +8,6 @@ const fs = require('fs');
 
 // Models
 const guild_model = require('./models/guild')
-const logger_model = require('./models/logger');
 const channel_model = require('./models/channel');
 const user_model = require('./models/user');
 
@@ -76,7 +75,6 @@ client.on('message', async (message) => {
                 GuildName: message.guild.name
             })
             write_data.save();
-            logger(`Joined Guild. [ID: ${message.guild.id}] [Name: ${message.guild.name}]`)
         }
     });
 
@@ -110,7 +108,6 @@ client.on('message', async (message) => {
                 SpawnLimit: 0
             });
             new_channel.save();
-            logger(`Joined Channel. [ID: ${message.guild.id}] [ChannelID: ${message.channel.id}] [ChannelName: ${message.channel.name}]`);
         }
         else {
             // Update message count
@@ -254,7 +251,6 @@ client.on('guildCreate', guild => {
         GuildName: guild.name
     })
     write_data.save();
-    logger(`Joined Guild. [ID: ${guild.id}] [Name: ${guild.name}]`)
     guild.systemChannel.send(config.BOT_NAME + " Joined this server. Thanks for invitation :smile:")
     guild.systemChannel.send("Use ``" + config.DEFAULT_PREFIX + "help`` to view list of commands.")
 });
@@ -378,14 +374,6 @@ function evolution_tree(pokemons, pokemon_id) {
     if (post_post_evolution) filtered_pokemons.push([parseInt(post_post_evolution["Pokemon Id"]), post_post_evolution["Evolution Details"]]);
 
     return filtered_pokemons;
-}
-
-// Logging System
-function logger(Message) {
-    let write_data = new logger_model({
-        Message: Message
-    })
-    write_data.save();
 }
 
 // Random Value
