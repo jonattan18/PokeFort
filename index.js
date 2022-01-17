@@ -2,7 +2,6 @@
 const Discord = require('discord.js');
 const config = require("./config/config.json");
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
-const { loadCommands } = require('./utils/loadCommands');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
@@ -10,6 +9,12 @@ const fs = require('fs');
 const guild_model = require('./models/guild')
 const channel_model = require('./models/channel');
 const user_model = require('./models/user');
+const pokemons_model = require('./models/pokemons');
+
+//Utils
+const { loadCommands } = require('./utils/loadCommands');
+const getPokemons = require('./utils/getPokemon');
+const { performance } = require('perf_hooks');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -32,6 +37,7 @@ mongoose.connect(config.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
+    useCreateIndex: true
 });
 
 // Discord Client Login
@@ -91,7 +97,7 @@ client.on('message', async (message) => {
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }
         else {
-            advance_xp(message, user_available); // Increase XP
+            //   advance_xp(message, user_available); // Increase XP
         }
     });
 

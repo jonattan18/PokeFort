@@ -1,8 +1,9 @@
-const Discord = require('discord.js'); // For Embedded Message.
-
 // Models
 const channel_model = require('../models/channel');
 const user_model = require('../models/user');
+
+// Utils
+const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
@@ -39,10 +40,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (pokemon["Pokemon Id"] == channel.PokemonID) {
                 user_model.findOne({ UserID: message.author.id }, (err, user) => {
                     if (err) console.log(err);
-                    if (user) {
 
-                        // Get number of catached pokemons.
-                        var user_pokemons = user.Pokemons;
+                    // Get number of catached pokemons.
+                    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
                         var no_of_pokemons = user_pokemons.filter(it => it["PokemonId"] === channel.PokemonID && it["Reason"] === "Catched").length + 1;
                         var splitted_number = no_of_pokemons.toString().split('');
                         var credit_amount = 0;
@@ -52,60 +53,63 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         if (splitted_number.length == 3 && splitted_number[1] == 0 && splitted_number[2] == 0) { credit_amount = 3500; }
                         if (splitted_number.length == 4 && splitted_number[1] == 0 && splitted_number[2] == 0 && splitted_number[3] == 0) { credit_amount = 35000; }
 
-                        user.Pokemons.push({
+                        let pokemon_data = {
                             PokemonId: pokemon["Pokemon Id"],
-                            Nickname: '',
-                            CatchedOn: Date.now(),
                             Experience: 0,
                             Level: channel.PokemonLevel,
                             Nature: channel.PokemonNature,
                             IV: channel.PokemonIV,
                             Shiny: channel.Shiny,
-                            Reason: "Catched",
+                            Reason: "Catched"
+                        }
+
+                        getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+
+                            if (no_of_pokemons == 1) {
+                                user.TotalCaught = user.TotalCaught == undefined ? 1 : user.TotalCaught + 1;
+                                if (channel.Shiny) { user.TotalShiny = user.TotalShiny == undefined ? 1 : user.TotalShiny + 1; }
+                                user.DexRewards.push({
+                                    PokemonId: pokemon["Pokemon Id"],
+                                    RewardName: pokemon["Pokemon Name"],
+                                    RewardAmount: credit_amount,
+                                    RewardDescription: `${no_of_pokemons} Caught!`
+                                });
+                                user.save();
+                            }
+                            else {
+                                user_model.findOneAndUpdate({ UserID: message.author.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
+                                    arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
+                                    new: true
+                                }, (err, user) => {
+                                    if (err) return console.log(err);
+                                });
+                                user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
+                                    arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
+                                    new: true
+                                }, (err, user) => {
+                                    if (err) return console.log(err);
+                                });
+                            }
+
+                            var message_string = "";
+
+                            // Pokemon Name
+                            var temp_name = "";
+                            if (pokemon["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon["Pokemon Name"]; }
+                            else if (pokemon["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon["Pokemon Name"]; }
+                            else if (pokemon["Alternate Form Name"] != "NULL") { temp_name = pokemon["Alternate Form Name"] + " " + pokemon["Pokemon Name"]; }
+                            else { temp_name = pokemon["Pokemon Name"]; }
+                            var message_pokemon_name = temp_name;
+                            if (channel.Shiny) { message_pokemon_name = "Shiny " + message_pokemon_name; }
+
+                            if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
+                            else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
+                            else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
+                            else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
+                            else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
+                            message.channel.send(message_string);
                         });
-
-                        if (no_of_pokemons == 1) {
-                            user.DexRewards.push({
-                                PokemonId: pokemon["Pokemon Id"],
-                                RewardName: pokemon["Pokemon Name"],
-                                RewardAmount: credit_amount,
-                                RewardDescription: `${no_of_pokemons} Caught!`
-                            });
-                        }
-                        else {
-                            user_model.findOneAndUpdate({ UserID: message.author.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
-                                arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
-                                new: true
-                            }, (err, user) => {
-                                if (err) return console.log(err);
-                            });
-                            user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
-                                arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
-                                new: true
-                            }, (err, user) => {
-                                if (err) return console.log(err);
-                            });
-                        }
-                        user.save();
-
-                        var message_string = "";
-
-                        // Pokemon Name
-                        var temp_name = "";
-                        if (pokemon["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon["Pokemon Name"]; }
-                        else if (pokemon["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon["Pokemon Name"]; }
-                        else if (pokemon["Alternate Form Name"] != "NULL") { temp_name = pokemon["Alternate Form Name"] + " " + pokemon["Pokemon Name"]; }
-                        else { temp_name = pokemon["Pokemon Name"]; }
-                        var message_pokemon_name = temp_name;
-                        if(channel.Shiny){ message_pokemon_name = "Shiny " + message_pokemon_name; }
-
-                        if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
-                        else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
-                        else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
-                        else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
-                        else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
-                        message.channel.send(message_string);
-                    }
+                    });
                 });
 
                 // Removing pokemon in channel database.
