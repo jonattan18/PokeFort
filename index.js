@@ -65,16 +65,8 @@ client.on('message', async (message) => {
     args = args.filter(function (e) { return e }); // Remove empty values from args
 
     //Getting Prefix from database
-    await guild_model.findOne({ GuildID: message.guild.id }, (err, data) => {
-        if (err) return console.log(err);
-        if (!data) return;
-        prefix = data.Prefix.toLowerCase();
-    });
-
-    //check if guild exists
     await guild_model.findOne({ GuildID: message.guild.id }, (err, guild) => {
         if (err) return console.log(err);
-        // If guild not found create new one.
         if (!guild) {
             let write_data = new guild_model({
                 GuildID: message.guild.id,
@@ -82,6 +74,7 @@ client.on('message', async (message) => {
             })
             write_data.save();
         }
+        else prefix = guild.Prefix.toLowerCase();
     });
 
     //Getting the data from the user model

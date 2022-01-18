@@ -18,7 +18,7 @@
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
     "mongodb": "^4.3.0",
-    "mongoose": "^6.1.7",
+    "mongoose": "5.9",
     "save": "^2.4.0"
   }
 }

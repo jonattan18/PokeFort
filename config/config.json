@@ -1,7 +1,7 @@
 {
     "BOT_NAME": "PokéFort",
     "BOT_TOKEN": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
-    "MONGO_URI": "mongodb://JonattanS:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false",
+    "MONGO_URI": "mongodb://JonattanS:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "DEFAULT_PREFIX": "p!",
     "POKEMON_IN_SLOT": 200000,
     "NICKNAME_LENGTH": 14

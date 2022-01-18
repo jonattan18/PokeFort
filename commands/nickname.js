@@ -8,7 +8,6 @@ const config = require('../config/config.json');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 const mongoose = require('mongoose');
-const { findIndex } = require('lodash');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -22,15 +21,26 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+            var _id = selected_pokemon._id;
 
             if (args.length == 0) {
-                pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(selected_pokemon._id) }, (err, pokemon) => {
+                pokemons_model.findOne({ id: mongoose.ObjectId(_id) }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    var changable_pokemon = pokemon.Pokemons.filter(it => it.id == _id)[0];
+                    var index = pokemon.Pokemons.indexOf(changable_pokemon);
+                    pokemon.Pokemons[index].Nickname = undefined;
+                    pokemon.save();
+                    message.channel.send(`Your nickname has been removed.`);
                 });
             }
             else {
-                pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(selected_pokemon._id) }, (err, pokemon) => {
-                    var index = findIndex(pokemon.Pokemons, { _id: selected_pokemon._id });
-                    console.log(index);
+                pokemons_model.findOne({ id: mongoose.ObjectId(_id) }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    var changable_pokemon = pokemon.Pokemons.filter(it => it.id == _id)[0];
+                    var index = pokemon.Pokemons.indexOf(changable_pokemon);
+                    pokemon.Pokemons[index].Nickname = nickname;
+                    pokemon.save();
+                    message.channel.send(`Set your current pokémon's nickname to ${nickname}!`);
                 });
             }
         });
