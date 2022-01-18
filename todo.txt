@@ -1,41 +1,15 @@
 Accept --
-Addfavourties
-ahint
 back --
-balance
 c --
 cancel --
-Catch
 confirm --
 deny --
-dex
-favourite
-givecredit
-giveredeem
-giveshard
-hint
-info
-moveinfo
-moves
 next --
-nickname
 p --
-pick
-ping
-pokemon
-profile
 r --
 recycle --
-redeem
-redeemspawn
 release --
-removefavourite --
 s --
-select --
-setprefix
-silence
-spawn 
-start
-test
 trade --
-viewcredit
+
+tm moves upto 60
