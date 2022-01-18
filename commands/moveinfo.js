@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const fs = require('fs'); // To read files.
-const { emit } = require('process');
 
 // Get moveinfo.
 const moveinfo = JSON.parse(fs.readFileSync('./assets/movesinfo.json').toString());

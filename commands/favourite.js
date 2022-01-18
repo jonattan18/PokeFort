@@ -5,6 +5,11 @@ const _ = require('lodash');
 const user_model = require('../models/user');
 const channel_model = require('../models/channel');
 
+// Utils
+const getPokemons = require('../utils/getPokemon');
+
+// Initialize the variable.
+var pokemons_from_database = null;
 var static_user_pokemons = null;
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
@@ -16,44 +21,43 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (!user) return;
         if (err) console.log(err);
 
-        static_user_pokemons = user.Pokemons;
-        var user_pokemons = user.Pokemons;;
-        var order_type = user.OrderType;
+        getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
+            static_user_pokemons = pokemons_from_database;
+            var user_pokemons = pokemons_from_database;
+            var order_type = user.OrderType;
 
-        // Ordering Pokemons based on user.
-        if (order_type == "Level") { user_pokemons = _.orderBy(user_pokemons, ['Level'], ['asc']); }
-        else if (order_type == "IV") {
-            for (i = 0; i < user_pokemons.length; i++) {
-                user_pokemons[i]["Total_IV"] = parseFloat(total_iv(user_pokemons[i].IV));
+            // Ordering Pokemons based on user.
+            if (order_type == "Level") { user_pokemons = _.orderBy(user_pokemons, ['Level'], ['asc']); }
+            else if (order_type == "IV") {
+                for (i = 0; i < user_pokemons.length; i++) {
+                    user_pokemons[i]["Total_IV"] = parseFloat(total_iv(user_pokemons[i].IV));
+                }
+                user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['desc']);
             }
-            user_pokemons = _.orderBy(user_pokemons, ['Total_IV'], ['desc']);
-        }
-        else if (order_type == "Number") { user_pokemons = user_pokemons; }
-        else if (order_type == "Alphabet") {
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                var temp_name = "";
-                if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                else { temp_name = pokemon_db["Pokemon Name"]; }
-                var pokemon_name = temp_name;
-                user_pokemons[i]["Name"] = pokemon_name;
+            else if (order_type == "Number") { user_pokemons = user_pokemons; }
+            else if (order_type == "Alphabet") {
+                for (i = 0; i < user_pokemons.length; i++) {
+                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                    var temp_name = "";
+                    if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
+                    else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
+                    else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
+                    else { temp_name = pokemon_db["Pokemon Name"]; }
+                    var pokemon_name = temp_name;
+                    user_pokemons[i]["Name"] = pokemon_name;
+                }
+                user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
             }
-            user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
-        }
 
-        // For only fav command.
-        if (args.length == 0 || isInt(args[0])) {
-            if (isInt(args[0])) { page = parseInt(args[0]); }
-            user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
-            return pagination(message, pokemons, user_pokemons);
-        }
-        else 
-        {
-            return message.channel.send(`Invalid command! Use ${prefix}fav to see all favourite pokemons!`);
-        }
-
+            // For only fav command.
+            if (args.length == 0 || isInt(args[0])) {
+                user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite == true);
+                return pagination(message, pokemons, user_pokemons);
+            }
+            else {
+                return message.channel.send(`Invalid command! Use ${prefix}fav to see all favourite pokemons!`);
+            }
+        });
     });
 }
 
@@ -87,7 +91,7 @@ function pagination(message, pokemons, user_pokemons) {
 
             var total_iv = ((chunked_pokemons[a][i].IV[0] + chunked_pokemons[a][i].IV[1] + chunked_pokemons[a][i].IV[2] + chunked_pokemons[a][i].IV[3] + chunked_pokemons[a][i].IV[4] + chunked_pokemons[a][i].IV[5]) / 186 * 100).toFixed(2);
             var pokemon_number = static_user_pokemons.findIndex(x => x === chunked_pokemons[a][i]);
-            if (chunked_pokemons[a][i].Nickname != "") {
+            if (chunked_pokemons[a][i].Nickname != undefined) {
                 description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}% | Nickname: ${chunked_pokemons[a][i].Nickname}\n`;
             }
             else { description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}%\n`; }

@@ -1,10 +1,10 @@
-const Discord = require('discord.js'); // For Embedded Message.
-
 // Models
 const user_model = require('../models/user');
+const pokemons_model = require('../models/pokemons');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const mongoose = require('mongoose');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -37,16 +37,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else return message.channel.send("Invalid argument.");
 
             // If pokemon is already in favourites.
-            if (user.Favourites.includes(selected_pokemon._id)) { return message.channel.send("This pokemon is already in your favourites."); }
-            user.Favorites = user.Favourites == undefined ? [] : user.Favourites;
-            user.Favorites.push(selected_pokemon._id);
-            user.save(function (err, saved) {
+            if (selected_pokemon.Favourite == true) { return message.channel.send("This pokemon is already in your favourites."); }
+            pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(selected_pokemon._id) }, { $set: { "Pokemons.$[elem].Favourite": true } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                 if (err) return console.log(err);
                 show_msg();
             });
 
             function show_msg() {
-                if (selected_pokemon.Nickname == "") {
+                if (selected_pokemon.Nickname == undefined || selected_pokemon.Nickname == "") {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
 
                     //Get Pokemon Name from Pokemon ID.

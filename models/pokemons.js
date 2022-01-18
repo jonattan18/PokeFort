@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const PokemonSchema = new mongoose.Schema({
-        UserID: String,
+        UserID: Number,
         Pokemons: [{
                 PokemonId: String,
                 CatchedOn: { type: Number, default: Date.now() },
@@ -10,7 +10,9 @@ const PokemonSchema = new mongoose.Schema({
                 Nature: Number,
                 IV: [Number, Number, Number, Number, Number, Number],
                 Shiny: Boolean,
-                Reason: String
+                Reason: String,
+                Nickname: String,
+                Favourite: Boolean
         }]
 });
 

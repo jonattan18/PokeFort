@@ -5,7 +5,7 @@ const pokemons_model = require('../models/pokemons');
 const config = require('../config/config.json');
 
 // Function to get all pokemons from a given user id.
-let getallpokemon = (UserID, Pokemons) => new Promise((resolve, reject) => {
+let getallpokemon = (UserID) => new Promise((resolve, reject) => {
     pokemons_model.find({ UserID: UserID }).exec(function (err, pokemon_data) {
         if (err) reject(err);
         var total_pokemons = [];

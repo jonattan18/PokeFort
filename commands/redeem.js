@@ -3,6 +3,9 @@ const Discord = require('discord.js'); // For Embedded Message.
 // Models
 const user_model = require('../models/user');
 
+// Utils
+const getPokemons = require('../utils/getPokemon');
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
@@ -93,7 +96,7 @@ function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) 
 
     // Pokemon Nature
     let random_nature = getRandomInt(1, 26);
-    let pokemon_shiny = getRandomInt(1, 1000) > 990 ? true : false;
+    let pokemon_shiny = getRandomInt(1, 1000) > 950 ? true : false;
 
     // IV creation
     var IV = [];
@@ -111,25 +114,25 @@ function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) 
     }
 
     user.Redeems -= 1;
-    user.Pokemons.push({
+    let pokemon_data = {
         PokemonId: choosen_pokemon["Pokemon Id"],
-        Nickname: '',
-        CatchedOn: Date.now(),
         Experience: 0,
         Level: pokemon_level,
         Nature: random_nature,
         IV: IV,
         Shiny: pokemon_shiny,
         Reason: "Redeem",
-    });
+    }
 
-    user.save();
-    if (pokemon_shiny == true) {
-        message.channel.send(`You have been given a shiny ${choosen_pokemon["Pokemon Name"]}!`);
-    }
-    else {
-        message.channel.send(`You have been given a ${choosen_pokemon["Pokemon Name"]}!`);
-    }
+    getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+        user.save();
+        if (pokemon_shiny == true) {
+            message.channel.send(`You have been given a shiny ${choosen_pokemon["Pokemon Name"]}!`);
+        }
+        else {
+            message.channel.send(`You have been given a ${choosen_pokemon["Pokemon Name"]}!`);
+        }
+    });
 
 }
 

@@ -14,7 +14,6 @@ const UserSchema = new mongoose.Schema({
     WishingPieces: Number,
     Badges: Array,
     Admin: { type: Number, default: 0 },
-    Favourites: Array,
     TotalCaught: Number,
     TotalShiny: Number,
     DexRewards: [{
