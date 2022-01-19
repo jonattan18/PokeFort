@@ -1,9 +1,7 @@
 Accept --
-back --
 c --
 confirm --
 deny --
-next --
 p --
 r --
 s --
