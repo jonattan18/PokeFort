@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const PokemonSchema = new mongoose.Schema({
-        UserID: Number,
+        UserID: String,
         Pokemons: [{
                 PokemonId: String,
                 CatchedOn: { type: Number, default: Date.now() },

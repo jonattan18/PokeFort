@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ChannelSchema = new mongoose.Schema({
-    ChannelID: Number,
+    ChannelID: String,
     ChannelName: String,
     MessageCount: Number,
     SpawnLimit: Number,

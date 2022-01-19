@@ -1,6 +1,5 @@
 // Models
 const user_model = require('../models/user');
-const channel_model = require('../models/channel');
 const prompt_model = require('../models/prompt');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
@@ -14,31 +13,34 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     //Check if user2 is in the database.
     user_model.findOne({ UserID: user2id }, (err, user2) => {
-        if (!user2) message.channel.send(`Mentioned user is ineligible for trade!`);
-        if (err) console.log(err);
+        if (!user2) return message.channel.send(`Mentioned user is ineligible for trade!`);
+        if (err) return console.log(err);
 
         prompt_model.findOne({ $or: [{ "UserID.User1ID": user1id }, { "UserID.User2ID": user1id }] }, (err, prompt1) => {
-            if (err) console.log(err);
-            if (prompt1.Trade.Accepted == true) return message.channel.send(`You are already trading with someone!`);
+            if (err) return console.log(err);
+            if (prompt1 != undefined && prompt1.Trade.Accepted == true) return message.channel.send(`You are already trading with someone!`);
 
             prompt_model.findOne({ $or: [{ "UserID.User1ID": user2id }, { "UserID.User2ID": user2id }] }, (err, prompt2) => {
-                if (err) console.log(err);
-                if (prompt2.Trade.Accepted == true) return message.channel.send(`Mentioned user is already trading with someone!`);
+                if (err) return console.log(err);
+                if (prompt2 != undefined && prompt2.Trade.Accepted == true) return message.channel.send(`Mentioned user is already trading with someone!`);
 
-                var update_data = {
-                    User1ID: user1id,
-                    User2ID: user2id,
-                    Accepted: false,
-                    User1Items: [],
-                    User2Items: [],
-                    User1IConfirm: false,
-                    User2IConfirm: false,
-                    Timestamp: Date.now()
-                }
+                var update_data = new prompt_model({
+                    ChannelID: message.channel.id,
+                    PromptType: "Trade",
+                    UserID: {
+                        User1ID: user1id,
+                        User2ID: user2id
+                    },
+                    Trade: {
+                        Accepted: false,
+                        User1Items: [],
+                        User2Items: [],
+                        User1IConfirm: false,
+                        User2IConfirm: false
+                    }
+                });
 
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "AcceptPrompt": "Trade", "Trade": update_data } }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
+                update_data.save().then(result => {
                     bot.users.fetch(user1id).then(user_data => {
                         message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to trade! Type .accept to start the trade or .deny to deny the trade request.`);
                     });

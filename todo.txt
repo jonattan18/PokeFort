@@ -1,6 +1,4 @@
 c --
-confirm --
 p --
 r --
 s --
-trade --

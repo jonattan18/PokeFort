@@ -33,10 +33,10 @@ function trade(bot, message, prefix, prompt) {
     var user1name = "";
     var user2name = "";
 
-    bot.users.fetch(user1id).then(user_data => {
+    bot.users.fetch(user1id.toString()).then(user_data => {
         user1name = user_data.username;
 
-        bot.users.fetch(user2id).then(user_data => {
+        bot.users.fetch(user2id.toString()).then(user_data => {
             user2name = user_data.username;
 
             var embed = new Discord.MessageEmbed();

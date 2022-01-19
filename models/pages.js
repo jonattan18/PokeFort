@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const config = require('../config/config.json');
 
 const PagesSchema = new mongoose.Schema({
-    ChannelID: Number,
-    UserID: Number,
+    ChannelID: String,
+    UserID: String,
     MessageID: String,
     Embed: Array,
     CurrentPage: { type: Number, default: 1 },

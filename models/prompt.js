@@ -5,8 +5,8 @@ const PromptSchema = new mongoose.Schema({
     ChannelID: Number,
     PromptType: String,
     UserID : {
-        User1ID : Number,
-        User2ID : Number
+        User1ID : String,
+        User2ID : String
     },
     Recycle: {
         Pokemons: Array
