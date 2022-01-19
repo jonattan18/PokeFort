@@ -7,6 +7,7 @@ const channel_model = require('../models/channel');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const pagination = require('../utils/pagination');
 
 // Initialize the variable.
 var pokemons_from_database = null;
@@ -52,7 +53,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             // For only fav command.
             if (args.length == 0 || isInt(args[0])) {
                 user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite == true);
-                return pagination(message, pokemons, user_pokemons);
+                return create_pagination(message, pokemons, user_pokemons);
             }
             else {
                 return message.channel.send(`Invalid command! Use ${prefix}fav to see all favourite pokemons!`);
@@ -62,7 +63,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function for pagination.
-function pagination(message, pokemons, user_pokemons) {
+function create_pagination(message, pokemons, user_pokemons) {
 
     if (user_pokemons.length == 0) { message.channel.send("Pokemons not found."); return; }
 
@@ -110,29 +111,10 @@ function pagination(message, pokemons, user_pokemons) {
     page = page - 1;
     if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }
 
-    // Send message to channel.
-    message.channel.send(global_embed[page]).then(msg => {
+     // Send message to channel.
+     message.channel.send(global_embed[page]).then(msg => {
         if (global_embed.length == 1) return;
-        channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-            if (err) return console.log(err);
-            if (!channel) return;
-            var Pagination = channel.Pagination;
-            var user_page = Pagination.filter(it => it.UserID == message.author.id)[0];
-            if (!user_page) {
-                channel.Pagination.push({
-                    UserID: message.author.id,
-                    Message: JSON.stringify(msg),
-                    Embed: global_embed,
-                    CurrentPage: page
-                });
-                channel.save();
-            } else {
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Pagination.$[elem].Message": JSON.stringify(msg), "Pagination.$[elem].Embed": global_embed, "Pagination.$[elem].CurrentPage": 1, "Pagination.$[elem].Timestamp": Date.now() } }, { arrayFilters: [{ "elem.UserID": message.author.id }] }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
-                });
-            }
-        });
+        pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
     });
 }
 

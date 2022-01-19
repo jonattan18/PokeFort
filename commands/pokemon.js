@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             // For only pk command.
             if (args.length == 0 || isInt(args[0])) {
                 if (isInt(args[0])) { page = parseInt(args[0]); }
-                return pagination(message, pokemons, user_pokemons);
+                return create_pagination(message, pokemons, user_pokemons);
             }
 
             // Multi commmand controller.
@@ -101,7 +101,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (is_not) {
                     user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
                 }
-                if (j == total_args.length - 1) { pagination(message, pokemons, user_pokemons); }
+                if (j == total_args.length - 1) { create_pagination(message, pokemons, user_pokemons); }
             }
 
             // For pk --shiny command.
@@ -468,7 +468,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function for pagination.
-function pagination(message, pokemons, user_pokemons) {
+function create_pagination(message, pokemons, user_pokemons) {
 
     if (user_pokemons.length == 0) { message.channel.send("Pokemons not found."); return; }
 
@@ -519,26 +519,7 @@ function pagination(message, pokemons, user_pokemons) {
     // Send message to channel.
     message.channel.send(global_embed[page]).then(msg => {
         if (global_embed.length == 1) return;
-        channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-            if (err) return console.log(err);
-            if (!channel) return;
-            var Pagination = channel.Pagination;
-            var user_page = Pagination.filter(it => it.UserID == message.author.id)[0];
-            if (!user_page) {
-                channel.Pagination.push({
-                    UserID: message.author.id,
-                    Message: JSON.stringify(msg),
-                    Embed: global_embed,
-                    CurrentPage: page
-                });
-                channel.save();
-            } else {
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Pagination.$[elem].Message": JSON.stringify(msg), "Pagination.$[elem].Embed": global_embed, "Pagination.$[elem].CurrentPage": 1, "Pagination.$[elem].Timestamp": Date.now() } }, { arrayFilters: [{ "elem.UserID": message.author.id }] }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
-                });
-            }
-        });
+        pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
     });
 }
 

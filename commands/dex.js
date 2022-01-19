@@ -3,10 +3,10 @@ const _ = require('lodash'); // Array sorting module.
 
 // Models
 const user_model = require('../models/user');
-const channel_model = require('../models/channel');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const pagination = require('../utils/pagination');
 
 // Initialize the variable.
 var pokemons_from_database = [];
@@ -487,26 +487,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
     // Send message to channel.
     message.channel.send(global_embed[page]).then(msg => {
         if (global_embed.length == 1) return;
-        channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-            if (err) return console.log(err);
-            if (!channel) return;
-            var Pagination = channel.Pagination;
-            var user_page = Pagination.filter(it => it.UserID == message.author.id)[0];
-            if (!user_page) {
-                channel.Pagination.push({
-                    UserID: message.author.id,
-                    Message: JSON.stringify(msg),
-                    Embed: global_embed,
-                    CurrentPage: page
-                });
-                channel.save();
-            } else {
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Pagination.$[elem].Message": JSON.stringify(msg), "Pagination.$[elem].Embed": global_embed, "Pagination.$[elem].CurrentPage": 1, "Pagination.$[elem].Timestamp": Date.now() } }, { arrayFilters: [{ "elem.UserID": message.author.id }] }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
-                });
-            }
-        });
+        pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
     });
 }
 

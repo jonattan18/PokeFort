@@ -10,14 +10,7 @@ const ChannelSchema = new mongoose.Schema({
     PokemonLevel: Number,
     PokemonNature: Number,
     PokemonIV: Array,
-    Hint: { type: Number, default: 0 },
-    Pagination: [{
-        UserID: Number,
-        Message: Array,
-        Embed: Array,
-        Timestamp: { type: Number, default: Date.now() },
-        CurrentPage: { type: Number, default: 1 }
-    }]
+    Hint: { type: Number, default: 0 }
 });
 
 const MessageModel = module.exports = mongoose.model('channels', ChannelSchema);

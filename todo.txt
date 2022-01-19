@@ -1,7 +1,6 @@
 Accept --
 back --
 c --
-cancel --
 confirm --
 deny --
 next --
