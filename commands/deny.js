@@ -11,13 +11,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var userid = message.author.id;
 
         //Deny trade.
-        if (prompt.UserID.User1ID == userid) {
-            message.channel.send(`You declined your own trade offer!`);
+        if (prompt.UserID.User1ID == userid && prompt.Trade.Accepted == false) {
+            message.channel.send(`You took back your trade offer!`);
             return prompt.remove();
         }
 
         //Check if user is already trading.
-        else if (prompt.UserID.User2ID == userid) {
+        else if (prompt.UserID.User2ID && prompt.Trade.Accepted == false) {
             message.channel.send(`You declined the trade offer!`);
             return prompt.remove();
         }
