@@ -469,18 +469,27 @@ function recycle(message, pokemons, user_pokemons, prefix, user) {
     var total_xp = total_pokemon_level * 66;
 
     // If alredy exists check
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, prompt) => {
+    prompt_model.findOne({ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (prompt) return message.channel.send("You can't release pokemons while you are in a trade.");
+        if (prompt != undefined && prompt.Trade.Accepted == true) return message.channel.send("You can't release pokemons while you are in a trade.");
 
         pokemon_ids.push(total_xp);
 
-        var new_prompt = new prompt_model({
-            "ChannelID": message.channel.id,
-            "PromptType": "Recycle",
-            "UserID": { "User1ID": message.author.id },
-            "Recycle.Pokemons": pokemon_ids
-        });
+        var new_prompt = null;
+        if (prompt) {
+            prompt.ChannelID = message.channel.id;
+            prompt.UserID.User1ID = message.author.id;
+            prompt.PromptType = "Recycle";
+            prompt.Release.Pokemons = pokemon_ids;
+            new_prompt = prompt;
+        } else {
+            new_prompt = new prompt_model({
+                "ChannelID": message.channel.id,
+                "PromptType": "Recycle",
+                "UserID": { "User1ID": message.author.id },
+                "Recycle.Pokemons": pokemon_ids
+            });
+        }
 
         new_prompt.save().then(() => {
             // Create a new Message embed.

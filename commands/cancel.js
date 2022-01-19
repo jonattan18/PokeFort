@@ -26,6 +26,7 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                 message.channel.send('You cancelled ongoing trade!');
             });
         }
+        else return message.channel.send('No prompt asked for to use ``cancel`` command.');
 
     });
 }

@@ -1,30 +1,39 @@
 const Discord = require('discord.js'); // For message embed.
-const fs = require('fs'); // To read file.
 const _ = require('lodash'); // for utils
+const mongoose = require('mongoose');
 
 // Models
 const user_model = require('../models/user');
-const channel_model = require('../models/channel');
+const prompt_model = require('../models/prompt');
+const pokemons_model = require('../models/pokemons');
+
+// Utils
+const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
-    channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!channel) return;
+        if (!prompt) return message.channel.send('No prompt asked for to use ``confirm`` command.');
 
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
-            if (!user) return;
-            if (err) console.log(err);
+        // If user prompt is for release
+        if (prompt.PromptType == "Release") {
+            return release(message, prompt);
+        }
 
-            var user_prompt = channel.Prompt;
-            var trade_prompt = channel.Trade;
-            if (user_prompt.UserID != message.author.id && (trade_prompt.User1ID == message.author.id || trade_prompt.User2ID == message.author.id) && (Date.now() - trade_prompt.Timestamp) / 1000 < 120) { return trade(message, trade_prompt, user, channel) }
-            if (user_prompt.UserID != message.author.id) { message.channel.send('No prompt asked for to use ``confirm`` command.'); return; }
-            if (user_prompt.Reason == "Release") { release(message, user_prompt, user); return; }
-            if (user_prompt.Reason == "Recycle") { recycle(message, user_prompt, user, pokemons); return; }
+        // If user prompt is for recycle
+        else if (prompt.PromptType == "Recycle") {
+            return recycle(message, prompt, pokemons);
+        }
 
-        });
+        // If user prompt is for trade
+        else if (prompt.PromptType == "Trade" && prompt.Trade.Selected == true) {
+            return trade(message, prompt, user, channel);
+        }
+
+        else return message.channel.send('No prompt asked for to use ``confirm`` command.');
+
     });
 }
 
@@ -258,141 +267,112 @@ function change_trade(message, trade_prompt) {
 }
 
 // Function to recycle pokemon.
-function recycle(message, user_prompt, user, load_pokemons) {
+function recycle(message, user_prompt, load_pokemons) {
 
-    var pokemon_to_recycle = user_prompt.Pokemons;
-    var user_pokemons = user.Pokemons;
-    var recycled_pokemons = user.Recycled;
+    // Get all user pokemons.
+    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-    var old_date = user_prompt.Timestamp;
-    var current_date = Date.now();
+        var pokemon_to_recycle = user_prompt.Recycle.Pokemons;
+        var recycled_exp = pokemon_to_recycle.splice(-1, 1)[0];
+        var delete_pokemon_ids = [];
 
-    var recycled_exp = pokemon_to_recycle.splice(-1, 1)[0];
+        for (i = 0; i < pokemon_to_recycle.length; i++) {
+            delete_pokemon_ids.push(pokemon_to_recycle[i]._id);
+        }
 
-    if ((current_date - old_date) / 1000 > 120) {
-        message.channel.send(`Too late to recycle pokemon. Pokemon Spared!`);
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
-            if (err) console.log(err);
-        });
-        return;
-    }
+        getPokemons.deletepokemon(delete_pokemon_ids).then(() => {
+            user_prompt.remove();
 
-    var temp_recycled_pokemons = user_pokemons.filter(x => pokemon_to_recycle.includes(x._id));
-    var new_recycled_pokemons = recycled_pokemons.concat(temp_recycled_pokemons);
-    var new_user_pokemons = user_pokemons.filter(x => !pokemon_to_recycle.includes(x._id));
+            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                //#region Update XP
+                var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+                var _id = selected_pokemon._id;
+                var pokemon_id = selected_pokemon.PokemonId;
+                var pokemon_current_xp = selected_pokemon.Experience + recycled_exp;
+                var pokemon_level = selected_pokemon.Level;
+                var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
 
-    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "Pokemons": new_user_pokemons, "Recycled": new_recycled_pokemons } }, (err, user) => {
-        if (err) console.log(err);
-        if (!user) return;
+                var old_pokemon_exp = pokemon_current_xp;
+                var leveled_up = false;
+                var evolved = false;
+                var new_evolved_name = "";
+                while (pokemon_current_xp > 0) {
+                    if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
+                        leveled_up = true;
 
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
-            if (err) console.log(err);
+                        //Update level and send message.
+                        pokemon_level += 1;
+                        pokemon_current_xp -= exp_to_level(pokemon_level);
 
-            //#region Update XP
-            var user_pokemons = user.Pokemons;
-            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-            var _id = selected_pokemon._id;
-            var pokemon_id = selected_pokemon.PokemonId;
-            var pokemon_current_xp = selected_pokemon.Experience + recycled_exp;
-            var pokemon_level = selected_pokemon.Level;
-            var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
+                        if (pokemon_level == 100) {
+                            pokemon_level = 100;
+                            pokemon_current_xp = 0;
+                            break;
+                        }
 
-            var old_pokemon_exp = pokemon_current_xp;
-            var leveled_up = false;
-            var evolved = false;
-            var new_evolved_name = "";
-            while (pokemon_current_xp > 0) {
-                if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
-                    leveled_up = true;
-
-                    //Update level and send message.
-                    pokemon_level += 1;
-                    pokemon_current_xp -= exp_to_level(pokemon_level);
-
-                    if (pokemon_level == 100) {
-                        pokemon_level = 100;
-                        pokemon_current_xp = 0;
-                        break;
-                    }
-
-                    // Get pokemon evolution.
-                    var evo_tree = evolution_tree(load_pokemons, pokemon_id);
-                    var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                    if (next_evolutions != undefined && next_evolutions.length > 0) {
-                        next_evolutions = next_evolutions[0];
-                        var required_level = next_evolutions[1].match(/\d/g).join("");
-                        if (pokemon_level >= required_level) {
-                            var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon, true);
-                            pokemon_id = next_evolutions[0];
-                            evolved = true;
-                            new_evolved_name = new_pokemon_name;
+                        // Get pokemon evolution.
+                        var evo_tree = evolution_tree(load_pokemons, pokemon_id);
+                        var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                        if (next_evolutions != undefined && next_evolutions.length > 0) {
+                            next_evolutions = next_evolutions[0];
+                            var required_level = next_evolutions[1].match(/\d/g).join("");
+                            if (pokemon_level >= required_level) {
+                                var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon, true);
+                                pokemon_id = next_evolutions[0];
+                                evolved = true;
+                                new_evolved_name = new_pokemon_name;
+                            }
                         }
                     }
+                    else {
+                        break;
+                    }
                 }
-                else {
-                    break;
-                }
-            }
 
-            // Update database
-            user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "Pokemons.$[el].Experience": pokemon_current_xp, "Pokemons.$[el].Level": pokemon_level, "Pokemons.$[el].PokemonId": pokemon_id } }, {
-                arrayFilters: [{ "el._id": _id }],
-                new: true
-            }, (err, user) => {
-                if (err) { console.log(err) }
+                // Update database
+                pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(_id) }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                });
+                //#endregion
+
+                var embed = new Discord.MessageEmbed()
+                embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
+                if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
+                else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
+                else { embed.addField(`**${old_pokemon_name} xp increased!**`, `${old_pokemon_name}'s xp is now ${old_pokemon_exp}`, false); }
+                embed.setColor(message.member.displayHexColor)
+                message.channel.send(embed);
             });
-
-            //#endregion
-
-            var embed = new Discord.MessageEmbed()
-            embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
-            if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
-            else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
-            else { embed.addField(`**${old_pokemon_name} xp increased!**`, `${old_pokemon_name}'s xp is now ${old_pokemon_exp}`, false); }
-            embed.setColor(message.member.displayHexColor)
-            message.channel.send(embed);
         });
     });
 }
 
 // Function to release pokemon.
-function release(message, user_prompt, user) {
+function release(message, user_prompt) {
 
-    var pokemon_to_release = user_prompt.Pokemons;
-    var user_pokemons = user.Pokemons;
-    var released_pokemons = user.Released;
+    // Get all user pokemons.
+    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-    var old_date = user_prompt.Timestamp;
-    var current_date = Date.now();
+        var pokemon_to_release = user_prompt.Release.Pokemons;
+        var new_user_pokemons = user_pokemons.filter(x => !pokemon_to_release.includes(x._id));
+        var delete_pokemon_ids = [];
+        if (new_user_pokemons.length == 0) { return message.channel.send(`You can't release all pokemons. Spare atleast one.`); }
 
-    if ((current_date - old_date) / 1000 > 120) {
-        message.channel.send(`Too late to release pokemon. Pokemon Spared!`);
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
-            if (err) console.log(err);
-        });
-        return;
-    }
+        for (i = 0; i < pokemon_to_release.length; i++) {
+            delete_pokemon_ids.push(pokemon_to_release[i]._id);
+        }
 
-    var temp_released_pokemons = user_pokemons.filter(x => pokemon_to_release.includes(x._id));
-    var new_released_pokemons = released_pokemons.concat(temp_released_pokemons);
-    var new_user_pokemons = user_pokemons.filter(x => !pokemon_to_release.includes(x._id));
-
-    if (new_user_pokemons.length == 0) { message.channel.send(`You can't release all pokemons. Spare atleast one.`); return; }
-
-    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "Pokemons": new_user_pokemons, "Released": new_released_pokemons } }, (err, user) => {
-        if (err) console.log(err);
-        if (!user) return;
-
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Prompt": new Object } }, (err, channel) => {
-            if (err) console.log(err);
-
-            message.channel.send(`Successfully released ${temp_released_pokemons.length} pokemons!`);
-            var selected_pokemon = new_user_pokemons.filter(it => it._id == user.Selected)[0];
-            if (selected_pokemon == undefined) {
-                message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
-                user.Selected = new_user_pokemons[0]._id;
-                user.save();
-            }
+        getPokemons.deletepokemon(delete_pokemon_ids).then(() => {
+            user_prompt.remove();
+            message.channel.send(`Successfully released ${pokemon_to_release.length} pokemons!`);
+            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                var selected_pokemon = new_user_pokemons.filter(it => it._id == user.Selected)[0];
+                if (selected_pokemon == undefined) {
+                    message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                    user.Selected = new_user_pokemons[0]._id;
+                    user.save();
+                }
+            });
         });
     });
 }

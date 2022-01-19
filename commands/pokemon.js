@@ -91,6 +91,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
+                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--order"))) { return order(new_args); }
                 else { message.channel.send("Invalid command."); return; }
 
                 // Check if error occurred in previous loop
@@ -421,8 +422,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // For pk --order command.
-            if (args[0] == "--order") {
-                if (args.length != 2) { return message.channel.send("Invalid argument syntax.") }
+            function order(args) {
                 var order_type = "";
                 if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
                 else if (args[1].toLowerCase() == "level") { order_type = "Level"; }
@@ -430,10 +430,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 else if (args[1].toLowerCase() == "number") { order_type = "Number"; }
 
                 user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { OrderType: order_type } }, { new: true }, (err, doc) => {
-                    if (err) { console.log(err); }
-                    else {
-                        message.channel.send("Pokemon Order updated.");
-                    }
+                    if (err) return console.log(err);
+                    return message.channel.send("Pokemon Order updated.");
                 });
             }
 

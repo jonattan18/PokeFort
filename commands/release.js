@@ -451,16 +451,25 @@ function release(message, pokemons, user_pokemons, prefix) {
     if (user_pokemons.length > 20) { description += `\n+${user_pokemons.length - 20} other pokemons` }
 
     // If alredy exists check
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, prompt) => {
+    prompt_model.findOne({ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (prompt) return message.channel.send("You can't release pokemons while you are in a trade.");
+        if (prompt != undefined && prompt.Trade.Accepted == true) return message.channel.send("You can't release pokemons while you are in a trade.");
 
-        var new_prompt = new prompt_model({
-            "ChannelID": message.channel.id,
-            "PromptType": "Release",
-            "UserID": { "User1ID": message.author.id },
-            "Release.Pokemons": pokemon_ids
-        });
+        var new_prompt = null;
+        if (prompt) {
+            prompt.ChannelID = message.channel.id;
+            prompt.UserID.User1ID = message.author.id;
+            prompt.PromptType = "Release";
+            prompt.Release.Pokemons = pokemon_ids;
+            new_prompt = prompt;
+        } else {
+            new_prompt = new prompt_model({
+                "ChannelID": message.channel.id,
+                "PromptType": "Release",
+                "UserID": { "User1ID": message.author.id },
+                "Release.Pokemons": pokemon_ids
+            });
+        }
 
         new_prompt.save().then(() => {
             // Create a new Message embed.

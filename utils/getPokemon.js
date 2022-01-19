@@ -3,6 +3,7 @@ const pokemons_model = require('../models/pokemons');
 
 // Load Config Data.
 const config = require('../config/config.json');
+const mongoose = require('mongoose');
 
 // Function to get all pokemons from a given user id.
 let getallpokemon = (UserID) => new Promise((resolve, reject) => {
@@ -18,11 +19,6 @@ let getallpokemon = (UserID) => new Promise((resolve, reject) => {
     });
     setTimeout(resolve, 5000);
 });
-
-// Function get pokemon from user id.
-function getpokemon(UserID, PokemonId) {
-
-}
 
 // Function to insert a pokemon to user id.
 let insertpokemon = (UserID, Pokemons) => new Promise((resolve, reject) => {
@@ -67,8 +63,12 @@ let insertpokemon = (UserID, Pokemons) => new Promise((resolve, reject) => {
 });
 
 // Function to delete a pokemon from user id.
-function deletepokemon(UserID, PokemonIds) {
+let deletepokemon = (PokemonIds) => new Promise((resolve, reject) => {
+    pokemons_model.updateMany({}, { $pull: { "Pokemons": { _id: { $in: PokemonIds } } } }, (err, pokemon) => {
+        if (err) reject(err);
+        resolve();
+    });
+    setTimeout(resolve, 5000);
+});
 
-}
-
-module.exports = { getallpokemon, getpokemon, insertpokemon, deletepokemon };
+module.exports = { getallpokemon, insertpokemon, deletepokemon };
