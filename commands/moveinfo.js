@@ -18,6 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else var accuracy = key_move_info["accuracy"];
 
         var description = "";
+        var footer = "";
         if (key_move_info["tm"] == undefined) {
             description = key_move_info["desc"] + '\n'
                 + "\n" + "**Type:** " + key_move_info["type"]
@@ -25,6 +26,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + "\n" + "**Accuracy:** " + accuracy
                 + "\n" + "**Category:** " + key_move_info["category"]
                 + "\n" + "**Priority:** " + key_move_info["priority"]
+            footer = "All status effects only work in raids and not duels.";
         }
         else {
             description = key_move_info["desc"] + '\n'
@@ -33,7 +35,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + "\n" + "**Accuracy:** " + accuracy
                 + "\n" + "**Category:** " + key_move_info["category"]
                 + "\n" + "**Priority:** " + key_move_info["priority"]
-                + "\n" + "**Status Effect:** " + key_move_info["tm"]
+            footer = `TM NUMBER: TM${key_move_info["tm"].toLocaleString(undefined, {minimumIntegerDigits: 3, useGrouping:false})} | All status effect only work in raids and not duels.`;
         }
 
         // Create discord embed.
@@ -41,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         embed.setColor(message.member.displayHexColor)
         embed.setTitle(name)
         embed.setDescription(description)
-        embed.setFooter("All status effects only work in raids and not duels.")
+        embed.setFooter(footer)
         message.channel.send(embed);
     }
     else { return message.channel.send('No move found with the name ``' + original_move_name + '``!'); }
