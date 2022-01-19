@@ -4,5 +4,6 @@
     "MONGO_URI": "mongodb://JonattanS:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "DEFAULT_PREFIX": "p!",
     "POKEMON_IN_SLOT": 200000,
-    "NICKNAME_LENGTH": 14
+    "NICKNAME_LENGTH": 14,
+    "PROMPT_EXPIRATION_SECONDS": 120
 }

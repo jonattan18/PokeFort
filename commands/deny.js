@@ -1,5 +1,3 @@
-const Discord = require('discord.js'); // For Embedded Message.
-
 // Models
 const user_model = require('../models/user');
 const channel_model = require('../models/channel');

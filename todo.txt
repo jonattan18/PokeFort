@@ -7,9 +7,5 @@ deny --
 next --
 p --
 r --
-recycle --
-release --
 s --
 trade --
-
-tm moves upto 60
