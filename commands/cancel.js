@@ -21,9 +21,9 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
             });
         }
         // If user prompt is for trade
-        else if (prompt.PromptType == "Trade") {
+        else if (prompt.PromptType == "Trade" && prompt.Trade.Selected == true) {
             prompt.remove().then(() => {
-                message.channel.send('You have cancelled trade.');
+                message.channel.send('You cancelled ongoing trade!');
             });
         }
 

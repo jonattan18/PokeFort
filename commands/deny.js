@@ -1,49 +1,32 @@
 // Models
-const user_model = require('../models/user');
-const channel_model = require('../models/channel');
+const prompt_model = require('../models/prompt');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
-    var userid = message.author.id;
-
-    //Get user data.
-    user_model.findOne({ UserID: userid }, (err, user) => {
-        if (!user) return message.channel.send(`You are ineligible for trade!`);
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }] }, (err, prompt) => {
         if (err) console.log(err);
+        if (!prompt) return message.channel.send("You don't have any trade to deny.")
 
-        channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-            if (err) console.log(err);
-            if (!channel) return;
+        var userid = message.author.id;
 
-            //Deny trade.
-            if ((channel.Trade.User2ID == userid) && channel.Trade.Accepted != true) {
-                message.channel.send(`You declined the trade offer!`);
-                return cancel_trade();
-            }
+        //Deny trade.
+        if (prompt.UserID.User1ID == userid) {
+            message.channel.send(`You declined your own trade offer!`);
+            return prompt.remove();
+        }
 
-            //Check if user is already trading.
-            else if ((channel.Trade.User1ID == userid) && channel.Trade.Accepted != true) {
-                message.channel.send(`You declined your own trade offer!`);
-                return cancel_trade();
-            }
+        //Check if user is already trading.
+        else if (prompt.UserID.User2ID == userid) {
+            message.channel.send(`You declined the trade offer!`);
+            return prompt.remove();
+        }
 
-            //Check if any other traders are in the channel.
-            else if ((channel.Trade.User1ID == userid || channel.Trade.User2ID == userid) && channel.Trade.Accepted == true && ((Date.now() - channel.Trade.Timestamp) / 1000 < 120)) {
-                message.channel.send(`You cancelled ongoing trade!`);
-                return cancel_trade();
-            }
-
-            else { message.channel.send(`You are not trading with anyone!`); return; }
-
-            function cancel_trade() {
-
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "AcceptPrompt": "", "Trade": new Object } }, (err, channel) => {
-                    if (err) return console.log(err);
-                    if (!channel) return;
-                });
-            }
-        });
+        //Check if any other traders are in the channel.
+        else if ((prompt.UserID.User1ID == userid || prompt.UserID.User2ID == userid) && prompt.Trade.Accepted == true) {
+            message.channel.send(`You cancelled ongoing trade!`);
+            return prompt.remove();
+        }
     });
 }
 

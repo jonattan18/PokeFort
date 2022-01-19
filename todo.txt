@@ -1,7 +1,5 @@
-Accept --
 c --
 confirm --
-deny --
 p --
 r --
 s --
