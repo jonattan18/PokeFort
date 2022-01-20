@@ -174,7 +174,6 @@ function change_trade(message, trade_prompt) {
                     // Get user 1 trade items.
                     getPokemons.getallpokemon(trade_prompt.UserID.User1ID).then(function (user_pokemons) {
                         if (err) return console.log(err);
-                        if (!user) return;
                         var pokemons_to_add = [];
                         var pokemons_to_delete = [];
                         for (i = 0; i < user_1_items.length; i++) {

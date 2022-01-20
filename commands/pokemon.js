@@ -3,7 +3,6 @@ const _ = require('lodash');
 
 // Models
 const user_model = require('../models/user');
-const channel_model = require('../models/channel');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -47,9 +46,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
             }
 
-            // For only pk command.
-            if (args.length == 0 || isInt(args[0])) {
-                if (isInt(args[0])) { page = parseInt(args[0]); }
+            // For only recycle int type command
+            if (onlyNumbers(args)) {
+                user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
                 return create_pagination(message, pokemons, user_pokemons);
             }
 
