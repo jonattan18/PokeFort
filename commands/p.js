@@ -16,18 +16,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) return console.log(err);
         if (!prompt) return message.channel.send('You are not in a trade!');
 
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
-            if (!user) return;
-            if (err) console.log(err);
-
-            if (args[0].toLowerCase() == "add") return add(bot, message, args.splice(1), pokemons, prompt, user);
-            else if (args[0].toLowerCase() == "remove") return remove(message, args.splice(1), prompt);
-        });
+        if (args[0].toLowerCase() == "add") return add(bot, message, args.splice(1), pokemons, prompt);
+        else if (args[0].toLowerCase() == "remove") return remove(bot, message, args.splice(1), pokemons, prompt);
     });
 }
 
 // Function to add pokemons to trade.
-function add(bot, message, args, pokemons, prompt, user_data) {
+function add(bot, message, args, pokemons, prompt) {
     var current_user = 0;
     if (message.author.id == prompt.UserID.User1ID) {
         current_user = 1;
@@ -120,103 +115,91 @@ function add(bot, message, args, pokemons, prompt, user_data) {
 }
 
 // Function to remove pokemons from trade.
-function remove(bot, message, args, pokemons, channel_data, user_data) {
+function remove(bot, message, args, pokemons, prompt) {
     var current_user = 0;
-    if (message.author.id == channel_data.Trade.User1ID) {
+    if (message.author.id == prompt.UserID.User1ID) {
         current_user = 1;
-        if (channel_data.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
-        var old_items = channel_data.Trade.User1Items == undefined ? [] : channel_data.Trade.User1Items;
+        if (prompt.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        var old_items = prompt.Trade.User1Items == undefined ? [] : prompt.Trade.User1Items;
     } else {
         current_user = 2;
-        if (channel_data.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
-        var old_items = channel_data.Trade.User2Items == undefined ? [] : channel_data.Trade.User2Items;
-    }
-    var user_pokemons = user_data.Pokemons;
-    var add_items = [];
-    var processed_add_items = [];
-    var update_items = [];
-
-    // For only add int type command
-    if (onlyNumbers(args)) {
-        user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-        add_items.push(user_pokemons);
-        add_items = add_items[0];
-    }
-    else {
-        return message.channel.send(`Invalid Pokemon. Please recheck your syntax.`);
+        if (prompt.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        var old_items = prompt.Trade.User2Items == undefined ? [] : prompt.Trade.User2Items;
     }
 
-    // Update trade menu.
-    add_items = _.differenceBy(old_items, add_items, JSON.stringify);
+    getPokemons.getallpokemon(message.author.id).then(function (user_pokemons) {
 
-    for (let i = 0; i < add_items.length; i++) {
-        const element = add_items[i];
-        processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
-    }
+        var trade_pokemons = pokemon_filter(message, args, user_pokemons, pokemons);
+        if (trade_pokemons == undefined || trade_pokemons.length == 0) return message.channel.send('Pokemons not found.')
 
-    var new_field = "";
-    if (processed_add_items.length == 0) { new_field = ' ' }
-    for (let i = 0; i < processed_add_items.length; i++) {
-        const element = processed_add_items[i];
-        update_items = _.concat(update_items, element[1]);
-        new_field += `${i + 1} | Level ${processed_add_items[i][1].Level} ${element[0]}\n`;
-    }
+        var add_items = trade_pokemons;
+        var processed_add_items = [];
+        var update_items = [];
 
-    if (current_user == 1) {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User1Items": update_items } }, { upsert: true }, (err, channel) => {
-            if (err) return console.log(err);
-            if (!channel) return;
-        });
-    } else {
-        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { $set: { "Trade.User2Items": update_items } }, { upsert: true }, (err, channel) => {
-            if (err) return console.log(err);
-            if (!channel) return;
-        });
-    }
+        // Update trade menu.
+        add_items = _.differenceBy(old_items, add_items, JSON.stringify);
 
-    var user1id = channel_data.Trade.User1ID;
-    var user2id = channel_data.Trade.User2ID;
+        for (let i = 0; i < add_items.length; i++) {
+            const element = add_items[i];
+            processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
+        }
 
-    var user1name = "";
-    var user2name = "";
+        var new_field = "";
+        if (processed_add_items.length == 0) { new_field = ' ' }
+        for (let i = 0; i < processed_add_items.length; i++) {
+            const element = processed_add_items[i];
+            update_items = _.concat(update_items, element[1]);
+            new_field += `${i + 1} | Level ${processed_add_items[i][1].Level} ${element[0]}\n`;
+        }
 
-    var extra_msg = "";
+        if (current_user == 1) prompt.Trade.User1Items = update_items;
+        else prompt.Trade.User2Items = update_items;
 
-    // Extra Messages
-    if (current_user == 1) {
-        var credits = channel_data.Trade.Credits.User1 == undefined ? 0 : channel_data.Trade.Credits.User1;
-        var redeems = channel_data.Trade.Redeems.User1 == undefined ? 0 : channel_data.Trade.Redeems.User1;
-        var shards = channel_data.Trade.Shards.User1 == undefined ? 0 : channel_data.Trade.Shards.User1;
-        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
-        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
-        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
-        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-    }
-    if (current_user == 2) {
-        var credits = channel_data.Trade.Credits.User2 == undefined ? 0 : channel_data.Trade.Credits.User2;
-        var redeems = channel_data.Trade.Redeems.User2 == undefined ? 0 : channel_data.Trade.Redeems.User2;
-        var shards = channel_data.Trade.Shards.User2 == undefined ? 0 : channel_data.Trade.Shards.User2;
-        var num_of_lines = new_field.split(/\r\n|\r|\n/).length
-        if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
-        if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
-        if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-    }
+        prompt.save().then(() => {
+            var user1id = prompt.UserID.User1ID;
+            var user2id = prompt.UserID.User2ID;
 
-    bot.users.fetch(user1id).then(user_data => {
-        user1name = user_data.username;
+            var user1name = "";
+            var user2name = "";
+            var extra_msg = "";
 
-        bot.users.fetch(user2id).then(user_data => {
-            user2name = user_data.username;
+            // Extra Messages
+            if (current_user == 1) {
+                var credits = prompt.Trade.Credits.User1 == undefined ? 0 : prompt.Trade.Credits.User1;
+                var redeems = prompt.Trade.Redeems.User1 == undefined ? 0 : prompt.Trade.Redeems.User1;
+                var shards = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
+                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+                if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+                if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+            }
+            if (current_user == 2) {
+                var credits = prompt.Trade.Credits.User2 == undefined ? 0 : prompt.Trade.Credits.User2;
+                var redeems = prompt.Trade.Redeems.User2 == undefined ? 0 : prompt.Trade.Redeems.User2;
+                var shards = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
+                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
+                if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
+                if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+            }
 
-            message.channel.messages.fetch(channel_data.Trade.MessageID).then(message_old => {
-                var new_embed = message_old.embeds[0];
-                if (current_user == 1) {
-                    new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
-                } else {
-                    new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
-                }
-                message_old.edit(new_embed);
-            }).catch(console.error);
+            bot.users.fetch(user1id).then(user_data => {
+                user1name = user_data.username;
+
+                bot.users.fetch(user2id).then(user_data => {
+                    user2name = user_data.username;
+
+                    message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
+                        var new_embed = message_old.embeds[0];
+                        if (current_user == 1) {
+                            new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                        } else {
+                            new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                        }
+                        message_old.edit(new_embed);
+                    }).catch(console.error);
+                });
+            });
         });
     });
 }
