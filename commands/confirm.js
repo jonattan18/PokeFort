@@ -171,50 +171,57 @@ function change_trade(message, trade_prompt) {
 
                 // For user 1
                 if (user_1_items.length > 0) {
-                    // Get user 1 trade items.
                     getPokemons.getallpokemon(trade_prompt.UserID.User1ID).then(function (user_pokemons) {
-                        if (err) return console.log(err);
+
                         var pokemons_to_add = [];
                         var pokemons_to_delete = [];
                         for (i = 0; i < user_1_items.length; i++) {
                             var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_1_items[i]))[0];
                             if (user_pokemon_to_add != undefined) {
                                 pokemons_to_delete.push(user_pokemon_to_add._id);
-                                delete user_pokemon_to_add["_id"];
                                 pokemons_to_add.push(user_pokemon_to_add);
                             }
                         }
-                        getPokemons.deletepokemon(pokemons_to_delete).then(() => {
-                            getPokemons.insertpokemon(trade_prompt.UserID.User2ID, pokemons_to_add).then(() => {
-                                // var new_user_pokemon_to_update = _.differenceBy(user_pokemons, pokemons_to_add, JSON.stringify);
-                                // user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $set: { Pokemons: new_user_pokemon_to_update } }, { new: true }, (err, user) => {
-                                //     if (err) return console.log(err);
-                                //  user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $push: { Pokemons: pokemons_to_add } }, { new: true }, (err, user) => {
-                                //        if (err) return console.log(err);
-                            });
-                        });
 
+                        var selected_pokemon = pokemons_to_delete.filter(it => it._id == user1.Selected)[0];
+                        if (selected_pokemon != undefined) {
+                            var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
+                            user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User1ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
+                                if (err) console.log(err)
+                                message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                            })
+                        }
+
+                        getPokemons.deletepokemon(pokemons_to_delete);
+                        getPokemons.insertpokemon(trade_prompt.UserID.User2ID, pokemons_to_add);
                     });
                 }
-                if (user_2_items.length > 0) {
-                    // Get user 1 trade items.
-                    user_model.findOne({ UserID: trade_prompt.User2ID }, (err, user) => {
-                        if (err) return console.log(err);
-                        if (!user) return;
-                        var pokemons_to_add = [];
-                        for (i = 0; i < user_2_items.length; i++) {
-                            var user_pokemons = user.Pokemons;
-                            var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_2_items[i]))[0];
-                            if (user_pokemon_to_add != undefined) pokemons_to_add.push(user_pokemon_to_add);
-                        }
-                        var new_user_pokemon_to_update = _.differenceBy(user.Pokemons, pokemons_to_add, JSON.stringify);
-                        user_model.findOneAndUpdate({ UserID: trade_prompt.User2ID }, { $set: { Pokemons: new_user_pokemon_to_update } }, { new: true }, (err, user) => {
-                            if (err) return console.log(err);
-                            user_model.findOneAndUpdate({ UserID: trade_prompt.User1ID }, { $push: { Pokemons: pokemons_to_add } }, { new: true }, (err, user) => {
-                                if (err) return console.log(err);
-                            });
-                        });
 
+                // For user 2
+                if (user_2_items.length > 0) {
+                    getPokemons.getallpokemon(trade_prompt.UserID.User2ID).then(function (user_pokemons) {
+
+                        var pokemons_to_add = [];
+                        var pokemons_to_delete = [];
+                        for (i = 0; i < user_2_items.length; i++) {
+                            var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_2_items[i]))[0];
+                            if (user_pokemon_to_add != undefined) {
+                                pokemons_to_delete.push(user_pokemon_to_add._id);
+                                pokemons_to_add.push(user_pokemon_to_add);
+                            }
+                        }
+
+                        var selected_pokemon = pokemons_to_delete.filter(it => it._id == user2.Selected)[0];
+                        if (selected_pokemon != undefined) {
+                            var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
+                            user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User2ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
+                                if (err) console.log(err)
+                                message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                            })
+                        }
+
+                        getPokemons.deletepokemon(pokemons_to_delete);
+                        getPokemons.insertpokemon(trade_prompt.UserID.User1ID, pokemons_to_add);
                     });
                 }
                 //#endregion
@@ -222,6 +229,7 @@ function change_trade(message, trade_prompt) {
                 user1.save().then(() => {
                     user2.save().then(() => {
                         trade_prompt.remove().then(() => {
+                            console.log('Saved')
                             message.channel.send(`Trade has been confirmed.`);
                         });
                     });

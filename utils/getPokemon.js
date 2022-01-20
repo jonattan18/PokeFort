@@ -66,7 +66,7 @@ let insertpokemon = (UserID, Pokemons) => new Promise((resolve, reject) => {
 let deletepokemon = (PokemonIds) => new Promise((resolve, reject) => {
     pokemons_model.updateMany({}, { $pull: { "Pokemons": { _id: { $in: PokemonIds } } } }, (err, pokemon) => {
         if (err) reject(err);
-        resolve();
+        resolve(pokemon);
     });
     setTimeout(resolve, 5000);
 });

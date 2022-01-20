@@ -46,8 +46,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
             }
 
-            // For only recycle int type command
-            if (onlyNumbers(args)) {
+            // For only pk command
+            if (args.length == 0) {
+                return create_pagination(message, pokemons, user_pokemons);
+            }
+
+            // For only int type command
+            if (args.length > 0 && onlyNumbers(args)) {
                 user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
                 return create_pagination(message, pokemons, user_pokemons);
             }
