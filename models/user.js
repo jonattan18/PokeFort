@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema({
     RaidsCompleted: Number,
     WishingPieces: Number,
     Badges: Array,
-    Admin: { type: Number, default: 0 },
+    Admin: Number,
     TotalCaught: Number,
     TotalShiny: Number,
     DexRewards: [{
