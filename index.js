@@ -57,6 +57,7 @@ client.on('message', async (message) => {
     // Initialize Variables
     var prefix = config.DEFAULT_PREFIX;
     var user_available = false;
+    var global_user = null;
 
     // Message Processing
     var messageArray = message.content.split(' ');
@@ -81,6 +82,7 @@ client.on('message', async (message) => {
     await user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
         if (user) { user_available = true; }
+        global_user = user;
 
         // Check if the message starts with the prefix.
         if (message.content.toLowerCase().startsWith(prefix)) {
@@ -90,7 +92,7 @@ client.on('message', async (message) => {
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }
         else {
-            //   advance_xp(message, user_available); // Increase XP
+            advance_xp(message, user_available); // Increase XP
         }
     });
 
@@ -111,28 +113,29 @@ client.on('message', async (message) => {
         else {
             // Update message count
             // [SPAM SYSTEM]
-            //if (channel_message_cache[message.channel.id] != message.author.id) {
 
-            //Caching last message user.
-            channel_message_cache[message.channel.id] = message.author.id;
+            if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
 
-            channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-                let channel_id = message.channel.id;
-                var message_count = channel.MessageCount + 1;
-                var spawn_limit = channel.SpawnLimit;
-                if (spawn_limit == 0) {
-                    spawn_limit = getRandomInt(10, 20);
-                }
-                if (spawn_limit == message_count) {
-                    spawn_limit = 0;
-                    message_count = 0;
-                    spawn_pokemon(message, prefix); // Spawn Pokemon
-                }
-                channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
-                    if (err) { console.log(err) }
+                //Caching last message user.
+                channel_message_cache[message.channel.id] = message.author.id;
+
+                channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                    let channel_id = message.channel.id;
+                    var message_count = channel.MessageCount + 1;
+                    var spawn_limit = channel.SpawnLimit;
+                    if (spawn_limit == 0) {
+                        spawn_limit = getRandomInt(10, 20);
+                    }
+                    if (spawn_limit == message_count) {
+                        spawn_limit = 0;
+                        message_count = 0;
+                        spawn_pokemon(message, prefix); // Spawn Pokemon
+                    }
+                    channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
+                        if (err) { console.log(err) }
+                    });
                 });
-            });
-            //   }
+            }
         }
     })
     //#endregion
@@ -141,79 +144,72 @@ client.on('message', async (message) => {
     //check if user database exists
     function advance_xp(message, user_avl) {
         if (user_avl) {
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                if (err) return console.log(err);
-                if (user) {
 
-                    //#region Update XP
-                    var user_pokemons = user.Pokemons;
-                    var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-                    var _id = selected_pokemon._id;
-                    var pokemon_id = selected_pokemon.PokemonId;
-                    var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
-                    var pokemon_level = selected_pokemon.Level;
-                    var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
-                    var old_pokemon_name_star = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, true);
+            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+                //#region Update XP
+                var selected_pokemon = user_pokemons.filter(it => it._id == global_user.Selected)[0];
+                var _id = selected_pokemon._id;
+                var pokemon_id = selected_pokemon.PokemonId;
+                var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
+                var pokemon_level = selected_pokemon.Level;
+                var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
+                var old_pokemon_name_star = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, true);
 
-                    var old_pokemon_exp = pokemon_current_xp;
-                    var leveled_up = false;
-                    var evolved = false;
-                    var new_evolved_name = "";
-                    while (pokemon_current_xp > 0) {
-                        if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
-                            leveled_up = true;
+                var old_pokemon_exp = pokemon_current_xp;
+                var leveled_up = false;
+                var evolved = false;
+                var new_evolved_name = "";
+                while (pokemon_current_xp > 0) {
+                    if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
+                        leveled_up = true;
 
-                            //Update level and send message.
-                            pokemon_level += 1;
-                            pokemon_current_xp -= exp_to_level(pokemon_level);
+                        //Update level and send message.
+                        pokemon_level += 1;
+                        pokemon_current_xp -= exp_to_level(pokemon_level);
 
-                            if (pokemon_level == 100) {
-                                pokemon_level = 100;
-                                pokemon_current_xp = 0;
-                                break;
-                            }
-
-                            // Get pokemon evolution.
-                            var evo_tree = evolution_tree(load_pokemons, pokemon_id);
-                            var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                            if (next_evolutions != undefined && next_evolutions.length > 0) {
-                                next_evolutions = next_evolutions[0];
-                                var required_level = next_evolutions[1].match(/\d/g).join("");
-                                if (pokemon_level >= required_level) {
-                                    var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon);
-                                    pokemon_id = next_evolutions[0];
-                                    evolved = true;
-                                    new_evolved_name = new_pokemon_name;
-                                }
-                            }
-                        }
-                        else {
+                        if (pokemon_level == 100) {
+                            pokemon_level = 100;
+                            pokemon_current_xp = 0;
                             break;
                         }
-                    }
 
-                    // Update database
-                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "Pokemons.$[el].Experience": pokemon_current_xp, "Pokemons.$[el].Level": pokemon_level, "Pokemons.$[el].PokemonId": pokemon_id } }, {
-                        arrayFilters: [{ "el._id": _id }],
-                        new: true
-                    }, (err, user) => {
-                        if (err) { console.log(err) }
-                    });
-
-                    //#endregion
-
-                    if (leveled_up || evolved) {
-                        var embed = new Discord.MessageEmbed()
-                    }
-
-                    if (user.Silence == false || user.Silence == undefined) {
-                        if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
-                        if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
-                        if (evolved || leveled_up) {
-                            message.channel.send(embed);
+                        // Get pokemon evolution.
+                        var evo_tree = evolution_tree(load_pokemons, pokemon_id);
+                        var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                        if (next_evolutions != undefined && next_evolutions.length > 0) {
+                            next_evolutions = next_evolutions[0];
+                            var required_level = next_evolutions[1].match(/\d/g).join("");
+                            if (pokemon_level >= required_level) {
+                                var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon);
+                                pokemon_id = next_evolutions[0];
+                                evolved = true;
+                                new_evolved_name = new_pokemon_name;
+                            }
                         }
                     }
+                    else {
+                        break;
+                    }
                 }
+
+                // Update database
+                pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(_id) }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                });
+                //#endregion
+
+                if (leveled_up || evolved) {
+                    var embed = new Discord.MessageEmbed()
+                }
+
+                if (global_user.Silence == false || global_user.Silence == undefined) {
+                    if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
+                    if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
+                    if (evolved || leveled_up) {
+                        message.channel.send(embed);
+                    }
+                }
+
             });
         }
     }

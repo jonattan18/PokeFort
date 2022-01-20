@@ -229,7 +229,6 @@ function change_trade(message, trade_prompt) {
                 user1.save().then(() => {
                     user2.save().then(() => {
                         trade_prompt.remove().then(() => {
-                            console.log('Saved')
                             message.channel.send(`Trade has been confirmed.`);
                         });
                     });

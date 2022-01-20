@@ -3,6 +3,7 @@
     "BOT_TOKEN": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
     "MONGO_URI": "mongodb://JonattanS:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "DEFAULT_PREFIX": "p!",
+    "SPAWN_SPAM_SYSTEM": true,
     "POKEMON_IN_SLOT": 200000,
     "NICKNAME_LENGTH": 14,
     "PROMPT_EXPIRATION_SECONDS": 8200,
