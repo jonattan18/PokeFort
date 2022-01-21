@@ -14,7 +14,7 @@ var pokemons_from_database = [];
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
-    
+
     // Get all user pokemons.
     getPokemons.getallpokemon(message.author.id).then(data => {
         pokemons_from_database = data;
@@ -93,7 +93,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         // Get number of catached pokemons.
         var user_pokemons = pokemons_from_database
         no_of_caught = user_pokemons.filter(it => it["PokemonId"] === parseInt(pokemon["Pokemon Id"]) && it["Reason"] === "Catched").length;
-        create_embed();
 
         //#region Create Message
 
@@ -147,25 +146,23 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
         var image_url = './assets/images/' + image_name;
 
-        function create_embed() {
-            // Create embed message
-            let embed = new Discord.MessageEmbed();
-            embed.attachFiles(image_url)
-            embed.setImage('attachment://' + image_name)
-            embed.setTitle("**Base stats for " + pokemon_name + "**")
-            embed.setColor(message.member.displayHexColor)
-            embed.setDescription(evolution + "\n"
-                + "**Alternative Names:**\n🇯🇵 " + pokemon["jp_name"].join("/") + "\n🇩🇪 " + pokemon["dr_name"] + "\n🇫🇷 " + pokemon["fr_name"] + "\n\n"
-                + "**Type: " + type + '**\n'
-                + "**HP:** " + pokemon["Health Stat"] + '\n'
-                + "**Attack:** " + pokemon["Attack Stat"] + '\n'
-                + "**Defense:** " + pokemon["Defense Stat"] + '\n'
-                + "**Sp. Atk:** " + pokemon["Special Attack Stat"] + '\n'
-                + "**Sp. Def:** " + pokemon["Special Defense Stat"] + '\n'
-                + "**Speed:** " + pokemon["Speed Stat"] + '\n')
-            embed.setFooter(`Dex Number: ${pokemon["Pokedex Number"]} \nNumber caught: ${no_of_caught}`);
-            message.channel.send(embed)
-        }
+        // Create embed message
+        let embed = new Discord.MessageEmbed();
+        embed.attachFiles(image_url)
+        embed.setImage('attachment://' + image_name)
+        embed.setTitle("**Base stats for " + pokemon_name + "**")
+        embed.setColor(message.member.displayHexColor)
+        embed.setDescription(evolution + "\n"
+            + "**Alternative Names:**\n🇯🇵 " + pokemon["jp_name"].join("/") + "\n🇩🇪 " + pokemon["dr_name"] + "\n🇫🇷 " + pokemon["fr_name"] + "\n\n"
+            + "**Type: " + type + '**\n'
+            + "**HP:** " + pokemon["Health Stat"] + '\n'
+            + "**Attack:** " + pokemon["Attack Stat"] + '\n'
+            + "**Defense:** " + pokemon["Defense Stat"] + '\n'
+            + "**Sp. Atk:** " + pokemon["Special Attack Stat"] + '\n'
+            + "**Sp. Def:** " + pokemon["Special Defense Stat"] + '\n'
+            + "**Speed:** " + pokemon["Speed Stat"] + '\n')
+        embed.setFooter(`Dex Number: ${pokemon["Pokedex Number"]} \nNumber caught: ${no_of_caught}`);
+        message.channel.send(embed)
         //#endregion
     });
 }
