@@ -27,7 +27,7 @@ warn /
 listwarn /
 remwarn /
 complaint /
-suspend
-looksuspend 
-remsuspend
+suspend /
+looksuspend /
+remsuspend /
 

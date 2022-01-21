@@ -16,6 +16,7 @@ const UserSchema = new mongoose.Schema({
     Admin: Number,
     TotalCaught: Number,
     TotalShiny: Number,
+    Suspend: { Hours: Number, Reason: String, Timestamp: Number },
     DexRewards: [{
         PokemonId: Number,
         RewardName: String,

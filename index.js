@@ -83,15 +83,28 @@ client.on('message', async (message) => {
         if (err) return console.log(err);
         if (user) { user_available = true; }
         global_user = user;
+        var issuspend = false;
+
+        // Suspend Protection
+        if (user.Suspend.Hours != undefined) {
+            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
+                user.Suspend = undefined;
+                user.save();
+            }
+            else issuspend = true;
+        }
+
         // Check if the message starts with the prefix.
         if (message.content.toLowerCase().startsWith(prefix)) {
+            if(issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
             cmd = redirect_command(cmd, prefix).slice(prefix.length);
-            if (admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; }
+            if (admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; }
             const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
             if (!commandfile) return;
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }
         else {
+            if(issuspend) return;
             advance_xp(message, user_available); // Increase XP
         }
     });
