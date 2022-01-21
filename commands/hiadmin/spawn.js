@@ -1,40 +1,41 @@
-const Discord = require('discord.js'); // For Embedded Message.
+// Imports
+const Discord = require('discord.js');
 
 // Models
-const channel_model = require('../models/channel');
-const user_model = require('../models/user');
+const channel_model = require('../../models/channel');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-
-    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user) {
-            var redeems = user.Redeems == undefined ? 0 : user.Redeems;
-            if (redeems >= 1) {
-                give_pokemon(bot, message, args, prefix, user_available, pokemons, user)
-            }
-            else {
-                message.channel.send(`You don't have any redeems!`);
-            }
-        }
-    });
-}
-
-// Function to give the user a pokemon.
-function give_pokemon(bot, message, args, prefix, user_available, pokemons, user) {
-
+    if (!message.isadmin) return; // Admin check
+    
     // Pokemon Level
     let level = getRandomInt(1, 36);
 
+    try {
+        if (args[args.length - 2].toLowerCase() == "-l") { level = args[args.length - 1]; args.splice(args.length - 2, 2); }
+    } catch (e) { }
+
     // Forms
-    var form = "";
-    if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; }
-    if (args[0].toLowerCase() == "alolan") { form = "Alola"; args.splice(0, 1) }
-    else if (args[0].toLowerCase() == "galarian") { form = "Galar"; args.splice(0, 1) }
+    var isshiny = false;
+    var form = [];
+    if (args[0].toLowerCase() == "shiny") { form.push("Shiny"); args.splice(0, 1); if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; } }
+    if (args[0].toLowerCase() == "alolan") { form.push("Alola"); args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "galarian") { form.push("Galar"); args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "gigantamax") { form.push("Gigantamax"); args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "eternamax") { form.push("Eternamax"); args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "mega" && args[args.length - 1].toLowerCase() == "x" || args[args.length - 1].toLowerCase() == "y") {
+        if (args[args.length - 1] == "x") { form.push("Mega X") };
+        if (args[args.length - 1] == "y") { form.push("Mega Y") };
+        args.splice(0, 1);
+        args.splice(args.length - 1, 1)
+    }
+    else if (args[0].toLowerCase() == "mega") { form.push("Mega"); args.splice(0, 1) }
+
+    if (form.length == 1) { form = form[0] }
+    else if (form.length == 2) { form = form[1]; isshiny = true; }
 
     let given_name = args.join(" ")._normalize();
 
-    if (form == "") {
+    if (form == "" || form == "Shiny") {
         var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name); // Searching in English Name.
         if (pokemon.length == 0) {
             dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name); // Searching in Germany Name.
@@ -61,31 +62,17 @@ function give_pokemon(bot, message, args, prefix, user_available, pokemons, user
     }
 
     pokemon = pokemon[0];
-    spawn_pokemon(message, prefix, pokemon, level, user);
 
+    if (form == "Shiny" || isshiny == true) {
+        spawn_pokemon(message, prefix, pokemon, level, true);
+    }
+    else {
+        spawn_pokemon(message, prefix, pokemon, level, false);
+    }
 }
 
-// Pokemon choosen System
-function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, user) {
-
-    // Pokemon Nature
-    let random_nature = getRandomInt(1, 26);
-    let pokemon_shiny = getRandomInt(1, 1000) > 950 ? true : false;
-
-    // IV creation
-    var IV = [];
-    while (true) {
-        let hp_iv = getRandomInt(0, 32);
-        let atk_iv = getRandomInt(0, 32);
-        let def_iv = getRandomInt(0, 32);
-        let spa_iv = getRandomInt(0, 32);
-        let spd_iv = getRandomInt(0, 32);
-        let spe_iv = getRandomInt(0, 32);
-        let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
-        IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
-        if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
-        break;
-    }
+// Pokemon Spawn System
+function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_shiny) {
 
     // Image url
     var str = "" + spawn_pokemon["Pokedex Number"];
@@ -105,13 +92,28 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, user) {
     embed.setColor("#1cb99a");
     message.channel.send(embed);
 
-    // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, MessageCount: 0 }, function (err, channel) {
-        if (err) { console.log(err) }
-        user.Redeems -= 1;
-        user.save();
-    });
+    // Pokemon Nature
+    let random_nature = getRandomInt(1, 26);
 
+    // IV creation
+    var IV = [];
+    while (true) {
+        let hp_iv = getRandomInt(0, 32);
+        let atk_iv = getRandomInt(0, 32);
+        let def_iv = getRandomInt(0, 32);
+        let spa_iv = getRandomInt(0, 32);
+        let spd_iv = getRandomInt(0, 32);
+        let spe_iv = getRandomInt(0, 32);
+        let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
+        IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
+        if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
+        break;
+    }
+
+    // Updating pokemon to database.
+    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, SpawnLimit: 30, MessageCount: 0 }, function (err, user) {
+        if (err) { console.log(err) }
+    });
 }
 
 // Random Value
@@ -127,6 +129,6 @@ String.prototype._normalize = function () {
 }
 
 module.exports.config = {
-    name: "redeemspawn",
+    name: "spawn",
     aliases: []
 }

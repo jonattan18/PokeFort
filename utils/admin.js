@@ -1,5 +1,5 @@
 // Utils to control admin message structure.
-var moderator = ["profile", "balance", "playerid", "pokemon", "dex", "report", "listreport", "remreport", "favourite", "info", "apf", "channelid", "serverid"];
+var moderator = ["ahelp", "profile", "balance", "playerid", "pokemon", "dex", "report", "listreport", "remreport", "favourite", "info", "apf", "channelid", "serverid"];
 var LoAdmin = moderator.concat(["ahint", "complaint", "suspend", "looksuspend", "remsuspend", "warn", "listwarn", "remwarn"]);
 var HiAdmin = LoAdmin.concat(["listcomplaint", "remcomplaint", "ban", "spawn", "unban", "promote", "demote", "unspawn"]);
 var System = HiAdmin.concat(["sysstat", "dbstat"]);
@@ -40,11 +40,52 @@ function getdesc(level) {
     else if (level > 3) return "No information found !";
 }
 
-function getrole(leve) {
-    if (leve == "1") return "Watch any suspicious activity and report it to higher admins.";
-    else if (leve == "2") return "Verify the suspicious activity and apply ban or suspend application to higher admins.";
-    else if (leve == "3") return "Monitor all spawn rate and misc. If suspicious activity is found, ban them.";
-    else if (leve > 3) return "Not defined";
+function getrole(level) {
+    if (level == "1") return "Watch any suspicious activity and report it to higher admins.";
+    else if (level == "2") return "Verify the suspicious activity and apply ban or suspend application to higher admins.";
+    else if (level == "3") return "Monitor all spawn rate and misc. If suspicious activity is found, ban them.";
+    else if (level > 3) return "Not defined";
 }
 
-module.exports = { iseligible, getlevel, getposition, getdesc, getrole };
+function gethelp(level) {
+    if (level == "1") return moderator_help;
+    else if (level == "2") return LoAdmin_help;
+    else if (level == "3") return HiAdmin_help;
+    else if (level > 3) return HiAdmin_help;
+}
+
+var moderator_help = "``Profile <user>`` - Will show the profile information of other players.\n"
+                    + "``Balance <user>`` - Will show the balance of other players.\n"
+                    + "``PlayerID <user>`` - Will show the player ID of other players.\n"
+                    + "``Pokemon <user>`` - Will show the pokemon owned by other players.\n"
+                    + "``Dex <user>`` - Will show the dex report by other players.\n"
+                    + "``Report <user>`` - Will report the user to higher admins.\n"
+                    + "``ListReport <user>`` - List reports given to a user.\n"
+                    + "``RemReport <user>`` - Remove a report given to a user.\n"
+                    + "``Favourite <user>`` - Will show the favourite pokemon of other players.\n"
+                    + "``Info <user>`` - Will show the pokemon info of other players.\n"
+                    + "``APF <user>`` - Will show the profile of your admin.\n"
+                    + "``ChannelID`` - Will show the channel ID of the current channel.\n"
+                    + "``ServerID`` - Will show the server ID of the current Server.\n";
+
+var LoAdmin_help = moderator_help
+                    + "``Ahint <user>`` - Will show the hint of other players.\n"
+                    + "``Complaint <user>`` - Will complaint the user to higher admins.\n"
+                    + "``Suspend <user>`` - Will suspend the user.\n"
+                    + "``LookSuspend`` - Will show the suspended users.\n"
+                    + "``RemSuspend <user>`` - Will remove the suspension of the user.\n"
+                    + "``Warn <user>`` - Will warn the user.\n"
+                    + "``ListWarn <user>`` - Will list the warns given to a user.\n"
+                    + "``RemWarn <user>`` - Will remove the warns given to a user.\n";
+
+var HiAdmin_help = LoAdmin_help
+                    + "``ListComplaint`` - Will list the complaints given to a user.\n"
+                    + "``RemComplaint <user>`` - Will remove the complaint given to a user.\n"
+                    + "``Ban <user>`` - Will ban the user.\n"
+                    + "``Spawn <user>`` - Will spawn the user.\n"
+                    + "``Unban <user>`` - Will unban the user.\n"
+                    + "``Promote <user>`` - Will promote the user.\n"
+                    + "``Demote <user>`` - Will demote the user.\n"
+                    + "``Unspawn <user>`` - Will unspawn the user.\n";
+
+module.exports = { iseligible, getlevel, getposition, getdesc, getrole, gethelp };
