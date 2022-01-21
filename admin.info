@@ -18,14 +18,16 @@ apf /
 channelid /
 serverid /
 report /
-listreport
-remreport
+listreport /
+remreport /
 
 LoAdmin :
 ahint /
 warn /
 listwarn /
 remwarn /
-complaint 
-suspend 
+complaint /
+suspend
+looksuspend 
+remsuspend
 

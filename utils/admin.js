@@ -1,7 +1,7 @@
 // Utils to control admin message structure.
 var moderator = ["profile", "balance", "playerid", "pokemon", "dex", "report", "listreport", "remreport", "favourite", "info", "apf", "channelid", "serverid"];
-var LoAdmin = moderator.concat(["ahint", "warn", "complaint", "suspend", "listwarn", "remwarn"]);
-var HiAdmin = LoAdmin.concat(["ban", "spawn", "unban", "promote", "demote", "unspawn"]);
+var LoAdmin = moderator.concat(["ahint", "complaint", "suspend", "looksuspend", "remsuspend", "warn", "listwarn", "remwarn"]);
+var HiAdmin = LoAdmin.concat(["listcomplaint", "remcomplaint", "ban", "spawn", "unban", "promote", "demote", "unspawn"]);
 var System = HiAdmin.concat(["sysstat", "dbstat"]);
 var Cardinal = System.concat([]);
 var Architecture = Cardinal.concat([]);
