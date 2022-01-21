@@ -1,4 +1,4 @@
-const warning_model = require('../../models/warnings');
+const reports_model = require('../../models/reports');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!message.isadmin) return; // Admin check
@@ -8,12 +8,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (!mentioned_user) return;
         if (!isInt(args[1])) { return; }
 
-        warning_model.find({ UserID: mentioned_user.id }, (err, warnings) => {
+        reports_model.find({ UserID: mentioned_user.id }, (err, reports) => {
             if (err) console.log(err);
-            if (warnings.length == 0) return message.channel.send(`${'``' + mentioned_user.username + '``'} don't have any warnings.`);
+            if (reports.length == 0) return message.channel.send(`${'``' + mentioned_user.username + '``'} don't have any reports.`);
 
-            warnings[args[1] - 1].remove().then(() => {
-                message.channel.send(`Warning ${args[1]} removed from user ${mentioned_user.username}.`);
+            reports[args[1] - 1].remove().then(() => {
+                message.channel.send(`Report ${args[1]} removed from user ${mentioned_user.username}.`);
             });
         });
 
@@ -27,6 +27,6 @@ function isInt(value) {
 }
 
 module.exports.config = {
-    name: "remwarn",
+    name: "remreport",
     aliases: []
 }

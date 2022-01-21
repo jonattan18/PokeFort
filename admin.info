@@ -4,7 +4,7 @@ Admin - 2 _LoAdmin
 Admin - 3 _HiAdmin
 Admin - 4 _System
 Admin - 5 _Cardinal
-Admin - 6 _Monoarch
+Admin - 6 _Architecture
 
 Mod : 
 profile /
@@ -17,6 +17,9 @@ info /
 apf /
 channelid /
 serverid /
+report /
+listreport
+remreport
 
 LoAdmin :
 ahint /

@@ -1,7 +1,10 @@
 // Utils to control admin message structure.
-var moderator = ["profile", "balance", "playerid", "pokemon", "dex", "favourite", "info", "apf", "channelid", "serverid"];
+var moderator = ["profile", "balance", "playerid", "pokemon", "dex", "report", "listreport", "remreport", "favourite", "info", "apf", "channelid", "serverid"];
 var LoAdmin = moderator.concat(["ahint", "warn", "complaint", "suspend", "listwarn", "remwarn"]);
-var HiAdmin = LoAdmin.concat(["ban", "spawn", "unban", "promote", "demote", "unspawn", "sysstat"]);
+var HiAdmin = LoAdmin.concat(["ban", "spawn", "unban", "promote", "demote", "unspawn"]);
+var System = HiAdmin.concat(["sysstat", "dbstat"]);
+var Cardinal = System.concat([]);
+var Architecture = Cardinal.concat([]);
 
 function iseligible(level, cmd, message) {
     if ((message.mentions.users.first() || message.author).bot) return false;
@@ -10,7 +13,17 @@ function iseligible(level, cmd, message) {
     else if (level == "1" && moderator.includes(cmd)) return true;
     else if (level == "2" && LoAdmin.includes(cmd)) return true;
     else if (level == "3" && HiAdmin.includes(cmd)) return true;
+    else if (level == "4" && System.includes(cmd)) return true;
+    else if (level == "5" && Cardinal.includes(cmd)) return true;
+    else if (level == "6" && Architecture.includes(cmd)) return true;
     else return false;
+}
+
+function getlevel(level) {
+    if (level == "1") return "1";
+    else if (level == "2") return "2";
+    else if (level == "3") return "3";
+    else if (level > 3) return "???";
 }
 
 function getposition(level) {
@@ -34,4 +47,4 @@ function getrole(leve) {
     else if (leve > 3) return "Not defined";
 }
 
-module.exports = { iseligible, getposition, getdesc, getrole };
+module.exports = { iseligible, getlevel, getposition, getdesc, getrole };
