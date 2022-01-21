@@ -86,7 +86,7 @@ client.on('message', async (message) => {
         var issuspend = false;
 
         // Suspend Protection
-        if (user.Suspend.Hours != undefined) {
+        if (user.Suspend != undefined && user.Suspend.Hours != undefined) {
             if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
                 user.Suspend = undefined;
                 user.save();
