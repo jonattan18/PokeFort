@@ -15,6 +15,7 @@ var static_user_pokemons = null;
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+    if (message.isadmin) { message.author = message.mentions.users.first() || message.author; args.shift() } // Admin check
 
     page = 1;
     //Get user data.

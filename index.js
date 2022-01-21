@@ -14,7 +14,7 @@ const pokemons_model = require('./models/pokemons');
 //Utils
 const { loadCommands } = require('./utils/loadCommands');
 const getPokemons = require('./utils/getPokemon');
-const { performance } = require('perf_hooks');
+const admin = require('./utils/admin');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -83,11 +83,11 @@ client.on('message', async (message) => {
         if (err) return console.log(err);
         if (user) { user_available = true; }
         global_user = user;
-
         // Check if the message starts with the prefix.
         if (message.content.toLowerCase().startsWith(prefix)) {
-            cmd = redirect_command(cmd, prefix);
-            const commandfile = client.commands.get(cmd.slice(prefix.length)) || client.commands.get(client.aliases.get(cmd.slice(prefix.length)));
+            cmd = redirect_command(cmd, prefix).slice(prefix.length);
+            if (admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; }
+            const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
             if (!commandfile) return;
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }

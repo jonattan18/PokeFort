@@ -1,9 +1,10 @@
 // Utils to control admin message structure.
-var moderator = ["profile", "balance", "redeem", "playerid", "apf", "channelid", "serverid"];
-var LoAdmin = moderator.concat(["warn", "complaint", "suspend", "mute", "unmute", "visible", "invisible"]);
-var HiAdmin = LoAdmin.concat(["ban", "spawn", "unban", "promote", "hidestat", "demote", "unhidestat", "unspawn"]);
+var moderator = ["profile", "balance", "playerid", "pokemon", "dex", "favourite", "info", "apf", "channelid", "serverid"];
+var LoAdmin = moderator.concat(["ahint", "warn", "complaint", "suspend", "listwarn", "remwarn"]);
+var HiAdmin = LoAdmin.concat(["ban", "spawn", "unban", "promote", "demote", "unspawn", "sysstat"]);
 
-function iseligible(level, cmd) {
+function iseligible(level, cmd, message) {
+    if ((message.mentions.users.first() || message.author).bot) return false;
     cmd = cmd.toLowerCase();
     if (level == "0") return false;
     else if (level == "1" && moderator.includes(cmd)) return true;
@@ -12,4 +13,25 @@ function iseligible(level, cmd) {
     else return false;
 }
 
-module.exports = { iseligible };
+function getposition(level) {
+    if (level == "1") return "Moderator";
+    else if (level == "2") return "LoAdmin";
+    else if (level == "3") return "HiAdmin";
+    else if (level > 3) return "Unknown";
+}
+
+function getdesc(level) {
+    if (level == "1") return "Moderator is a person who acts as an organizer, officiant for regarding rules, arbitrator";
+    else if (level == "2") return "LoAdmin is a person who have higher authority than Moderator, who can talk directly to Higher Admins";
+    else if (level == "3") return "HiAdmin is a highest authority role, who can ban and suspend users and command lower admins.";
+    else if (level > 3) return "No information found !";
+}
+
+function getrole(leve) {
+    if (leve == "1") return "Watch any suspicious activity and report it to higher admins.";
+    else if (leve == "2") return "Verify the suspicious activity and apply ban or suspend application to higher admins.";
+    else if (leve == "3") return "Monitor all spawn rate and misc. If suspicious activity is found, ban them.";
+    else if (leve > 3) return "Not defined";
+}
+
+module.exports = { iseligible, getposition, getdesc, getrole };

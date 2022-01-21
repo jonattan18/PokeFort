@@ -13,7 +13,8 @@ var pokemons_from_database = [];
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-
+    if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
+    
     // Get all user pokemons.
     getPokemons.getallpokemon(message.author.id).then(data => {
         pokemons_from_database = data;

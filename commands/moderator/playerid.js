@@ -1,15 +1,6 @@
-// Models
-const user_model = require('../../models/user');
-
-// Utils
-const admin = require('../../utils/admin');
-
 module.exports.run = async (bot, message, args, prefix, user_available) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user.Admin == undefined || !admin.iseligible(user.Admin, 'playerid')) return;
-        message.channel.send('UserID: ' + message.author.id);
-    });
+    if (message.isadmin) message.author = message.mentions.users.first() || message.author; // Admin check
+    message.channel.send('UserID: ' + message.author.id);
 }
 
 module.exports.config = {

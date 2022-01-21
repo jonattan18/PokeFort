@@ -6,7 +6,7 @@ const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-
+    if (message.isadmin == true) { message.author = message.mentions.users.first() || message.author; args.shift() } // Admin check
     if (args.length != 0) { return message.channel.send("Invalid Command!") }
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -31,7 +31,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             const embed = new Discord.MessageEmbed()
             embed.setTitle(`${message.author.username}'s Profile`)
             embed.setColor(message.member.displayHexColor)
-            embed.setThumbnail(message.author.avatarURL())
+            embed.setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
             embed.setDescription('**Date Started:** ' + date_started
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems

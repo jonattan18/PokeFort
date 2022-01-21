@@ -7,10 +7,22 @@ Admin - 5 _Cardinal
 Admin - 6 _Monoarch
 
 Mod : 
-profile 
-balance 
-redeems
+profile /
+balance /
 playerid /
-apf
+pokemon /
+dex /
+favourite /
+info /
+apf /
 channelid /
 serverid /
+
+LoAdmin :
+ahint /
+warn /
+listwarn /
+remwarn /
+complaint 
+suspend 
+
