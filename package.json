@@ -19,6 +19,7 @@
     "lodash": "^4.17.21",
     "mongodb": "^4.3.0",
     "mongoose": "5.9",
+    "pokemon-showdown": "^0.11.7",
     "readdirp": "^3.6.0",
     "save": "^2.4.0"
   }

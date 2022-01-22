@@ -18,7 +18,6 @@ const admin = require('./utils/admin');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
-const evolutions = JSON.parse(fs.readFileSync('./assets/evolutions.json').toString());
 const mythical_pokemons = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
 const ultra_beast_pokemons = pokemons.filter(it => it["Primary Ability"] === "Beast Boost" && it["Alternate Form Name"] === "NULL");
 const legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL");

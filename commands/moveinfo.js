@@ -12,6 +12,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     var search_name = args.join("").replace(/[^a-zA-Z ]/g, "").toLowerCase();
 
     var key_move_info = moveinfo[search_name];
+
     if (key_move_info != undefined) {
         var name = key_move_info["name"];
         if (key_move_info["accuracy"] == true) var accuracy = 100
@@ -35,7 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + "\n" + "**Accuracy:** " + accuracy
                 + "\n" + "**Category:** " + key_move_info["category"]
                 + "\n" + "**Priority:** " + key_move_info["priority"]
-            footer = `TM NUMBER: TM${key_move_info["tm"].toLocaleString(undefined, {minimumIntegerDigits: 3, useGrouping:false})} | All status effect only work in raids and not duels.`;
+            footer = `TM NUMBER: TM${key_move_info["tm"].toLocaleString(undefined, { minimumIntegerDigits: 3, useGrouping: false })} | All status effect only work in raids and not duels.`;
         }
 
         // Create discord embed.
