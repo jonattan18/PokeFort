@@ -5,10 +5,6 @@ const pokemons_model = require('../models/pokemons');
 // Config
 const config = require('../config/config.json');
 
-// Utils
-const getPokemons = require('../utils/getPokemon');
-const mongoose = require('mongoose');
-
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     var nickname = args.join(" ");
@@ -18,31 +14,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (!user) return;
         if (err) console.log(err);
-        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-            var _id = selected_pokemon._id;
+        var _id = user.Selected; // Get selected ID.
+        if (args.length == 0) nickname = undefined;
+        else nickname = nickname;
 
-            if (args.length == 0) {
-                pokemons_model.findOne({ id: mongoose.ObjectId(_id) }, (err, pokemon) => {
-                    if (err) return console.log(err);
-                    var changable_pokemon = pokemon.Pokemons.filter(it => it.id == _id)[0];
-                    var index = pokemon.Pokemons.indexOf(changable_pokemon);
-                    pokemon.Pokemons[index].Nickname = undefined;
-                    pokemon.save();
-                    message.channel.send(`Your nickname has been removed.`);
-                });
-            }
-            else {
-                pokemons_model.findOne({ id: mongoose.ObjectId(_id) }, (err, pokemon) => {
-                    if (err) return console.log(err);
-                    var changable_pokemon = pokemon.Pokemons.filter(it => it.id == _id)[0];
-                    var index = pokemon.Pokemons.indexOf(changable_pokemon);
-                    pokemon.Pokemons[index].Nickname = nickname;
-                    pokemon.save();
-                    message.channel.send(`Set your current pokémon's nickname to ${nickname}!`);
-                });
-            }
+        pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nickname": nickname } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+            if (err) return console.log(err);
+            if (args.length == 0) message.channel.send(`Pokemon nickname has been removed.`);
+            else message.channel.send(`Set your current pokémon's nickname to ${nickname}!`);
         });
     });
 }

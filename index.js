@@ -82,8 +82,8 @@ client.on('message', async (message) => {
     await user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
         if (user) { user_available = true; }
-        global_user = user;
-        var issuspend = false;
+        global_user = user; // To access from outer fields.
+        var issuspend = false; // To check if the user is suspended
 
         // Suspend Protection
         if (user != null && user.Suspend.Hours != undefined) {
@@ -96,7 +96,7 @@ client.on('message', async (message) => {
 
         // Check if the message starts with the prefix.
         if (message.content.toLowerCase().startsWith(prefix)) {
-            if(issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
+            if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
             cmd = redirect_command(cmd, prefix).slice(prefix.length);
             if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; }
             const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
@@ -104,7 +104,7 @@ client.on('message', async (message) => {
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);
         }
         else {
-            if(issuspend) return;
+            if (issuspend) return;
             advance_xp(message, user_available); // Increase XP
         }
     });
@@ -159,6 +159,7 @@ client.on('message', async (message) => {
         if (user_avl) {
 
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
                 //#region Update XP
                 var selected_pokemon = user_pokemons.filter(it => it._id == global_user.Selected)[0];
                 var _id = selected_pokemon._id;
@@ -204,9 +205,9 @@ client.on('message', async (message) => {
                         break;
                     }
                 }
-
+                if (pokemon_current_xp < 0) pokemon_current_xp = 0;
                 // Update database
-                pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(_id) }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
                 });
                 //#endregion

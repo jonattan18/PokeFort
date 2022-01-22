@@ -38,7 +38,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // If pokemon is already in favourites.
             if (selected_pokemon.Favourite == true) { return message.channel.send("This pokemon is already in your favourites."); }
-            pokemons_model.findOneAndUpdate({ id: mongoose.ObjectId(selected_pokemon._id) }, { $set: { "Pokemons.$[elem].Favourite": true } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
+            pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].Favourite": true } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                 if (err) return console.log(err);
                 show_msg();
             });
