@@ -56,6 +56,19 @@ function add(bot, message, args, pokemons, prompt) {
             processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
         }
 
+        if (current_user == 1) {
+            if ((processed_add_items.length + prompt.Trade.User2Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
+                processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User2Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
+                message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
+            }
+        }
+        else {
+            if ((processed_add_items.length + prompt.Trade.User1Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
+                processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User1Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
+                message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
+            }
+        }
+
         var new_field = [];
         var last_num = 0;
         var number_of_chunks = config.TRADE_POKEMON_PER_PAGE;
@@ -94,7 +107,8 @@ function add(bot, message, args, pokemons, prompt) {
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-                new_field[new_field.length - 1] += extra_msg;
+                if (new_field.length == 0) { new_field[0] = "\t" + extra_msg; }
+                else new_field[new_field.length - 1] += extra_msg;
             }
             if (current_user == 2) {
                 var credits = prompt.Trade.Credits.User2 == undefined ? 0 : prompt.Trade.Credits.User2;
@@ -104,7 +118,8 @@ function add(bot, message, args, pokemons, prompt) {
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-                new_field[new_field.length - 1] += extra_msg;
+                if (new_field.length == 0) { new_field[0] = "\t" + extra_msg; }
+                else new_field[new_field.length - 1] += extra_msg;
             }
 
             bot.users.fetch(user1id).then(user_data => {
@@ -132,7 +147,12 @@ function add(bot, message, args, pokemons, prompt) {
                                     new_embed.fields[new_field.length + i] = { name: opp_user_fields[i].name, value: opp_user_fields[i].value, inline: false };
                                 }
                             }
-                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
+                            // Check for empty fields.
+                            for (i = 0; i < new_embed.fields.length; i++) {
+                                if (new_embed.fields[i].name.includes(user1name + '#' + tag1) && new_embed.fields[i].value == '``` ```') {
+                                    new_embed.fields.splice(i, 1);
+                                }
+                            }
                         } else {
                             if (new_field.length > 0) {
                                 var opp_user_fields = [];
@@ -145,7 +165,12 @@ function add(bot, message, args, pokemons, prompt) {
                                     new_embed.fields[opp_user_fields.length + i] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
                                 }
                             }
-                            else new_embed.fields[0] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field + '```', inline: false };
+                            // Check for empty fields.
+                            for (i = 0; i < new_embed.fields.length; i++) {
+                                if (new_embed.fields[i].name.includes(user2name + '#' + tag2) && new_embed.fields[i].value == '``` ```') {
+                                    new_embed.fields.splice(i, 1);
+                                }
+                            }
                         }
                         message_old.edit(new_embed);
                     }).catch(console.error);
@@ -187,7 +212,7 @@ function remove(bot, message, args, pokemons, prompt) {
 
         var new_field = [];
         var last_num = 0;
-        var number_of_chunks = 5;
+        var number_of_chunks = config.TRADE_POKEMON_PER_PAGE;
         var chunked_array = chunkArray(processed_add_items, number_of_chunks);
         for (let j = 0; j < chunked_array.length; j++) {
             for (let i = 0; i < chunked_array[j].length; i++) {
@@ -221,7 +246,8 @@ function remove(bot, message, args, pokemons, prompt) {
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-                new_field[new_field.length - 1] += extra_msg;
+                if (new_field[new_field.length] == undefined) { new_field[new_field.length] = " " + extra_msg; }
+                else new_field[new_field.length - 1] += extra_msg;
             }
             if (current_user == 2) {
                 var credits = prompt.Trade.Credits.User2 == undefined ? 0 : prompt.Trade.Credits.User2;
@@ -231,7 +257,8 @@ function remove(bot, message, args, pokemons, prompt) {
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
-                new_field[new_field.length - 1] += extra_msg;
+                if (new_field[new_field.length] == undefined) { new_field[new_field.length] = "\t" + extra_msg; }
+                else new_field[new_field.length - 1] += extra_msg;
             }
 
             bot.users.fetch(user1id).then(user_data => {
@@ -266,7 +293,6 @@ function remove(bot, message, args, pokemons, prompt) {
                                     }
                                 }
                             }
-                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
                         } else {
                             if (new_field.length > 0) {
                                 var opp_user_fields = [];
@@ -287,7 +313,6 @@ function remove(bot, message, args, pokemons, prompt) {
                                     }
                                 }
                             }
-                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
                         }
                         message_old.edit(new_embed);
                     }).catch(console.error);

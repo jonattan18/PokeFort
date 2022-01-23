@@ -10,6 +10,9 @@ const pokemons_model = require('../models/pokemons');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
+// Config
+const config = require('../config/config.json');
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
@@ -78,7 +81,8 @@ function trade(message, trade_prompt) {
             trade_prompt.save().then(() => {
                 message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
-                    new_embed.fields[1].name += " | :white_check_mark:";
+                    var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
+                    new_embed.fields[last_index].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
                     change_trade(message, trade_prompt);
                 });
@@ -92,7 +96,8 @@ function trade(message, trade_prompt) {
             trade_prompt.save().then(() => {
                 message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
-                    new_embed.fields[1].name += " | :white_check_mark:";
+                    var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
+                    new_embed.fields[last_index].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
                 });
             });
