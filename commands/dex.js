@@ -46,6 +46,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (args[0].toLowerCase() == "galarian") { form.push("Galar"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "gigantamax") { form.push("Gigantamax"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "eternamax") { form.push("Eternamax"); args.splice(0, 1) }
+        else if (args[0].toLowerCase() == "primal") { form.push("Primal"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "mega" && args[args.length - 1].toLowerCase() == "x" || args[args.length - 1].toLowerCase() == "y") {
             if (args[args.length - 1] == "x") { form.push("Mega X") };
             if (args[args.length - 1] == "y") { form.push("Mega Y") };
