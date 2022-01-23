@@ -48,11 +48,12 @@ function megamoves(moveset, nolock = false) {
 function tmmoves(moveset, nolock = false) {
     var moves = [];
     for (var i = 0; i < Object.keys(moveset).length; i++) {
-        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8M"));
+        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8M") || x.includes("7M") || x.includes("6M") || x.includes("5M") || x.includes("4M") || x.includes("3M") || x.includes("2M") || x.includes("1M"));
         if (temp_move.length > 0) {
             var name = movesinfo[Object.keys(moveset)[i]].name;
             if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
             var tmno = movesinfo[Object.keys(moveset)[i]].tm;
+            if (tmno == undefined) continue;
             moves.push([tmno, name]);
         }
     }
