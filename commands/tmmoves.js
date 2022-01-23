@@ -63,7 +63,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (global_embed.length == 1) return;
             pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, 0);
         });
-
     }
 }
 

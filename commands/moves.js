@@ -25,19 +25,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-                var pokemon_moves = selected_pokemon.Moves == undefined ? [] : selected_pokemon.Moves;
 
-                if (pokemon_moves.length == 0) { var embed_current_moves = ["Move 1: None", "Move 2: None", "Move 3: None", "Move 4: None"]; }
-                else {
-                    if (pokemon_moves[0] == undefined || pokemon_moves[0] == null) embed_current_moves[0] = "Move 1: None";
-                    else embed_current_moves[0] = "Move 1: " + pokemon_moves[0];
-                    if (pokemon_moves[1] == undefined || pokemon_moves[1] == null) embed_current_moves[1] = "Move 2: None";
-                    else embed_current_moves[1] = "Move 2: " + pokemon_moves[1];
-                    if (pokemon_moves[2] == undefined || pokemon_moves[2] == null) embed_current_moves[2] = "Move 3: None";
-                    else embed_current_moves[2] = "Move 3: " + pokemon_moves[2];
-                    if (pokemon_moves[3] == undefined || pokemon_moves[3] == null) embed_current_moves[3] = "Move 4: None";
-                    else embed_current_moves[3] = "Move 4: " + pokemon_moves[3];
+                var embed_current_moves = [];
+                for (var i = 0; i < 4; i++) {
+                    if (selected_pokemon.Moves != undefined && selected_pokemon.Moves[i + 1] != undefined) {
+                        var move_name = selected_pokemon.Moves[i + 1];
+                        embed_current_moves.push(`Move ${i + 1}: ${move_name}`)
+                    } else embed_current_moves.push(`Move ${i + 1}: None`)
                 }
+
                 pokemon_embed(selected_pokemon, embed_current_moves)
             });
         });
@@ -58,13 +54,21 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (selected_pokemon.Shiny) { title = `:star: Level ${selected_pokemon.Level} ${get_pokemon_full_name(selected_pokemon, pokemons)}`; }
             else { title = `Level ${selected_pokemon.Level} ${get_pokemon_full_name(selected_pokemon, pokemons)}`; }
             embed.setTitle(title)
-            embed.setDescription(`To learn a move, do ${prefix}learn <move>`);
+            embed.setDescription(`To learn a move do ${prefix}learn <move>`);
             embed.addField("Current Moves", embed_current_moves.join("\n"));
             var available_moves = "";
             for (var i = 0; i < pokemon_moveset.length; i++) {
                 available_moves += `${pokemon_moveset[i][1]}\n`;
             }
-            embed.addField("Available Moves", available_moves);
+            embed.addField("Available Moves", available_moves, true);
+            if (selected_pokemon.TmMoves != undefined && selected_pokemon.TmMoves.length > 0) {
+                var tm_moves = "";
+                for (var i = 0; i < selected_pokemon.TmMoves.length; i++) {
+                    var move_name = movesparser.movedata(selected_pokemon.TmMoves[i]).name;
+                    tm_moves += `${move_name}\n`;
+                }
+                embed.addField("Available TMs", tm_moves, true);
+            }
             embed.setFooter(`You have ${pokemon_moveset.length} moves to learn and use in battle!`);
         }
         else {

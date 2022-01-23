@@ -1,13 +1,14 @@
+const _ = require('lodash');
 const movesinfo = require('../assets/movesinfo.json');
 
 // Function to get all pokemons from a given user id.
-function normalmoves(moveset) {
+function normalmoves(moveset, nolock = false) {
     var moves = [];
     for (var i = 0; i < Object.keys(moveset).length; i++) {
         var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8L") || x.includes("4L" || x.includes("3L") || x.includes("2L") || x.includes("1L")));
         if (temp_move.length > 0) {
             var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status") name += " :lock:";
+            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
             moves.push([temp_move[0].split("L")[1], name]);
         }
     }
@@ -15,13 +16,13 @@ function normalmoves(moveset) {
     return moves;
 }
 
-function formmoves(moveset) {
+function formmoves(moveset, nolock = false) {
     var moves = [];
     for (var i = 0; i < Object.keys(moveset).length; i++) {
         var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8L") || x.includes("7L") || x.includes("6L") || x.includes("5L") || x.includes("4L" || x.includes("3L") || x.includes("2L") || x.includes("1L")));
         if (temp_move.length > 0) {
             var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status") name += " :lock:";
+            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
             moves.push([temp_move[0].split("L")[1], name]);
         }
     }
@@ -30,13 +31,13 @@ function formmoves(moveset) {
 }
 
 
-function megamoves(moveset) {
+function megamoves(moveset, nolock = false) {
     var moves = [];
     for (var i = 0; i < Object.keys(moveset).length; i++) {
         var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("6L") || x.includes("7L"));
         if (temp_move.length > 0) {
             var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status") name += " :lock:";
+            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
             moves.push([temp_move[0].split("L")[1], name]);
         }
     }
@@ -44,13 +45,13 @@ function megamoves(moveset) {
     return moves;
 }
 
-function tmmoves(moveset) {
+function tmmoves(moveset, nolock = false) {
     var moves = [];
     for (var i = 0; i < Object.keys(moveset).length; i++) {
         var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8M"));
         if (temp_move.length > 0) {
             var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status") name += " :lock:";
+            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
             var tmno = movesinfo[Object.keys(moveset)[i]].tm;
             moves.push([tmno, name]);
         }
@@ -59,5 +60,21 @@ function tmmoves(moveset) {
     return moves;
 }
 
+function tmdata(tmid, nolock = false) {
+    var movedata = _.find(movesinfo, { tm: tmid });
+    if (movedata.category == "Status" && nolock == false) movedata.name += " :lock:";
+    return movedata;
+}
 
-module.exports = { normalmoves, megamoves, tmmoves, formmoves };
+function movedata(moveid, nolock = false) {
+    var movedata = _.find(movesinfo, { num: moveid });
+    if (movedata.category == "Status" && nolock == false) movedata.name += " :lock:";
+    return movedata;
+}
+
+function movedataname(name) {
+    var movedata = _.find(movesinfo, { name: name });
+    return movedata;
+}
+
+module.exports = { normalmoves, megamoves, tmmoves, formmoves, tmdata, movedata, movedataname };
