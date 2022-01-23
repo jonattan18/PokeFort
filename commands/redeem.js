@@ -127,7 +127,7 @@ function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) 
     getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
         user.save();
         if (pokemon_shiny == true) {
-            message.channel.send(`You have been given a shiny ${choosen_pokemon["Pokemon Name"]}!`);
+            message.channel.send(`You have been given a Shiny ${choosen_pokemon["Pokemon Name"]}!`);
         }
         else {
             message.channel.send(`You have been given a ${choosen_pokemon["Pokemon Name"]}!`);
