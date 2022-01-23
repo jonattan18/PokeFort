@@ -21,7 +21,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 function buytm(message, args, pokemons) {
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
-        if (user.PokeCredits < 2000) return message.channel.send("You don't have enough PokeCredits to buy this TM!");
+        if (user.PokeCredits < 500) return message.channel.send("You don't have enough PokeCredits to buy this TM!");
         getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
             var user_pokemons = pokemons_from_database;
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
@@ -35,7 +35,7 @@ function buytm(message, args, pokemons) {
             if (selected_pokemon.TmMoves.includes(move_data.num)) return message.channel.send("You already have this TM!");
 
             selected_pokemon.TmMoves.push(move_data.num);
-            user.PokeCredits -= 2000;
+            user.PokeCredits -= 500;
 
             user.save().then(() => {
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
