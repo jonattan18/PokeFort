@@ -8,6 +8,8 @@ const PokemonSchema = new mongoose.Schema({
                 Experience: Number,
                 Level: Number,
                 Nature: Number,
+                Moves: [],
+                TMOVES: [],
                 IV: [Number, Number, Number, Number, Number, Number],
                 Shiny: Boolean,
                 Reason: String,
