@@ -62,13 +62,11 @@ function tmmoves(moveset, nolock = false) {
 
 function tmdata(tmid, nolock = false) {
     var movedata = _.find(movesinfo, { tm: tmid });
-    if (movedata.category == "Status" && nolock == false) movedata.name += " :lock:";
     return movedata;
 }
 
 function movedata(moveid, nolock = false) {
     var movedata = _.find(movesinfo, { num: moveid });
-    if (movedata.category == "Status" && nolock == false) movedata.name += " :lock:";
     return movedata;
 }
 

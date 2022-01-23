@@ -64,7 +64,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (selected_pokemon.TmMoves != undefined && selected_pokemon.TmMoves.length > 0) {
                 var tm_moves = "";
                 for (var i = 0; i < selected_pokemon.TmMoves.length; i++) {
-                    var move_name = movesparser.movedata(selected_pokemon.TmMoves[i]).name;
+                    var move_data = movesparser.movedata(selected_pokemon.TmMoves[i]);
+                    if(move_data.category == "Status") var move_name = move_data.name + " :lock:"
+                    else var move_name = move_data.name
                     tm_moves += `${move_name}\n`;
                 }
                 embed.addField("Available TMs", tm_moves, true);
