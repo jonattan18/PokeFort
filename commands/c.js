@@ -5,6 +5,9 @@ const _ = require('lodash'); // For utils
 const user_model = require('../models/user');
 const prompt_model = require('../models/prompt');
 
+// Config
+const config = require('../config/config.json');
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length < 2) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to use trade.`); }
@@ -55,15 +58,16 @@ function add(message, args, prompt, user_data) {
     message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
         var new_embed = message_old.embeds[0];
         if (current_user == 1) {
-            var msg = get_message(current_user, prompt, new_embed.fields[0].value, new_credit);
-            new_embed.fields[0].value = '```' + msg + '```';
+            var user_items = prompt.Trade.User1Items;
+            var last_index = parseInt((user_items.length - 1) / config.TRADE_POKEMON_PER_PAGE);
+            var msg = get_message(current_user, prompt, new_embed.fields[last_index].value, new_credit);
+            new_embed.fields[last_index].value = '```' + msg + '```';
         } else {
-            var msg = get_message(current_user, prompt, new_embed.fields[1].value, new_credit);
-            new_embed.fields[1].value = '```' + msg + '```';
+            var msg = get_message(current_user, prompt, new_embed.fields[new_embed.fields.length - 1].value, new_credit);
+            new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
         message_old.edit(new_embed);
     }).catch(console.error);
-
 }
 
 // Function to remove credits from trade.
@@ -98,11 +102,13 @@ function remove(message, args, prompt) {
     message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
         var new_embed = message_old.embeds[0];
         if (current_user == 1) {
-            var msg = get_message(current_user, prompt, new_embed.fields[0].value, new_credit);
-            new_embed.fields[0].value = '```' + msg + '```';
+            var user_items = prompt.Trade.User1Items;
+            var last_index = parseInt((user_items.length - 1) / config.TRADE_POKEMON_PER_PAGE);
+            var msg = get_message(current_user, prompt, new_embed.fields[last_index].value, new_credit);
+            new_embed.fields[last_index].value = '```' + msg + '```';
         } else {
-            var msg = get_message(current_user, prompt, new_embed.fields[1].value, new_credit);
-            new_embed.fields[1].value = '```' + msg + '```';
+            var msg = get_message(current_user, prompt, new_embed.fields[new_embed.fields.length - 1].value, new_credit);
+            new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
         message_old.edit(new_embed);
     }).catch(console.error);
@@ -129,7 +135,7 @@ function get_message(current_user, prompt, embed_field, new_credit) {
     if (current_user == 1) {
         var redeems = prompt.Trade.Redeems.User1 == undefined ? 0 : prompt.Trade.Redeems.User1;
         var shards = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
-        var line_counter = embed_field.split(/\r\n|\r|\n/).length
+        var line_counter = prompt.Trade.User1Items.length + 1;
         if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Credits\n`; line_counter++; }
         if (redeems > 0) { extra_msg += `${line_counter} | ${redeems} Redeems\n`; line_counter++; }
         if (shards > 0) { extra_msg += `${line_counter} | ${shards} Shards\n`; line_counter++; }
@@ -137,7 +143,7 @@ function get_message(current_user, prompt, embed_field, new_credit) {
     if (current_user == 2) {
         var redeems = prompt.Trade.Redeems.User2 == undefined ? 0 : prompt.Trade.Redeems.User2;
         var shards = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
-        var line_counter = embed_field.split(/\r\n|\r|\n/).length;
+        var line_counter = prompt.Trade.User2Items.length + 1;
         if (new_credit > 0) { extra_msg += `${line_counter} | ${new_credit} Credits\n`; line_counter++; }
         if (redeems > 0) { extra_msg += `${line_counter} | ${redeems} Redeems\n`; line_counter++; }
         if (shards > 0) { extra_msg += `${line_counter} | ${shards} Shards\n`; line_counter++; }

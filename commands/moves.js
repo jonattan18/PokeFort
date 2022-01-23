@@ -69,7 +69,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var pad = "000"
         var pokedex_num = pad.substring(0, pad.length - str.length) + str;
         if (form == "") { var image_name = pokedex_num + '.png'; }
-        else if (isshiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '-Shiny.png'; isshiny = false; }
+        else if (isshiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '-Shiny.png'; }
         else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
         var image_url = './assets/images/' + image_name;
 
@@ -88,19 +88,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-                var pokemon_moves = selected_pokemon.Move;
+                var pokemon_moves = selected_pokemon.Moves == undefined ? [] : selected_pokemon.Moves;
 
-                if (pokemon_moves == undefined) { var embed_current_moves = ["Move 1: None", "Move 2: None", "Move 3: None", "Move 4: None"]; }
+                if (pokemon_moves.length == 0) { var embed_current_moves = ["Move 1: None", "Move 2: None", "Move 3: None", "Move 4: None"]; }
                 else {
-                    var embed_current_moves = []
-                    if (embed_current_moves[0] == undefined || embed_current_moves[0] == null) embed_current_moves[0] = "Move 1: None";
-                    else embed_current_moves[0] = "Move 1: " + moves_details.find(it => it.num == pokemon_move[0])[0]["name"];
-                    if (embed_current_moves[1] == undefined || embed_current_moves[1] == null) embed_current_moves[1] = "Move 2: None";
-                    else embed_current_moves[1] = "Move 2: " + moves_details.find(it => it.num == pokemon_move[1])[0]["name"];
-                    if (embed_current_moves[2] == undefined || embed_current_moves[2] == null) embed_current_moves[2] = "Move 3: None";
-                    else embed_current_moves[2] = "Move 3: " + moves_details.find(it => it.num == pokemon_move[2])[0]["name"];
-                    if (embed_current_moves[3] == undefined || embed_current_moves[3] == null) embed_current_moves[3] = "Move 4: None";
-                    else embed_current_moves[3] = "Move 4: " + moves_details.find(it => it.num == pokemon_move[3])[0]["name"];
+                    if (pokemon_moves[0] == undefined || pokemon_moves[0] == null) embed_current_moves[0] = "Move 1: None";
+                    else embed_current_moves[0] = "Move 1: " + pokemon_moves[0];
+                    if (pokemon_moves[1] == undefined || pokemon_moves[1] == null) embed_current_moves[1] = "Move 2: None";
+                    else embed_current_moves[1] = "Move 2: " + pokemon_moves[1];
+                    if (pokemon_moves[2] == undefined || pokemon_moves[2] == null) embed_current_moves[2] = "Move 3: None";
+                    else embed_current_moves[2] = "Move 3: " + pokemon_moves[2];
+                    if (pokemon_moves[3] == undefined || pokemon_moves[3] == null) embed_current_moves[3] = "Move 4: None";
+                    else embed_current_moves[3] = "Move 4: " + pokemon_moves[3];
                 }
                 pokemon_embed(selected_pokemon, embed_current_moves)
             });

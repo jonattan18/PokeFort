@@ -8,6 +8,9 @@ const prompt_model = require('../models/prompt');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
+// Config
+const config = require('../config/config.json');
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length < 2) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to use trade.`); }
@@ -53,11 +56,18 @@ function add(bot, message, args, pokemons, prompt) {
             processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
         }
 
-        var new_field = "";
-        for (let i = 0; i < processed_add_items.length; i++) {
-            const element = processed_add_items[i];
-            update_items = _.concat(update_items, element[1]);
-            new_field += `${i + 1} | Level ${processed_add_items[i][1].Level} ${element[0]}\n`;
+        var new_field = [];
+        var last_num = 0;
+        var number_of_chunks = config.TRADE_POKEMON_PER_PAGE;
+        var chunked_array = chunkArray(processed_add_items, number_of_chunks);
+        for (let j = 0; j < chunked_array.length; j++) {
+            for (let i = 0; i < chunked_array[j].length; i++) {
+                const element = chunked_array[j][i];
+                update_items = _.concat(update_items, element[1]);
+                if (new_field[j] == undefined) { new_field[j] = ""; }
+                new_field[j] += `${number_of_chunks * j + i + 1} | Level ${chunked_array[j][i][1].Level} ${element[0]}\n`;
+                last_num = number_of_chunks * j + i + 1;
+            }
         }
 
         if ((user_pokemons.length - update_items.length) == 0) return message.channel.send('You should atleast spare one pokemon.')
@@ -71,6 +81,8 @@ function add(bot, message, args, pokemons, prompt) {
 
             var user1name = "";
             var user2name = "";
+            var tag1 = "";
+            var tag2 = "";
             var extra_msg = "";
 
             // Extra Messages
@@ -78,33 +90,62 @@ function add(bot, message, args, pokemons, prompt) {
                 var credits = prompt.Trade.Credits.User1 == undefined ? 0 : prompt.Trade.Credits.User1;
                 var redeems = prompt.Trade.Redeems.User1 == undefined ? 0 : prompt.Trade.Redeems.User1;
                 var shards = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
-                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                var num_of_lines = last_num + 1;
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+                new_field[new_field.length - 1] += extra_msg;
             }
             if (current_user == 2) {
                 var credits = prompt.Trade.Credits.User2 == undefined ? 0 : prompt.Trade.Credits.User2;
                 var redeems = prompt.Trade.Redeems.User2 == undefined ? 0 : prompt.Trade.Redeems.User2;
                 var shards = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
-                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                var num_of_lines = last_num + 1;
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+                new_field[new_field.length - 1] += extra_msg;
             }
 
             bot.users.fetch(user1id).then(user_data => {
                 user1name = user_data.username;
+                tag1 = user_data.discriminator;
 
                 bot.users.fetch(user2id).then(user_data => {
                     user2name = user_data.username;
+                    tag2 = user_data.discriminator;
 
                     message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
                         var new_embed = message_old.embeds[0];
                         if (current_user == 1) {
-                            new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                            if (new_field.length > 0) {
+                                var opp_user_fields = [];
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user2name + '#' + tag2)) {
+                                        opp_user_fields.push(new_embed.fields[i]);
+                                    }
+                                }
+                                for (i = 0; i < new_field.length; i++) {
+                                    new_embed.fields[i] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
+                                }
+                                for (i = 0; i < opp_user_fields.length; i++) {
+                                    new_embed.fields[new_field.length + i] = { name: opp_user_fields[i].name, value: opp_user_fields[i].value, inline: false };
+                                }
+                            }
+                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
                         } else {
-                            new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                            if (new_field.length > 0) {
+                                var opp_user_fields = [];
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user1name)) {
+                                        opp_user_fields.push(new_embed.fields[i]);
+                                    }
+                                }
+                                for (i = 0; i < new_field.length; i++) {
+                                    new_embed.fields[opp_user_fields.length + i] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
+                                }
+                            }
+                            else new_embed.fields[0] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field + '```', inline: false };
                         }
                         message_old.edit(new_embed);
                     }).catch(console.error);
@@ -144,12 +185,18 @@ function remove(bot, message, args, pokemons, prompt) {
             processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
         }
 
-        var new_field = "";
-        if (processed_add_items.length == 0) { new_field = ' ' }
-        for (let i = 0; i < processed_add_items.length; i++) {
-            const element = processed_add_items[i];
-            update_items = _.concat(update_items, element[1]);
-            new_field += `${i + 1} | Level ${processed_add_items[i][1].Level} ${element[0]}\n`;
+        var new_field = [];
+        var last_num = 0;
+        var number_of_chunks = 5;
+        var chunked_array = chunkArray(processed_add_items, number_of_chunks);
+        for (let j = 0; j < chunked_array.length; j++) {
+            for (let i = 0; i < chunked_array[j].length; i++) {
+                const element = chunked_array[j][i];
+                update_items = _.concat(update_items, element[1]);
+                if (new_field[j] == undefined) { new_field[j] = ""; }
+                new_field[j] += `${number_of_chunks * j + i + 1} | Level ${chunked_array[j][i][1].Level} ${element[0]}\n`;
+                last_num = number_of_chunks * j + i + 1;
+            }
         }
 
         if (current_user == 1) prompt.Trade.User1Items = update_items;
@@ -161,6 +208,8 @@ function remove(bot, message, args, pokemons, prompt) {
 
             var user1name = "";
             var user2name = "";
+            var tag1 = "";
+            var tag2 = "";
             var extra_msg = "";
 
             // Extra Messages
@@ -168,33 +217,77 @@ function remove(bot, message, args, pokemons, prompt) {
                 var credits = prompt.Trade.Credits.User1 == undefined ? 0 : prompt.Trade.Credits.User1;
                 var redeems = prompt.Trade.Redeems.User1 == undefined ? 0 : prompt.Trade.Redeems.User1;
                 var shards = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
-                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                var num_of_lines = last_num + 1;
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+                new_field[new_field.length - 1] += extra_msg;
             }
             if (current_user == 2) {
                 var credits = prompt.Trade.Credits.User2 == undefined ? 0 : prompt.Trade.Credits.User2;
                 var redeems = prompt.Trade.Redeems.User2 == undefined ? 0 : prompt.Trade.Redeems.User2;
                 var shards = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
-                var num_of_lines = new_field.split(/\r\n|\r|\n/).length
+                var num_of_lines = last_num + 1;
                 if (credits > 0) { extra_msg += `${num_of_lines} | ${credits} Credits\n`; num_of_lines++; }
                 if (redeems > 0) { extra_msg += `${num_of_lines} | ${redeems} Redeems\n`; num_of_lines++; }
                 if (shards > 0) { extra_msg += `${num_of_lines} | ${shards} Shards\n`; num_of_lines++; }
+                new_field[new_field.length - 1] += extra_msg;
             }
 
             bot.users.fetch(user1id).then(user_data => {
                 user1name = user_data.username;
+                tag1 = user_data.discriminator;
 
                 bot.users.fetch(user2id).then(user_data => {
                     user2name = user_data.username;
+                    tag2 = user_data.discriminator;
 
                     message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
                         var new_embed = message_old.embeds[0];
                         if (current_user == 1) {
-                            new_embed.fields[0] = { name: `${user1name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                            if (new_field.length > 0) {
+                                var opp_user_fields = [];
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user2name + '#' + tag2)) {
+                                        opp_user_fields.push(new_embed.fields[i]);
+                                    }
+                                }
+                                for (i = 0; i < new_field.length; i++) {
+                                    new_embed.fields[i] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
+                                }
+                                for (i = 0; i < opp_user_fields.length; i++) {
+                                    new_embed.fields[new_field.length + i] = { name: opp_user_fields[i].name, value: opp_user_fields[i].value, inline: false };
+                                }
+
+                                // Check for empty fields.
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user2name + '#' + tag2) && new_embed.fields[i].value == '``` ```') {
+                                        new_embed.fields.splice(i, 1);
+                                    }
+                                }
+                            }
+                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
                         } else {
-                            new_embed.fields[1] = { name: `${user2name}'s is offering`, value: '```' + new_field + extra_msg + '```', inline: false };
+                            if (new_field.length > 0) {
+                                var opp_user_fields = [];
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user1name)) {
+                                        opp_user_fields.push(new_embed.fields[i]);
+                                    }
+                                    else new_embed.fields.splice(i, 1);
+                                }
+                                for (i = 0; i < new_field.length; i++) {
+                                    new_embed.fields[opp_user_fields.length + i] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
+                                }
+
+                                // Check for empty fields.
+                                for (i = 0; i < new_embed.fields.length; i++) {
+                                    if (new_embed.fields[i].name.includes(user2name + '#' + tag2) && new_embed.fields[i].value == '``` ```') {
+                                        new_embed.fields.splice(i, 1);
+                                    }
+                                }
+                            }
+                            else new_embed.fields[0] = { name: `${user1name + '#' + tag1}'s is offering`, value: '```' + new_field + '```', inline: false };
                         }
                         message_old.edit(new_embed);
                     }).catch(console.error);
@@ -636,6 +729,21 @@ function pokemon_filter(message, args, user_pokemons, pokemons) {
         }
         else { return error[1] = [false, "Invalid argument syntax."] }
     }
+}
+
+// Chunk array into equal parts.
+function chunkArray(myArray, chunk_size) {
+    var index = 0;
+    var arrayLength = myArray.length;
+    var tempArray = [];
+
+    for (index = 0; index < arrayLength; index += chunk_size) {
+        myChunk = myArray.slice(index, index + chunk_size);
+        // Do something if you want with the group
+        tempArray.push(myChunk);
+    }
+
+    return tempArray;
 }
 
 function onlyNumbers(array) {

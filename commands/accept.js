@@ -32,19 +32,23 @@ function trade(bot, message, prefix, prompt) {
 
     var user1name = "";
     var user2name = "";
+    var tag1 = "";
+    var tag2 = "";
 
     bot.users.fetch(user1id.toString()).then(user_data => {
         user1name = user_data.username;
+        tag1 = user_data.discriminator;
 
         bot.users.fetch(user2id.toString()).then(user_data => {
             user2name = user_data.username;
+            tag2 = user_data.discriminator;
 
             var embed = new Discord.MessageEmbed();
             embed.setTitle(`Trade between ${user1name} and ${user2name}`);
             embed.setDescription(`For instructions on how to trade, see ${prefix}help trade.`)
             embed.setColor(message.member.displayHexColor);
-            embed.addField(`${user1name}'s is offering`, '``` ```', false);
-            embed.addField(`${user2name}'s is offering`, '``` ```', false);
+            embed.addField(`${user1name + '#' + tag1}'s is offering`, '``` ```', false);
+            embed.addField(`${user2name + '#' + tag2}'s is offering`, '``` ```', false);
             message.channel.send(embed).then(msg => {
                 prompt.Trade.Accepted = true;
                 prompt.Trade.MessageID = msg.id;
