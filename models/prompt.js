@@ -4,9 +4,9 @@ const config = require('../config/config.json');
 const PromptSchema = new mongoose.Schema({
     ChannelID: Number,
     PromptType: String,
-    UserID : {
-        User1ID : String,
-        User2ID : String
+    UserID: {
+        User1ID: String,
+        User2ID: String
     },
     Recycle: {
         Pokemons: Array
@@ -33,6 +33,11 @@ const PromptSchema = new mongoose.Schema({
             User2: Number
         },
         MessageID: String
+    },
+    Duel: {
+        Accepted: Boolean,
+        User1Pokemon: String,
+        User2Pokemon: String
     },
     createdAt: { type: Date, expires: config.PROMPT_EXPIRATION_SECONDS, default: Date.now }
 });

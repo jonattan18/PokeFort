@@ -34,7 +34,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);
         if (pokemon_moveset.length == 0) return message.channel.send("No TM found for this pokemon.");
 
-        var chunked_moveset = chunkArray(pokemon_moveset, 15);
+        var chunked_moveset = chunkArray(pokemon_moveset, 20);
         var global_embed = [];
         var old_chunked_moveset_count = 1;
         for (a = 0; a < chunked_moveset.length; a++) {
@@ -95,19 +95,19 @@ function get_pokemon_move(pokemon_id, pokemons) {
     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
 
     if (pokemon_db["Alternate Form Name"] == "Alola") {
-        temp_name = pokemon_db["Pokemon Name"] + "alola";
+        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase() + "alola";
         var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
         var learnset = pokemon_moves.learnset;
         moveset = movesparser.tmmoves(learnset);
     }
     else if (pokemon_db["Alternate Form Name"] == "Galar") {
-        temp_name = pokemon_db["Pokemon Name"] + "galar";
+        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase() + "galar";
         var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
         var learnset = pokemon_moves.learnset;
         moveset = movesparser.tmmoves(learnset);
     }
     else {
-        temp_name = pokemon_db["Pokemon Name"];
+        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase();
         var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
         var learnset = pokemon_moves.learnset;
         moveset = movesparser.tmmoves(learnset);

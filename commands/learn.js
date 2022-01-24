@@ -74,7 +74,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (selected_pokemon.Moves != undefined && selected_pokemon.Moves[i + 1] != undefined) {
                         var move_name = selected_pokemon.Moves[i + 1];
                         embed.addField(`${move_name}`, `${prefix}replace ${i + 1}`, true)
-                    } else embed.addField(`None`, `${prefix}replace ${i + 1}`, true)
+                    } else embed.addField(`Tackle`, `${prefix}replace ${i + 1}`, true)
                 }
                 message.channel.send(embed);
             });

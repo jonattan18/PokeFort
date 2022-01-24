@@ -19,10 +19,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (prompt.UserID.User2ID == message.author.id && prompt.Trade.Accepted == false) {
                     return trade(bot, message, prefix, prompt);
                 }
-            } else return message.channel.send('No prompt asked for to use ``accept`` command.');
+            }
+            else if (prompt.PromptType == "Duel") {
+                if (prompt.UserID.User2ID == message.author.id && prompt.Duel.Accepted == false) {
+                    return duel(bot, message, prefix, prompt);
+                }
+            }
+            else return message.channel.send('No prompt asked for to use ``accept`` command.');
 
         });
     });
+}
+
+// Function to accept and start duel.
+function duel(bot, message, prefix, prompt) {
 }
 
 // Function to accept and start trade.
