@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args) => {
 
     if (data) {
 
-        console.log(args)
+        message.channel.send(args)
       //  guildModel.findOneAndUpdate({ GuildID: message.guild.id }, { Prefix: args[0] }, function (err, user) {
       //      if(err){console.log(err)}
       //  });
