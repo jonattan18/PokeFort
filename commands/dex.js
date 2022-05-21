@@ -447,6 +447,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
     var global_embed = [];
     var old_chunked_dex_count = 1;
     var not_caught_count = 0;
+    var no_of_caught = 0;
     for (a = 0; a < chunked_dex.length; a++) {
         if (chunked_dex[a] == undefined) break;
         // Chunk filter
@@ -463,7 +464,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
 
         for (i = 0; i < chunked_dex[a].length; i++) {
             if (user_index.includes(chunked_index[i])) {
-                var no_of_caught = user_index.filter(x => x == chunked_index[i]).length
+                no_of_caught = user_index.filter(x => x == chunked_index[i]).length
                 embed.addField(field_prefix + chunked_dex[a][i]["Pokemon Name"], `${no_of_caught} caught!  :white_check_mark:`, true);
             } else {
                 not_caught_count++;
