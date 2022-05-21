@@ -57,6 +57,7 @@ client.on('message', async (message) => {
     var prefix = config.DEFAULT_PREFIX;
     var user_available = false;
     var global_user = null;
+    var guild_redirect_spawn = null;
 
     // Message Processing
     var messageArray = message.content.split(' ');
@@ -75,6 +76,7 @@ client.on('message', async (message) => {
             write_data.save();
         }
         else prefix = guild.Prefix.toLowerCase();
+        if(guild.hasOwnProperty('Redirect'))  guild_redirect_spawn = guild.Redirect;
     });
 
     //Getting the data from the user model
@@ -141,7 +143,7 @@ client.on('message', async (message) => {
                     if (spawn_limit == message_count) {
                         spawn_limit = 0;
                         message_count = 0;
-                        spawn_pokemon(message, prefix); // Spawn Pokemon
+                        spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
                     }
                     channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
                         if (err) { console.log(err) }
@@ -276,7 +278,7 @@ function redirect_command(command, prefix) {
 }
 
 // Pokemon Spawn System
-function spawn_pokemon(message, prefix) {
+function spawn_pokemon(message, prefix, guild_redirect_spawn) {
 
     // Initialize Variables
     let random = getRandomInt(0, 1000);
@@ -357,7 +359,8 @@ function spawn_pokemon(message, prefix) {
     message.channel.send(embed);
 
     // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
+    var channel_to_send = guild_redirect_spawn == null ? message.channel.id : guild_redirect_spawn;
+    channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
 }

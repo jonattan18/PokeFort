@@ -5,6 +5,7 @@ const GuildSchema = new mongoose.Schema({
     Prefix: {type: String, default: config.DEFAULT_PREFIX},
     GuildID: String,
     GuildName: String,
+    Redirect: String,
     DateJoined: {type: Number, default: Date.now()}
 });
 
