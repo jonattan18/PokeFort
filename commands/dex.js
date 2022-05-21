@@ -476,9 +476,9 @@ function create_pagination(message, dex_pokemons, description_string = "", field
     }
 
     for (i = 0; i < global_embed.length; i++) {
-        if (total_pokemons_uncaught > 0) { global_embed[i].setDescription(`You have not caught ${total_pokemons_uncaught} ${description_string}pokemons.\n`); }
+        if (total_pokemons_uncaught > 0) { global_embed[i].setDescription(`You have caught ${dex_pokemons.length - total_pokemons_uncaught.length} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
         else if (not_caught_count == 0) { global_embed[i].setDescription("You have caught all pokemons."); }
-        else { global_embed[i].setDescription(`You have not caught ${not_caught_count} ${description_string}pokemons.\n`); }
+        else { global_embed[i].setDescription(`You have caught ${dex_pokemons.length - total_pokemons_uncaught.length} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
     }
 
     if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }
