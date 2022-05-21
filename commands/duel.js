@@ -32,15 +32,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         User2ID: user2id
                     },
                     Duel: {
-                        Accepted: false,
-                        User1Pokemon: "",
-                        User2Pokemon: ""
+                        Accepted: false
                     }
                 });
 
                 update_data.save().then(result => {
                     bot.users.fetch(user1id).then(user_data => {
-                        message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to duel! Type .accept to start the duel or .deny to deny the duel request.`);
+                        message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to duel! Type ${prefix}accept to start the duel or ${prefix}deny to deny the duel request.`);
                     });
                 });
             });

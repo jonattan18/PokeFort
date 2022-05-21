@@ -36,8 +36,7 @@ const PromptSchema = new mongoose.Schema({
     },
     Duel: {
         Accepted: Boolean,
-        User1Pokemon: String,
-        User2Pokemon: String
+        BattleData: Object
     },
     createdAt: { type: Date, expires: config.PROMPT_EXPIRATION_SECONDS, default: Date.now }
 });

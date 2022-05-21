@@ -140,4 +140,16 @@ function pokemondata(args, pokemons) {
     }
 }
 
-module.exports = { getallpokemon, insertpokemon, deletepokemon, pokemondata };
+function imagefromid(pokemonid, pokemons) {
+    var pokemon = pokemons.filter(it => it["Pokemon Id"] === pokemonid);
+    pokemon = pokemon[0];
+    var str = "" + pokemon["Pokedex Number"]
+    var pad = "000"
+    var pokedex_num = pad.substring(0, pad.length - str.length) + str;
+    if (pokemon["Alternate Form Name"] == "NULL") { var image_name = pokedex_num + '.png'; }
+    else { var image_name = pokedex_num + '-' + pokemon["Alternate Form Name"].replace(" ", "-") + '.png'; }
+    var image_url = './assets/images/' + image_name;
+    return image_url;
+}
+
+module.exports = { getallpokemon, insertpokemon, deletepokemon, pokemondata, imagefromid };

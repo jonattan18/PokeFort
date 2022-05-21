@@ -42,7 +42,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 update_data.save().then(result => {
                     bot.users.fetch(user1id).then(user_data => {
-                        message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to trade! Type .accept to start the trade or .deny to deny the trade request.`);
+                        message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to trade! Type ${prefix}accept to start the trade or ${prefix}deny to deny the trade request.`);
                     });
                 });
             });
