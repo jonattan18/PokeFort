@@ -183,6 +183,7 @@ function change_trade(message, trade_prompt) {
                         for (i = 0; i < user_1_items.length; i++) {
                             var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_1_items[i]))[0];
                             if (user_pokemon_to_add != undefined) {
+                                user_pokemon_to_add.Reason = "Traded";
                                 pokemons_to_delete.push(user_pokemon_to_add._id);
                                 pokemons_to_add.push(user_pokemon_to_add);
                             }
@@ -211,6 +212,7 @@ function change_trade(message, trade_prompt) {
                         for (i = 0; i < user_2_items.length; i++) {
                             var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_2_items[i]))[0];
                             if (user_pokemon_to_add != undefined) {
+                                user_pokemon_to_add.Reason = "Traded";
                                 pokemons_to_delete.push(user_pokemon_to_add._id);
                                 pokemons_to_add.push(user_pokemon_to_add);
                             }
