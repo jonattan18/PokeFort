@@ -37,7 +37,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (args[0] == "--c" || args[0] == "--caught") { dex_caught(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--uc" || args[0] == "--uncaught") { dex_uncaught(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--od" || args[0] == "--orderd") { dex_orderd(bot, message, args, prefix, user_available, pokemons); return; }
-        if (args[0] == "--t" || args[0] == "--traded") { dex_traded(bot, message, args, prefix, user_available, pokemons); return; }
 
         // Forms
         var isshiny = false;
@@ -412,21 +411,6 @@ function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
     dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons);
 
     create_pagination(message, dex_pokemons, "", "", 0, 0, true);
-}
-
-// Function to display only traded pokemons.
-function dex_traded(bot, message, args, prefix, user_available, pokemons) {
-    var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
-    dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
-    var new_dex_pokemons = [];
-    var user_pokemons = pokemons_from_database.filter(it => it["Reason"] === "Traded");
-    for (var i = 0; i < user_pokemons.length; i++) {
-        var pokemon = dex_pokemons.find(it => it["Pokemon Id"] === user_pokemons[i]["PokemonId"].toString());
-        if (pokemon) new_dex_pokemons.push(pokemon);
-    }
-    new_dex_pokemons = _.uniqBy(new_dex_pokemons, 'Pokemon Id');
-    var total_pokemons_traded = dex_pokemons.length - _.uniq(new_dex_pokemons).length;
-    create_pagination(message, new_dex_pokemons, "", "", 0, total_pokemons_traded);
 }
 
 // Function to create pages in embeds.
