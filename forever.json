@@ -2,7 +2,7 @@
     "uid": "PokeFort",
     "append": true,
     "watch": true,
-    "script": "node index.js",
+    "script": "index.js",
     "sourceDir": "./",
     "logFile": "./forever.log",
     "outFile": "./out.log",
