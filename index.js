@@ -58,6 +58,7 @@ client.on('message', async (message) => {
     var user_available = false;
     var global_user = null;
     var guild_redirect_spawn = null;
+    var channel_data = null;
 
     // Message Processing
     var messageArray = message.content.split(' ');
@@ -79,41 +80,12 @@ client.on('message', async (message) => {
         if (guild != null && guild["Redirect"] !== undefined) { guild_redirect_spawn = guild.Redirect; }
     });
 
-    //Getting the data from the user model
-    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (err) return console.log(err);
-        if (user) { user_available = true; }
-        global_user = user; // To access from outer fields.
-        var issuspend = false; // To check if the user is suspended
-
-        // Suspend Protection
-        if (user != null && user.Suspend.Hours != undefined) {
-            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
-                user.Suspend = undefined;
-                user.save();
-            }
-            else issuspend = true;
-        }
-
-        // Check if the message starts with the prefix.
-        if (message.content.toLowerCase().startsWith(prefix)) {
-            if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
-            cmd = redirect_command(cmd, prefix).slice(prefix.length);
-            if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; }
-            const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
-            if (!commandfile) return;
-            commandfile.run(client, message, args, prefix, user_available, load_pokemons);
-        }
-        else {
-            if (issuspend) return;
-            advance_xp(message, user_available); // Increase XP
-        }
-    });
-
     //#region Catch Sytem
     //check if database exists
-    channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+    await channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
         if (err) console.log(err);
+        channel_data = channel;
+        if (channel && channel.Disabled === true) return;
         // If channel not found create new one.
         if (!channel) {
             let new_channel = new channel_model({
@@ -150,14 +122,46 @@ client.on('message', async (message) => {
                 });
             }
         }
-    })
+    });
     //#endregion
+
+    //Getting the data from the user model
+    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (err) return console.log(err);
+        if (user) { user_available = true; }
+        global_user = user; // To access from outer fields.
+        var issuspend = false; // To check if the user is suspended
+
+        // Suspend Protection
+        if (user != null && user.Suspend.Hours != undefined) {
+            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
+                user.Suspend = undefined;
+                user.save();
+            }
+            else issuspend = true;
+        }
+
+        // Check if the message starts with the prefix.
+        if (message.content.toLowerCase().startsWith(prefix)) {
+            if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
+            cmd = redirect_command(cmd, prefix).slice(prefix.length);
+            if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return;
+            if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; }
+            const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
+            if (!commandfile) return;
+            commandfile.run(client, message, args, prefix, user_available, load_pokemons);
+        }
+        else {
+            if (issuspend) return;
+            advance_xp(message, user_available); // Increase XP
+        }
+    });
 
     //#region Xp Increase
     //check if user database exists
     function advance_xp(message, user_avl) {
         if (user_avl) {
-
+            if (channel_data != null && channel_data.Disabled === true) return;
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
                 //#region Update XP

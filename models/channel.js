@@ -10,6 +10,7 @@ const ChannelSchema = new mongoose.Schema({
     PokemonLevel: Number,
     PokemonNature: Number,
     PokemonIV: Array,
+    Disabled: { type: Boolean, default: false },
     Hint: { type: Number, default: 0 }
 });
 

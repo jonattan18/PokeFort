@@ -23,9 +23,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 
-
-
-
 // Random Value
 function getRandomInt(min, max) {
     min = Math.ceil(min);
