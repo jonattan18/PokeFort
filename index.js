@@ -358,7 +358,8 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
 
     // Updating pokemon to database.
     var channel_to_send = guild_redirect_spawn == null ? message.channel.id : guild_redirect_spawn;
-    message.guild.channels.cache.get(channel_to_send).send(embed);
+    message.channel.send(channel_to_send);
+    message.channels.cache.get(channel_to_send).send(embed);
     channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
