@@ -127,12 +127,10 @@ client.on('message', async (message) => {
         else {
             // Update message count
             // [SPAM SYSTEM]
-
             if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
 
                 //Caching last message user.
                 channel_message_cache[message.channel.id] = message.author.id;
-
                 channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
                     let channel_id = message.channel.id;
                     var message_count = channel.MessageCount + 1;
@@ -145,6 +143,7 @@ client.on('message', async (message) => {
                         message_count = 0;
                         spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
                     }
+
                     channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
                         if (err) { console.log(err) }
                     });
