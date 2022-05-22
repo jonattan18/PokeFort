@@ -9,8 +9,7 @@ module.exports.run = async (bot, message, args) => {
         GuildID: message.guild.id
     });
 
-    if (!args[0]) return message.channel.send('You must tag a channel!');
-    if (args.length > 2) return message.channel.send('Please tag one channel alone!')
+    if (args.length != 1) return message.channel.send('You must tag a channel!');
 
     if (data) {
 
