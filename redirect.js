@@ -5,6 +5,8 @@ module.exports.run = async (bot, message, args) => {
         return message.channel.send("You are not allowed to change the bot's redirect channel!");
     }
 
+    message.channel.send(args)
+
     const data = await guildModel.findOne({
         GuildID: message.guild.id
     });
