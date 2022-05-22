@@ -76,7 +76,7 @@ client.on('message', async (message) => {
             write_data.save();
         }
         else prefix = guild.Prefix.toLowerCase();
-        if(guild != null && guild.hasOwnProperty('Redirect'))  guild_redirect_spawn = guild.Redirect;
+        if (guild != null && guild.hasOwnProperty('Redirect')) guild_redirect_spawn = guild.Redirect;
     });
 
     //Getting the data from the user model
@@ -355,10 +355,10 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     embed.setTitle("A wild pokémon has appeared!")
     embed.setDescription(`Guess the pokémon and type ${prefix}catch <pokémon> to catch it!`)
     embed.setColor("#1cb99a");
-    message.channel.send(embed);
 
     // Updating pokemon to database.
     var channel_to_send = guild_redirect_spawn == null ? message.channel.id : guild_redirect_spawn;
+    client.channels.cache.get(channel_to_send).send(embed);
     channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
         if (err) { console.log(err) }
     });
