@@ -76,7 +76,7 @@ client.on('message', async (message) => {
             write_data.save();
         }
         else prefix = guild.Prefix.toLowerCase();
-        if(guild.hasOwnProperty('Redirect'))  guild_redirect_spawn = guild.Redirect;
+        if(guild != null && guild.hasOwnProperty('Redirect'))  guild_redirect_spawn = guild.Redirect;
     });
 
     //Getting the data from the user model
