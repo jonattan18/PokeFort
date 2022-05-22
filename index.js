@@ -141,6 +141,7 @@ client.on('message', async (message) => {
                     if (spawn_limit == message_count) {
                         spawn_limit = 0;
                         message_count = 0;
+                        message.channel.send(`<@${message.author.id}> has reached the spawn limit.`);
                         spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
                     }
 
