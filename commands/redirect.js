@@ -20,8 +20,8 @@ module.exports.run = async (bot, message, args) => {
         });
     }
     else if (args[0].substring(0, 2) == '<#') {
-        // Remove first two letters and last two letters from string.
-        const channelID = args[0].substring(2, args[0].length - 2);
+        // Remove first two letters and last one letter from a string
+        var channelID = args[0].substring(2, args[0].length - 1);
         guildModel.findOneAndUpdate({ GuildID: message.guild.id }, { Redirect: channelID }, function (err, guild) {
             if (err) { return console.log(err) }
             message.channel.send(`Spawn channel set to ${args[0]}`);
