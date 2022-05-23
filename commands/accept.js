@@ -2,7 +2,6 @@ const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash');
 const mergeImages = require('merge-images-v2');
 const Canvas = require('canvas');
-const Sim = require('pokemon-showdown');
 
 // Models
 const prompt_model = require('../models/prompt');
@@ -47,142 +46,103 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Function to accept and start duel.
 function duel(bot, message, prefix, prompt, pokemons) {
-    stream = new Sim.BattleStream();
-    
-    var user1_hp_info = null;
-    var user2_hp_info = null;
-    var user1_trainer_name = null;
-    var user2_trainer_name = null;
 
-    (async () => {
-        for await (const output of stream) {
-            if (_.startsWith(output, "sideupdate\np1\n|request|")) {
-                var request = JSON.parse(output.split("\n")[2].split("|request|")[1]);
-                var pokemon_name = request.side.pokemon[0].details.split(",")[0].replace("-", " ");
-                var condition = request.side.pokemon[0].condition;
-                user1_trainer_name = request.side.name;
-                user1_hp_info = pokemon_name + " | " + condition + "HP";
-            }
-            else if (_.startsWith(output, "sideupdate\np2\n|request|")) {
-                var request = JSON.parse(output.split("\n")[2].split("|request|")[1]);
-                var pokemon_name = request.side.pokemon[0].details.split(",")[0].replace("-", " ");
-                var condition = request.side.pokemon[0].condition;
-                user2_trainer_name = request.side.name;
-                user2_hp_info = pokemon_name + " | " + condition + "HP";
-            }
-            else if (_.includes(output, "|turn|1")) {
+    // Image generation.
+    var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons);
+    var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons);
 
-                // Image generation.
-                var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons);
-                var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons);
+    mergeImages(["./assets/duel_images/background.jpg",
+        { src: image1_url, x: 40, y: 0, width: 350, height: 350 }, { src: image2_url, x: 500, y: 0, width: 350, height: 350 }], {
+        Canvas: Canvas
+    }).then(b64 => {
+        const img_data = b64.split(',')[1];
+        const img_buffer = new Buffer.from(img_data, 'base64');
+        const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
 
-                mergeImages(["./assets/duel_images/background.jpg",
-                    { src: image1_url, x: 40, y: 0, width: 350, height: 350 }, { src: image2_url, x: 500, y: 0, width: 350, height: 350 }], {
-                    Canvas: Canvas
-                }).then(b64 => {
-                    const img_data = b64.split(',')[1];
-                    const img_buffer = new Buffer.from(img_data, 'base64');
-                    const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-
-                    prompt.Duel.Accepted = true;
-                    prompt.Duel.BattleData = JSON.stringify(stream);
-                    prompt.save().then(() => {
-                        embed = new Discord.MessageEmbed();
-                        embed.attachFiles(image_file)
-                        embed.setImage('attachment://img.jpeg')
-                        embed.setTitle(`${user1_trainer_name.toUpperCase()} VS ${user2_trainer_name.toUpperCase()}`);
-                        embed.addField(`${user1_trainer_name}'s Pokémon`, user1_hp_info, true);
-                        embed.addField(`${user2_trainer_name}'s Pokémon`, user2_hp_info, true);
-                        message.channel.send(embed);
-                    });
-                });
-            }
-        }
-    })();
+        prompt.Duel.Accepted = true;
+        prompt.Duel.BattleData = JSON.stringify(stream);
+        prompt.save().then(() => {
+            embed = new Discord.MessageEmbed();
+            embed.attachFiles(image_file)
+            embed.setImage('attachment://img.jpeg')
+            embed.setTitle(`${user1_trainer_name.toUpperCase()} VS ${user2_trainer_name.toUpperCase()}`);
+            embed.addField(`${user1_trainer_name}'s Pokémon`, user1_hp_info, true);
+            embed.addField(`${user2_trainer_name}'s Pokémon`, user2_hp_info, true);
+            message.channel.send(embed);
+        });
+    });
 
     var user1id = prompt.UserID.User1ID;
     var user2id = prompt.UserID.User2ID;
 
-    var user1name = "";
-    var user2name = "";
+    var user1name = prompt.Duel.User1name;
+    var user2name = prompt.Duel.User2name;
+
     var user1pokemon = null;
     var user2pokemon = null;
+
     var user1pokemon_moves = [];
     var user2pokemon_moves = [];
 
-    bot.users.fetch(user1id.toString()).then(user_data => {
-        user1name = user_data.username;
 
-        bot.users.fetch(user2id.toString()).then(user_data => {
-            user2name = user_data.username;
+    user_model.findOne({ UserID: user1id }, (err, user1) => {
+        user_model.findOne({ UserID: user2id }, (err, user2) => {
 
-            user_model.findOne({ UserID: user1id }, (err, user1) => {
+            getPokemons.getallpokemon(user1id).then(pokemons_from_database => {
+                var user_pokemons = pokemons_from_database;
+                user1pokemon = user_pokemons.filter(it => it._id == user1.Selected)[0];
 
-                user_model.findOne({ UserID: user2id }, (err, user2) => {
+                getPokemons.getallpokemon(user2id).then(pokemons_from_database => {
+                    var user_pokemons = pokemons_from_database;
+                    user2pokemon = user_pokemons.filter(it => it._id == user2.Selected)[0];
 
-                    getPokemons.getallpokemon(user1id).then(pokemons_from_database => {
-                        var user_pokemons = pokemons_from_database;
-                        user1pokemon = user_pokemons.filter(it => it._id == user1.Selected)[0];
+                    var user1pokemon_name = get_pokemon_full_name(user1pokemon.PokemonId, pokemons);
+                    var user2pokemon_name = get_pokemon_full_name(user2pokemon.PokemonId, pokemons);
 
-                        getPokemons.getallpokemon(user2id).then(pokemons_from_database => {
-                            var user_pokemons = pokemons_from_database;
-                            user2pokemon = user_pokemons.filter(it => it._id == user2.Selected)[0];
+                    for (var i = 0; i < 4; i++) {
+                        if (user1pokemon.Moves != undefined && user1pokemon.Moves[i + 1] != undefined) {
+                            var move_name = user1pokemon.Moves[i + 1].replace(" (TM)", "");
+                            if (moveparser.movedataname(move_name).category != "Status") user1pokemon_moves.push(move_name);
+                            else user1pokemon_moves.push(`Tackle`);
+                        } else user1pokemon_moves.push(`Tackle`)
+                    }
 
-                            var user1pokemon_name = get_pokemon_full_name(user1pokemon.PokemonId, pokemons);
-                            var user2pokemon_name = get_pokemon_full_name(user2pokemon.PokemonId, pokemons);
+                    for (var i = 0; i < 4; i++) {
+                        if (user2pokemon.Moves != undefined && user2pokemon.Moves[i + 1] != undefined) {
+                            var move_name = user2pokemon.Moves[i + 1].replace(" (TM)", "");
+                            if (moveparser.movedataname(move_name).category != "Status") user2pokemon_moves.push(move_name);
+                            else user2pokemon_moves.push(`Tackle`);
+                        } else user2pokemon_moves.push(`Tackle`)
+                    }
 
-                            for (var i = 0; i < 4; i++) {
-                                if (user1pokemon.Moves != undefined && user1pokemon.Moves[i + 1] != undefined) {
-                                    var move_name = user1pokemon.Moves[i + 1].replace(" (TM)", "");
-                                    if (moveparser.movedataname(move_name).category != "Status") user1pokemon_moves.push(move_name);
-                                    else user1pokemon_moves.push(`Tackle`);
-                                } else user1pokemon_moves.push(`Tackle`)
-                            }
+                    var player1 = {
+                        name: user1name,
+                        team: [{
+                            "name": "",
+                            "species": user1pokemon_name,
+                            "gender": "",
+                            "item": "",
+                            "ability": "",
+                            "nature": nature_of(user1pokemon.Nature),
+                            "level": user1pokemon.Level,
+                            "moves": user1pokemon_moves
+                        }]
+                    }
 
-                            for (var i = 0; i < 4; i++) {
-                                if (user2pokemon.Moves != undefined && user2pokemon.Moves[i + 1] != undefined) {
-                                    var move_name = user2pokemon.Moves[i + 1].replace(" (TM)", "");
-                                    if (moveparser.movedataname(move_name).category != "Status") user2pokemon_moves.push(move_name);
-                                    else user2pokemon_moves.push(`Tackle`);
-                                } else user2pokemon_moves.push(`Tackle`)
-                            }
+                    var player2 = {
+                        name: user2name,
+                        team: [{
+                            "name": "",
+                            "species": user2pokemon_name,
+                            "gender": "",
+                            "item": "",
+                            "ability": "",
+                            "nature": nature_of(user1pokemon.Nature),
+                            "level": user2pokemon.Level,
+                            "moves": user2pokemon_moves
+                        }]
+                    }
 
-                            var player1 = {
-                                name: user1name,
-                                team: [{
-                                    "name": "",
-                                    "species": user1pokemon_name,
-                                    "gender": "",
-                                    "item": "",
-                                    "ability": "",
-                                    "nature": nature_of(user1pokemon.Nature),
-                                    "level": user1pokemon.Level,
-                                    "moves": user1pokemon_moves
-                                }]
-                            }
-
-                            var player2 = {
-                                name: user2name,
-                                team: [{
-                                    "name": "",
-                                    "species": user2pokemon_name,
-                                    "gender": "",
-                                    "item": "",
-                                    "ability": "",
-                                    "nature": nature_of(user1pokemon.Nature),
-                                    "level": user2pokemon.Level,
-                                    "moves": user2pokemon_moves
-                                }]
-                            }
-
-                            stream.write(`>start {"formatid":"gen8ubers"}`);
-                            stream.write(`>player p1 ${JSON.stringify(player1)}`);
-                            stream.write(`>player p2 ${JSON.stringify(player2)}`);
-
-                            stream.write(`>p1 team 1`)
-                            stream.write(`>p2 team 1`)
-                        });
-                    });
                 });
             });
         });

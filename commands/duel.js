@@ -36,7 +36,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             User2ID: user2id
                         },
                         Duel: {
-                            Accepted: false
+                            Accepted: false,
+                            User1name: message.author.username,
+                            User2name: message.mentions.users.first().username
                         }
                     });
 
