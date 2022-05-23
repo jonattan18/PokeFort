@@ -1,5 +1,6 @@
 // Models
 const user_model = require('../models/user');
+const prompt_model = require('../models/prompt');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -11,6 +12,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         message.channel.send("You have not mentioned any pokemon number. Use ``" + prefix + "select <pokemon number>`` or ``l`` for latest pokemon.");
         return;
     }
+
+    prompt_model.findOne({ $or: { $and: [{ "UserID.User1ID": message.author.id }, { "Duel.Accepted": true }], $and: [{ "UserID.User2ID": message.author.id }, { "Duel.Accepted": true }] }}, (err, _duel) => {
+        if (err) return console.log(err);
+        if (_duel) return message.channel.send("You can't select pokemon while you are in a duel!");
+
+    });
 
     //Get user data.
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
