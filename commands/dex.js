@@ -44,7 +44,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (args[0].toLowerCase() == "shiny") { form.push("Shiny"); args.splice(0, 1); if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; } }
         if (args[0].toLowerCase() == "alolan") { form.push("Alola"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "galarian") { form.push("Galar"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "gigantamax") { form.push("Gigantamax"); args.splice(0, 1) }
+        else if (args[0].toLowerCase() == "gigantamax" || args[0].toLowerCase() == "gmax") { form.push("Gigantamax"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "eternamax") { form.push("Eternamax"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "primal") { form.push("Primal"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "mega" && args[args.length - 1].toLowerCase() == "x" || args[args.length - 1].toLowerCase() == "y") {
