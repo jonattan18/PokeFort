@@ -26,6 +26,12 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                 message.channel.send('You cancelled ongoing trade!');
             });
         }
+        // If user prompt is for duel
+        else if (prompt.PromptType == "Duel" && prompt.Duel.Accepted == true) {
+            prompt.remove().then(() => {
+                message.channel.send('You cancelled duel.');
+            });
+        }
         else return message.channel.send('No prompt asked for to use ``cancel`` command.');
 
     });
