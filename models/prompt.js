@@ -38,7 +38,11 @@ const PromptSchema = new mongoose.Schema({
         Accepted: Boolean,
         BattleData: Object
     },
-    createdAt: { type: Date, expires: config.PROMPT_EXPIRATION_SECONDS, default: Date.now }
+    expireAt: {
+        type: Date,
+        default: Date.now,
+        index: { expires: config.PROMPT_EXPIRATION_SECONDS },
+      },
 });
 
 const MessageModel = module.exports = mongoose.model('prompt', PromptSchema);
