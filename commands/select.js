@@ -13,7 +13,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         return;
     }
 
-    prompt_model.findOne({ $or: { $and: [{ "UserID.User1ID": message.author.id }, { "Duel.Accepted": true }], $and: [{ "UserID.User2ID": message.author.id }, { "Duel.Accepted": true }] }}, (err, _duel) => {
+    prompt_model.findOne({ $or: [{ $and: [{ "UserID.User1ID": message.author.id }, { "Duel.Accepted": true }], $and: [{ "UserID.User2ID": message.author.id }, { "Duel.Accepted": true }] }] }, (err, _duel) => {
         if (err) return console.log(err);
         if (_duel) return message.channel.send("You can't select pokemon while you are in a duel!");
 
