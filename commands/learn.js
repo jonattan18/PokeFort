@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't select pokemon while you are in a duel!");
+        if (_duel) return message.channel.send("You can't learn pokemon moves while you are in a duel!");
 
         //Get user data.
         user_model.findOne({ UserID: message.author.id }, (err, user) => {

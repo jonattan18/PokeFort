@@ -15,11 +15,11 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't select pokemon while you are in a duel!");
+        if (_duel) return message.channel.send("You can't replace pokemon while you are in a duel!");
 
         prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
             if (err) return console.log(err);
-            if (_trade) return message.channel.send("You can't select pokemon while you are in a trade!");
+            if (_trade) return message.channel.send("You can't replace pokemon while you are in a trade!");
 
             if (args.length > 1 || args.length < 1) return message.channel.send(`You should specify a place to learn!`);
             if (!isInt(args[0])) return message.channel.send(`You should specify a place to learn!`);

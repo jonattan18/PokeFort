@@ -11,34 +11,39 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     user2id = args[0].replace(/[<@!>]/g, '');
     if (user1id == user2id) { message.channel.send(`You can't duel with yourself!`); return; }
 
-    //Check if user2 is in the database.
-    user_model.findOne({ UserID: user2id }, (err, user2) => {
-        if (!user2) return message.channel.send(`Mentioned user is ineligible for duel!`);
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
         if (err) return console.log(err);
+        if (_trade) return message.channel.send("You can't duel pokemon while you are in a trade!");
 
-        prompt_model.findOne({ $or: [{ "UserID.User1ID": user1id }, { "UserID.User2ID": user1id }] }, (err, prompt1) => {
+        //Check if user2 is in the database.
+        user_model.findOne({ UserID: user2id }, (err, user2) => {
+            if (!user2) return message.channel.send(`Mentioned user is ineligible for duel!`);
             if (err) return console.log(err);
-            if (prompt1 != undefined && prompt1.Duel.Accepted == true) return message.channel.send(`You are already in battle with someone!`);
 
-            prompt_model.findOne({ $or: [{ "UserID.User1ID": user2id }, { "UserID.User2ID": user2id }] }, (err, prompt2) => {
+            prompt_model.findOne({ $or: [{ "UserID.User1ID": user1id }, { "UserID.User2ID": user1id }] }, (err, prompt1) => {
                 if (err) return console.log(err);
-                if (prompt2 != undefined && prompt2.Duel.Accepted == true) return message.channel.send(`Mentioned user is already in battle with someone!`);
+                if (prompt1 != undefined && prompt1.Duel.Accepted == true) return message.channel.send(`You are already in battle with someone!`);
 
-                var update_data = new prompt_model({
-                    ChannelID: message.channel.id,
-                    PromptType: "Duel",
-                    UserID: {
-                        User1ID: user1id,
-                        User2ID: user2id
-                    },
-                    Duel: {
-                        Accepted: false
-                    }
-                });
+                prompt_model.findOne({ $or: [{ "UserID.User1ID": user2id }, { "UserID.User2ID": user2id }] }, (err, prompt2) => {
+                    if (err) return console.log(err);
+                    if (prompt2 != undefined && prompt2.Duel.Accepted == true) return message.channel.send(`Mentioned user is already in battle with someone!`);
 
-                update_data.save().then(result => {
-                    bot.users.fetch(user1id).then(user_data => {
-                        message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to duel! Type ${prefix}accept to start the duel or ${prefix}deny to deny the duel request.`);
+                    var update_data = new prompt_model({
+                        ChannelID: message.channel.id,
+                        PromptType: "Duel",
+                        UserID: {
+                            User1ID: user1id,
+                            User2ID: user2id
+                        },
+                        Duel: {
+                            Accepted: false
+                        }
+                    });
+
+                    update_data.save().then(result => {
+                        bot.users.fetch(user1id).then(user_data => {
+                            message.channel.send(`<@${user2id}>! ${user_data.username} has invited you to duel! Type ${prefix}accept to start the duel or ${prefix}deny to deny the duel request.`);
+                        });
                     });
                 });
             });
