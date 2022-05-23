@@ -77,7 +77,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                 var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons);
 
                 mergeImages(["./assets/duel_images/background.jpg",
-                    { src: image1_url, x: 0, y: 0, width: 360, height: 360 }, { src: image2_url, x: 430, y: 0, width: 360, height: 360 }], {
+                    { src: image1_url, x: 0, y: 0, width: 360, height: 360 }, { src: image2_url, x: 470, y: 0, width: 360, height: 360 }], {
                     Canvas: Canvas
                 }).then(b64 => {
                     const img_data = b64.split(',')[1];
