@@ -220,6 +220,7 @@ client.on('message', async (message) => {
                     var embed = new Discord.MessageEmbed()
                 }
 
+                if (channel_data != null && channel_data.Silence === true) return;
                 if (global_user.Silence == false || global_user.Silence == undefined) {
                     if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
                     if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
@@ -362,8 +363,9 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
 
     // Updating pokemon to database.
     var channel_to_send = guild_redirect_spawn == null ? message.channel.id : guild_redirect_spawn;
-    client.channels.fetch(channel_to_send).then(channel => { channel.send(embed) });
-    channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV }, function (err, user) {
+    var msg_id = "";
+    client.channels.fetch(channel_to_send).then(channel => { channel.send(embed).then(message => { msg_id = message.id; }); });
+    channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, MessageID: msg_id }, function (err, user) {
         if (err) { console.log(err) }
     });
 }

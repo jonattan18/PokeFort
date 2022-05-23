@@ -6,7 +6,7 @@ const channel_model = require('../../models/channel');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!message.isadmin) return; // Admin check
-    
+
     // Pokemon Level
     let level = getRandomInt(1, 36);
 
@@ -82,6 +82,7 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     if (form == "" || form == "NULL") { var image_name = pokedex_num + '.png'; }
     else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
     var image_url = './assets/images/' + image_name;
+    var msg_id = "";
 
     // Create embed message
     let embed = new Discord.MessageEmbed();
@@ -90,29 +91,31 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     embed.setTitle("A wild pokémon has appeared!")
     embed.setDescription(`Guess the pokémon and type ${prefix}catch <pokémon> to catch it!`)
     embed.setColor("#1cb99a");
-    message.channel.send(embed);
+    message.channel.send(embed).then(msg => {
+        msg_id = msg.id;
+        
+        // Pokemon Nature
+        let random_nature = getRandomInt(1, 26);
 
-    // Pokemon Nature
-    let random_nature = getRandomInt(1, 26);
+        // IV creation
+        var IV = [];
+        while (true) {
+            let hp_iv = getRandomInt(0, 32);
+            let atk_iv = getRandomInt(0, 32);
+            let def_iv = getRandomInt(0, 32);
+            let spa_iv = getRandomInt(0, 32);
+            let spd_iv = getRandomInt(0, 32);
+            let spe_iv = getRandomInt(0, 32);
+            let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
+            IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
+            if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
+            break;
+        }
 
-    // IV creation
-    var IV = [];
-    while (true) {
-        let hp_iv = getRandomInt(0, 32);
-        let atk_iv = getRandomInt(0, 32);
-        let def_iv = getRandomInt(0, 32);
-        let spa_iv = getRandomInt(0, 32);
-        let spd_iv = getRandomInt(0, 32);
-        let spe_iv = getRandomInt(0, 32);
-        let total_iv = (hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv / 186 * 100).toFixed(2);
-        IV = [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv];
-        if (total_iv > 90 || total_iv < 10) { if (getRandomInt(0, 1000) > 990) { continue; } else { break; } }
-        break;
-    }
-
-    // Updating pokemon to database.
-    channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, SpawnLimit: 30, MessageCount: 0 }, function (err, user) {
-        if (err) { console.log(err) }
+        // Updating pokemon to database.
+        channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: pokemon_level, Shiny: pokemon_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, SpawnLimit: 30, MessageCount: 0, MessageID: msg_id }, function (err, user) {
+            if (err) { console.log(err) }
+        });
     });
 }
 

@@ -11,6 +11,9 @@ const ChannelSchema = new mongoose.Schema({
     PokemonNature: Number,
     PokemonIV: Array,
     Disabled: { type: Boolean, default: false },
+    Silence: { type: Boolean, default: false },
+    MessageID: String,
+    ClearSpawns: { type: Boolean, default: false },
     Hint: { type: Number, default: 0 }
 });
 
