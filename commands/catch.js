@@ -1,6 +1,7 @@
 // Models
 const channel_model = require('../models/channel');
 const user_model = require('../models/user');
+const dex_model = require('../models/dex');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -90,6 +91,21 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     if (err) return console.log(err);
                                 });
                             }
+
+                            // Adding to dex.
+                            dex_model.findOne({ UserID: message.author.id }, (err, dex) => {
+                                if (err) console.log(err);
+                                if (dex) {
+                                    dex.Pokemons.push({ PokemonId: pokemon["Pokemon Id"] });
+                                } else {
+                                    var dex_data = {
+                                        UserID: message.author.id,
+                                        Pokemons: [{ PokemonId: pokemon["Pokemon Id"] }]
+                                    }
+                                    var dex = new dex_model(dex_data);
+                                }
+                                dex.save();
+                            });
 
                             var message_string = "";
 

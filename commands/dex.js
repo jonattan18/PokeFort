@@ -3,6 +3,7 @@ const _ = require('lodash'); // Array sorting module.
 
 // Models
 const user_model = require('../models/user');
+const dex_model = require('../models/dex');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -16,8 +17,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
 
     // Get all user pokemons.
-    getPokemons.getallpokemon(message.author.id).then(data => {
-        pokemons_from_database = data;
+    dex_model.findOne({ UserID: message.author.id }, (err, data) => {
+        pokemons_from_database = data.Pokemons;
 
         //Check if its dex arguements
         if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
@@ -93,7 +94,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var no_of_caught = 0;
         // Get number of catached pokemons.
         var user_pokemons = pokemons_from_database
-        no_of_caught = user_pokemons.filter(it => it["PokemonId"] === parseInt(pokemon["Pokemon Id"]) && it["Reason"] === "Catched").length;
+        no_of_caught = user_pokemons.filter(it => it["PokemonId"] === parseInt(pokemon["Pokemon Id"])).length;
 
         //#region Create Message
 
@@ -369,12 +370,12 @@ function dex_starter(bot, message, args, prefix, user_available, pokemons) {
     create_pagination(message, dex_pokemons);
 }
 
-// Function to display caught pokemons.
+// Function to display uncaught pokemons.
 function dex_uncaught(bot, message, args, prefix, user_available, pokemons) {
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
     //Get user data from database
-    var user_pokemons = pokemons_from_database.filter(it => it["Reason"] === "Catched");
+    var user_pokemons = pokemons_from_database;
     for (var i = 0; i < user_pokemons.length; i++) {
         dex_pokemons = dex_pokemons.filter(it => it["Pokemon Id"] != user_pokemons[i]["PokemonId"].toString());
     }
@@ -386,7 +387,7 @@ function dex_caught(bot, message, args, prefix, user_available, pokemons) {
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
     var new_dex_pokemons = [];
-    var user_pokemons = pokemons_from_database.filter(it => it["Reason"] === "Catched");
+    var user_pokemons = pokemons_from_database;
     for (var i = 0; i < user_pokemons.length; i++) {
         var pokemon = dex_pokemons.find(it => it["Pokemon Id"] === user_pokemons[i]["PokemonId"].toString());
         if (pokemon) new_dex_pokemons.push(pokemon);
@@ -416,7 +417,7 @@ function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
 // Function to create pages in embeds.
 function create_pagination(message, dex_pokemons, description_string = "", field_prefix = "", page = 0, total_pokemons_uncaught = 0, orderd = false) {
 
-    var user_pokemons = pokemons_from_database.filter(it => it["Reason"] === "Catched");
+    var user_pokemons = pokemons_from_database;
 
     // User pokemon filter
     var user_index = [];
