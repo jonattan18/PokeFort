@@ -39,25 +39,34 @@ const PromptSchema = new mongoose.Schema({
         Turn: Number,
         User1name: String,
         User2name: String,
+        ImageCache: String,
         User1Pokemon: {
+            PokemonUserID: String,
             PokemonName: String,
+            PokemonXP: Number,
             PokemonID: String,
             PokemonLevel: Number,
             Attack: Number,
             Defense: Number,
             ActiveHP: Number,
             TotalHP: Number,
-            Moves: Array
+            Moves: Array,
+            Traded: Boolean,
+            Shiny: Boolean
         },
         User2Pokemon: {
+            PokemonUserID: String,
             PokemonName: String,
+            PokemonXP: Number,
             PokemonID: String,
             PokemonLevel: Number,
             Attack: Number,
             Defense: Number,
             ActiveHP: Number,
             TotalHP: Number,
-            Moves: Array
+            Moves: Array,
+            Traded: Boolean,
+            Shiny: Boolean
         }
     },
     expireAt: {

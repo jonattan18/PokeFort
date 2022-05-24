@@ -170,6 +170,7 @@ client.on('message', async (message) => {
                 var pokemon_id = selected_pokemon.PokemonId;
                 var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
                 var pokemon_level = selected_pokemon.Level;
+                if (pokemon_level == 100 || pokemon_level > 100) return;
                 var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
                 var old_pokemon_name_star = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, true);
 

@@ -103,6 +103,8 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.Turn = 1;
 
                     // For pokemon 1
+                    prompt.Duel.User1Pokemon.PokemonUserID = user1.Selected;
+                    prompt.Duel.User1Pokemon.PokemonXP = user1pokemon.Experience;
                     prompt.Duel.User1Pokemon.PokemonName = user1pokemon_name;
                     prompt.Duel.User1Pokemon.PokemonID = user1pokemon.PokemonId;
                     prompt.Duel.User1Pokemon.PokemonLevel = user1pokemon.Level;
@@ -111,8 +113,12 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User1Pokemon.ActiveHP = pokemon1_hp;
                     prompt.Duel.User1Pokemon.TotalHP = pokemon1_hp;
                     prompt.Duel.User1Pokemon.Moves = user1pokemon_moves;
+                    prompt.Duel.User1Pokemon.Traded = user1pokemon.Reason == "Traded" ? true : false;
+                    prompt.Duel.User1Pokemon.Shiny = user1pokemon.Shiny == true ? true : false;
 
                     // For pokemon 2
+                    prompt.Duel.User2Pokemon.PokemonUserID = user2.Selected;
+                    prompt.Duel.User2Pokemon.PokemonXP = user2pokemon.Experience;
                     prompt.Duel.User2Pokemon.PokemonName = user2pokemon_name;
                     prompt.Duel.User2Pokemon.PokemonID = user2pokemon.PokemonId;
                     prompt.Duel.User2Pokemon.PokemonLevel = user2pokemon.Level;
@@ -121,6 +127,8 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User2Pokemon.ActiveHP = pokemon2_hp;
                     prompt.Duel.User2Pokemon.TotalHP = pokemon2_hp;
                     prompt.Duel.User2Pokemon.Moves = user2pokemon_moves;
+                    prompt.Duel.User2Pokemon.Traded = user2pokemon.Reason == "Traded" ? true : false;
+                    prompt.Duel.User2Pokemon.Shiny = user2pokemon.Shiny == true ? true : false;
 
                     // Image generation.
                     var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons, user1pokemon.Shiny);
@@ -131,6 +139,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                         Canvas: Canvas
                     }).then(b64 => {
                         const img_data = b64.split(',')[1];
+                        prompt.Duel.ImageCache = img_data;
                         const img_buffer = new Buffer.from(img_data, 'base64');
                         const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
 

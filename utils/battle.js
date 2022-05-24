@@ -2,7 +2,6 @@ var targets = 1; // The pokemon has 1 target
 var pb = 1; // No second strike Parental Blood
 var weather = 1; // No weather specified
 var Critical = 1; // No critical hit
-var random = rand(85, 100) / 100; // Random integer between 85 and 100, inclusive, then divided by 100.
 var burn = 1; // No burns found
 var others = 1; // No other effects
 
@@ -10,21 +9,33 @@ var others = 1; // No other effects
 function calculate_damage(user1pokemon, user_1_atk, user_1_def, user1pokemon_level, user1move, user2pokemon) {
     var part_1 = (((((2 * user1pokemon_level) / 5) + 2) * user1move.basePower * (user_1_atk / user_1_def)) / 50) + 2;
     var type_effectiveness = type_calc(user1move.type.toLowerCase(), user2pokemon["Primary Type"].toLowerCase(), user2pokemon["Secondary Type"].toLowerCase())
-    var part_2 = targets * pb * weather * Critical * random * STAB(user1pokemon["Primary Type"].toLowerCase(), user1pokemon["Secondary Type"].toLowerCase(), user1move.type.toLowerCase()) * type_effectiveness * burn * others;
+    var part_2 = targets * pb * weather * Critical * (rand(85, 100) / 100) * STAB(user1pokemon["Primary Type"].toLowerCase(), user1pokemon["Secondary Type"].toLowerCase(), user1move.type.toLowerCase()) * type_effectiveness * burn * others;
     var damage = (part_1 * part_2).toFixed(0);
 
     var damage_line = "";
-    if(type_effectiveness == 0) damage_line = `It has no effect!`;
-    if(type_effectiveness >= 0.25 && type_effectiveness < 1) damage_line = `It's not very effective... It did ${damage} damage.`;
-    if(type_effectiveness == 1) damage_line = `It did ${damage} damage!`;
-    if(type_effectiveness > 1 && type_effectiveness < 4) damage_line = `It's super effective! It did ${damage} damage!`;
-    if(type_effectiveness == 4) damage_line = `It's doubly effective! It did ${damage} damage!`;
+    if (type_effectiveness == 0) damage_line = `It has no effect!`;
+    if (type_effectiveness >= 0.25 && type_effectiveness < 1) damage_line = `It's not very effective... It did ${damage} damage.`;
+    if (type_effectiveness == 1) damage_line = `It did ${damage} damage!`;
+    if (type_effectiveness > 1 && type_effectiveness < 4) damage_line = `It's super effective! It did ${damage} damage!`;
+    if (type_effectiveness == 4) damage_line = `It's doubly effective! It did ${damage} damage!`;
 
     return [damage, damage_line];
 }
 
-function xp_calculation() {
-    
+function xp_calculation(user1pokemon, user1pokemon_level, user2pokemon, user2pokemon_level, traded, luckyegg) {
+    var b = user2pokemon["Experience Yield"]; // Expereience yeild points.
+    var fainted_Level = user2pokemon_level; // Fainted pokemon level.
+    var victory_Level = user1pokemon_level; // Victory pokemon Level.
+    var t = traded ? 1.5 : 1; // If the pokemon was traded, then t = 1. Otherwise, t = 1.
+    var v = 1 // winning Pokémon is at or past the level where it would be able to evolve.
+    var f = 1; // No friend's pokemon.
+    var s = 1; // Pokemon fought in battle.
+    var p = 1; // No Point power.
+    var e = luckyegg ? 1.5 : 1;
+    var xp = (((b * fainted_Level * f * v) / 5 * s) * (((2 * fainted_Level + 10) / (fainted_Level + victory_Level + 10)) ** 2.5) * t * e * p);
+    if (user1pokemon_level >= user2pokemon_level) xp = (xp * 2) + 100;
+    else xp = xp ** 2;
+    return xp.toFixed(0);
 }
 
 function STAB(pokemon_type, pokemon_secondary_type, move_type) {
@@ -37,8 +48,8 @@ function STAB(pokemon_type, pokemon_secondary_type, move_type) {
 
 function type_calc(att_type, def_type, sec_def_type) {
 
-    if (sec_def_type !== "NULL") {
-        return type_calc(att_type, def_type, "NULL") * type_calc(att_type, sec_def_type, "NULL");
+    if (sec_def_type != "null") {
+        return type_calc(att_type, def_type, "null") * type_calc(att_type, sec_def_type, "null");
     }
 
     // Normal
@@ -409,4 +420,4 @@ function rand(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-module.exports = { calculate_damage };
+module.exports = { calculate_damage, xp_calculation };

@@ -269,6 +269,14 @@ function recycle(message, user_prompt, load_pokemons) {
                 var pokemon_id = selected_pokemon.PokemonId;
                 var pokemon_current_xp = selected_pokemon.Experience + recycled_exp;
                 var pokemon_level = selected_pokemon.Level;
+                if (pokemon_level == 100 || pokemon_level > 100) {
+                    var embed = new Discord.MessageEmbed()
+                    embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
+                    embed.setDescription(`Your Pokemon in max level!`)
+                    embed.setColor(message.member.displayHexColor)
+                    message.channel.send(embed);
+                    return;
+                }
                 var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
 
                 var old_pokemon_exp = pokemon_current_xp;
