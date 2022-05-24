@@ -61,15 +61,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
             }
             else {
-                var embed = new Discord.MessageEmbed();
-                const img_buffer = new Buffer.from(prompt.Duel.ImageCache, 'base64');
-                const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-                embed.attachFiles(image_file)
-                embed.setImage('attachment://img.jpeg')
-                embed.setTitle(`${duel_data.User1name.toUpperCase()} VS ${duel_data.User2name.toUpperCase()}`);
-                embed.addField(`${duel_data.User1name}'s Pokémon`, `${user1_data.PokemonName} ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP`, true);
-                embed.addField(`${duel_data.User2name}'s Pokémon`, `${user2_data.PokemonName} ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP`, true);
-                message.channel.send(embed);
                 prompt.Duel.Turn = 2;
                 prompt.save();
             }
@@ -80,7 +71,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (duel_data.Turn != 2) return message.channel.send('It is not your turn!');
             var user_1_pokemon = pokemons.filter(it => it["Pokemon Id"] == user1_data.PokemonID)[0];
             var user_2_pokemon = pokemons.filter(it => it["Pokemon Id"] == user2_data.PokemonID)[0];
-            var move_used = user2_data.Moves[args[0] - 1].replaceAll(" ", "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
+            var move_used = user2_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
             var move_used_info = moveinfo[move_used];
             var pokemon_level = user2_data.PokemonLevel;
             var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
