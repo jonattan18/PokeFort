@@ -79,7 +79,7 @@ function pokemondata(args, pokemons) {
         if (args[0].toLowerCase() == "shiny") { form.push("Shiny"); args.splice(0, 1); if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; } }
         if (args[0].toLowerCase() == "alolan") { form.push("Alola"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "galarian") { form.push("Galar"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "gigantamax") { form.push("Gigantamax"); args.splice(0, 1) }
+        else if (args[0].toLowerCase() == "gigantamax" || args[0].toLowerCase() == "gmax") { form.push("Gigantamax"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "eternamax") { form.push("Eternamax"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "primal") { form.push("Primal"); args.splice(0, 1) }
         else if (args[0].toLowerCase() == "mega" && args[args.length - 1].toLowerCase() == "x" || args[args.length - 1].toLowerCase() == "y") {
@@ -140,15 +140,16 @@ function pokemondata(args, pokemons) {
     }
 }
 
-function imagefromid(pokemonid, pokemons) {
+function imagefromid(pokemonid, pokemons, shiny) {
     var pokemon = pokemons.filter(it => it["Pokemon Id"] === pokemonid);
     pokemon = pokemon[0];
     var str = "" + pokemon["Pokedex Number"]
     var pad = "000"
     var pokedex_num = pad.substring(0, pad.length - str.length) + str;
-    if (pokemon["Alternate Form Name"] == "NULL") { var image_name = pokedex_num + '.png'; }
-    else { var image_name = pokedex_num + '-' + pokemon["Alternate Form Name"].replace(" ", "-") + '.png'; }
-    var image_url = './assets/images/' + image_name;
+    if (pokemon["Alternate Form Name"] == "NULL") { var image_name = pokedex_num }
+    else { var image_name = pokedex_num + '-' + pokemon["Alternate Form Name"].replace(" ", "-") }
+    if (shiny) var image_url = './assets/images/' + image_name + '-Shiny.png';
+    else var image_url = './assets/images/' + image_name + '.png';
     return image_url;
 }
 

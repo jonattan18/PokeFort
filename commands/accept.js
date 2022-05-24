@@ -47,31 +47,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 // Function to accept and start duel.
 function duel(bot, message, prefix, prompt, pokemons) {
 
-    // Image generation.
-    var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons);
-    var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons);
-
-    mergeImages(["./assets/duel_images/background.jpg",
-        { src: image1_url, x: 40, y: 0, width: 350, height: 350 }, { src: image2_url, x: 500, y: 0, width: 350, height: 350 }], {
-        Canvas: Canvas
-    }).then(b64 => {
-        const img_data = b64.split(',')[1];
-        const img_buffer = new Buffer.from(img_data, 'base64');
-        const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-
-        prompt.Duel.Accepted = true;
-        prompt.Duel.BattleData = JSON.stringify(stream);
-        prompt.save().then(() => {
-            embed = new Discord.MessageEmbed();
-            embed.attachFiles(image_file)
-            embed.setImage('attachment://img.jpeg')
-            embed.setTitle(`${user1_trainer_name.toUpperCase()} VS ${user2_trainer_name.toUpperCase()}`);
-            embed.addField(`${user1_trainer_name}'s Pokémon`, user1_hp_info, true);
-            embed.addField(`${user2_trainer_name}'s Pokémon`, user2_hp_info, true);
-            message.channel.send(embed);
-        });
-    });
-
     var user1id = prompt.UserID.User1ID;
     var user2id = prompt.UserID.User2ID;
 
@@ -83,7 +58,6 @@ function duel(bot, message, prefix, prompt, pokemons) {
 
     var user1pokemon_moves = [];
     var user2pokemon_moves = [];
-
 
     user_model.findOne({ UserID: user1id }, (err, user1) => {
         user_model.findOne({ UserID: user2id }, (err, user2) => {
@@ -115,33 +89,62 @@ function duel(bot, message, prefix, prompt, pokemons) {
                         } else user2pokemon_moves.push(`Tackle`)
                     }
 
-                    var player1 = {
-                        name: user1name,
-                        team: [{
-                            "name": "",
-                            "species": user1pokemon_name,
-                            "gender": "",
-                            "item": "",
-                            "ability": "",
-                            "nature": nature_of(user1pokemon.Nature),
-                            "level": user1pokemon.Level,
-                            "moves": user1pokemon_moves
-                        }]
-                    }
+                    let ev = 0;
+                    var pokemon1_info = pokemons.filter(it => it["Pokemon Id"] == user1pokemon.PokemonId)[0];
+                    var pokemon1_hp = _.floor(0.01 * (2 * pokemon1_info["Health Stat"] + user1pokemon.IV[0] + _.floor(0.25 * ev)) * user1pokemon.Level) + user1pokemon.Level + 10;
+                    var pokemon1_attack = _.floor(0.01 * (2 * pokemon1_info["Attack Stat"] + user1pokemon.IV[1] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
+                    var pokemon1_defense = _.floor(0.01 * (2 * pokemon1_info["Defense Stat"] + user1pokemon.IV[2] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
+                    var pokemon2_info = pokemons.filter(it => it["Pokemon Id"] == user2pokemon.PokemonId)[0];
+                    var pokemon2_hp = _.floor(0.01 * (2 * pokemon2_info["Health Stat"] + user2pokemon.IV[0] + _.floor(0.25 * ev)) * user2pokemon.Level) + user2pokemon.Level + 10;
+                    var pokemon2_attack = _.floor(0.01 * (2 * pokemon2_info["Attack Stat"] + user2pokemon.IV[1] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
+                    var pokemon2_defense = _.floor(0.01 * (2 * pokemon2_info["Defense Stat"] + user2pokemon.IV[2] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
 
-                    var player2 = {
-                        name: user2name,
-                        team: [{
-                            "name": "",
-                            "species": user2pokemon_name,
-                            "gender": "",
-                            "item": "",
-                            "ability": "",
-                            "nature": nature_of(user1pokemon.Nature),
-                            "level": user2pokemon.Level,
-                            "moves": user2pokemon_moves
-                        }]
-                    }
+                    // Turn chooser
+                    prompt.Duel.Turn = 1;
+
+                    // For pokemon 1
+                    prompt.Duel.User1Pokemon.PokemonName = user1pokemon_name;
+                    prompt.Duel.User1Pokemon.PokemonID = user1pokemon.PokemonId;
+                    prompt.Duel.User1Pokemon.PokemonLevel = user1pokemon.Level;
+                    prompt.Duel.User1Pokemon.Attack = pokemon1_attack;
+                    prompt.Duel.User1Pokemon.Defense = pokemon1_defense;
+                    prompt.Duel.User1Pokemon.ActiveHP = pokemon1_hp;
+                    prompt.Duel.User1Pokemon.TotalHP = pokemon1_hp;
+                    prompt.Duel.User1Pokemon.Moves = user1pokemon_moves;
+
+                    // For pokemon 2
+                    prompt.Duel.User2Pokemon.PokemonName = user2pokemon_name;
+                    prompt.Duel.User2Pokemon.PokemonID = user2pokemon.PokemonId;
+                    prompt.Duel.User2Pokemon.PokemonLevel = user2pokemon.Level;
+                    prompt.Duel.User2Pokemon.Attack = pokemon2_attack;
+                    prompt.Duel.User2Pokemon.Defense = pokemon2_defense;
+                    prompt.Duel.User2Pokemon.ActiveHP = pokemon2_hp;
+                    prompt.Duel.User2Pokemon.TotalHP = pokemon2_hp;
+                    prompt.Duel.User2Pokemon.Moves = user2pokemon_moves;
+
+                    // Image generation.
+                    var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons, user1pokemon.Shiny);
+                    var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons, user2pokemon.Shiny);
+
+                    mergeImages(["./assets/duel_images/background.jpg",
+                        { src: image1_url, x: 40, y: 0, width: 350, height: 350 }, { src: image2_url, x: 550, y: 0, width: 350, height: 350 }], {
+                        Canvas: Canvas
+                    }).then(b64 => {
+                        const img_data = b64.split(',')[1];
+                        const img_buffer = new Buffer.from(img_data, 'base64');
+                        const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+
+                        prompt.Duel.Accepted = true;
+                        prompt.save().then(() => {
+                            embed = new Discord.MessageEmbed();
+                            embed.attachFiles(image_file)
+                            embed.setImage('attachment://img.jpeg')
+                            embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
+                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                            message.channel.send(embed);
+                        });
+                    });
 
                 });
             });

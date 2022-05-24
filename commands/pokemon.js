@@ -6,6 +6,7 @@ const user_model = require('../models/user');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const pagination = require('../utils/pagination');
 
 var static_user_pokemons = null;
 

@@ -36,12 +36,28 @@ const PromptSchema = new mongoose.Schema({
     },
     Duel: {
         Accepted: Boolean,
+        Turn: Number,
         User1name: String,
         User2name: String,
         User1Pokemon: {
+            PokemonName: String,
             PokemonID: String,
             PokemonLevel: Number,
-            ActiveHP: Number
+            Attack: Number,
+            Defense: Number,
+            ActiveHP: Number,
+            TotalHP: Number,
+            Moves: Array
+        },
+        User2Pokemon: {
+            PokemonName: String,
+            PokemonID: String,
+            PokemonLevel: Number,
+            Attack: Number,
+            Defense: Number,
+            ActiveHP: Number,
+            TotalHP: Number,
+            Moves: Array
         }
     },
     expireAt: {

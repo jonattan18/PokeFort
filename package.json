@@ -13,6 +13,7 @@
   "author": "Blank",
   "license": "ISC",
   "dependencies": {
+    "@smogon/calc": "^0.6.0",
     "canvas": "^2.9.0",
     "cloc": "^2.9.0",
     "discord.js": "^12.3.1",
