@@ -31,7 +31,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (duel_data.Turn != 1) return message.channel.send('It is not your turn!');
             var user_1_pokemon = pokemons.filter(it => it["Pokemon Id"] == user1_data.PokemonID)[0];
             var user_2_pokemon = pokemons.filter(it => it["Pokemon Id"] == user2_data.PokemonID)[0];
-            var move_used = user1_data.Moves[args[0] - 1].replaceAll(" ", "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
+            var move_used = user1_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
             var move_used_info = moveinfo[move_used];
             var pokemon_level = user1_data.PokemonLevel;
             var damage = battle.calculate_damage(user_1_pokemon, user1_data.Attack, user2_data.Defense, pokemon_level, move_used_info, user_2_pokemon);
