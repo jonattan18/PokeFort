@@ -93,8 +93,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         //Getting the data from the user model
         var no_of_caught = 0;
         // Get number of catached pokemons.
-        var user_pokemons = pokemons_from_database
-        no_of_caught = user_pokemons.filter(it => it["PokemonId"] === parseInt(pokemon["Pokemon Id"])).length;
+        var user_pokemons = pokemons_from_database;
+        no_of_caught = user_pokemons.filter(it => it["PokemonId"] === pokemon["Pokemon Id"]).length;
 
         //#region Create Message
 
