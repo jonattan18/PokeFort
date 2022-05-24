@@ -13,7 +13,7 @@ var static_user_pokemons = null;
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
-    
+
     page = 1;
     //Get user data.
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -431,10 +431,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             function order(args) {
                 var order_type = "";
                 if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
-                else if (args[1].toLowerCase() == "level") { order_type = "Level"; }
+                else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = "Level"; }
                 else if (args[1].toLowerCase() == "alphabet") { order_type = "Alphabet"; }
                 else if (args[1].toLowerCase() == "number") { order_type = "Number"; }
-
+                else { return error[1] = [false, "Invalid argument syntax."] }
                 user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { OrderType: order_type } }, { new: true }, (err, doc) => {
                     if (err) return console.log(err);
                     return message.channel.send("Pokemon Order updated.");
