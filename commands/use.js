@@ -8,6 +8,7 @@ const moveinfo = JSON.parse(fs.readFileSync('./assets/movesinfo.json').toString(
 // Models
 const prompt_model = require('../models/prompt');
 const pokemons_model = require('../models/pokemons');
+const user_model = require('../models/user');
 
 // Utils
 const battle = require('../utils/battle');
@@ -36,34 +37,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var pokemon_level = user1_data.PokemonLevel;
             var damage = battle.calculate_damage(user_1_pokemon, user1_data.Attack, user2_data.Defense, pokemon_level, move_used_info, user_2_pokemon);
 
-            // Create embed for damage.
-            var embed = new Discord.MessageEmbed()
-            embed.setTitle(`${duel_data.User1name}'s ${user1_data.PokemonName} used ${move_used}!`)
-            embed.setDescription(damage[1]);
-            embed.setColor(message.member.displayHexColor);
-            message.channel.send(embed);
-
             prompt.Duel.User2Pokemon.ActiveHP -= damage[0];
-            if (prompt.Duel.User2Pokemon.ActiveHP <= 0) {
-
-                // Xp gained calculations.
-                var xp = battle.xp_calculation(user_1_pokemon, user1_data.PokemonLevel, user_2_pokemon, user2_data.PokemonLevel, user1_data.Traded, false);
-
-                // Create embed for damage fainted.
-                var embed = new Discord.MessageEmbed()
-                embed.setTitle(`${duel_data.User2name}'s ${user2_data.PokemonName} fainted.`)
-                if (user1_data.PokemonLevel >= 100) embed.setDescription(`${duel_data.User1name}'s ${user1_data.PokemonName} is in Max Level!`);
-                else embed.setDescription(`${duel_data.User1name}'s ${user1_data.PokemonName} gained ${xp} exp.`);
-                embed.setColor(message.member.displayHexColor);
-                message.channel.send(embed);
-                prompt.remove().then(() => {
-                    pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
-                });
-            }
-            else {
+            message.delete().then(() => {
+                prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
                 prompt.Duel.Turn = 2;
                 prompt.save();
-            }
+            });
+
         }
 
         // Player 2
@@ -74,47 +54,69 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var move_used = user2_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
             var move_used_info = moveinfo[move_used];
             var pokemon_level = user2_data.PokemonLevel;
+            var description = "";
             var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
+            prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
 
             // Create embed for damage.
             var embed = new Discord.MessageEmbed()
-            embed.setTitle(`${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used}!`)
-            embed.setDescription(damage[1]);
+
+            embed.setTitle(`${duel_data.User1name} VS ${duel_data.User2name}`)
             embed.setColor(message.member.displayHexColor);
-            message.channel.send(embed);
 
-            prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
-            if (prompt.Duel.User1Pokemon.ActiveHP <= 0) {
-
+            if (prompt.Duel.User2Pokemon.ActiveHP <= 0) {
+                // Xp gained calculations.
+                var xp = battle.xp_calculation(user_1_pokemon, user1_data.PokemonLevel, user_2_pokemon, user2_data.PokemonLevel, user1_data.Traded, false);
+                // Description generation.
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
+                description += `**\n${duel_data.User2name} wins!**`;
+                description += `\n${duel_data.User1name} was awarded ${xp[0]}XP and 10 credits for winning! :moneybag:`;
+                prompt.remove().then(() => {
+                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                        pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
+                    });
+                });
+            }
+            else if (prompt.Duel.User1Pokemon.ActiveHP <= 0) {
                 // Xp gained calculations.
                 var xp = battle.xp_calculation(user_2_pokemon, user2_data.PokemonLevel, user_1_pokemon, user1_data.PokemonLevel, user2_data.Traded, false);
-
-                // Create embed for damage fainted.
-                var embed = new Discord.MessageEmbed()
-                embed.setTitle(`${duel_data.User1name}'s ${user1_data.PokemonName} fainted.`)
-                if (user1_data.PokemonLevel >= 100) embed.setDescription(`${duel_data.User2name}'s ${user2_data.PokemonName} is in Max Level!`);
-                else embed.setDescription(`${duel_data.User2name}'s ${user2_data.PokemonName} gained ${xp} exp.`);
-                embed.setColor(message.member.displayHexColor);
-                message.channel.send(embed);
+                // Description generation.
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**\n`;
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
+                description += `**\n${duel_data.User2name} wins!**`;
+                description += `\n${duel_data.User2name} was awarded ${xp[0]}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
-                    pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
+                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                        pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
+                    });
                 });
             }
             else {
-                var embed = new Discord.MessageEmbed();
+                description = `${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n`;
                 const img_buffer = new Buffer.from(prompt.Duel.ImageCache, 'base64');
                 const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
                 embed.attachFiles(image_file)
                 embed.setImage('attachment://img.jpeg')
-                embed.setTitle(`${duel_data.User1name.toUpperCase()} VS ${duel_data.User2name.toUpperCase()}`);
-                embed.addField(`${duel_data.User1name}'s Pokémon`, `${user1_data.PokemonName} ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP`, true);
-                embed.addField(`${duel_data.User2name}'s Pokémon`, `${user2_data.PokemonName} ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP`, true);
-                message.channel.send(embed);
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**`;
                 prompt.Duel.Turn = 1;
                 prompt.save();
             }
-        }
 
+            embed.setDescription(description);
+            message.channel.send(embed).then(() => {
+                message.delete();
+            });
+        }
 
         //#region Pokemon XP Update.
         function pokemon_xp_update(_id, pokemon_id, pokemon_current_xp, pokemon_level, old_pokemon_name, shiny) {
@@ -169,7 +171,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         }
         //#endregion
-
     });
 }
 

@@ -40,6 +40,7 @@ const PromptSchema = new mongoose.Schema({
         User1name: String,
         User2name: String,
         ImageCache: String,
+        User1Move: Array,
         User1Pokemon: {
             PokemonUserID: String,
             PokemonName: String,

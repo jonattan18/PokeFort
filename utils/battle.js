@@ -13,11 +13,11 @@ function calculate_damage(user1pokemon, user_1_atk, user_1_def, user1pokemon_lev
     var damage = (part_1 * part_2).toFixed(0);
 
     var damage_line = "";
-    if (type_effectiveness == 0) damage_line = `It has no effect!`;
-    if (type_effectiveness >= 0.25 && type_effectiveness < 1) damage_line = `It's not very effective... It did ${damage} damage.`;
-    if (type_effectiveness == 1) damage_line = `It did ${damage} damage!`;
-    if (type_effectiveness > 1 && type_effectiveness < 4) damage_line = `It's super effective! It did ${damage} damage!`;
-    if (type_effectiveness == 4) damage_line = `It's doubly effective! It did ${damage} damage!`;
+    if (type_effectiveness == 0) damage_line = `It has no effect`;
+    if (type_effectiveness >= 0.25 && type_effectiveness < 1) damage_line = `It's not very effective.`;
+    if (type_effectiveness == 1) damage_line = ``;
+    if (type_effectiveness > 1 && type_effectiveness < 4) damage_line = `It's super effective`;
+    if (type_effectiveness == 4) damage_line = `It's doubly effective`;
 
     return [damage, damage_line];
 }
