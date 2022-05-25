@@ -45,7 +45,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     // Get number of catached pokemons.
                     dex_model.findOne({ UserID: message.author.id }, (err, data) => {
 
-                        var user_pokemons = data.Pokemons;
+                        var user_pokemons = data.Pokemons == null ? [] : data.Pokemons;
                         var no_of_pokemons = user_pokemons.filter(it => it["PokemonId"] == channel.PokemonID).length + 1;
                         var splitted_number = no_of_pokemons.toString().split('');
                         var credit_amount = 0;
