@@ -42,6 +42,7 @@ function page_1(message, balance, prefix) {
     embed.addField('4 Hour - 1.5X Multiplier | Cost: 90 Credits', '``' + prefix + 'buy 4``', false)
     embed.addField('Rare Candy | Cost: 75 Credits', 'Rare candies level up your selected pokemon by one level for each candy you feed it.\n``' + prefix + 'buy candy <amount>``', false)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
+    message.channel.send(embed)
 }
 
 // Page 2 Rare Stones & Evolution Items 
