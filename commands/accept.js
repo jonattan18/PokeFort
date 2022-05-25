@@ -153,6 +153,21 @@ function duel(bot, message, prefix, prompt, pokemons) {
                             embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
                             embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
                             message.channel.send(embed);
+
+                            var usr_embed = new Discord.MessageEmbed();
+                            usr_embed.setColor(message.guild.me.displayHexColor);
+                            usr_embed.setTitle(`Battle VS ${user2name}`);
+                            var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
+                            description += "\n\n";
+                            description += "Available moves:\n\n"
+                            description += `${user1pokemon_moves[0]} ${prefix}use 1\n\n`;
+                            description += `${user1pokemon_moves[1]} ${prefix}use 2\n\n`;
+                            description += `${user1pokemon_moves[2]} ${prefix}use 3\n\n`;
+                            description += `${user1pokemon_moves[3]} ${prefix}use 4\n\n`;
+                            usr_embed.setDescription(description);
+                            bot.users.fetch(user1.UserID).then(user => {
+                                user.send(usr_embed);
+                            });
                         });
                     });
 

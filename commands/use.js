@@ -12,6 +12,7 @@ const user_model = require('../models/user');
 
 // Utils
 const battle = require('../utils/battle');
+const mongoose = require('mongoose');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -41,7 +42,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             message.delete().then(() => {
                 prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
                 prompt.Duel.Turn = 2;
-                prompt.save();
+
+                message.author.send("Move chosen!");
+                message.author.send("Waiting for opponent to pick a move...");
+
+                var usr_embed = new Discord.MessageEmbed();
+                usr_embed.setColor(message.guild.me.displayHexColor);
+                usr_embed.setTitle(`Battle VS ${duel_data.User1name}`);
+                var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
+                description += "\n\n";
+                description += "Available moves:\n\n"
+                description += `${user2_data.Moves[0]} ${prefix}use 1\n\n`;
+                description += `${user2_data.Moves[1]} ${prefix}use 2\n\n`;
+                description += `${user2_data.Moves[2]} ${prefix}use 3\n\n`;
+                description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
+                usr_embed.setDescription(description);
+                bot.users.fetch(prompt.UserID.User2ID).then(user => {
+                    user.send(usr_embed);
+                    var new_prompt = new prompt_model();
+                    new_prompt = duel_copy(prompt, new_prompt);
+                    new_prompt.save().then(() => { prompt.remove(); });
+                });
             });
 
         }
@@ -109,6 +130,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${damage[1]} **-${damage[0]}**`;
                 prompt.Duel.Turn = 1;
                 prompt.save();
+
+                message.author.send("Move chosen!");
+                message.author.send("Waiting for opponent to pick a move...");
+
+                var usr_embed = new Discord.MessageEmbed();
+                usr_embed.setColor(message.guild.me.displayHexColor);
+                usr_embed.setTitle(`Battle VS ${duel_data.User2name}`);
+                var usr_description = "Pick a move by typing the corresponding command in the channel where you started the duel."
+                usr_description += "\n\n";
+                usr_description += "Available moves:\n\n"
+                usr_description += `${user1_data.Moves[0]} ${prefix}use 1\n\n`;
+                usr_description += `${user1_data.Moves[1]} ${prefix}use 2\n\n`;
+                usr_description += `${user1_data.Moves[2]} ${prefix}use 3\n\n`;
+                usr_description += `${user1_data.Moves[3]} ${prefix}use 4\n\n`;
+                usr_embed.setDescription(usr_description);
+                bot.users.fetch(prompt.UserID.User1ID).then(user => {
+                    user.send(usr_embed);
+                    var new_prompt = new prompt_model();
+                    new_prompt = duel_copy(prompt, new_prompt);
+                    new_prompt.save().then(() => { prompt.remove(); });
+                });
             }
 
             embed.setDescription(description);
@@ -171,6 +213,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
         //#endregion
     });
+}
+
+// Copy duel data to new duel prompt.
+function duel_copy(old_prompt, new_prompt) {
+    for (var prop in old_prompt._doc) {
+        if (old_prompt._doc.hasOwnProperty(prop)) {
+            if (prop == "_id" || prop == "expireAt" || prop == "_v") continue;
+            new_prompt._doc[prop] = old_prompt._doc[prop];
+        }
+    }
+    return new_prompt;
 }
 
 // Get evolution tree of pokemons.
