@@ -1,10 +1,10 @@
 // Models
 const channel_model = require('../models/channel');
 const user_model = require('../models/user');
-const dex_model = require('../models/dex');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const getDexes = require('../utils/getDex');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
@@ -43,9 +43,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) console.log(err);
 
                     // Get number of catached pokemons.
-                    dex_model.findOne({ UserID: message.author.id }, (err, data) => {
+                    getDexes.getalldex(message.author.id).then((user_pokemons) => {
 
-                        var user_pokemons = data == null ? [] : data.Pokemons;
                         var no_of_pokemons = user_pokemons.filter(it => it["PokemonId"] == channel.PokemonID).length + 1;
                         var splitted_number = no_of_pokemons.toString().split('');
                         var credit_amount = 0;
@@ -94,19 +93,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             }
 
                             // Adding to dex.
-                            dex_model.findOne({ UserID: message.author.id }, (err, dex) => {
-                                if (err) console.log(err);
-                                if (dex) {
-                                    dex.Pokemons.push({ PokemonId: pokemon["Pokemon Id"] });
-                                } else {
-                                    var dex_data = {
-                                        UserID: message.author.id,
-                                        Pokemons: [{ PokemonId: pokemon["Pokemon Id"] }]
-                                    }
-                                    var dex = new dex_model(dex_data);
-                                }
-                                dex.save();
-                            });
+                            var dex_data = { PokemonId: pokemon["Pokemon Id"] };
+                            getDexes.insertdex(message.author.id, dex_data);
 
                             var message_string = "";
 

@@ -3,11 +3,11 @@ const _ = require('lodash'); // Array sorting module.
 
 // Models
 const user_model = require('../models/user');
-const dex_model = require('../models/dex');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
 const pagination = require('../utils/pagination');
+const getDexes = require('../utils/getDex');
 
 // Initialize the variable.
 var pokemons_from_database = [];
@@ -17,8 +17,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
 
     // Get all user pokemons.
-    dex_model.findOne({ UserID: message.author.id }, (err, data) => {
-        pokemons_from_database = data == null ? [] : data.Pokemons;
+    getDexes.getalldex(message.author.id).then((pokemons_from_database) => {
 
         //Check if its dex arguements
         if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
