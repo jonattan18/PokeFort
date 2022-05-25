@@ -139,7 +139,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons, user2pokemon.Shiny);
 
                     mergeImages(["./assets/duel_images/background.jpg",
-                        { src: image1_url, x: 40, y: 0, width: 350, height: 350 }, { src: image2_url, x: 550, y: 0, width: 350, height: 350 }], {
+                        { src: image1_url, x: 40, y: 20, width: 350, height: 350 }, { src: image2_url, x: 550, y: 20, width: 350, height: 350 }], {
                         Canvas: Canvas
                     }).then(b64 => {
                         const img_data = b64.split(',')[1];

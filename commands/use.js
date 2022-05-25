@@ -144,7 +144,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User1name} wins!**`;
-                description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
+                else description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
                     user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
@@ -162,7 +163,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User2name} wins!**`;
-                description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
+                else description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
                     user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
@@ -178,7 +180,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         //#region Pokemon XP Update.
         function pokemon_xp_update(_id, pokemon_id, pokemon_current_xp, pokemon_level, old_pokemon_name, shiny) {
-            if (pokemon_level == 100) return;
+            if (pokemon_level >= 100) return;
             var leveled_up = false;
             var evolved = false;
             var new_evolved_name = "";
