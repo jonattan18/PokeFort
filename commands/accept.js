@@ -146,6 +146,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                         prompt.Duel.Accepted = true;
                         prompt.save().then(() => {
                             embed = new Discord.MessageEmbed();
+                            embed.setColor(message.guild.me.displayHexColor);
                             embed.attachFiles(image_file)
                             embed.setImage('attachment://img.jpeg')
                             embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);

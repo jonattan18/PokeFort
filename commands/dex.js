@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     // Get all user pokemons.
     dex_model.findOne({ UserID: message.author.id }, (err, data) => {
-        pokemons_from_database = data.Pokemons;
+        pokemons_from_database = data == null ? [] : data.Pokemons;
 
         //Check if its dex arguements
         if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
