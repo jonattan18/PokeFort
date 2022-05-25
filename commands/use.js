@@ -36,7 +36,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var move_used = user1_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
             var move_used_info = moveinfo[move_used];
             var pokemon_level = user1_data.PokemonLevel;
-            var damage = battle.calculate_damage(user_1_pokemon, user1_data.Attack, user2_data.Defense, pokemon_level, move_used_info, user_2_pokemon);
+
+            if (move_used_info.category == "Special") var damage = battle.calculate_damage(user_1_pokemon, user1_data.SpAttack, user2_data.SpDefense, pokemon_level, move_used_info, user_2_pokemon);
+            else var damage = battle.calculate_damage(user_1_pokemon, user1_data.Attack, user2_data.Defense, pokemon_level, move_used_info, user_2_pokemon);
 
             prompt.Duel.User2Pokemon.ActiveHP -= damage[0];
             message.delete().then(() => {
@@ -75,7 +77,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var move_used_info = moveinfo[move_used];
             var pokemon_level = user2_data.PokemonLevel;
             var description = "";
-            var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
+
+            if (move_used_info.category == "Special") var damage = battle.calculate_damage(user_2_pokemon, user2_data.SpAttack, user1_data.SpDefense, pokemon_level, move_used_info, user_1_pokemon);
+            else var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
+            
             prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
 
             // Create embed for damage.

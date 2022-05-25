@@ -94,11 +94,15 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var pokemon1_hp = _.floor(0.01 * (2 * pokemon1_info["Health Stat"] + user1pokemon.IV[0] + _.floor(0.25 * ev)) * user1pokemon.Level) + user1pokemon.Level + 10;
                     var pokemon1_attack = _.floor(0.01 * (2 * pokemon1_info["Attack Stat"] + user1pokemon.IV[1] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_defense = _.floor(0.01 * (2 * pokemon1_info["Defense Stat"] + user1pokemon.IV[2] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
+                    var pokemon1_spattack = _.floor(0.01 * (2 * pokemon1_info["Sp. Attack Stat"] + user1pokemon.IV[3] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
+                    var pokemon1_spdefense = _.floor(0.01 * (2 * pokemon1_info["Sp. Defense Stat"] + user1pokemon.IV[4] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_speed = _.floor(0.01 * (2 * pokemon1_info["Speed Stat"] + user1pokemon.IV[5] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon2_info = pokemons.filter(it => it["Pokemon Id"] == user2pokemon.PokemonId)[0];
                     var pokemon2_hp = _.floor(0.01 * (2 * pokemon2_info["Health Stat"] + user2pokemon.IV[0] + _.floor(0.25 * ev)) * user2pokemon.Level) + user2pokemon.Level + 10;
                     var pokemon2_attack = _.floor(0.01 * (2 * pokemon2_info["Attack Stat"] + user2pokemon.IV[1] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
                     var pokemon2_defense = _.floor(0.01 * (2 * pokemon2_info["Defense Stat"] + user2pokemon.IV[2] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
+                    var pokemon2_spattack = _.floor(0.01 * (2 * pokemon2_info["Sp. Attack Stat"] + user2pokemon.IV[3] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
+                    var pokemon2_spdefense = _.floor(0.01 * (2 * pokemon2_info["Sp. Defense Stat"] + user2pokemon.IV[4] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
                     var pokemon2_speed = _.floor(0.01 * (2 * pokemon2_info["Speed Stat"] + user2pokemon.IV[5] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
 
                     // Turn chooser
@@ -112,6 +116,8 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User1Pokemon.PokemonLevel = user1pokemon.Level;
                     prompt.Duel.User1Pokemon.Attack = pokemon1_attack;
                     prompt.Duel.User1Pokemon.Defense = pokemon1_defense;
+                    prompt.Duel.User1Pokemon.SpAttack = pokemon1_spattack;
+                    prompt.Duel.User1Pokemon.SpDefense = pokemon1_spdefense;
                     prompt.Duel.User1Pokemon.Speed = pokemon1_speed;
                     prompt.Duel.User1Pokemon.ActiveHP = pokemon1_hp;
                     prompt.Duel.User1Pokemon.TotalHP = pokemon1_hp;
@@ -128,6 +134,8 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User2Pokemon.PokemonLevel = user2pokemon.Level;
                     prompt.Duel.User2Pokemon.Attack = pokemon2_attack;
                     prompt.Duel.User2Pokemon.Defense = pokemon2_defense;
+                    prompt.Duel.User2Pokemon.SpAttack = pokemon2_spattack;
+                    prompt.Duel.User2Pokemon.SpDefense = pokemon2_spdefense;
                     prompt.Duel.User2Pokemon.Speed = pokemon2_speed;
                     prompt.Duel.User2Pokemon.ActiveHP = pokemon2_hp;
                     prompt.Duel.User2Pokemon.TotalHP = pokemon2_hp;
