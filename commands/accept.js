@@ -97,6 +97,17 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var pokemon1_spattack = _.floor(0.01 * (2 * pokemon1_info["Special Attack Stat"] + user1pokemon.IV[3] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_spdefense = _.floor(0.01 * (2 * pokemon1_info["Special Defense Stat"] + user1pokemon.IV[4] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_speed = _.floor(0.01 * (2 * pokemon1_info["Speed Stat"] + user1pokemon.IV[5] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
+                    
+                    //Pokemon 1 nature update.
+                    var pokemon1_nature = nature_of(user1pokemon.Nature);
+                    pokemon1_hp += percentage(pokemon1_hp, pokemon1_nature[1]);
+                    pokemon1_attack += percentage(pokemon1_attack, pokemon1_nature[2]);
+                    pokemon1_defense += percentage(pokemon1_defense, pokemon1_nature[3]);
+                    pokemon1_spattack += percentage(pokemon1_spattack, pokemon1_nature[4]);
+                    pokemon1_spdefense += percentage(pokemon1_spdefense, pokemon1_nature[5]);
+                    pokemon1_speed += percentage(pokemon1_speed, pokemon1_nature[6]);                    
+                    
+                    
                     var pokemon2_info = pokemons.filter(it => it["Pokemon Id"] == user2pokemon.PokemonId)[0];
                     var pokemon2_hp = _.floor(0.01 * (2 * pokemon2_info["Health Stat"] + user2pokemon.IV[0] + _.floor(0.25 * ev)) * user2pokemon.Level) + user2pokemon.Level + 10;
                     var pokemon2_attack = _.floor(0.01 * (2 * pokemon2_info["Attack Stat"] + user2pokemon.IV[1] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
@@ -104,6 +115,15 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var pokemon2_spattack = _.floor(0.01 * (2 * pokemon2_info["Special Attack Stat"] + user2pokemon.IV[3] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
                     var pokemon2_spdefense = _.floor(0.01 * (2 * pokemon2_info["Special Defense Stat"] + user2pokemon.IV[4] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
                     var pokemon2_speed = _.floor(0.01 * (2 * pokemon2_info["Speed Stat"] + user2pokemon.IV[5] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
+
+                    //Pokemon 2 Nature update.
+                    var pokemon2_nature = nature_of(user2pokemon.Nature);
+                    pokemon2_hp += percentage(pokemon2_hp, pokemon2_nature[1]);
+                    pokemon2_attack += percentage(pokemon2_attack, pokemon2_nature[2]);
+                    pokemon2_defense += percentage(pokemon2_defense, pokemon2_nature[3]);
+                    pokemon2_spattack += percentage(pokemon2_spattack, pokemon2_nature[4]);
+                    pokemon2_spdefense += percentage(pokemon2_spdefense, pokemon2_nature[5]);
+                    pokemon2_speed += percentage(pokemon2_speed, pokemon2_nature[6]);
 
                     // Turn chooser
                     prompt.Duel.Turn = 1;
@@ -248,31 +268,36 @@ function get_pokemon_full_name(selected_pokemonid, pokemons) {
 
 // Function to get the nature from number.
 function nature_of(int) {
-    if (int == 1) { return "Adament" }
-    else if (int == 2) { return "Bashful" }
-    else if (int == 3) { return "Bold" }
-    else if (int == 4) { return "Brave" }
-    else if (int == 5) { return "Calm" }
-    else if (int == 6) { return "Careful" }
-    else if (int == 7) { return "Docile" }
-    else if (int == 8) { return "Gentle" }
-    else if (int == 9) { return "Hardy" }
-    else if (int == 10) { return "Hasty" }
-    else if (int == 11) { return "Impish" }
-    else if (int == 12) { return "Jolly" }
-    else if (int == 13) { return "Lax" }
-    else if (int == 14) { return "Lonely" }
-    else if (int == 15) { return "Mild" }
-    else if (int == 16) { return "Modest" }
-    else if (int == 17) { return "Naive" }
-    else if (int == 18) { return "Naughty" }
-    else if (int == 19) { return "Quiet" }
-    else if (int == 20) { return "Quirky" }
-    else if (int == 21) { return "Rash" }
-    else if (int == 22) { return "Relaxed" }
-    else if (int == 23) { return "Sassy" }
-    else if (int == 24) { return "Serious" }
-    else if (int == 25) { return "Timid" }
+    if (int == 1) { return ["Adament", 0, 10, 0, -10, 0, 0] }
+    else if (int == 2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
+    else if (int == 3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
+    else if (int == 4) { return ["Brave", 0, 10, 0, 0, 0, -10] }
+    else if (int == 5) { return ["Calm", 0, -10, 0, 0, 10, 0] }
+    else if (int == 6) { return ["Careful", 0, 0, 0, -10, 10, 0] }
+    else if (int == 7) { return ["Docile", 0, 0, 0, 0, 0, 0] }
+    else if (int == 8) { return ["Gentle", 0, 0, -10, 0, 10, 0] }
+    else if (int == 9) { return ["Hardy", 0, 0, 0, 0, 0, 0] }
+    else if (int == 10) { return ["Hasty", 0, 0, -10, 0, 0, 10] }
+    else if (int == 11) { return ["Impish", 0, 0, 10, -10, 0, 0] }
+    else if (int == 12) { return ["Jolly", 0, 0, 0, -10, 0, 10] }
+    else if (int == 13) { return ["Lax", 0, 10, 0, 0, -10, 0] }
+    else if (int == 14) { return ["Lonely", 0, 10, -10, 0, 0, 0] }
+    else if (int == 15) { return ["Mild", 0, 0, -10, 10, 0, 0] }
+    else if (int == 16) { return ["Modest", 0, 0, 0, 10, 0, -10] }
+    else if (int == 17) { return ["Naive", 0, 0, 0, 0, -10, 10] }
+    else if (int == 18) { return ["Naughty", 0, 10, 0, 0, -10, 0] }
+    else if (int == 19) { return ["Quiet", 0, 0, 0, 10, 0, -10] }
+    else if (int == 20) { return ["Quirky", 0, 0, 0, 0, 0, 0] }
+    else if (int == 21) { return ["Rash", 0, 0, 0, 10, -10, 0] }
+    else if (int == 22) { return ["Relaxed", 0, 0, 10, 0, 0, -10] }
+    else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
+    else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
+    else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+}
+
+// Percentage calculation.
+function percentage(percent, total) {
+    return parseInt(((percent / 100) * total).toFixed(0));
 }
 
 module.exports.config = {

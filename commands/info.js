@@ -95,6 +95,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * ev)) * level) + 5);
             let total_iv = ((hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv) / 186 * 100).toFixed(2);
 
+            // Nature Change
+            var nature_value = nature_of(nature);
+            hp += percentage(hp, nature_value[1]);
+            atk += percentage(atk, nature_value[2]);
+            def += percentage(def, nature_value[3]);
+            spa += percentage(spa, nature_value[4]);
+            spd += percentage(spd, nature_value[5]);
+            spe += percentage(spe, nature_value[6]);
+
             // Image url
             var form = pokemon_db["Alternate Form Name"];
             var str = "" + pokemon_db["Pokedex Number"];
@@ -158,6 +167,11 @@ function nature_of(int) {
     else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
     else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
     else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+}
+
+// Percentage calculation.
+function percentage(percent, total) {
+    return parseInt(((percent / 100) * total).toFixed(0));
 }
 
 // Exp to level up.
