@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
                 prompt.Duel.Turn = 2;
 
-                message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
+                if (user1_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
 
                 var usr_embed = new Discord.MessageEmbed();
                 usr_embed.setColor(message.guild.me.displayHexColor);
@@ -57,7 +57,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(description);
                 bot.users.fetch(prompt.UserID.User2ID).then(user => {
-                    user.send(usr_embed);
+                    if (user2_data.DuelDM != true) user.send(usr_embed);
                     var new_prompt = new prompt_model();
                     new_prompt = duel_copy(prompt, new_prompt);
                     new_prompt.save().then(() => { prompt.remove(); });
@@ -113,7 +113,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 prompt.Duel.Turn = 1;
                 prompt.save();
 
-                message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
+                if (user2_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
 
                 var usr_embed = new Discord.MessageEmbed();
                 usr_embed.setColor(message.guild.me.displayHexColor);
@@ -127,7 +127,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 usr_description += `${user1_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(usr_description);
                 bot.users.fetch(prompt.UserID.User1ID).then(user => {
-                    user.send(usr_embed);
+                    if (user1_data.DuelDM != true) user.send(usr_embed);
                     var new_prompt = new prompt_model();
                     new_prompt = duel_copy(prompt, new_prompt);
                     new_prompt.save().then(() => { prompt.remove(); });

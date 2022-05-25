@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
     OrderType: String,
     PokeCredits: Number,
     Silence: Boolean,
+    DuelDM: Boolean,
     Selected: String,
     Redeems: Number,
     Shards: Number,

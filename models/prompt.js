@@ -42,6 +42,7 @@ const PromptSchema = new mongoose.Schema({
         ImageCache: String,
         User1Move: Array,
         User1Pokemon: {
+            DuelDM: Boolean,
             PokemonUserID: String,
             PokemonName: String,
             PokemonXP: Number,
@@ -57,6 +58,7 @@ const PromptSchema = new mongoose.Schema({
             Shiny: Boolean
         },
         User2Pokemon: {
+            DuelDM: Boolean,
             PokemonUserID: String,
             PokemonName: String,
             PokemonXP: Number,
