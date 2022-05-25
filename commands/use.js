@@ -60,9 +60,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // Create embed for damage.
             var embed = new Discord.MessageEmbed()
-
             embed.setTitle(`${duel_data.User1name} VS ${duel_data.User2name}`)
-            embed.setColor(message.member.displayHexColor);
+            embed.setColor(message.guild.me.displayHexColor);
 
             if (prompt.Duel.User2Pokemon.ActiveHP <= 0) {
                 // Xp gained calculations.
@@ -73,8 +72,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
-                description += `**\n${duel_data.User2name} wins!**`;
-                description += `\n${duel_data.User1name} was awarded ${xp[0]}XP and 10 credits for winning! :moneybag:`;
+                description += `**\n${duel_data.User1name} wins!**`;
+                description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
                     user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
@@ -91,7 +90,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User2name} wins!**`;
-                description += `\n${duel_data.User2name} was awarded ${xp[0]}XP and 10 credits for winning! :moneybag:`;
+                description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
                     user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
