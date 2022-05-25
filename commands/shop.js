@@ -32,10 +32,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Page 1 XP Boosters & Rare Candies
 function page_1(message, balance, prefix) {
-
+    var embed = new Discord.MessageEmbed()
+    embed.setTitle(`:moneybag: Balance: ${balance}\n\nXP Boosters & Rare Candies`)
+    embed.setColor(message.guild.me.displayHexColor)
+    embed.setDescription(`Get XP boosters to increase your XP gain from chatting and battling!.\n`)
+    embed.addField('30 Minutes - 2X Multiplier | Cost: 20 Credits', '``' + prefix + 'buy 1``', false)
+    embed.addField('1 Hour - 2X Multiplier | Cost: 40 Credits', '``' + prefix + 'buy 2``', false)
+    embed.addField('2 Hour - 2X Multiplier | Cost: 70 Credits', '``' + prefix + 'buy 3``', false)
+    embed.addField('4 Hour - 1.5X Multiplier | Cost: 90 Credits', '``' + prefix + 'buy 4``', false)
+    embed.addField('Rare Candy | Cost: 75 Credits', 'Rare candies level up your selected pokemon by one level for each candy you feed it.\n``' + prefix + 'buy candy <amount>``', false)
+    embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
 }
 
-// Page 2 Rare Stones & Evolution Items
+// Page 2 Rare Stones & Evolution Items 
 function page_2(message, balance, prefix) {
     var embed = new Discord.MessageEmbed()
     embed.setTitle(`:moneybag: Balance: ${balance}\n\nRare Stones & Evolution Items`)
