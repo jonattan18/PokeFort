@@ -43,8 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
                 prompt.Duel.Turn = 2;
 
-                message.author.send("Move chosen!");
-                message.author.send("Waiting for opponent to pick a move...");
+                message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
 
                 var usr_embed = new Discord.MessageEmbed();
                 usr_embed.setColor(message.guild.me.displayHexColor);
@@ -84,39 +83,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             embed.setTitle(`${duel_data.User1name} VS ${duel_data.User2name}`)
             embed.setColor(message.guild.me.displayHexColor);
 
-            if (prompt.Duel.User2Pokemon.ActiveHP <= 0) {
-                // Xp gained calculations.
-                var xp = battle.xp_calculation(user_1_pokemon, user1_data.PokemonLevel, user_2_pokemon, user2_data.PokemonLevel, user1_data.Traded, false);
-                // Description generation.
-                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
-                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
-                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
-                description += `\n${damage[1]} **-${damage[0]}**\n`;
-                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
-                description += `**\n${duel_data.User1name} wins!**`;
-                description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
-                prompt.remove().then(() => {
-                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
-                        pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
-                    });
-                });
+            if (prompt.Duel.User1Pokemon.ActiveHP <= 0 && prompt.Duel.User2Pokemon.ActiveHP <= 0) {
+                if (prompt.Duel.User1Pokemon.Speed > prompt.Duel.User2Pokemon.Speed) {
+                    player1_is_winner();
+                }
+                else if (prompt.Duel.User1Pokemon.Speed < prompt.Duel.User2Pokemon.Speed) {
+                    player2_is_winner();
+                }
+                else {
+                    player1_is_winner();
+                }
+            }
+            else if (prompt.Duel.User2Pokemon.ActiveHP <= 0) {
+                player1_is_winner();
             }
             else if (prompt.Duel.User1Pokemon.ActiveHP <= 0) {
-                // Xp gained calculations.
-                var xp = battle.xp_calculation(user_2_pokemon, user2_data.PokemonLevel, user_1_pokemon, user1_data.PokemonLevel, user2_data.Traded, false);
-                // Description generation.
-                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
-                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
-                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
-                description += `\n${damage[1]} **-${damage[0]}**\n`;
-                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
-                description += `**\n${duel_data.User2name} wins!**`;
-                description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
-                prompt.remove().then(() => {
-                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
-                        pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
-                    });
-                });
+                player2_is_winner();
             }
             else {
                 description = `${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n`;
@@ -131,8 +113,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 prompt.Duel.Turn = 1;
                 prompt.save();
 
-                message.author.send("Move chosen!");
-                message.author.send("Waiting for opponent to pick a move...");
+                message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
 
                 var usr_embed = new Discord.MessageEmbed();
                 usr_embed.setColor(message.guild.me.displayHexColor);
@@ -150,6 +131,42 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var new_prompt = new prompt_model();
                     new_prompt = duel_copy(prompt, new_prompt);
                     new_prompt.save().then(() => { prompt.remove(); });
+                });
+            }
+
+            function player1_is_winner() {
+                // Xp gained calculations.
+                var xp = battle.xp_calculation(user_1_pokemon, user1_data.PokemonLevel, user_2_pokemon, user2_data.PokemonLevel, user1_data.Traded, false);
+                // Description generation.
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
+                description += `**\n${duel_data.User1name} wins!**`;
+                description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                prompt.remove().then(() => {
+                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                        pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
+                    });
+                });
+            }
+
+            function player2_is_winner() {
+                // Xp gained calculations.
+                var xp = battle.xp_calculation(user_2_pokemon, user2_data.PokemonLevel, user_1_pokemon, user1_data.PokemonLevel, user2_data.Traded, false);
+                // Description generation.
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**\n`;
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
+                description += `**\n${duel_data.User2name} wins!**`;
+                description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                prompt.remove().then(() => {
+                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                        pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
+                    });
                 });
             }
 
