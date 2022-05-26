@@ -14,7 +14,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     if (args.length > 0) {
-        var selected_pokemon = getPokemons.pokemondata(args, pokemons);
+        var selected_pokemon = getPokemons.getPokemonData(args, pokemons);
+        if (selected_pokemon == null) return message.channel.send(`This is not a valid pokemon!`);
         selected_pokemon.Level = 100;
         pokemon_embed(selected_pokemon)
     }
@@ -42,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     function pokemon_embed(selected_pokemon, embed_current_moves) {
 
         //Get pokemon name.
-        var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);
+        var pokemon_moveset = get_pokemon_move(selected_pokemon["Pokemon Id"], pokemons);
         pokemon_moveset = pokemon_moveset.filter(it => it[0] <= selected_pokemon.Level);
 
         // Show Embedded Message.
@@ -51,8 +52,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         embed.setTitle(title)
         if (embed_current_moves != undefined) {
             var title = "";
-            if (selected_pokemon.Shiny) { title = `:star: Level ${selected_pokemon.Level} ${get_pokemon_full_name(selected_pokemon, pokemons)}`; }
-            else { title = `Level ${selected_pokemon.Level} ${get_pokemon_full_name(selected_pokemon, pokemons)}`; }
+            if (selected_pokemon.Shiny) { title = `:star: Level ${selected_pokemon.Level} ${selected_pokemon.name_no_shiny}`; }
+            else { title = `Level ${selected_pokemon.Level} ${selected_pokemon.name_no_shiny}`; }
             embed.setTitle(title)
             embed.setDescription(`To learn a move do ${prefix}learn <move>`);
             embed.addField("Current Moves", embed_current_moves.join("\n"));
@@ -75,8 +76,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
         else {
             var title = "";
-            if (selected_pokemon.Shiny) { title = `:star: ${get_pokemon_full_name(selected_pokemon, pokemons)}'s moves`; }
-            else { title = `${get_pokemon_full_name(selected_pokemon, pokemons)}'s moves`; }
+            if (selected_pokemon.Shiny) { title = `:star: ${selected_pokemon.name_no_shiny}'s moves`; }
+            else { title = `${selected_pokemon.name_no_shiny}'s moves`; }
             var description = "";
             for (var i = 0; i < pokemon_moveset.length; i++) {
                 description += `${pokemon_moveset[i][1].replace(":lock:", "")} | Level: ${pokemon_moveset[i][0]} \n`
@@ -88,29 +89,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         message.channel.send(embed);
 
     }
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_full_name(selected_pokemon, pokemons) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
-
-    //Get Pokemon Name from Pokemon ID.
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-
-    if (selected_pokemon.Nickname) { var name = `'${selected_pokemon.Nickname}'` }
-    else { var name = pokemon_name }
-
-    return name;
 }
 
 // Get pokemon name from pokemon ID.

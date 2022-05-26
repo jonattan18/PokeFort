@@ -62,7 +62,6 @@ function page_2(message, balance, prefix) {
     embed.addField('Thunder Stone', '``' + prefix + 'buy stone Thunder``', true)
     embed.addField('Water Stone', '``' + prefix + 'buy stone Water``', true)
     embed.addField('Friendship Bracelet', '``' + prefix + 'buy bracelet``', true)
-    embed.addField('‎', '‎', true)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }
@@ -127,7 +126,6 @@ function page_4(message, balance, prefix) {
     embed.addField('Oval Stone', 'Trade Evolution Item', true)
     embed.addField('Razor Claw', 'Trade Evolution Item', true)
     embed.addField('Razor Fang', 'Trade Evolution Item', true)
-    embed.addField('‎', '‎', true)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }

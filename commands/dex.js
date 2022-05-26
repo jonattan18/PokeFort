@@ -17,7 +17,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (message.isadmin) { if (message.mentions.users.first()) { message.author = message.mentions.users.first(); args.shift() } } // Admin check
 
     // Get all user pokemons.
-    getDexes.getalldex(message.author.id).then((pokemons_from_database) => {
+    getDexes.getalldex(message.author.id).then((data) => {
+        pokemons_from_database = data;
 
         //Check if its dex arguements
         if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, message, args, prefix, user_available, pokemons); return; }
@@ -38,78 +39,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (args[0] == "--uc" || args[0] == "--uncaught") { dex_uncaught(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--od" || args[0] == "--orderd") { dex_orderd(bot, message, args, prefix, user_available, pokemons); return; }
 
-        // Forms
-        var isshiny = false;
-        var form = [];
-        if (args[0].toLowerCase() == "shiny") { form.push("Shiny"); args.splice(0, 1); if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; } }
-        if (args[0].toLowerCase() == "alolan") { form.push("Alola"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "galarian") { form.push("Galar"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "gigantamax" || args[0].toLowerCase() == "gmax") { form.push("Gigantamax"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "eternamax") { form.push("Eternamax"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "primal") { form.push("Primal"); args.splice(0, 1) }
-        else if (args[0].toLowerCase() == "mega" && args[args.length - 1].toLowerCase() == "x" || args[args.length - 1].toLowerCase() == "y") {
-            if (args[args.length - 1] == "x") { form.push("Mega X") };
-            if (args[args.length - 1] == "y") { form.push("Mega Y") };
-            args.splice(0, 1);
-            args.splice(args.length - 1, 1)
-        }
-        else if (args[0].toLowerCase() == "mega") { form.push("Mega"); args.splice(0, 1) }
+        //#region Create Message
 
-        if (form.length == 1) { form = form[0] }
-        else if (form.length == 2) { form = form[1]; isshiny = true; }
-
-        let given_name = args.join(" ")._normalize();
-
-        if (form == "" || form == "Shiny") {
-            var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name); // Searching in English Name.
-            if (pokemon.length == 0) {
-                dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name); // Searching in Germany Name.
-                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() === given_name)); // Searching in Japanese Name.
-                fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name); // Searching in French Name.
-                if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
-            }
-        }
-        else {
-            var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in English Name.
-            if (pokemon.length == 0) {
-                dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in Germany Name.
-                jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() === given_name) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
-                fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in French Name.
-                if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is not a valid pokemon!"); return; };
-            }
-        }
-
-        function language_finder(dr_pokemon, jp_pokemon, fr_pokemon) {
-            if (dr_pokemon.length > 0) { pokemon = dr_pokemon; }
-            else if (jp_pokemon.length > 0) { pokemon = jp_pokemon; }
-            else if (fr_pokemon.length > 0) { pokemon = fr_pokemon; }
-            else { return false; }
-        }
-
-        pokemon = pokemon[0];
+        pokemon = getPokemons.getPokemonData(args, pokemons, true);
+        if (pokemon == null) { return message.channel.send("Pokemon not found!"); }
 
         // No of caught
         //Getting the data from the user model
         var no_of_caught = 0;
         // Get number of catached pokemons.
-        var user_pokemons = pokemons_from_database;
-        no_of_caught = user_pokemons.filter(it => it["PokemonId"] === pokemon["Pokemon Id"]).length;
-
-        //#region Create Message
-
-        // Pokemon Name
-        if (form == "") { var pokemon_name = pokemon["Pokemon Name"] }
-        else if (form == "Mega X" || form == "Mega Y") {
-            var pokemon_name = `Mega ${pokemon["Pokemon Name"]} ${form[form.length - 1]}`
-        }
-        else {
-            var form_name = "";
-            if (form == "Shiny") { form_name = "" }
-            else if (form == "Alola") { form_name = "Alolan" }
-            else if (form == "Galar") { form_name = "Galarian" }
-            else { form_name = form; }
-            var pokemon_name = `${form_name} ${pokemon["Pokemon Name"]}`;
-        }
+        no_of_caught = pokemons_from_database.filter(it => it["PokemonId"] === pokemon["Pokemon Id"]).length;
 
         // Evolution
         var evolution = "";
@@ -120,17 +59,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (pre_evolution["Evolution Details"].includes("Level")) {
                 var evolution_detail = pre_evolution["Evolution Details"].toLowerCase();
                 if (evolution_detail == "null") { evolution_detail = "" }
-                evolution = pokemon_name + " evolves into " + pre_evolution["Pokemon Name"] + " starting at " + evolution_detail + "\n";
+                evolution = pokemon.name_no_shiny + " evolves into " + pre_evolution["Pokemon Name"] + " starting at " + evolution_detail + "\n";
             }
             else if (pre_evolution["Evolution Details"].includes("Stone")) {
                 var evolution_detail = pre_evolution["Evolution Details"].toLowerCase();
                 if (evolution_detail == "null") { evolution_detail = "" }
-                evolution = pokemon_name + " evolves into " + pre_evolution["Pokemon Name"] + " using " + evolution_detail + "\n";
+                evolution = pokemon.name_no_shiny + " evolves into " + pre_evolution["Pokemon Name"] + " using " + evolution_detail + "\n";
             }
             else {
                 var evolution_detail = pre_evolution["Evolution Details"].toLowerCase();
                 if (evolution_detail == "null") { evolution_detail = "" }
-                evolution = pokemon_name + " evolves into " + pre_evolution["Pokemon Name"] + " " + evolution_detail + "\n";
+                evolution = pokemon.name_no_shiny + " evolves into " + pre_evolution["Pokemon Name"] + " " + evolution_detail + "\n";
             }
         }
 
@@ -138,20 +77,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (pokemon["Secondary Type"] != "NULL") { type = pokemon["Primary Type"] + " | " + pokemon["Secondary Type"] }
         else { type = pokemon["Primary Type"]; }
 
-        // Image url
-        var str = "" + pokemon["Pokedex Number"]
-        var pad = "000"
-        var pokedex_num = pad.substring(0, pad.length - str.length) + str;
-        if (form == "") { var image_name = pokedex_num + '.png'; }
-        else if (isshiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '-Shiny.png'; isshiny = false; }
-        else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
-        var image_url = './assets/images/' + image_name;
-
         // Create embed message
         let embed = new Discord.MessageEmbed();
-        embed.attachFiles(image_url)
-        embed.setImage('attachment://' + image_name)
-        embed.setTitle("**Base stats for " + pokemon_name + "**")
+        embed.attachFiles(pokemon.imageurl);
+        embed.setImage('attachment://' + pokemon.imagename)
+        embed.setTitle("**Base stats for " + pokemon.name_no_shiny + "**")
         embed.setColor(message.member.displayHexColor)
         embed.setDescription(evolution + "\n"
             + "**Alternative Names:**\n🇯🇵 " + pokemon["jp_name"].join("/") + "\n🇩🇪 " + pokemon["dr_name"] + "\n🇫🇷 " + pokemon["fr_name"] + "\n\n"

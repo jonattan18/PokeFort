@@ -1,0 +1,65 @@
+{
+    "allowed_forms": [
+        "alolan",
+        "galarian",
+        "mega",
+        "gigantamax",
+        "primal",
+        "gmax",
+        "speed",
+        "attack",
+        "defense",
+        "dawn wings",
+        "dusk mane",
+        "ultra",
+        "ice rider",
+        "shadow rider",
+        "white",
+        "black",
+        "midnight",
+        "dusk",
+        "ash",
+        "crowned",
+        "zen",
+        "unbound"
+    ],
+    "forms": {
+        "386": [
+            "speed",
+            "attack",
+            "defense"
+        ],
+        "800": [
+            "dusk mane",
+            "dawn wings",
+            "ultra"
+        ],
+        "898": [
+            "ice rider",
+            "shadow rider"
+        ],
+        "646": [
+            "black",
+            "white"
+        ],
+        "745": [
+            "midnight",
+            "dusk"
+        ],
+        "658": [
+            "ash"
+        ],
+        "888": [
+            "crowned"
+        ],
+        "889": [
+            "crowned"
+        ],
+        "555": [
+            "zen"
+        ],
+        "720": [
+            "unbound"
+        ]
+    }
+}

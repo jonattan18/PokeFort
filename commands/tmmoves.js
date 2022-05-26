@@ -15,7 +15,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     if (args.length > 0) {
-        var selected_pokemon = getPokemons.pokemondata(args, pokemons);
+        var selected_pokemon = getPokemons.getPokemonData(args, pokemons);
+        if (selected_pokemon == null) return message.channel.send(`This is not a valid pokemon!`);
         pokemon_embed(selected_pokemon)
     }
     else if (args.length == 0) {
@@ -31,7 +32,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     function pokemon_embed(selected_pokemon) {
 
-        var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);
+        var pokemon_moveset = get_pokemon_move(selected_pokemon["Pokemon Id"], pokemons);
         if (pokemon_moveset.length == 0) return message.channel.send("No TM found for this pokemon.");
 
         var chunked_moveset = chunkArray(pokemon_moveset, 20);
@@ -51,7 +52,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             // Show Embedded Message.
             var embed = new Discord.MessageEmbed()
             embed.setColor(message.member.displayHexColor)
-            embed.setTitle(`${get_pokemon_full_name(selected_pokemon, pokemons)}'s TMs`)
+            embed.setTitle(`${selected_pokemon.name_no_shiny}'s TMs`)
             embed.setDescription(description)
             embed.setFooter(`Showing ${old_chunked_moveset_count} - ${old_chunked_moveset_count + chunked_moveset[a].length - 1} of ${pokemon_moveset.length} total TMs!`)
             global_embed.push(embed);
@@ -64,29 +65,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, 0);
         });
     }
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_full_name(selected_pokemon, pokemons) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
-
-    //Get Pokemon Name from Pokemon ID.
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-
-    if (selected_pokemon.Nickname) { var name = `'${selected_pokemon.Nickname}'` }
-    else { var name = pokemon_name }
-
-    return name;
 }
 
 // Get pokemon name from pokemon ID.
