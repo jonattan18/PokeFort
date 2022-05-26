@@ -222,11 +222,11 @@ function dex_galarian(bot, message, args, prefix, user_available, pokemons) {
 function dex_pokemons(bot, message, args, prefix, user_available, pokemons) {
     var new_alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
     for (i = 0; i < new_alolan_pokemons.length; i++) {
-        new_alolan_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_alolan_pokemons[i]["Pokemon Id"]);
+        new_alolan_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_alolan_pokemons[i]["Pokemon Id"], pokemons, false);
     }
     var new_galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
     for (i = 0; i < new_galarian_pokemons.length; i++) {
-        new_galarian_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_galarian_pokemons[i]["Pokemon Id"]);
+        new_galarian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_galarian_pokemons[i]["Pokemon Id"], pokemons, false);
     }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
@@ -330,11 +330,11 @@ function dex_caught(bot, message, args, prefix, user_available, pokemons) {
 function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
     var new_alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
     for (i = 0; i < new_alolan_pokemons.length; i++) {
-        new_alolan_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_alolan_pokemons[i]["Pokemon Id"]);
+        new_alolan_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_alolan_pokemons[i]["Pokemon Id"], pokemons, false);
     }
     var new_galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
     for (i = 0; i < new_galarian_pokemons.length; i++) {
-        new_galarian_pokemons[i]["Pokemon Name"] = get_pokemon_name(pokemons, new_galarian_pokemons[i]["Pokemon Id"]);
+        new_galarian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_galarian_pokemons[i]["Pokemon Id"], pokemons, false);
     }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
@@ -420,24 +420,6 @@ function create_pagination(message, dex_pokemons, description_string = "", field
         if (global_embed.length == 1) return;
         pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
     });
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_name(pokemons, pokemon_id) {
-    var pokemon_name = "";
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        pokemon_name = temp_name;
-    }
-    return pokemon_name;
 }
 
 // Chunk array into equal parts.

@@ -126,8 +126,8 @@ function getPokemonData(args, pokemons, shiny_allowed) {
 
     // Pokemon Name
     var pokemon_name = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, shiny);
-    pokemon.fullname = pokemon_name[0];
-    pokemon.name_no_shiny = pokemon_name[1];
+    pokemon.fullname = pokemon_name;
+    pokemon.name_no_shiny = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, false);
     pokemon.imageurl = image_url;
     pokemon.imagename = image_name;
     pokemon.pokemon_name = pokemon_name;
@@ -151,7 +151,7 @@ function imagefromid(pokemonid, pokemons, shiny) {
 }
 
 // Get pokemon name from pokemon ID.
-function get_pokemon_name_from_id(pokemonID, pokemons, shiny) {
+function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false) {
 
     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemonID)[0];
 
@@ -163,14 +163,21 @@ function get_pokemon_name_from_id(pokemonID, pokemons, shiny) {
         var temp_name = "";
         if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
         else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
+        else if (pokemon_db["Alternate Form Name"] != "NULL") {
+            if (pokemon_db["Dex Search"] == "Front") temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
+            else if (pokemon_db["Dex Search"] == "Back") temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
+            else temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
+        }
         else { temp_name = pokemon_db["Pokemon Name"]; }
         var pokemon_name = temp_name;
     }
 
-    if (shiny) { var name = "Shiny " + pokemon_name; var name_without_shiny = pokemon_name; }
-    else { var name = pokemon_name; var name_without_shiny = pokemon_name; }
-    return [name, name_without_shiny];
+    if (shiny) {
+        if (star_shiny) var name = ":star: " + pokemon_name;
+        else var name = "Shiny " + pokemon_name;
+    }
+    else var name = pokemon_name;
+    return name;
 }
 
 Object.defineProperty(String.prototype, 'capitalize', {
@@ -186,4 +193,4 @@ Number.prototype.pad = function (size) {
     return s;
 }
 
-module.exports = { getallpokemon, insertpokemon, deletepokemon, getPokemonData, imagefromid };
+module.exports = { getallpokemon, insertpokemon, deletepokemon, getPokemonData, get_pokemon_name_from_id, imagefromid };

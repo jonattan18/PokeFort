@@ -453,7 +453,7 @@ function recycle(message, pokemons, user_pokemons, prefix, user) {
     // Get selected pokemon name.
     var selected_user_pokemons = global_user_pokemon;
     var selected_pokemon = selected_user_pokemons.filter(it => it._id == user.Selected)[0];
-    var selected_pokemon_name = get_pokemon_name(pokemons, selected_pokemon["PokemonId"], selected_pokemon);
+    var selected_pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon["PokemonId"], pokemons, selected_pokemon.Shiny);
 
     // Remove selected pokemon in list if it is in the list.
     var user_pokemons = user_pokemons.filter(pokemon => pokemon._id != selected_pokemon._id);
@@ -471,7 +471,7 @@ function recycle(message, pokemons, user_pokemons, prefix, user) {
     var display_pokemons = user_pokemons.slice(0, 20);
     for (let i = 0; i < display_pokemons.length; i++) {
         const element = display_pokemons[i];
-        var pokemon_name = get_pokemon_name(pokemons, element["PokemonId"], element, true);
+        var pokemon_name = getPokemons.get_pokemon_name_from_id(element["PokemonId"], pokemons, element.Shiny, true);
         description += `Level ${element["Level"]} ${pokemon_name}\n`;
     }
     if (user_pokemons.length > 20) { description += `\n+${user_pokemons.length - 20} other pokemons` }
@@ -511,24 +511,6 @@ function recycle(message, pokemons, user_pokemons, prefix, user) {
             message.channel.send(embed);
         });
     });
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_name(pokemons, pokemon_id, selected_pokemon, star_shiny = false) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-    if (selected_pokemon.Shiny) { if (star_shiny) { pokemon_name = ':star: ' + pokemon_name; } else { pokemon_name = 'Shiny ' + pokemon_name; } }
-    return pokemon_name;
 }
 
 // Calculate total iv from iv array.

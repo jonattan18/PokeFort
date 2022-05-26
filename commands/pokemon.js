@@ -36,14 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (order_type == "Number") { user_pokemons = user_pokemons; }
             else if (order_type == "Alphabet") {
                 for (i = 0; i < user_pokemons.length; i++) {
-                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                    var temp_name = "";
-                    if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                    else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                    else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                    else { temp_name = pokemon_db["Pokemon Name"]; }
-                    var pokemon_name = temp_name;
-                    user_pokemons[i]["Name"] = pokemon_name;
+                    user_pokemons[i]["Name"] = getPokemons.get_pokemon_name_from_id(user_pokemons[i].PokemonId, pokemons, false);
                 }
                 user_pokemons = _.orderBy(user_pokemons, ['Name'], ['asc']);
             }
@@ -485,19 +478,7 @@ function create_pagination(message, pokemons, user_pokemons) {
         for (i = 0; i < chunked_pokemons[a].length; i++) {
 
             //Get Pokemon Name from Pokemon ID.
-            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == chunked_pokemons[a][i].PokemonId)[0];
-            if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-                var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-            }
-            else {
-                var temp_name = "";
-                if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                else { temp_name = pokemon_db["Pokemon Name"]; }
-                var pokemon_name = temp_name;
-            }
-            if (chunked_pokemons[a][i].Shiny) { pokemon_name += ' :star:' }
+            var pokemon_name = getPokemons.get_pokemon_name_from_id(chunked_pokemons[a][i]["PokemonId"], pokemons, chunked_pokemons[a][i].Shiny, true);
 
             var total_iv = ((chunked_pokemons[a][i].IV[0] + chunked_pokemons[a][i].IV[1] + chunked_pokemons[a][i].IV[2] + chunked_pokemons[a][i].IV[3] + chunked_pokemons[a][i].IV[4] + chunked_pokemons[a][i].IV[5]) / 186 * 100).toFixed(2);
             var pokemon_number = static_user_pokemons.findIndex(x => x === chunked_pokemons[a][i]);

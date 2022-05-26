@@ -12,7 +12,7 @@ const user_model = require('../models/user');
 
 // Utils
 const battle = require('../utils/battle');
-const mongoose = require('mongoose');
+const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -210,7 +210,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         next_evolutions = next_evolutions[0];
                         var required_level = next_evolutions[1].match(/\d/g).join("");
                         if (pokemon_level >= required_level) {
-                            var new_pokemon_name = get_pokemon_name(pokemons, next_evolutions[0], shiny, true);
+                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
                             pokemon_id = next_evolutions[0];
                             evolved = true;
                             new_evolved_name = new_pokemon_name;
@@ -270,24 +270,6 @@ function evolution_tree(pokemons, pokemon_id) {
     if (post_post_evolution) filtered_pokemons.push([parseInt(post_post_evolution["Pokemon Id"]), post_post_evolution["Evolution Details"]]);
 
     return filtered_pokemons;
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_name(load_pokemons, pokemon_id, shiny, star_shiny = false) {
-    var pokemon_db = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-    if (shiny) { if (star_shiny) { pokemon_name = ':star: ' + pokemon_name; } else { pokemon_name = 'Shiny ' + pokemon_name; } }
-    return pokemon_name;
 }
 
 // Exp to level up.

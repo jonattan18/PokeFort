@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     function pokemon_embed(selected_pokemon, embed_current_moves) {
 
         //Get pokemon name.
-        var pokemon_moveset = get_pokemon_move(selected_pokemon["Pokemon Id"], pokemons);
+        var pokemon_moveset = get_pokemon_move(selected_pokemon["PokemonId"], pokemons);
         pokemon_moveset = pokemon_moveset.filter(it => it[0] <= selected_pokemon.Level);
 
         // Show Embedded Message.

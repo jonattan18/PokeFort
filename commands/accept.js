@@ -70,8 +70,8 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var user_pokemons = pokemons_from_database;
                     user2pokemon = user_pokemons.filter(it => it._id == user2.Selected)[0];
 
-                    var user1pokemon_name = get_pokemon_full_name(user1pokemon.PokemonId, pokemons);
-                    var user2pokemon_name = get_pokemon_full_name(user2pokemon.PokemonId, pokemons);
+                    var user1pokemon_name = getPokemons.get_pokemon_name_from_id(user1pokemon.PokemonId, pokemons, false);
+                    var user2pokemon_name = getPokemons.get_pokemon_name_from_id(user2pokemon.PokemonId, pokemons, false);
 
                     for (var i = 0; i < 4; i++) {
                         if (user1pokemon.Moves != undefined && user1pokemon.Moves[i + 1] != undefined) {
@@ -97,7 +97,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var pokemon1_spattack = _.floor(0.01 * (2 * pokemon1_info["Special Attack Stat"] + user1pokemon.IV[3] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_spdefense = _.floor(0.01 * (2 * pokemon1_info["Special Defense Stat"] + user1pokemon.IV[4] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
                     var pokemon1_speed = _.floor(0.01 * (2 * pokemon1_info["Speed Stat"] + user1pokemon.IV[5] + _.floor(0.25 * ev)) * user1pokemon.Level) + 5;
-                    
+
                     //Pokemon 1 nature update.
                     var pokemon1_nature = nature_of(user1pokemon.Nature);
                     pokemon1_hp += percentage(pokemon1_hp, pokemon1_nature[1]);
@@ -105,9 +105,9 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     pokemon1_defense += percentage(pokemon1_defense, pokemon1_nature[3]);
                     pokemon1_spattack += percentage(pokemon1_spattack, pokemon1_nature[4]);
                     pokemon1_spdefense += percentage(pokemon1_spdefense, pokemon1_nature[5]);
-                    pokemon1_speed += percentage(pokemon1_speed, pokemon1_nature[6]);                    
-                    
-                    
+                    pokemon1_speed += percentage(pokemon1_speed, pokemon1_nature[6]);
+
+
                     var pokemon2_info = pokemons.filter(it => it["Pokemon Id"] == user2pokemon.PokemonId)[0];
                     var pokemon2_hp = _.floor(0.01 * (2 * pokemon2_info["Health Stat"] + user2pokemon.IV[0] + _.floor(0.25 * ev)) * user2pokemon.Level) + user2pokemon.Level + 10;
                     var pokemon2_attack = _.floor(0.01 * (2 * pokemon2_info["Attack Stat"] + user2pokemon.IV[1] + _.floor(0.25 * ev)) * user2pokemon.Level) + 5;
@@ -244,26 +244,6 @@ function trade(bot, message, prefix, prompt) {
             });
         });
     });
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_full_name(selected_pokemonid, pokemons) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemonid)[0];
-
-    //Get Pokemon Name from Pokemon ID.
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-
-    return pokemon_name;
 }
 
 // Function to get the nature from number.

@@ -53,7 +53,7 @@ function add(bot, message, args, pokemons, prompt) {
 
         for (let i = 0; i < add_items.length; i++) {
             const element = add_items[i];
-            processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
+            processed_add_items.push([getPokemons.get_pokemon_name_from_id(element.PokemonId, pokemons, element.Shiny, true), element]);
         }
 
         if (current_user == 1) {
@@ -207,7 +207,7 @@ function remove(bot, message, args, pokemons, prompt) {
 
         for (let i = 0; i < add_items.length; i++) {
             const element = add_items[i];
-            processed_add_items.push([get_pokemon_name(pokemons, element.PokemonId, element), element]);
+            processed_add_items.push([getPokemons.get_pokemon_name_from_id(element.PokemonId, pokemons, element.Shiny, true), element]);
         }
 
         var new_field = [];
@@ -320,24 +320,6 @@ function remove(bot, message, args, pokemons, prompt) {
             });
         });
     });
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_name(pokemons, pokemon_id, selected_pokemon) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-    if (selected_pokemon.Shiny) { pokemon_name = pokemon_name + ' ⭐' }
-    return pokemon_name;
 }
 
 function pokemon_filter(message, args, user_pokemons, pokemons) {

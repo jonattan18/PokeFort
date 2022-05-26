@@ -40,34 +40,11 @@ function buytm(message, args, pokemons) {
             user.save().then(() => {
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
-                    message.channel.send(`Your level ${selected_pokemon.Level} ${get_pokemon_full_name(selected_pokemon, pokemons)} can now learn ${move_data.name}`);
+                    message.channel.send(`Your level ${selected_pokemon.Level} ${getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons)} can now learn ${move_data.name}`);
                 });
             });
         })
     })
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_full_name(selected_pokemon, pokemons) {
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
-
-    //Get Pokemon Name from Pokemon ID.
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-
-    if (selected_pokemon.Nickname) { var name = `'${selected_pokemon.Nickname}'` }
-    else { var name = pokemon_name }
-
-    return name;
 }
 
 // Get pokemon name from pokemon ID.

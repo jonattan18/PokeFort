@@ -35,17 +35,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
 
                 //Get Pokemon Name from Pokemon ID.
-                if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-                    var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-                }
-                else {
-                    var temp_name = "";
-                    if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-                    else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-                    else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-                    else { temp_name = pokemon_db["Pokemon Name"]; }
-                    var pokemon_name = temp_name;
-                }
+                var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, false);
 
                 //Get pokemon name.
                 var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);

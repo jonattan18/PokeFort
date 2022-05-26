@@ -171,8 +171,8 @@ client.on('message', async (message) => {
                 var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
                 var pokemon_level = selected_pokemon.Level;
                 if (pokemon_level == 100 || pokemon_level > 100) return;
-                var old_pokemon_name = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon);
-                var old_pokemon_name_star = get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, true);
+                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny);
+                var old_pokemon_name_star = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny, true);
 
                 var old_pokemon_exp = pokemon_current_xp;
                 var leveled_up = false;
@@ -199,7 +199,7 @@ client.on('message', async (message) => {
                             next_evolutions = next_evolutions[0];
                             var required_level = next_evolutions[1].match(/\d/g).join("");
                             if (pokemon_level >= required_level) {
-                                var new_pokemon_name = get_pokemon_name(load_pokemons, next_evolutions[0], selected_pokemon);
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny);
                                 pokemon_id = next_evolutions[0];
                                 evolved = true;
                                 new_evolved_name = new_pokemon_name;
@@ -235,24 +235,6 @@ client.on('message', async (message) => {
     }
     //#endregion
 });
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_name(load_pokemons, pokemon_id, selected_pokemon, star_shiny = false) {
-    var pokemon_db = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-    if (pokemon_db["Alternate Form Name"] == "Mega X" || pokemon_db["Alternate Form Name"] == "Mega Y") {
-        var pokemon_name = `Mega ${pokemon_db["Pokemon Name"]} ${pokemon_db["Alternate Form Name"][pokemon_db["Alternate Form Name"].length - 1]}`
-    }
-    else {
-        var temp_name = "";
-        if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
-        else if (pokemon_db["Alternate Form Name"] != "NULL") { temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"]; }
-        else { temp_name = pokemon_db["Pokemon Name"]; }
-        var pokemon_name = temp_name;
-    }
-    if (selected_pokemon.Shiny) { if (star_shiny) { pokemon_name = ':star: ' + pokemon_name; } else { pokemon_name = 'Shiny ' + pokemon_name; } }
-    return pokemon_name;
-}
 
 // Exp to level up.
 function exp_to_level(level) {
