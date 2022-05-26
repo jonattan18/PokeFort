@@ -114,7 +114,7 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     if (pokemon.length == 0) return null;
     else pokemon = pokemon[0];
 
-    if (form != "NULL" && pokemon["Dex Search"] != search_type) return null;
+    if (form != "NULL" && pokemon["Dex Search"] != undefined && pokemon["Dex Search"] != search_type) return null;
 
     // Image Finding
     if (form != "NULL") form = `-${form.replace(/ /g, "-")}`;

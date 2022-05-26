@@ -15,9 +15,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (args.length < 1) return message.channel.send("Please specify a name to purchase!");
 
     if (_.startsWith(args[0], "tm")) { return buytm(message, args, pokemons); }
-    else return message.channel.send("Please specify a valid name to purchase!");
+    else if (args.length == 1 && isInt(args[0]) && args[0] <= 4) { return buyboosters(message, args); }
+    else return message.channel.send("Please specify a valid item to purchase!");
 }
 
+// Function to buy boosters.
+function buyboosters(message, args) {
+    
+}
+
+// Function to buy TM Moves.
 function buytm(message, args, pokemons) {
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
@@ -71,6 +78,16 @@ function get_pokemon_move(pokemon_id, pokemons) {
         moveset = movesparser.tmmoves(learnset);
     }
     return moveset;
+}
+
+// Check if value is int.
+function isInt(value) {
+    var x;
+    if (isNaN(value)) {
+        return false;
+    }
+    x = parseFloat(value);
+    return (x | 0) === x;
 }
 
 module.exports.config = {
