@@ -18,7 +18,41 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (_.startsWith(args[0], "tm")) { return buytm(message, args, pokemons); }
     else if (args.length == 1 && isInt(args[0]) && args[0] <= 4) { return buyboosters(message, args); }
     else if (args[0].toLowerCase() == "candy") { return buycandy(message, args, pokemons); }
+    else if (args[0].toLowerCase() == "nature") { return buynature(message, args, pokemons); }
     else return message.channel.send("Please specify a valid item to purchase!");
+}
+
+// Function to buy nature.
+function buynature(message, args, pokemons) {
+    if (args.length < 2 || args.length > 2) return message.channel.send("Please specify a valid nature to buy!");
+
+    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this nature!"); }
+
+        var available_nature = ["adament", "bashful", "bold", "brave", "calm", "careful", "docile", "gentle", "hardy", "hasty", "impish", "jolly", "lax", "lonely", "mild", "modest", "naive", "naughty", "quiet", "quirky", "rash", "relaxed", "sassy", "serious", "timid"];
+        if (available_nature.includes(args[1].toLowerCase())) {
+
+            // Get all user pokemons.
+            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+                var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+                var _id = selected_pokemon._id;
+                var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
+                if (available_nature[selected_pokemon.Nature - 1] == args[1].toLowerCase()) return message.channel.send("This pokemon already has this nature!");
+
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nature": available_nature.indexOf(args[1]) + 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+
+                    message.channel.send(`You changed the nature of your ${pokemon_name} from ${available_nature[selected_pokemon.Nature - 1].capitalize()} to ${args[1].capitalize()}.`);
+                });
+
+                user.PokeCredits -= 1000;
+                user.save();
+            });
+        }
+        else return message.channel.send("Please specify a valid nature to buy!");
+    });
 }
 
 // Function to buy candy.
