@@ -83,15 +83,17 @@ function getPokemonData(args, pokemons, shiny_allowed) {
         if (args[0] == "shiny") { shiny = true; args.splice(0, 1); }
     }
 
-    // Front Form Check
+    // Form Check
     var form = "NULL";
-    // Double Name Form Check
-    if (forms.allowed_forms.includes(args[0] + " " + args[1])) { form = args[0].capitalize() + " " + args[1].capitalize(); args.splice(0, 2); }
-    else if (forms.allowed_forms.includes(args[0])) { form = args[0].capitalize(); args.splice(0, 1); }
+    var search_type = null;
+
+    // Front Form Check
+    if (forms.allowed_forms.includes(args[0] + " " + args[1])) { form = args[0].capitalize() + " " + args[1].capitalize(); args.splice(0, 2); search_type = "Front"; }
+    else if (forms.allowed_forms.includes(args[0])) { form = args[0].capitalize(); args.splice(0, 1); search_type = "Front"; }
 
     // Back Form Check
-    if (forms.allowed_forms.includes(args[args.length - 1])) { form = args[args.length - 1].capitalize(); args.splice(args.length - 1, 1); }
-    else if (forms.allowed_forms.includes(args[args.length - 2] + " " + args[args.length - 1])) { form = args[args.length - 2].capitalize() + " " + args[args.length - 1].capitalize(); args.splice(args.length - 2, 2); }
+    if (forms.allowed_forms.includes(args[args.length - 1])) { form = args[args.length - 1].capitalize(); args.splice(args.length - 1, 1); search_type = "Back"; }
+    else if (forms.allowed_forms.includes(args[args.length - 2] + " " + args[args.length - 1])) { form = args[args.length - 2].capitalize() + " " + args[args.length - 1].capitalize(); args.splice(args.length - 2, 2); search_type = "Back"; }
 
     // Exectional Form Change
     if (form == "Mega" && (args[args.length - 1] == "x" || args[args.length - 1] == "y")) {
@@ -111,6 +113,8 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     if (pokemon.length == 0) pokemon = pokemons.filter(it => (it["fr_name"]._normalize() == user_pokemon_name) && (it["Alternate Form Name"] == form));
     if (pokemon.length == 0) return null;
     else pokemon = pokemon[0];
+
+    if (form != "NULL" && pokemon["Dex Search"] != search_type) return null;
 
     // Image Finding
     if (form != "NULL") form = `-${form.replace(/ /g, "-")}`;
