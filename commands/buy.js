@@ -26,10 +26,10 @@ function buycandy(message, args, pokemons) {
     if (args.length == 1 || args.length > 2) return message.channel.send("Please specify a valid amount to buy candy!");
     if (!isInt(args[1]) || args[1] < 1 || args[1] > 99) return message.channel.send("Please specify a valid amount to buy candy!");
 
-    var purchased_candy = args[1];
+    var purchased_candy = parseInt(args[1]);
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
 
-        if (user.PokeCredits < 70 * args[1]) { return message.channel.send("You don't have enough PokeCredits to buy this candy!"); }
+        if (user.PokeCredits < 70 * purchased_candy) { return message.channel.send("You don't have enough PokeCredits to buy this candy!"); }
 
         // Get all user pokemons.
         getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
@@ -45,7 +45,7 @@ function buycandy(message, args, pokemons) {
                 return message.channel.send("This pokemon reached max level!");
             }
 
-            if (pokemon_level + level_to_updated > 100) {
+            if (pokemon_level + purchased_candy > 100) {
                 level_to_updated = 100 - pokemon_level;
                 purchased_candy = level_to_updated;
                 message.channel.send(`Your Pokemon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
