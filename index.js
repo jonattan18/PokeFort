@@ -153,22 +153,32 @@ client.on('message', async (message) => {
         }
         else {
             if (issuspend) return;
-            advance_xp(message, user_available); // Increase XP
+            advance_xp(message, user_available, user); // Increase XP
         }
     });
 
     //#region Xp Increase
     //check if user database exists
-    function advance_xp(message, user_avl) {
+    function advance_xp(message, user_avl, user) {
         if (user_avl) {
             if (channel_data != null && channel_data.Disabled === true) return;
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+                var randomxp = getRandomInt(1, 100);
+
+                // Check for XP Boosters.
+                if (user.Boosters != undefined) {
+                    var old_date = user.Boosters.Timestamp;
+                    var new_date = new Date();
+                    var hours = Math.abs(old_date - new_date) / 36e5;
+                    if (hours < user.Boosters.Hours) { randomxp *= user.Boosters.Level; }
+                }
 
                 //#region Update XP
                 var selected_pokemon = user_pokemons.filter(it => it._id == global_user.Selected)[0];
                 var _id = selected_pokemon._id;
                 var pokemon_id = selected_pokemon.PokemonId;
-                var pokemon_current_xp = selected_pokemon.Experience + getRandomInt(1, 100);
+                var pokemon_current_xp = selected_pokemon.Experience + randomxp
                 var pokemon_level = selected_pokemon.Level;
                 if (pokemon_level == 100 || pokemon_level > 100) return;
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny);

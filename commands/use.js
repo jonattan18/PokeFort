@@ -80,7 +80,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             if (move_used_info.category == "Special") var damage = battle.calculate_damage(user_2_pokemon, user2_data.SpAttack, user1_data.SpDefense, pokemon_level, move_used_info, user_1_pokemon);
             else var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
-            
+
             prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
 
             // Create embed for damage.
@@ -152,7 +152,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
                 else description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
-                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                    user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user1 => {
+                        user1.PokeCredits += 10;
+                        user1.TotalDueled += 1;
+                        user1.DuelWon += 1;
+
+                        // Check for XP Boosters.
+                        if (user1.Boosters != undefined) {
+                            var old_date = user1.Boosters.Timestamp;
+                            var new_date = new Date();
+                            var hours = Math.abs(old_date - new_date) / 36e5;
+                            if (hours < user1.Boosters.Hours) { xp *= user1.Boosters.Level; }
+                        }
+
+                        //  user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
                     });
                 });
@@ -171,7 +184,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
                 else description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
                 prompt.remove().then(() => {
-                    user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
+                    user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user2 => {
+                        user2.PokeCredits += 10;
+                        user2.TotalDueled += 1;
+                        user2.DuelWon += 1;
+
+                        // Check for XP Boosters.
+                        if (user2.Boosters != undefined) {
+                            var old_date = user2.Boosters.Timestamp;
+                            var new_date = new Date();
+                            var hours = Math.abs(old_date - new_date) / 36e5;
+                            if (hours < user2.Boosters.Hours) { xp *= user2.Boosters.Level; }
+                        }
+
+                        //user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
                         pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
                     });
                 });

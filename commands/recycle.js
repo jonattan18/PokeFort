@@ -501,6 +501,14 @@ function recycle(message, pokemons, user_pokemons, prefix, user) {
             });
         }
 
+        // Check for XP Boosters.
+        if (user.Boosters != undefined) {
+            var old_date = user.Boosters.Timestamp;
+            var new_date = new Date();
+            var hours = Math.abs(old_date - new_date) / 36e5;
+            if (hours < user.Boosters.Hours) { total_xp *= user.Boosters.Level; }
+        }
+
         new_prompt.save().then(() => {
             // Create a new Message embed.
             let embed = new Discord.MessageEmbed();
