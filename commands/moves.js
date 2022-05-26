@@ -27,6 +27,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 var user_pokemons = pokemons_from_database;
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
 
+                selected_pokemon.name_no_shiny = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, false);
+
                 var embed_current_moves = [];
                 for (var i = 0; i < 4; i++) {
                     if (selected_pokemon.Moves != undefined && selected_pokemon.Moves[i + 1] != undefined) {
@@ -41,7 +43,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     }
 
     function pokemon_embed(selected_pokemon, embed_current_moves) {
-
         //Get pokemon name.
         var pokemon_moveset = get_pokemon_move(selected_pokemon["PokemonId"], pokemons);
         pokemon_moveset = pokemon_moveset.filter(it => it[0] <= selected_pokemon.Level);

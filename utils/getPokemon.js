@@ -125,6 +125,7 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     var image_url = './assets/images/' + image_name;
 
     // Pokemon Name
+    console.log(pokemon["Pokemon Name"]);
     var pokemon_name = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, shiny);
     pokemon.fullname = pokemon_name;
     pokemon.name_no_shiny = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, false);
@@ -132,6 +133,7 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     pokemon.imagename = image_name;
     pokemon.pokemon_name = pokemon_name;
     pokemon.Shiny = shiny;
+    pokemon["PokemonId"] = pokemon["Pokemon Id"]
 
     return pokemon;
 }
