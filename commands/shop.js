@@ -61,7 +61,12 @@ function page_2(message, balance, prefix) {
     embed.addField('Sun Stone', '``' + prefix + 'buy stone Sun``', true)
     embed.addField('Thunder Stone', '``' + prefix + 'buy stone Thunder``', true)
     embed.addField('Water Stone', '``' + prefix + 'buy stone Water``', true)
-    embed.addField('Friendship Bracelet', '``' + prefix + 'buy bracelet``', true)
+    embed.addField('Sweet Apple', '``' + prefix + 'buy sweet apple``', true)
+    embed.addField('Tart Apple', '``' + prefix + 'buy tart apple``', true)
+    embed.addField('Cracked pot', '``' + prefix + 'buy cracked pot``', true)
+    embed.addField('Galariaca wreath', '``' + prefix + 'buy galariaca wreath``', true)
+    embed.addField('Galarica cuff', '``' + prefix + 'buy galarica cuff``', true)
+    embed.addField('Friendship Bracelet (Day/Night)', '``' + prefix + 'buy bracelet (day/night)``', true)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }
