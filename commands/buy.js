@@ -11,7 +11,6 @@ const forms_config = require('../config/forms.json');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 const movesparser = require('../utils/moveparser');
-const pokemons = require('../models/pokemons');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -21,12 +20,60 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     else if (args.length == 1 && isInt(args[0]) && args[0] <= 4) { return buyboosters(message, args); }
     else if (args[0].toLowerCase() == "candy") { return buycandy(message, args, pokemons); }
     else if (args[0].toLowerCase() == "nature") { return buynature(message, args, pokemons); }
-    else if (args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons, prefix); }
+    else if (args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons); }
+    else if (args[0].toLowerCase() == "mega") { return buymega(message, args, pokemons); }
     else return message.channel.send("Please specify a valid item to purchase!");
 }
 
+// Function to buy mega.
+function buymega(message, args, pokemons) {
+    if (args.length > 2) return message.channel.send("Please specify a valid mega form to buy!");
+    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
+
+        // Get all user pokemons.
+        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+            var _id = selected_pokemon._id;
+            var pokemon_id = selected_pokemon.PokemonId;
+            var mega_type = "";
+
+            if (args.length == 1) {
+                mega_type = "Mega";
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega") return message.channel.send("Your selected pokemon is already Mega!");
+                var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
+                var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && (it["Alternate Form Name"] == "Mega" || it["Alternate Form Name"] == "Primal"))[0];
+            }
+            else if (args.length == 2 && args[1].toLowerCase() == "x") {
+                mega_type = "Mega X";
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega X") return message.channel.send("Your selected pokemon is already Mega!");
+                var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
+                var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega X")[0];
+            }
+            else if (args.length == 2 && args[1].toLowerCase() == "y") {
+                mega_type = "Mega Y";
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega Y") return message.channel.send("Your selected pokemon is already Mega!");
+                var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
+                var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega Y")[0];
+            }
+            else return message.channel.send("Please specify a valid mega form to buy!");
+            if (pokemon_db == undefined || pokemon_db == null) return message.channel.send("You can't buy this form because selected pokemon is not suitable!");
+            else {
+                user.PokeCredits -= 1000;
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Mega": mega_type } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    user.save();
+                    message.channel.send(`You ${getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny)} is now able to ${mega_type}!`);
+                });
+            }
+        });
+    });
+}
+
 // Function to buy forms.
-function buyforms(message, args, pokemons, prefix) {
+function buyforms(message, args, pokemons) {
     if (args.length == 1) return message.channel.send("Please specify a valid form to buy!");
     args.shift();
     if (args[0].toLowerCase() == "normal") args.shift();

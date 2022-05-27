@@ -14,7 +14,8 @@ const PokemonSchema = new mongoose.Schema({
                 Shiny: Boolean,
                 Reason: String,
                 Nickname: String,
-                Favourite: Boolean
+                Favourite: Boolean,
+                Mega: String
         }]
 });
 
