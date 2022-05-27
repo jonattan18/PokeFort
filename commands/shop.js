@@ -28,9 +28,28 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (args.length == 1 && isInt(args[0]) && args[0] == 4) page_4(message, user.PokeCredits, prefix);
         else if (args.length == 1 && isInt(args[0]) && args[0] == 5) page_5(message, user.PokeCredits, prefix);
         else if (args.length == 1 && isInt(args[0]) && args[0] == 6) page_6(message, user.PokeCredits, prefix);
-        else message.channel.send(`Invalid page number!`);
+        else if (args.length == 2 && (args[0] == "forms" || args[1] == "form")) shop_forms(message, args, user.PokeCredits, prefix);
+        else message.channel.send(`Invalid Shop Syntax!`);
     });
 
+}
+
+// Function to shop forms of a pokemon.
+function shop_forms(message, args, balance, prefix) {
+    if (forms_config.available_pokemons.includes(args[1].toLowerCase())) {
+        var embed = new Discord.MessageEmbed()
+        embed.setTitle(`:moneybag: Balance: ${balance}\n\n${args[1].capitalize()}'s Forms`);
+        embed.setColor(message.guild.me.displayHexColor);
+        embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All ${args[1].capitalize()} forms cost 1,000 credits.**`)
+        embed.addField(`Normal ${args[1].capitalize()} Form`, '``' + prefix + 'buy forms normal ' + args[1].toLocaleLowerCase() + '``', true)
+        for (i = 0; i < forms_config.available_forms[args[1].toLowerCase()].forms.length; i++) {
+            var title = forms_config.available_forms[args[1].toLowerCase()]["Dex Search"] == "Front" ? `${forms_config.available_forms[args[1].toLowerCase()].forms[i].capitalize()} ${args[1].capitalize()}` : `${args[1].capitalize()} ${forms_config.available_forms[args[1].toLowerCase()].forms[i].capitalize()}`;
+            var field = "``" + prefix + "buy forms " + title.toLocaleLowerCase() + "``";
+            embed.addField(title + " Form", field, true);
+        }
+        embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
+        message.channel.send(embed);
+    } else return message.channel.send("This pokemon name don't have any forms to buy!");
 }
 
 // Page 1 XP Boosters & Rare Candies
@@ -158,7 +177,7 @@ function page_6(message, balance, prefix) {
     embed.setColor(message.guild.me.displayHexColor)
     embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All form items cost 1000 credits.**`)
     for (i = 0; i < forms_config.available_pokemons.length; i++) {
-        embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'buy forms ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
+        embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'shop forms ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
     }
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)

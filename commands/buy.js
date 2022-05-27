@@ -28,87 +28,39 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 // Function to buy forms.
 function buyforms(message, args, pokemons, prefix) {
     if (args.length == 1) return message.channel.send("Please specify a valid form to buy!");
+    args.shift();
+    if (args[0].toLowerCase() == "normal") args.shift();
+    var pokemon_data = getPokemons.getPokemonData(args, pokemons, false);
+    if (pokemon_data != null) {
+        if (forms_config.available_forms[pokemon_data["Pokemon Name"].toLowerCase()] == undefined || !forms_config.available_forms[pokemon_data["Pokemon Name"].toLowerCase()].forms.includes(pokemon_data["Alternate Form Name"].toLowerCase())) return message.channel.send("No form found in that name!");
 
-    if (args.length == 2) {
-        if (forms_config.available_pokemons.includes(args[1].toLowerCase())) {
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
 
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            // Get all user pokemons.
+            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                var embed = new Discord.MessageEmbed()
-                embed.setTitle(`:moneybag: Balance: ${user.PokeCredits}\n\n${args[1].capitalize()}'s Forms`);
-                embed.setColor(message.guild.me.displayHexColor);
-                embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All ${args[1].capitalize()} forms cost 1,000 credits.**`)
-                for (i = 0; i < forms_config.available_forms[args[1].toLowerCase()].forms.length; i++) {
-                    var title = forms_config.available_forms[args[1].toLowerCase()]["Dex Search"] == "Front" ? `${forms_config.available_forms[args[1].toLowerCase()].forms[i].capitalize()} ${args[1].capitalize()}` : `${args[1].capitalize()} ${forms_config.available_forms[args[1].toLowerCase()].forms[i].capitalize()}`;
-                    var field = "``" + prefix + "buy forms " + title.toLocaleLowerCase() + "``";
-                    embed.addField(title + " Form", field, true);
-                }
-                message.channel.send(embed);
-            });
+                var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+                var _id = selected_pokemon._id;
+                var pokemon_id = selected_pokemon.PokemonId;
 
-        } else return message.channel.send("This pokemon name don't have any forms to buy!");
-    }
-    else {
-        args.shift();
-        var pokemon_data = getPokemons.getPokemonData(args, pokemons, false);
-        if (pokemon_data != null) {
-
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
-
-                // Get all user pokemons.
-                getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
-
-                    var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-                    var _id = selected_pokemon._id;
-                    var pokemon_id = selected_pokemon.PokemonId;
-
-                    if (pokemon_id == pokemon_data["Pokemon Id"]) return message.channel.send("Your selected pokemon is already in this form!");
+                if (pokemon_id == pokemon_data["Pokemon Id"]) return message.channel.send("Your selected pokemon is already in this form!");
+                else {
+                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
+                    if (pokemon_db["Pokedex Number"] != pokemon_data["Pokedex Number"]) return message.channel.send("You can't buy this form because selected pokemon is not suitable!");
                     else {
-                        var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
-                        if (pokemon_db["Pokedex Number"] != pokemon_data["Pokedex Number"]) return message.channel.send("You can't buy this form because selected pokemon is not suitable!");
-                        else {
-                            user.PokeCredits -= 1000;
-                            // Update database
-                            pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": pokemon_data["Pokemon Id"] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                                if (err) return console.log(err);
-                                user.save();
-                                message.channel.send(`You pokemon's form changed to ${pokemon_data.fullname}!`);
-                            });
-                        }
+                        user.PokeCredits -= 1000;
+                        // Update database
+                        pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": pokemon_data["Pokemon Id"] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                            if (err) return console.log(err);
+                            user.save();
+                            message.channel.send(`You pokemon's form changed to ${pokemon_data.fullname}!`);
+                        });
                     }
-
-                });
+                }
             });
-
-        } else return message.channel.send("No form found in that name!");
-    }
-
-    /* if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
-
-     var available_nature = ["adament", "bashful", "bold", "brave", "calm", "careful", "docile", "gentle", "hardy", "hasty", "impish", "jolly", "lax", "lonely", "mild", "modest", "naive", "naughty", "quiet", "quirky", "rash", "relaxed", "sassy", "serious", "timid"];
-     if (available_nature.includes(args[1].toLowerCase())) {
-
-         // Get all user pokemons.
-         getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
-
-             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-             var _id = selected_pokemon._id;
-             var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
-             if (available_nature[selected_pokemon.Nature - 1] == args[1].toLowerCase()) return message.channel.send("This pokemon already has this nature!");
-
-             // Update database
-             pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nature": available_nature.indexOf(args[1]) + 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                 if (err) return console.log(err);
-
-                 message.channel.send(`You changed the nature of your ${pokemon_name} from ${available_nature[selected_pokemon.Nature - 1].capitalize()} to ${args[1].capitalize()}.`);
-             });
-
-             user.PokeCredits -= 1000;
-             user.save();
-         });
-     }
-     else return message.channel.send("Please specify a valid nature to buy!"); */
+        });
+    } else return message.channel.send("No form found in that name!");
 }
 
 // Function to buy nature.
@@ -270,7 +222,6 @@ function buyboosters(message, args) {
         }
         user.Boosters.Timestamp = Date.now();
         user.save().then(() => {
-            // user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "Boosters": user.Booster } }, (err, user_data) => {
             if (user.Boosters.Hours == 0.5) var hour_dialog = "30 Minutes";
             else var hour_dialog = `${user.Boosters.Hours} Hours`;
             message.channel.send(`Your XP gain will now be multiplied by ${user.Boosters.Level} for the next ${hour_dialog}!`);

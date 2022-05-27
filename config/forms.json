@@ -55,7 +55,8 @@
             "forms": [
                 "speed",
                 "attack",
-                "defense"
+                "defense",
+                "null"
             ]
         },
         "necrozma": {
@@ -64,7 +65,8 @@
             "forms": [
                 "dawn wings",
                 "dusk mane",
-                "ultra"
+                "ultra",
+                "null"
             ]
         },
         "calyrex": {
@@ -72,7 +74,8 @@
             "Dex Search": "Back",
             "forms": [
                 "ice rider",
-                "shadow rider"
+                "shadow rider",
+                "null"
             ]
         },
         "kyurem": {
@@ -80,7 +83,8 @@
             "Dex Search": "Back",
             "forms": [
                 "white",
-                "black"
+                "black",
+                "null"
             ]
         },
         "lycanroc": {
@@ -88,63 +92,72 @@
             "Dex Search": "Front",
             "forms": [
                 "midnight",
-                "dusk"
+                "dusk",
+                "null"
             ]
         },
         "greninja": {
             "Pokedex Number": 658,
             "Dex Search": "Front",
             "forms": [
-                "ash"
+                "ash",
+                "null"
             ]
         },
         "zacian": {
             "Pokedex Number": 888,
             "Dex Search": "Front",
             "forms": [
-                "crowned"
+                "crowned",
+                "null"
             ]
         },
         "zamazenta": {
             "Pokedex Number": 889,
             "Dex Search": "Front",
             "forms": [
-                "crowned"
+                "crowned",
+                "null"
             ]
         },
         "darmanitan": {
             "Pokedex Number": 555,
             "Dex Search": "Front",
             "forms": [
-                "zen"
+                "zen",
+                "null"
             ]
         },
         "hoopa": {
             "Pokedex Number": 720,
             "Dex Search": "Back",
             "forms": [
-                "unbound"
+                "unbound",
+                "null"
             ]
         },
         "aegislash": {
             "Pokedex Number": 681,
             "Dex Search": "Front",
             "forms": [
-                "blade"
+                "blade",
+                "null"
             ]
         },
         "shaymin": {
             "Pokedex Number": 492,
             "Dex Search": "Back",
             "forms": [
-                "sky"
+                "sky",
+                "null"
             ]
         },
         "meloetta": {
             "Pokedex Number": 681,
             "Dex Search": "Front",
             "forms": [
-                "pirouette"
+                "pirouette",
+                "null"
             ]
         },
         "zygarde": {
@@ -152,21 +165,24 @@
             "Dex Search": "Front",
             "forms": [
                 "10%",
-                "complete"
+                "complete",
+                "null"
             ]
         },
         "keldeo": {
             "Pokedex Number": 647,
             "Dex Search": "Back",
             "forms": [
-                "resolute"
+                "resolute",
+                "null"
             ]
         },
         "giratina": {
             "Pokedex Number": 487,
             "Dex Search": "Back",
             "forms": [
-                "origin"
+                "origin",
+                "null"
             ]
         }
     }
