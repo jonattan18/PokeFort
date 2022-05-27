@@ -21,7 +21,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     else if (args.length == 1 && isInt(args[0]) && args[0] <= 4) { return buyboosters(message, args); }
     else if (args[0].toLowerCase() == "candy") { return buycandy(message, args, pokemons); }
     else if (args[0].toLowerCase() == "nature") { return buynature(message, args, pokemons); }
-    else if (args[0].toLowerCase() == "forms" || args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons, prefix); }
+    else if (args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons, prefix); }
     else return message.channel.send("Please specify a valid item to purchase!");
 }
 
