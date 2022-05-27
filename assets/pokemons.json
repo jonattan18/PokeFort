@@ -1866,6 +1866,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": 88,
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Thunder Stone",
+            "90"
+        ],
         "dr_name": "Pikachu",
         "fr_name": "Pikachu",
         "jp_name": [
@@ -2172,6 +2176,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Ice Stone",
+            "95"
+        ],
         "dr_name": "Sandan",
         "fr_name": "Sabelette",
         "jp_name": [
@@ -2376,6 +2384,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 33,
         "Evolution Details": "Level 16",
+        "Evolution Stone": [
+            "Moon Stone",
+            "18"
+        ],
         "dr_name": "Nidorina",
         "fr_name": "Nidorina",
         "jp_name": [
@@ -2529,6 +2541,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 48,
         "Evolution Details": "Level 16",
+        "Evolution Stone": [
+            "Moon Stone",
+            "50"
+        ],
         "dr_name": "Nidorino",
         "fr_name": "Nidorino",
         "jp_name": [
@@ -2631,6 +2647,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 51,
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Moon Stone",
+            "53"
+        ],
         "dr_name": "Piepi",
         "fr_name": "Mélofée",
         "jp_name": [
@@ -2732,6 +2752,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Fire Stone",
+            "56"
+        ],
         "dr_name": "Vulpix",
         "fr_name": "Goupix",
         "jp_name": [
@@ -2782,6 +2806,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Ice Stone",
+            "57"
+        ],
         "dr_name": "Vulpix",
         "fr_name": "Goupix",
         "jp_name": [
@@ -2934,6 +2962,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": 58,
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Moon Stone",
+            "60"
+        ],
         "dr_name": "Pummeluff",
         "fr_name": "Rondoudou",
         "jp_name": [
@@ -3085,6 +3117,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 61,
         "Evolution Details": "Level 22",
+        "Evolution Stone": [
+            "Bracelet",
+            "63"
+        ],
         "dr_name": "Golbat",
         "fr_name": "Nosferalto",
         "jp_name": [
@@ -3186,6 +3222,16 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 64,
         "Evolution Details": "Level 21",
+        "Evolution Stone": [
+            [
+                "Leaf Stone",
+                "66"
+            ],
+            [
+                "Sun Stone",
+                "67"
+            ]
+        ],
         "dr_name": "Duflor",
         "fr_name": "Ortide",
         "jp_name": [
@@ -3746,6 +3792,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "101"
+        ],
         "dr_name": "Mauzi",
         "fr_name": "Miaouss",
         "jp_name": [
@@ -4204,6 +4254,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Fire Stone",
+            "960"
+        ],
         "dr_name": "Fukano",
         "fr_name": "Caninos",
         "jp_name": [
@@ -4356,6 +4410,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 971,
         "Evolution Details": "Level 25",
+        "Evolution Stone": [
+            "Water Stone",
+            "993"
+        ],
         "dr_name": "Quaputzi",
         "fr_name": "Têtarte",
         "jp_name": [
@@ -4914,6 +4972,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 1109,
         "Evolution Details": "Level 21",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "1139"
+        ],
         "dr_name": "Ultrigaria",
         "fr_name": "Boustiflor",
         "jp_name": [
@@ -5675,6 +5737,16 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            [
+                "Galarica Wreath",
+                "1388"
+            ],
+            [
+                "Galarica Cuff",
+                "1368"
+            ]
+        ],
         "dr_name": "Flegmon",
         "fr_name": "Ramoloss",
         "jp_name": [
@@ -6484,6 +6556,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Water Stone",
+            "1350"
+        ],
         "dr_name": "Muschas",
         "fr_name": "Kokiyas",
         "jp_name": [
@@ -7147,6 +7223,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "105"
+        ],
         "dr_name": "Voltobal",
         "fr_name": "Voltorbe",
         "jp_name": [
@@ -7248,6 +7328,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "137"
+        ],
         "dr_name": "Owei",
         "fr_name": "Noeunoeuf",
         "jp_name": [
@@ -7957,6 +8041,10 @@
         "Egg Cycle Count": 40,
         "Pre-Evolution Pokemon Id": 638,
         "Evolution Details": "Holding An Oval Stone During The Day",
+        "Evolution Stone": [
+            "Bracelet",
+            "366"
+        ],
         "dr_name": "Chaneira",
         "fr_name": "Leveinard",
         "jp_name": [
@@ -8363,6 +8451,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Water Stone",
+            "217"
+        ],
         "dr_name": "Sterndu",
         "fr_name": "Stari",
         "jp_name": [
@@ -9228,6 +9320,28 @@
         "Egg Cycle Count": 35,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            [
+                "Fire Stone",
+                "231"
+            ],
+            [
+                "Thunder Stone",
+                "230"
+            ],
+            [
+                "Water Stone",
+                "229"
+            ],
+            [
+                "Bracelet day",
+                "296"
+            ],
+            [
+                "Bracelet night",
+                "297"
+            ]
+        ],
         "dr_name": "Evoli",
         "fr_name": "Évoli",
         "jp_name": [
@@ -11666,6 +11780,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "89"
+        ],
         "dr_name": "Pichu",
         "fr_name": "Pichu",
         "jp_name": [
@@ -11717,6 +11835,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "52"
+        ],
         "dr_name": "Pii",
         "fr_name": "Mélo",
         "jp_name": [
@@ -11768,6 +11890,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "59"
+        ],
         "dr_name": "Fluffeluff",
         "fr_name": "Toudoudou",
         "jp_name": [
@@ -11818,6 +11944,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "265"
+        ],
         "dr_name": "Togepi",
         "fr_name": "Togepi",
         "jp_name": [
@@ -12682,6 +12812,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Sun Stone",
+            "292"
+        ],
         "dr_name": "Sonnkern",
         "fr_name": "Tournegrin",
         "jp_name": [
@@ -13038,6 +13172,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Dusk Stone",
+            "628"
+        ],
         "dr_name": "Kramurx",
         "fr_name": "Cornèbre",
         "jp_name": [
@@ -13190,6 +13328,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Dusk Stone",
+            "627"
+        ],
         "dr_name": "Traunfugil",
         "fr_name": "Feuforêve",
         "jp_name": [
@@ -17352,6 +17494,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 398,
         "Evolution Details": "Level 14",
+        "Evolution Stone": [
+            "Water Stone",
+            "400"
+        ],
         "dr_name": "Lombrero",
         "fr_name": "Lombre",
         "jp_name": [
@@ -17504,6 +17650,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 401,
         "Evolution Details": "Level 14",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "403"
+        ],
         "dr_name": "Blanas",
         "fr_name": "Pifeuil",
         "jp_name": [
@@ -17858,6 +18008,10 @@
         "Secondary Egg Group": "Amorphous",
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 408,
+        "Evolution Stone": [
+            "Dawn Stone",
+            "720"
+        ],
         "Evolution Details": "Level 20",
         "dr_name": "Kirlia",
         "fr_name": "Kirlia",
@@ -18768,6 +18922,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "283"
+        ],
         "dr_name": "Azurill",
         "fr_name": "Azurill",
         "jp_name": [
@@ -18869,6 +19027,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Moon Stone",
+            "429"
+        ],
         "dr_name": "Eneco",
         "fr_name": "Skitty",
         "jp_name": [
@@ -22630,6 +22792,10 @@
         "Secondary Egg Group": "Mineral",
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
+        "Evolution Stone": [
+            "Dawn Stone",
+            "728"
+        ],
         "Evolution Details": "NULL",
         "dr_name": "Schneppke",
         "fr_name": "Stalgamin",
@@ -25483,6 +25649,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet day",
+            "443"
+        ],
         "dr_name": "Knospi",
         "fr_name": "Rozbouton",
         "jp_name": [
@@ -26652,6 +26822,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "626"
+        ],
         "dr_name": "Haspiror",
         "fr_name": "Laporeille",
         "jp_name": [
@@ -27008,6 +27182,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet night",
+            "486"
+        ],
         "dr_name": "Klingplim",
         "fr_name": "Korillon",
         "jp_name": [
@@ -27717,6 +27895,10 @@
         "Egg Cycle Count": 40,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "238"
+        ],
         "dr_name": "Mampfaxo",
         "fr_name": "Goinfrex",
         "jp_name": [
@@ -27767,6 +27949,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet day",
+            "646"
+        ],
         "dr_name": "Riolu",
         "fr_name": "Riolu",
         "jp_name": [
@@ -31528,6 +31714,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "846"
+        ],
         "dr_name": "Vegimak",
         "fr_name": "Feuillajou",
         "jp_name": [
@@ -31629,6 +31819,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Fire Stone",
+            "848"
+        ],
         "dr_name": "Grillmak",
         "fr_name": "Flamajou",
         "jp_name": [
@@ -31730,6 +31924,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Water Stone",
+            "850"
+        ],
         "dr_name": "Sodamak",
         "fr_name": "Flotajou",
         "jp_name": [
@@ -31831,6 +32029,10 @@
         "Egg Cycle Count": 10,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Moon Stone",
+            "852"
+        ],
         "dr_name": "Somniam",
         "fr_name": "Munna",
         "jp_name": [
@@ -32337,6 +32539,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "862"
+        ],
         "dr_name": "Fleknoil",
         "fr_name": "Chovsourir",
         "jp_name": [
@@ -33091,6 +33297,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 874,
         "Evolution Details": "Level 20",
+        "Evolution Stone": [
+            "Bracelet",
+            "876"
+        ],
         "dr_name": "Folikon",
         "fr_name": "Couverdure",
         "jp_name": [
@@ -33343,6 +33553,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Sun Stone",
+            "881"
+        ],
         "dr_name": "Waumboll",
         "fr_name": "Doudouvet",
         "jp_name": [
@@ -33444,6 +33658,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Sun Stone",
+            "883"
+        ],
         "dr_name": "Lilminip",
         "fr_name": "Chlorobule",
         "jp_name": [
@@ -33850,6 +34068,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Ice Stone",
+            "1555"
+        ],
         "dr_name": "Flampion",
         "fr_name": "Darumarond",
         "jp_name": [
@@ -35013,6 +35235,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Shiny Stone",
+            "942"
+        ],
         "dr_name": "Picochilla",
         "fr_name": "Chinchidou",
         "jp_name": [
@@ -36583,6 +36809,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 974,
         "Evolution Details": "Level 39",
+        "Evolution Stone": [
+            "Thunder Stone",
+            "976"
+        ],
         "dr_name": "Zapplalek",
         "fr_name": "Lampéroie",
         "jp_name": [
@@ -36836,6 +37066,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 979,
         "Evolution Details": "Level 41",
+        "Evolution Stone": [
+            "Dusk Stone",
+            "981"
+        ],
         "dr_name": "Laternecto",
         "fr_name": "Mélancolux",
         "jp_name": [
@@ -40441,6 +40675,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 1086,
         "Evolution Details": "Level 19",
+        "Evolution Stone": [
+            "Shiny Stone",
+            "1089"
+        ],
         "dr_name": "Floette",
         "fr_name": "Floette",
         "jp_name": [
@@ -41000,6 +41238,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 25,
         "Evolution Details": "Level 35",
+        "Evolution Stone": [
+            "Dusk Stone",
+            "1098"
+        ],
         "dr_name": "Duokles",
         "fr_name": "Dimoclès",
         "jp_name": [
@@ -41763,6 +42005,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Sun Stone",
+            "1123"
+        ],
         "dr_name": "Eguana",
         "fr_name": "Galvaran",
         "jp_name": [
@@ -44459,6 +44705,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 1261,
         "Evolution Details": "Level 20",
+        "Evolution Stone": [
+            "Thunder Stone",
+            "1263"
+        ],
         "dr_name": "Akkup",
         "fr_name": "Chrysapile",
         "jp_name": [
@@ -46529,6 +46779,10 @@
         "Egg Cycle Count": 120,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet",
+            "1301"
+        ],
         "dr_name": "Typ:Null",
         "fr_name": "Type:0",
         "jp_name": [
@@ -50583,6 +50837,16 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            [
+                "Sweet apple",
+                "1503"
+            ],
+            [
+                "Tart apple",
+                "1502"
+            ]
+        ],
         "dr_name": "Knapfel",
         "fr_name": "Verpom",
         "jp_name": [
@@ -51647,6 +51911,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Cracked Pot",
+            "1514"
+        ],
         "dr_name": "Fatalitee",
         "fr_name": "Théffroi",
         "jp_name": [
@@ -52716,6 +52984,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Bracelet night",
+            "1482"
+        ],
         "dr_name": "Snomnom",
         "fr_name": "Frissonille",
         "jp_name": [

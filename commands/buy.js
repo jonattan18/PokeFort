@@ -22,7 +22,87 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     else if (args[0].toLowerCase() == "nature") { return buynature(message, args, pokemons); }
     else if (args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons); }
     else if (args[0].toLowerCase() == "mega") { return buymega(message, args, pokemons); }
-    else return message.channel.send("Please specify a valid item to purchase!");
+    else if (args[0].toLowerCase() == "stone") { return buystone(message, args, pokemons); }
+    else return buyevolveitems(message, args, pokemons);
+}
+
+// Function to buy evolve items
+function buyevolveitems(message, args, pokemons) {
+    var evolve_items = ["sweet apple", "tart apple", "cracked pot", "galarica wreath", "galarica cuff", "bracelet", "bracelet day", "bracelet night"];
+    if (!evolve_items.includes(args.join(" ").toLowerCase())) return message.channel.send("Please specify a valid item to purchase!");
+
+    var given_item = args.join(" ").toLowerCase().capitalize();
+
+    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (user.PokeCredits < 150) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
+
+        // Get all user pokemons.
+        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+            var _id = selected_pokemon._id;
+            var pokemon_id = selected_pokemon.PokemonId;
+            var update_pokemon_id = null;
+
+            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+            if (pokemon_db["Evolution Stone"] != undefined) {
+                if (pokemon_db["Evolution Stone"].some(it => it.includes(given_item))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(given_item))[1];
+                if (update_pokemon_id == null) return message.channel.send("This pokemon can't evolve with this item!");
+                if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == given_item) {
+                    update_pokemon_id = pokemon_db["Evolution Stone"][1];
+                }
+
+                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, selected_pokemon.Shiny);
+                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(update_pokemon_id, pokemons, selected_pokemon.Shiny);
+                user.PokeCredits -= 150;
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": update_pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    user.save();
+                    message.channel.send(`Your ${old_pokemon_name} evolved into ${new_pokemon_name}!`);
+                    return true;
+                });
+            } else return message.channel.send("This pokemon is not eligible for this item!");
+        });
+    });
+}
+
+// Function to buy stones.
+function buystone(message, args, pokemons) {
+    if (args.length > 2) return message.channel.send("Please specify a valid stone to buy!");
+    var stones = ["dawn", "dusk", "fire", "ice", "leaf", "moon", "shiny", "sun", "thunder", "water"];
+    if (!stones.includes(args[1].toLowerCase())) return message.channel.send("Please specify a valid stone to buy!");
+    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (user.PokeCredits < 150) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
+
+        // Get all user pokemons.
+        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+            var _id = selected_pokemon._id;
+            var pokemon_id = selected_pokemon.PokemonId;
+            var update_pokemon_id = null;
+
+            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+            if (pokemon_db["Evolution Stone"] != undefined) {
+                if (pokemon_db["Evolution Stone"].some(it => it.includes(`${args[1].capitalize()} Stone`))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(`${args[1].capitalize()} Stone`))[1];
+                if (update_pokemon_id == null) return message.channel.send("This pokemon can't evolve with this stone!");
+                if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == `${args[1].capitalize()} Stone`) {
+                    update_pokemon_id = pokemon_db["Evolution Stone"][1];
+                }
+
+                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, selected_pokemon.Shiny);
+                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(update_pokemon_id, pokemons, selected_pokemon.Shiny);
+                user.PokeCredits -= 150;
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": update_pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    user.save();
+                    message.channel.send(`Your ${old_pokemon_name} evolved into ${new_pokemon_name}!`);
+                });
+            } else return message.channel.send("This pokemon is not eligible for this stone!");
+        });
+    });
 }
 
 // Function to buy mega.
