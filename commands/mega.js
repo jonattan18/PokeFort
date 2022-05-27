@@ -7,6 +7,7 @@ const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+    if (args.length > 1) return message.channel.send("Invalid Syntax!")
 
     //Get user data.
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -20,22 +21,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var _id = selected_pokemon._id;
             var pokemon_id = selected_pokemon.PokemonId;
             var mega_type = selected_pokemon.Mega;
-            var id_to_be_updated = "";
 
             if (mega_type == undefined || mega_type == "" || mega_type == null) return message.channel.send(`You don't have or have not purchased a mega evolution for this pokemon!`);
             else {
-                if (mega_type == "Mega") {
+                if (mega_type == "Mega" && args.length == 0) {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && (it["Alternate Form Name"] == "Mega" || it["Alternate Form Name"] == "Primal"))[0];
                 }
-                else if (mega_type == "Mega X") {
+                else if (mega_type == "Mega X" && args.length == 1 && args[0] == "x") {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega X")[0];
                 }
-                else if (mega_type == "Mega Y") {
+                else if (mega_type == "Mega Y" && args.length == 1 && args[0] == "y") {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega Y")[0];
                 }
+                else return message.channel.send(`You don't have or have not purchased a mega evolution for this pokemon!`);
                 if (pokemon_db["Pokemon Id"] == selected_pokemon.PokemonId) {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "NULL")[0];
