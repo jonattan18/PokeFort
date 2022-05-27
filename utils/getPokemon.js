@@ -119,13 +119,12 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     // Image Finding
     if (form != "NULL") form = `-${form.replace(/ /g, "-")}`;
     else form = "";
-    var image_name = pokemon["Pokedex Number"].pad(3) + form;
+    var image_name = pokemon["Pokedex Number"].pad(3) + form.replace("%", "");
     if (shiny) image_name += "-Shiny.png";
     else image_name += ".png";
-    var image_url = './assets/images/' + image_name;
+    var image_url = './assets/images/' + image_name.replace("%", "");
 
     // Pokemon Name
-    console.log(pokemon["Pokemon Name"]);
     var pokemon_name = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, shiny);
     pokemon.fullname = pokemon_name;
     pokemon.name_no_shiny = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, false);
@@ -149,7 +148,7 @@ function imagefromid(pokemonid, pokemons, shiny) {
     else { var image_name = pokedex_num + '-' + pokemon["Alternate Form Name"].replace(" ", "-") }
     if (shiny) var image_url = './assets/images/' + image_name + '-Shiny.png';
     else var image_url = './assets/images/' + image_name + '.png';
-    return image_url;
+    return image_url.replace("%", "");
 }
 
 // Get pokemon name from pokemon ID.

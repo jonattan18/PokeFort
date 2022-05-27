@@ -1,6 +1,9 @@
 const user_model = require('../models/user');
 const Discord = require('discord.js');
 
+// Forms config file.
+const forms_config = require("../config/forms.json");
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
@@ -154,16 +157,9 @@ function page_6(message, balance, prefix) {
     embed.setTitle(`:moneybag: Balance: ${balance}\n\nForms`)
     embed.setColor(message.guild.me.displayHexColor)
     embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All form items cost 1000 credits.**`)
-    embed.addField('Deoxys', '``' + prefix + 'shop forms deoxys``', true)
-    embed.addField('Necrozma', '``' + prefix + 'shop forms necrozma``', true)
-    embed.addField('Calyrex', '``' + prefix + 'shop forms calyrex``', true)
-    embed.addField('Kyurem', '``' + prefix + 'shop forms kyurem``', true)
-    embed.addField('Lycanroc', '``' + prefix + 'shop forms lycanroc``', true)
-    embed.addField('Greninja', '``' + prefix + 'shop forms greninja``', true)
-    embed.addField('Zacian', '``' + prefix + 'shop forms zacian``', true)
-    embed.addField('Zamazenta', '``' + prefix + 'shop forms zamazenta``', true)
-    embed.addField('Darmanitan', '``' + prefix + 'shop forms darmanitan``', true)
-    embed.addField('Hoopa', '``' + prefix + 'shop forms hoopa``', true)
+    for (i = 0; i < forms_config.available_pokemons.length; i++) {
+        embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'buy form ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
+    }
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }
