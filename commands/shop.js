@@ -158,7 +158,7 @@ function page_6(message, balance, prefix) {
     embed.setColor(message.guild.me.displayHexColor)
     embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All form items cost 1000 credits.**`)
     for (i = 0; i < forms_config.available_pokemons.length; i++) {
-        embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'buy form ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
+        embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'buy forms ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
     }
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)

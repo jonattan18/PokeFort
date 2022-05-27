@@ -105,7 +105,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (form != "" && shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '-Shiny.png'; }
             else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
-            var image_url = './assets/images/' + image_name;
+            var image_url = './assets/images/' + image_name.replace("%", "");
 
             //Embed message.
             const embed = new Discord.MessageEmbed();
@@ -123,7 +123,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 `\n**Total IV**: ${total_iv}%`);
             embed.setColor(message.member.displayHexColor);
             embed.setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
-            embed.setImage('attachment://' + image_name)
+            embed.setImage('attachment://' + image_name.replace("%", ""))
             embed.setFooter(`Displaying Pokémon: ${index}/${user_pokemons.length}`);
             message.channel.send(embed)
         });
