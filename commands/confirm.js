@@ -32,7 +32,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // If user prompt is for trade
         else if (prompt.PromptType == "Trade" && prompt.Trade.Accepted == true) {
-            return trade(message, prompt);
+            return trade(message, prompt, pokemons);
         }
 
         else return message.channel.send('No prompt asked for to use ``confirm`` command.');
@@ -41,7 +41,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function to trade pokemon.
-function trade(message, trade_prompt) {
+function trade(message, trade_prompt, pokemons) {
     var current_user = 0;
     if (message.author.id == trade_prompt.UserID.User1ID) {
         current_user = 1;
@@ -57,7 +57,7 @@ function trade(message, trade_prompt) {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
-                    change_trade(message, trade_prompt);
+                    change_trade(message, trade_prompt, pokemons);
                 });
             });
         }
@@ -84,7 +84,7 @@ function trade(message, trade_prompt) {
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
-                    change_trade(message, trade_prompt);
+                    change_trade(message, trade_prompt, pokemons);
                 });
             });
         }
@@ -106,7 +106,7 @@ function trade(message, trade_prompt) {
 }
 
 // Function to change items in trade.
-function change_trade(message, trade_prompt) {
+function change_trade(message, trade_prompt, pokemons) {
     (async => {
         // User 1 details
         user_model.findOne({ UserID: trade_prompt.UserID.User1ID }, (err1, user1) => {
@@ -173,6 +173,8 @@ function change_trade(message, trade_prompt) {
                 //#region Transfer Pokemons.
                 var user_1_items = trade_prompt.Trade.User1Items == undefined ? [] : trade_prompt.Trade.User1Items;
                 var user_2_items = trade_prompt.Trade.User2Items == undefined ? [] : trade_prompt.Trade.User2Items;
+                var user_1_trade_evolutions = [];
+                var user_2_trade_evolutions = [];
 
                 // For user 1
                 if (user_1_items.length > 0) {
@@ -184,6 +186,23 @@ function change_trade(message, trade_prompt) {
                             var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_1_items[i]))[0];
                             if (user_pokemon_to_add != undefined) {
                                 user_pokemon_to_add.Reason = "Traded";
+
+                                // Trade Evolution Verify.
+                                if (user_pokemon_to_add.Everstone == undefined || user_pokemon_to_add.Everstone == false) {
+                                    user_pokemon_to_add.TradeEvoItem = user_pokemon_to_add.TradeEvoItem == undefined ? "NULL" : user_pokemon_to_add.TradeEvoItem;
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
+                                    if (pokemon_db["Evolution Trade"] != undefined) {
+                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.TradeEvoItem))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.TradeEvoItem))[1];
+                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.TradeEvoItem.toLowerCase()) {
+                                            user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
+                                            var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
+
+                                            user_1_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
+                                        }
+                                    }
+                                }
+
                                 pokemons_to_delete.push(user_pokemon_to_add._id);
                                 pokemons_to_add.push(user_pokemon_to_add);
                             }
@@ -194,7 +213,7 @@ function change_trade(message, trade_prompt) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User1ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                                message.channel.send(`You have traded your selected pokemon. Pokemon Number 1 selected!`);
                             })
                         }
 
@@ -213,6 +232,23 @@ function change_trade(message, trade_prompt) {
                             var user_pokemon_to_add = user_pokemons.filter(pokemon => JSON.stringify(pokemon) == JSON.stringify(user_2_items[i]))[0];
                             if (user_pokemon_to_add != undefined) {
                                 user_pokemon_to_add.Reason = "Traded";
+
+                                // Trade Evolution Verify.
+                                if (user_pokemon_to_add.Everstone == undefined || user_pokemon_to_add.Everstone == false) {
+                                    user_pokemon_to_add.TradeEvoItem = user_pokemon_to_add.TradeEvoItem == undefined ? "NULL" : user_pokemon_to_add.TradeEvoItem;
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
+                                    if (pokemon_db["Evolution Trade"] != undefined) {
+                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.TradeEvoItem))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.TradeEvoItem))[1];
+                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.TradeEvoItem.toLowerCase()) {
+                                            user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
+                                            var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
+
+                                            user_2_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
+                                        }
+                                    }
+                                }
+
                                 pokemons_to_delete.push(user_pokemon_to_add._id);
                                 pokemons_to_add.push(user_pokemon_to_add);
                             }
@@ -223,7 +259,7 @@ function change_trade(message, trade_prompt) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User2ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                                message.channel.send(`You have traded your selected pokemon. Pokemon Number 1 selected!`);
                             })
                         }
 
@@ -237,6 +273,29 @@ function change_trade(message, trade_prompt) {
                     user2.save().then(() => {
                         trade_prompt.remove().then(() => {
                             message.channel.send(`Trade has been confirmed.`);
+
+                            if (user_1_trade_evolutions.length > 0) {
+                                var evolved_pokemons = duplicate(user_1_trade_evolutions);
+                                var message_string = `<@${trade_prompt.UserID.User2ID}> During this trade,\n`;
+                                for (i = 0; i < Object.keys(evolved_pokemons).length; i++) {
+                                    var old_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[0];
+                                    var new_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[1];
+                                    message_string += `${evolved_pokemons[Object.keys(evolved_pokemons)[i]]} ${old_pokemon_name} evolved into ${new_pokemon_name}\n`;
+                                }
+                                message.channel.send(message_string);
+                            }
+
+                            if (user_2_trade_evolutions.length > 0) {
+                                var evolved_pokemons = duplicate(user_2_trade_evolutions);
+                                var message_string = `<@${trade_prompt.UserID.User1ID}> During this trade,\n`;
+                                for (i = 0; i < Object.keys(evolved_pokemons).length; i++) {
+                                    var old_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[0];
+                                    var new_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[1];
+                                    message_string += `${evolved_pokemons[Object.keys(evolved_pokemons)[i]]} ${old_pokemon_name} evolved into ${new_pokemon_name}\n`;
+                                }
+                                message.channel.send(message_string);
+                            }
+
                         });
                     });
                 });
@@ -384,6 +443,13 @@ function evolution_tree(pokemons, pokemon_id) {
     if (post_post_evolution) filtered_pokemons.push([parseInt(post_post_evolution["Pokemon Id"]), post_post_evolution["Evolution Details"]]);
 
     return filtered_pokemons;
+}
+
+// Functioon to get duplicate pokemons.
+function duplicate(array) {
+    const counts = {};
+    array.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+    return counts;
 }
 
 // Exp to level up.

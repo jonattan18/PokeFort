@@ -23,7 +23,63 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     else if (args[0].toLowerCase() == "form") { return buyforms(message, args, pokemons); }
     else if (args[0].toLowerCase() == "mega") { return buymega(message, args, pokemons); }
     else if (args[0].toLowerCase() == "stone") { return buystone(message, args, pokemons); }
+    else if (args[0].toLowerCase() == "item") { return buyitem(message, args); }
     else return buyevolveitems(message, args, pokemons);
+}
+
+// Function to buy trade items.
+function buyitem(message, args) {
+    args.shift();
+    var available_items = ["everstone", "xp blocker", "deep sea scale", "deep sea tooth", "dragon scale", "dubious disc", "electirizer", "kings rock", "magmarizer", "metal coat", "prism scale", "protector", "reaper cloth", "sachet", "upgrade", "whipped dream", "oval stone", "razor claw", "razon fang"];
+    if (!available_items.includes(args.join(" ").toLowerCase())) return message.channel.send("Please specify a valid item to purchase!");
+
+    var given_item = args.join(" ").toLowerCase();
+
+    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        if (user.PokeCredits < 75) { return message.channel.send("You don't have enough PokeCredits to buy this item!"); }
+
+        // Get all user pokemons.
+        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+            var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+            var _id = selected_pokemon._id;
+            var pokemon_id = selected_pokemon.PokemonId;
+
+            if (given_item == "everstone") {
+                if (selected_pokemon.Everstone) return message.channel.send("Your selected pokemon already has an Everstone!");
+                else {
+                    user.PokeCredits -= 75;
+                    // Update database
+                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Everstone": true } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                        if (err) return console.log(err);
+                        user.save();
+                        message.channel.send(`You pokemon is holding everstone!`);
+                    });
+                }
+            } else if (given_item == "xp blocker") {
+                if (selected_pokemon.XPBlocker) return message.channel.send("Your selected pokemon already has an XP Blocker!");
+                else {
+                    user.PokeCredits -= 75;
+                    // Update database
+                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].XPBlocker": true } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                        if (err) return console.log(err);
+                        user.save();
+                        message.channel.send(`You pokemon is holding xp blocker!`);
+                    });
+                }
+            } else {
+                if (selected_pokemon.TradeEvoItem != undefined && selected_pokemon.TradeEvoItem.toLowerCase() == given_item) return message.channel.send("Your selected pokemon already has this item!");
+                else {
+                    user.PokeCredits -= 75;
+                    // Update database
+                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].TradeEvoItem": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                        if (err) return console.log(err);
+                        user.save();
+                        message.channel.send(`You pokemon is holding ${given_item}!`);
+                    });
+                }
+            }
+        });
+    });
 }
 
 // Function to buy evolve items

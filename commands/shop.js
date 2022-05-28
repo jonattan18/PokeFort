@@ -150,7 +150,7 @@ function page_4(message, balance, prefix) {
     embed.addField('Protector', 'Trade Evolution Item', true)
     embed.addField('Reaper Cloth', 'Trade Evolution Item', true)
     embed.addField('Sachet', 'Trade Evolution Item', true)
-    embed.addField('Up-Grade', 'Trade Evolution Item', true)
+    embed.addField('Upgrade', 'Trade Evolution Item', true)
     embed.addField('Whipped Dream', 'Trade Evolution Item', true)
     embed.addField('Oval Stone', 'Trade Evolution Item', true)
     embed.addField('Razor Claw', 'Trade Evolution Item', true)
