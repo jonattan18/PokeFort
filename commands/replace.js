@@ -42,12 +42,11 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                         selected_pokemon.Moves[args[0]] = learn_name;
                         message.channel.send(`Your pokemon have learned ${learn_name}.`)
                     }
-
+                    if (selected_pokemon.Held != "Everstone") selected_pokemon = isevolving(message, selected_pokemon, learn_name);
                     user.MoveReplace = undefined;
                     user.save().then(() => {
-                        pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].Moves": selected_pokemon.Moves, "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
+                        pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].Moves": selected_pokemon.Moves, "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves, "Pokemons.$[elem].PokemonId": selected_pokemon.PokemonId } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                             if (err) return console.log(err);
-
                         });
                     });
                 });
@@ -56,6 +55,65 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
     });
 }
 
+// Function to evolve by learing moves.
+function isevolving(message, selected_pokemon, learn_name) {
+
+    if (selected_pokemon.PokemonId == "142" && learn_name == "Rollout") {
+        selected_pokemon.PokemonId = "685";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Lickitung evolved into a Shiny Lickilicky!` : `Your Lickitung evolved into a Lickilicky!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "148" && learn_name == "Ancient Power") {
+        selected_pokemon.PokemonId = "687";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Tangela evolved into a Shiny Tangrowth!` : `Your Tangela evolved into a Tangrowth!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "637" && learn_name == "Mimic") {
+        selected_pokemon.PokemonId = "218";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Mime Jr. evolved into a Shiny Mr. Mime!` : `Your Mime Jr. evolved into a Mr. Mime!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "636" && learn_name == "Mimic") {
+        selected_pokemon.PokemonId = "285";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Bonsly evolved into a Shiny Sudowoodo!` : `Your Bonsly evolved into a Sudowoodo!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "290" && learn_name == "Double Hit") {
+        selected_pokemon.PokemonId = "622";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Aipom evolved into a Shiny Ambipom!` : `Your Aipom evolved into a Ambipom!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "293" && learn_name == "Ancient Power") {
+        selected_pokemon.PokemonId = "714";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Yanma evolved into a Shiny Yanmega!` : `Your Yanma evolved into a Yanmega!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "345" && learn_name == "Ancient Power") {
+        selected_pokemon.PokemonId = "718";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Piloswine evolved into a Shiny Mamoswine!` : `Your Piloswine evolved into a Mamoswine!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "1290" && learn_name == "Stomp") {
+        selected_pokemon.PokemonId = "1291";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Steenee evolved into a Shiny Tsareena!` : `Your Steenee evolved into a Tsareena!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "1334" && learn_name == "Dragon Pulse") {
+        selected_pokemon.PokemonId = "1335";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Poipole evolved into a Shiny Naganadel!` : `Your Poipole evolved into a Naganadel!`;
+        message.channel.send(message_string);
+    }
+    else if (selected_pokemon.PokemonId == "1511" && learn_name == "Taunt") {
+        selected_pokemon.PokemonId = "1512";
+        var message_string = selected_pokemon.Shiny ? `Your Shiny Clobbopus evolved into a Shiny Grapploct!` : `Your Clobbopus evolved into a Grapploct!`;
+        message.channel.send(message_string);
+    }
+    else {
+        return selected_pokemon;
+    }
+
+    return selected_pokemon;
+}
 
 // Check if value is int.
 function isInt(value) {
