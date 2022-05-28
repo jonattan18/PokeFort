@@ -106,13 +106,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             var image_url = './assets/images/' + image_name.replace("%", "");
+            var held_item = selected_pokemon.Held != undefined ? `**\n_Holding: ${selected_pokemon.Held}_**` : "";
+
 
             //Embed message.
             const embed = new Discord.MessageEmbed();
             embed.attachFiles(image_url)
             embed.setTitle(title);
             embed.setDescription(description +
-                `\n**Type**: ${type}` +
+                `\n**Type**: ${type}` + held_item +
                 `\n**Nature**: ${nature_name}` +
                 `\n**HP**: ${hp} - IV ${hp_iv}/31` +
                 `\n**Attack**: ${atk} - IV ${atk_iv}/31` +

@@ -15,9 +15,7 @@ const PokemonSchema = new mongoose.Schema({
                 Reason: String,
                 Nickname: String,
                 Favourite: Boolean,
-                Everstone: Boolean,
-                XPBlocker: Boolean,
-                TradeEvoItem: String,
+                Held: String,
                 Mega: String
         }]
 });

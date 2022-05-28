@@ -145,6 +145,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User1Pokemon.DuelDM = user1.DuelDM != undefined ? user1.DuelDM : false;
                     prompt.Duel.User1Pokemon.Traded = user1pokemon.Reason == "Traded" ? true : false;
                     prompt.Duel.User1Pokemon.Shiny = user1pokemon.Shiny == true ? true : false;
+                    prompt.Duel.User1Pokemon.Held = user1pokemon.Held != undefined ? user1pokemon.Held : null;
 
                     // For pokemon 2
                     prompt.Duel.User2Pokemon.PokemonUserID = user2.Selected;
@@ -163,6 +164,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     prompt.Duel.User2Pokemon.DuelDM = user2.DuelDM != undefined ? user2.DuelDM : false;
                     prompt.Duel.User2Pokemon.Traded = user2pokemon.Reason == "Traded" ? true : false;
                     prompt.Duel.User2Pokemon.Shiny = user2pokemon.Shiny == true ? true : false;
+                    prompt.Duel.User2Pokemon.Held = user2pokemon.Held != undefined ? user2pokemon.Held : null;
 
                     // Image generation.
                     var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons, user1pokemon.Shiny);

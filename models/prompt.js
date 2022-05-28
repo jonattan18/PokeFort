@@ -57,7 +57,8 @@ const PromptSchema = new mongoose.Schema({
             TotalHP: Number,
             Moves: Array,
             Traded: Boolean,
-            Shiny: Boolean
+            Shiny: Boolean,
+            Held: String
         },
         User2Pokemon: {
             DuelDM: Boolean,
@@ -75,7 +76,8 @@ const PromptSchema = new mongoose.Schema({
             TotalHP: Number,
             Moves: Array,
             Traded: Boolean,
-            Shiny: Boolean
+            Shiny: Boolean,
+            Held: String
         }
     },
     expireAt: {

@@ -42,42 +42,18 @@ function buyitem(message, args) {
         getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
             var _id = selected_pokemon._id;
-            var pokemon_id = selected_pokemon.PokemonId;
 
-            if (given_item == "everstone") {
-                if (selected_pokemon.Everstone) return message.channel.send("Your selected pokemon already has an Everstone!");
-                else {
-                    user.PokeCredits -= 75;
-                    // Update database
-                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Everstone": true } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                        if (err) return console.log(err);
-                        user.save();
-                        message.channel.send(`You pokemon is holding everstone!`);
-                    });
-                }
-            } else if (given_item == "xp blocker") {
-                if (selected_pokemon.XPBlocker) return message.channel.send("Your selected pokemon already has an XP Blocker!");
-                else {
-                    user.PokeCredits -= 75;
-                    // Update database
-                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].XPBlocker": true } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                        if (err) return console.log(err);
-                        user.save();
-                        message.channel.send(`You pokemon is holding xp blocker!`);
-                    });
-                }
-            } else {
-                if (selected_pokemon.TradeEvoItem != undefined && selected_pokemon.TradeEvoItem.toLowerCase() == given_item) return message.channel.send("Your selected pokemon already has this item!");
-                else {
-                    user.PokeCredits -= 75;
-                    // Update database
-                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].TradeEvoItem": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                        if (err) return console.log(err);
-                        user.save();
-                        message.channel.send(`You pokemon is holding ${given_item}!`);
-                    });
-                }
+            if (selected_pokemon.Held != undefined && selected_pokemon.Held.toLowerCase() == given_item) return message.channel.send("Your selected pokemon already has this item!");
+            else {
+                user.PokeCredits -= 75;
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Held": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    user.save();
+                    message.channel.send(`You pokemon is holding ${given_item}!`);
+                });
             }
+
         });
     });
 }
@@ -99,6 +75,8 @@ function buyevolveitems(message, args, pokemons) {
             var _id = selected_pokemon._id;
             var pokemon_id = selected_pokemon.PokemonId;
             var update_pokemon_id = null;
+
+            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokemon with held item!");
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
             if (pokemon_db["Evolution Stone"] != undefined) {
@@ -138,6 +116,8 @@ function buystone(message, args, pokemons) {
             var _id = selected_pokemon._id;
             var pokemon_id = selected_pokemon.PokemonId;
             var update_pokemon_id = null;
+
+            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokemon with held item!");
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
             if (pokemon_db["Evolution Stone"] != undefined) {
@@ -282,7 +262,7 @@ function buynature(message, args, pokemons) {
 // Function to buy candy.
 function buycandy(message, args, pokemons) {
     if (args.length == 1 || args.length > 2) return message.channel.send("Please specify a valid amount to buy candy!");
-    if (!isInt(args[1]) || args[1] < 1 || args[1] > 99) return message.channel.send("Please specify a valid amount to buy candy!");
+    if (!isInt(args[1]) || args[1] < 1 || (args[1] > 99 && args[1] < 200) || args[1] > 200) return message.channel.send("Please specify a valid amount to buy candy!");
 
     var purchased_candy = parseInt(args[1]);
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -299,57 +279,84 @@ function buycandy(message, args, pokemons) {
             var pokemon_level = selected_pokemon.Level;
             var level_to_updated = purchased_candy;
 
-            if (pokemon_level == 100 || pokemon_level > 100) {
-                return message.channel.send("This pokemon reached max level!");
+            if (selected_pokemon.Held = "Xp blocker") return message.channel.send("You can't buy candy with held item!");
+
+            //#region Exceptions
+            if (pokemon_id == "958" && purchased_candy == 200 && selected_pokemon.Held != "Everstone") {
+                user.PokeCredits -= 70 * purchased_candy;
+                user.save()
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": "959" } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    var message_string = selected_pokemon.Shiny ? `Your Shiny Karrablast evolved into a Shiny Escavalier` : `Your Karrablast evolved into a Escavalier`;
+                    return message.channel.send(message_string);
+                });
             }
 
-            if (pokemon_level + purchased_candy > 100) {
-                level_to_updated = 100 - pokemon_level;
-                purchased_candy = level_to_updated;
-                message.channel.send(`Your Pokemon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
+            else if (pokemon_id == "989" && purchased_candy == 200 && selected_pokemon.Held != "Everstone") {
+                user.PokeCredits -= 70 * purchased_candy;
+                user.save()
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": "990" } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                    var message_string = selected_pokemon.Shiny ? `Your Shiny Shelmet evolved into a Shiny Accelgor` : `Your Shelmet evolved into a Accelgor`;
+                    return message.channel.send(message_string);
+                });
             }
-
-            var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
-            var evolved = false;
-            var new_evolved_name = "";
-
-            while (level_to_updated > 0) {
-
-                //Update level and send message.
-                pokemon_level += 1;
-                level_to_updated -= 1;
-
-                if (pokemon_level == 100) {
-                    pokemon_level = 100;
-                    break;
+            //#endregion
+            else {
+                if (pokemon_level == 100 || pokemon_level > 100) {
+                    return message.channel.send("This pokemon reached max level!");
                 }
 
-                // Get pokemon evolution.
-                var evo_tree = evolution_tree(pokemons, pokemon_id);
-                var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                if (next_evolutions != undefined && next_evolutions.length > 0) {
-                    next_evolutions = next_evolutions[0];
-                    var required_level = next_evolutions[1].match(/\d/g).join("");
-                    if (pokemon_level >= required_level) {
-                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
-                        pokemon_id = next_evolutions[0];
-                        evolved = true;
-                        new_evolved_name = new_pokemon_name;
+                if (pokemon_level + purchased_candy > 100) {
+                    level_to_updated = 100 - pokemon_level;
+                    purchased_candy = level_to_updated;
+                    message.channel.send(`Your Pokemon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
+                }
+
+                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                var evolved = false;
+                var new_evolved_name = "";
+
+                while (level_to_updated > 0) {
+
+                    //Update level and send message.
+                    pokemon_level += 1;
+                    level_to_updated -= 1;
+
+                    if (pokemon_level == 100) {
+                        pokemon_level = 100;
+                        break;
+                    }
+
+                    // Get pokemon evolution.
+                    var evo_tree = evolution_tree(pokemons, pokemon_id);
+                    var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                    if (next_evolutions != undefined && next_evolutions.length > 0) {
+                        next_evolutions = next_evolutions[0];
+                        var required_level = next_evolutions[1].match(/\d/g).join("");
+                        if (pokemon_level >= required_level) {
+                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
+                            pokemon_id = next_evolutions[0];
+                            evolved = true;
+                            new_evolved_name = new_pokemon_name;
+                        }
                     }
                 }
+
+                // Update database
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Experience": 0, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                    if (err) return console.log(err);
+                });
+                //#endregion
+
+                if (evolved) message.channel.send(`${old_pokemon_name} evolved into ${new_evolved_name}!\nYour ${new_evolved_name} is now level ${pokemon_level}!`);
+                else message.channel.send(`Your ${old_pokemon_name} is now level ${pokemon_level}!`);
+
+                user.PokeCredits -= 70 * purchased_candy;
+                user.save()
             }
-
-            // Update database
-            pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Experience": 0, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                if (err) return console.log(err);
-            });
-            //#endregion
-
-            if (evolved) message.channel.send(`${old_pokemon_name} evolved into ${new_evolved_name}!\nYour ${new_evolved_name} is now level ${pokemon_level}!`);
-            else message.channel.send(`Your ${old_pokemon_name} is now level ${pokemon_level}!`);
-
-            user.PokeCredits -= 70 * purchased_candy;
-            user.save()
         });
     });
 }

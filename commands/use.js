@@ -165,8 +165,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             if (hours < user1.Boosters.Hours) { xp *= user1.Boosters.Level; }
                         }
 
-                        //  user_model.findOneAndUpdate({ "UserID": prompt.UserID.User1ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
-                        pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny);
+                        pokemon_xp_update(user1_data.PokemonUserID, user1_data.PokemonID, parseInt(user1_data.PokemonXP) + parseInt(xp), user1_data.PokemonLevel, user1_data.PokemonName, user1_data.Shiny, user1_data.Held);
                     });
                 });
             }
@@ -197,8 +196,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             if (hours < user2.Boosters.Hours) { xp *= user2.Boosters.Level; }
                         }
 
-                        //user_model.findOneAndUpdate({ "UserID": prompt.UserID.User2ID }, { $inc: { PokeCredits: 10, TotalDueled: 1, DuelWon: 1 } }, (err, user) => {
-                        pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny);
+                        pokemon_xp_update(user2_data.PokemonUserID, user2_data.PokemonID, parseInt(user2_data.PokemonXP) + parseInt(xp), user2_data.PokemonLevel, user2_data.PokemonName, user2_data.Shiny, user2_data.Held);
                     });
                 });
             }
@@ -210,11 +208,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         //#region Pokemon XP Update.
-        function pokemon_xp_update(_id, pokemon_id, pokemon_current_xp, pokemon_level, old_pokemon_name, shiny) {
+        function pokemon_xp_update(_id, pokemon_id, pokemon_current_xp, pokemon_level, old_pokemon_name, shiny, held) {
             if (pokemon_level >= 100) return;
             var leveled_up = false;
             var evolved = false;
             var new_evolved_name = "";
+            if (held = "Xp blocker") return;
             while (pokemon_current_xp > 0) {
                 if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
                     leveled_up = true;
@@ -229,17 +228,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         break;
                     }
 
-                    // Get pokemon evolution.
-                    var evo_tree = evolution_tree(pokemons, pokemon_id);
-                    var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                    if (next_evolutions != undefined && next_evolutions.length > 0) {
-                        next_evolutions = next_evolutions[0];
-                        var required_level = next_evolutions[1].match(/\d/g).join("");
-                        if (pokemon_level >= required_level) {
-                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
-                            pokemon_id = next_evolutions[0];
-                            evolved = true;
-                            new_evolved_name = new_pokemon_name;
+                    if (held != "Everstone") {
+                        // Get pokemon evolution.
+                        var evo_tree = evolution_tree(pokemons, pokemon_id);
+                        var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                        if (next_evolutions != undefined && next_evolutions.length > 0) {
+                            next_evolutions = next_evolutions[0];
+                            var required_level = next_evolutions[1].match(/\d/g).join("");
+                            if (pokemon_level >= required_level) {
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
+                                pokemon_id = next_evolutions[0];
+                                evolved = true;
+                                new_evolved_name = new_pokemon_name;
+                            }
                         }
                     }
                 }

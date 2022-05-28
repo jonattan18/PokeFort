@@ -188,16 +188,16 @@ function change_trade(message, trade_prompt, pokemons) {
                                 user_pokemon_to_add.Reason = "Traded";
 
                                 // Trade Evolution Verify.
-                                if (user_pokemon_to_add.Everstone == undefined || user_pokemon_to_add.Everstone == false) {
-                                    user_pokemon_to_add.TradeEvoItem = user_pokemon_to_add.TradeEvoItem == undefined ? "NULL" : user_pokemon_to_add.TradeEvoItem;
+                                if (user_pokemon_to_add.Held == undefined) {
+                                    user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
                                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
                                     if (pokemon_db["Evolution Trade"] != undefined) {
-                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.TradeEvoItem))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.TradeEvoItem))[1];
-                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.TradeEvoItem.toLowerCase()) {
+                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.Held))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.Held))[1];
+                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase()) {
                                             user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
                                             var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
                                             var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
-
+                                            user_pokemon_to_add.Held = undefined;
                                             user_1_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
                                         }
                                     }
@@ -234,16 +234,16 @@ function change_trade(message, trade_prompt, pokemons) {
                                 user_pokemon_to_add.Reason = "Traded";
 
                                 // Trade Evolution Verify.
-                                if (user_pokemon_to_add.Everstone == undefined || user_pokemon_to_add.Everstone == false) {
-                                    user_pokemon_to_add.TradeEvoItem = user_pokemon_to_add.TradeEvoItem == undefined ? "NULL" : user_pokemon_to_add.TradeEvoItem;
+                                if (user_pokemon_to_add.Held == undefined) {
+                                    user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
                                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
                                     if (pokemon_db["Evolution Trade"] != undefined) {
-                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.TradeEvoItem))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.TradeEvoItem))[1];
-                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.TradeEvoItem.toLowerCase()) {
+                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.Held))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.Held))[1];
+                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase()) {
                                             user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
                                             var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
                                             var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
-
+                                            user_pokemon_to_add.Held = undefined;
                                             user_2_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
                                         }
                                     }
@@ -336,6 +336,7 @@ function recycle(message, user_prompt, load_pokemons) {
                     message.channel.send(embed);
                     return;
                 }
+                if (selected_pokemon.Held = "Xp blocker") pokemon_current_xp = selected_pokemon.Experience;
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny);
 
                 var old_pokemon_exp = pokemon_current_xp;
@@ -356,17 +357,20 @@ function recycle(message, user_prompt, load_pokemons) {
                             break;
                         }
 
-                        // Get pokemon evolution.
-                        var evo_tree = evolution_tree(load_pokemons, pokemon_id);
-                        var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                        if (next_evolutions != undefined && next_evolutions.length > 0) {
-                            next_evolutions = next_evolutions[0];
-                            var required_level = next_evolutions[1].match(/\d/g).join("");
-                            if (pokemon_level >= required_level) {
-                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny, true);
-                                pokemon_id = next_evolutions[0];
-                                evolved = true;
-                                new_evolved_name = new_pokemon_name;
+                        if (selected_pokemon.Held != "Everstone") {
+
+                            // Get pokemon evolution.
+                            var evo_tree = evolution_tree(load_pokemons, pokemon_id);
+                            var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                            if (next_evolutions != undefined && next_evolutions.length > 0) {
+                                next_evolutions = next_evolutions[0];
+                                var required_level = next_evolutions[1].match(/\d/g).join("");
+                                if (pokemon_level >= required_level) {
+                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny, true);
+                                    pokemon_id = next_evolutions[0];
+                                    evolved = true;
+                                    new_evolved_name = new_pokemon_name;
+                                }
                             }
                         }
                     }
