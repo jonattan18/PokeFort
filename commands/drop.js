@@ -36,6 +36,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 module.exports.config = {
-    name: "remove",
+    name: "drop",
     aliases: []
 }
