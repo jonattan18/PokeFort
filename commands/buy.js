@@ -43,16 +43,15 @@ function buyitem(message, args) {
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
             var _id = selected_pokemon._id;
 
-            if (selected_pokemon.Held != undefined && selected_pokemon.Held.toLowerCase() == given_item) return message.channel.send("Your selected pokemon already has this item!");
-            else {
-                user.PokeCredits -= 75;
-                // Update database
-                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Held": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                    if (err) return console.log(err);
-                    user.save();
-                    message.channel.send(`You pokemon is holding ${given_item}!`);
-                });
-            }
+            if (selected_pokemon.Held != undefined && selected_pokemon.Held != null) return message.channel.send("Your selected pokemon already has an item!");
+
+            user.PokeCredits -= 75;
+            // Update database
+            pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Held": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                if (err) return console.log(err);
+                user.save();
+                message.channel.send(`You pokemon is holding ${given_item}!`);
+            });
 
         });
     });
