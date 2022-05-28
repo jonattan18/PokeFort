@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 // Function to buy trade items.
 function buyitem(message, args) {
     args.shift();
-    var available_items = ["everstone", "xp blocker", "deep sea scale", "deep sea tooth", "dragon scale", "dubious disc", "electirizer", "kings rock", "magmarizer", "metal coat", "prism scale", "protector", "reaper cloth", "sachet", "upgrade", "whipped dream", "oval stone", "razor claw", "razon fang"];
+    var available_items = ["everstone", "xp blocker", "deep sea scale", "deep sea tooth", "dragon scale", "dubious disc", "electirizer", "kings rock", "magmarizer", "metal coat", "prism scale", "protector", "reaper cloth", "sachet", "upgrade", "whipped dream"];
     if (!available_items.includes(args.join(" ").toLowerCase())) return message.channel.send("Please specify a valid item to purchase!");
 
     var given_item = args.join(" ").toLowerCase();
@@ -60,7 +60,7 @@ function buyitem(message, args) {
 
 // Function to buy evolve items
 function buyevolveitems(message, args, pokemons) {
-    var evolve_items = ["sweet apple", "tart apple", "cracked pot", "galarica wreath", "galarica cuff", "bracelet", "bracelet day", "bracelet night"];
+    var evolve_items = ["sweet apple", "tart apple", "cracked pot", "galarica wreath", "galarica cuff", "razor claw", "razon fang", "bracelet", "bracelet day", "bracelet night"];
     if (!evolve_items.includes(args.join(" ").toLowerCase())) return message.channel.send("Please specify a valid item to purchase!");
 
     var given_item = args.join(" ").toLowerCase().capitalize();
@@ -104,7 +104,7 @@ function buyevolveitems(message, args, pokemons) {
 // Function to buy stones.
 function buystone(message, args, pokemons) {
     if (args.length > 2) return message.channel.send("Please specify a valid stone to buy!");
-    var stones = ["dawn", "dusk", "fire", "ice", "leaf", "moon", "shiny", "sun", "thunder", "water"];
+    var stones = ["dawn", "dusk", "fire", "ice", "leaf", "moon", "shiny", "sun", "thunder", "water", "oval"];
     if (!stones.includes(args[1].toLowerCase())) return message.channel.send("Please specify a valid stone to buy!");
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < 150) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
@@ -279,7 +279,7 @@ function buycandy(message, args, pokemons) {
             var pokemon_level = selected_pokemon.Level;
             var level_to_updated = purchased_candy;
 
-            if (selected_pokemon.Held = "Xp blocker") return message.channel.send("You can't buy candy with held item!");
+            if (selected_pokemon.Held == "Xp blocker") return message.channel.send("You can't buy candy with held item!");
 
             //#region Exceptions
             if (pokemon_id == "958" && purchased_candy == 200 && selected_pokemon.Held != "Everstone") {
@@ -333,14 +333,31 @@ function buycandy(message, args, pokemons) {
                     // Get pokemon evolution.
                     var evo_tree = evolution_tree(pokemons, pokemon_id);
                     var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                    if (next_evolutions != undefined && next_evolutions.length > 0) {
-                        next_evolutions = next_evolutions[0];
-                        var required_level = next_evolutions[1].match(/\d/g).join("");
-                        if (pokemon_level >= required_level) {
-                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
-                            pokemon_id = next_evolutions[0];
-                            evolved = true;
-                            new_evolved_name = new_pokemon_name;
+                    //Exections for Tyrogue
+                    if (pokemon_id == "360" && pokemon_level >= 20) {
+                        var ev = 0;
+                        let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                        let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+
+                        if (atk > def) next_evolutions[0] = "140";
+                        else if (atk < def) next_evolutions[0] = "141";
+                        else next_evolutions[0] = "361";
+                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny);
+                        pokemon_id = next_evolutions[0];
+                        evolved = true;
+                        new_evolved_name = new_pokemon_name;
+
+                    }
+                    else {
+                        if (next_evolutions != undefined && next_evolutions.length > 0) {
+                            next_evolutions = next_evolutions[0];
+                            var required_level = next_evolutions[1].match(/\d/g).join("");
+                            if (pokemon_level >= required_level) {
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
+                                pokemon_id = next_evolutions[0];
+                                evolved = true;
+                                new_evolved_name = new_pokemon_name;
+                            }
                         }
                     }
                 }

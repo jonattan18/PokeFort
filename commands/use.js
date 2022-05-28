@@ -213,7 +213,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var leveled_up = false;
             var evolved = false;
             var new_evolved_name = "";
-            if (held = "Xp blocker") return;
+            if (held == "Xp blocker") return;
             while (pokemon_current_xp > 0) {
                 if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
                     leveled_up = true;
@@ -232,14 +232,30 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         // Get pokemon evolution.
                         var evo_tree = evolution_tree(pokemons, pokemon_id);
                         var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                        if (next_evolutions != undefined && next_evolutions.length > 0) {
-                            next_evolutions = next_evolutions[0];
-                            var required_level = next_evolutions[1].match(/\d/g).join("");
-                            if (pokemon_level >= required_level) {
-                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
-                                pokemon_id = next_evolutions[0];
-                                evolved = true;
-                                new_evolved_name = new_pokemon_name;
+                        //Exections for Tyrogue
+                        if (pokemon_id == "360" && pokemon_level >= 20) {
+                            var ev = 0;
+                            let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                            let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+
+                            if (atk > def) next_evolutions[0] = "140";
+                            else if (atk < def) next_evolutions[0] = "141";
+                            else next_evolutions[0] = "361";
+                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
+                            pokemon_id = next_evolutions[0];
+                            evolved = true;
+                            new_evolved_name = new_pokemon_name;
+
+                        } else {
+                            if (next_evolutions != undefined && next_evolutions.length > 0) {
+                                next_evolutions = next_evolutions[0];
+                                var required_level = next_evolutions[1].match(/\d/g).join("");
+                                if (pokemon_level >= required_level) {
+                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
+                                    pokemon_id = next_evolutions[0];
+                                    evolved = true;
+                                    new_evolved_name = new_pokemon_name;
+                                }
                             }
                         }
                     }

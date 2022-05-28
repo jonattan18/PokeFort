@@ -7665,7 +7665,7 @@
         "Secondary Egg Group": "NULL",
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 360,
-        "Evolution Details": "Level 20 With Attack > Defense",
+        "Evolution Details": "Level 20",
         "dr_name": "Kicklee",
         "fr_name": "Kicklee",
         "jp_name": [
@@ -7716,7 +7716,7 @@
         "Secondary Egg Group": "NULL",
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 360,
-        "Evolution Details": "Level 20 With Attack < Defense",
+        "Evolution Details": "Level 20",
         "dr_name": "Nockchan",
         "fr_name": "Tygnon",
         "jp_name": [
@@ -13755,6 +13755,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Razor fang",
+            "717"
+        ],
         "dr_name": "Skorgla",
         "fr_name": "Scorplane",
         "jp_name": [
@@ -14315,6 +14319,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Razor claw",
+            "683"
+        ],
         "dr_name": "Sniebel",
         "fr_name": "Farfuret",
         "jp_name": [
@@ -15536,7 +15544,7 @@
         "Secondary Egg Group": "NULL",
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 360,
-        "Evolution Details": "Level 20 With Attack = Defense",
+        "Evolution Details": "Level 20",
         "dr_name": "Kapoera",
         "fr_name": "Kapoera",
         "jp_name": [
@@ -27631,6 +27639,10 @@
         "Egg Cycle Count": 40,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Oval Stone",
+            "147"
+        ],
         "dr_name": "Wonneira",
         "fr_name": "Ptiravi",
         "jp_name": [

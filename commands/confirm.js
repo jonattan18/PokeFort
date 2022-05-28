@@ -336,7 +336,7 @@ function recycle(message, user_prompt, load_pokemons) {
                     message.channel.send(embed);
                     return;
                 }
-                if (selected_pokemon.Held = "Xp blocker") pokemon_current_xp = selected_pokemon.Experience;
+                if (selected_pokemon.Held == "Xp blocker") pokemon_current_xp = selected_pokemon.Experience;
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny);
 
                 var old_pokemon_exp = pokemon_current_xp;
@@ -362,14 +362,30 @@ function recycle(message, user_prompt, load_pokemons) {
                             // Get pokemon evolution.
                             var evo_tree = evolution_tree(load_pokemons, pokemon_id);
                             var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
-                            if (next_evolutions != undefined && next_evolutions.length > 0) {
-                                next_evolutions = next_evolutions[0];
-                                var required_level = next_evolutions[1].match(/\d/g).join("");
-                                if (pokemon_level >= required_level) {
-                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny, true);
-                                    pokemon_id = next_evolutions[0];
-                                    evolved = true;
-                                    new_evolved_name = new_pokemon_name;
+                            //Exections for Tyrogue
+                            if (pokemon_id == "360" && pokemon_level >= 20) {
+                                var ev = 0;
+                                let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                                let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+
+                                if (atk > def) next_evolutions[0] = "140";
+                                else if (atk < def) next_evolutions[0] = "141";
+                                else next_evolutions[0] = "361";
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny, true);
+                                pokemon_id = next_evolutions[0];
+                                evolved = true;
+                                new_evolved_name = new_pokemon_name;
+
+                            } else {
+                                if (next_evolutions != undefined && next_evolutions.length > 0) {
+                                    next_evolutions = next_evolutions[0];
+                                    var required_level = next_evolutions[1].match(/\d/g).join("");
+                                    if (pokemon_level >= required_level) {
+                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], load_pokemons, selected_pokemon.Shiny, true);
+                                        pokemon_id = next_evolutions[0];
+                                        evolved = true;
+                                        new_evolved_name = new_pokemon_name;
+                                    }
                                 }
                             }
                         }
