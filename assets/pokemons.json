@@ -4414,6 +4414,10 @@
             "Water Stone",
             "993"
         ],
+        "Evolution Trade": [
+            "Kings Rock",
+            "286"
+        ],
         "dr_name": "Quaputzi",
         "fr_name": "Têtarte",
         "jp_name": [
@@ -4565,6 +4569,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 1004,
         "Evolution Details": "Level 16",
+        "Evolution Trade": [
+            "NULL",
+            "1026"
+        ],
         "dr_name": "Kadabra",
         "fr_name": "Kadabra",
         "jp_name": [
@@ -4769,6 +4777,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 1076,
         "Evolution Details": "Level 28",
+        "Evolution Trade": [
+            "NULL",
+            "1097"
+        ],
         "dr_name": "Maschock",
         "fr_name": "Machopeur",
         "jp_name": [
@@ -5279,6 +5291,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 1265,
         "Evolution Details": "Level 25",
+        "Evolution Trade": [
+            "NULL",
+            "1287"
+        ],
         "dr_name": "Georok",
         "fr_name": "Gravalanch",
         "jp_name": [
@@ -5330,6 +5346,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 1361,
         "Evolution Details": "Level 25",
+        "Evolution Trade": [
+            "NULL",
+            "1363"
+        ],
         "dr_name": "Georok",
         "fr_name": "Gravalanch",
         "jp_name": [
@@ -5687,6 +5707,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Kings Rock",
+            "299"
+        ],
         "dr_name": "Flegmon",
         "fr_name": "Ramoloss",
         "jp_name": [
@@ -6713,6 +6737,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 1351,
         "Evolution Details": "Level 25",
+        "Evolution Trade": [
+            "NULL",
+            "1353"
+        ],
         "dr_name": "Alpollo",
         "fr_name": "Spectrum",
         "jp_name": [
@@ -6917,6 +6945,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Metal Coat",
+            "332"
+        ],
         "dr_name": "Onix",
         "fr_name": "Onix",
         "jp_name": [
@@ -7990,6 +8022,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 145,
         "Evolution Details": "Level 42",
+        "Evolution Trade": [
+            "Protector",
+            "686"
+        ],
         "dr_name": "Rizeros",
         "fr_name": "Rhinoféros",
         "jp_name": [
@@ -8299,6 +8335,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 212,
         "Evolution Details": "Level 32",
+        "Evolution Trade": [
+            "Dragon Scale",
+            "354"
+        ],
         "dr_name": "Seemon",
         "fr_name": "Hypocéan",
         "jp_name": [
@@ -8658,6 +8698,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Metal Coat",
+            "336"
+        ],
         "dr_name": "Sichlor",
         "fr_name": "Insécateur",
         "jp_name": [
@@ -8760,6 +8804,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 363,
         "Evolution Details": "Level 30",
+        "Evolution Trade": [
+            "Electirizer",
+            "688"
+        ],
         "dr_name": "Elektek",
         "fr_name": "Élektek",
         "jp_name": [
@@ -8811,6 +8859,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 364,
         "Evolution Details": "Level 30",
+        "Evolution Trade": [
+            "Magmarizer",
+            "699"
+        ],
         "dr_name": "Magmar",
         "fr_name": "Magmar",
         "jp_name": [
@@ -9334,6 +9386,18 @@
                 "229"
             ],
             [
+                "Leaf Stone",
+                "715"
+            ],
+            [
+                "Ice Stone",
+                "716"
+            ],
+            [
+                "Shiny Stone",
+                "1129"
+            ],
+            [
                 "Bracelet day",
                 "296"
             ],
@@ -9648,6 +9712,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Upgrade",
+            "357"
+        ],
         "dr_name": "Porygon",
         "fr_name": "Porygon",
         "jp_name": [
@@ -15262,6 +15330,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 232,
         "Evolution Details": "Upgrade",
+        "Evolution Trade": [
+            "Dubious Disc",
+            "719"
+        ],
         "dr_name": "Porygon2",
         "fr_name": "Porygon2",
         "jp_name": [
@@ -21928,6 +22000,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Prism Scale",
+            "478"
+        ],
         "dr_name": "Barschwa",
         "fr_name": "Barpau",
         "jp_name": [
@@ -22487,6 +22563,10 @@
         "Egg Cycle Count": 25,
         "Pre-Evolution Pokemon Id": 483,
         "Evolution Details": "Level 37",
+        "Evolution Trade": [
+            "Reaper Cloth",
+            "727"
+        ],
         "dr_name": "Zwirrklop",
         "fr_name": "Téraclope",
         "jp_name": [
@@ -23101,6 +23181,16 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            [
+                "Deep Sea Tooth",
+                "495"
+            ],
+            [
+                "Deep Sea Scale",
+                "496"
+            ]
+        ],
         "dr_name": "Perlu",
         "fr_name": "Coquiperl",
         "jp_name": [
@@ -32437,6 +32527,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": 858,
         "Evolution Details": "Level 25",
+        "Evolution Trade": [
+            "NULL",
+            "860"
+        ],
         "dr_name": "Sedimantur",
         "fr_name": "Géolithe",
         "jp_name": [
@@ -32896,6 +32990,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 866,
         "Evolution Details": "Level 25",
+        "Evolution Trade": [
+            "NULL",
+            "868"
+        ],
         "dr_name": "Strepoli",
         "fr_name": "Ouvrifier",
         "jp_name": [
@@ -36052,6 +36150,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Shelmet",
+            "959"
+        ],
         "dr_name": "Laukaps",
         "fr_name": "Carabing",
         "jp_name": [
@@ -37476,6 +37578,10 @@
         "Egg Cycle Count": 15,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Karrablast",
+            "990"
+        ],
         "dr_name": "Schnuthelm",
         "fr_name": "Escargaume",
         "jp_name": [
@@ -41396,6 +41502,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Sachet",
+            "1102"
+        ],
         "dr_name": "Parfi",
         "fr_name": "Fluvetin",
         "jp_name": [
@@ -41497,6 +41607,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "Whipped Dream",
+            "1104"
+        ],
         "dr_name": "Flauschling",
         "fr_name": "Sucroquin",
         "jp_name": [
@@ -42719,6 +42833,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "NULL",
+            "1138"
+        ],
         "dr_name": "Paragoni",
         "fr_name": "Brocélôme",
         "jp_name": [
@@ -42821,6 +42939,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Trade": [
+            "NULL",
+            "1141"
+        ],
         "dr_name": "Irrbis",
         "fr_name": "Pitrouille",
         "jp_name": [
