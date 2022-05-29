@@ -32,6 +32,12 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                 message.channel.send('You cancelled duel.');
             });
         }
+        // If user prompt is for confirmlist
+        else if (prompt.PromptType == "ConfirmList") {
+            prompt.remove().then(() => {
+                message.channel.send('You cancelled market listing.');
+            });
+        }
         else return message.channel.send('No prompt asked for to use ``cancel`` command.');
 
     });

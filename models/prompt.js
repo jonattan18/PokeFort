@@ -14,6 +14,10 @@ const PromptSchema = new mongoose.Schema({
     Release: {
         Pokemons: Array
     },
+    List: {
+        PokemonUID: String,
+        Price: Number
+    },
     Trade: {
         Accepted: Boolean,
         User1Items: Array,
@@ -84,7 +88,7 @@ const PromptSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         index: { expires: config.PROMPT_EXPIRATION_SECONDS },
-      },
+    },
 });
 
 const MessageModel = module.exports = mongoose.model('prompt', PromptSchema);

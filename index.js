@@ -10,6 +10,7 @@ const guild_model = require('./models/guild')
 const channel_model = require('./models/channel');
 const user_model = require('./models/user');
 const pokemons_model = require('./models/pokemons');
+const market_model = require('./models/market');
 
 //Utils
 const { loadCommands } = require('./utils/loadCommands');
@@ -47,8 +48,22 @@ client.aliases = new Discord.Collection();
 // Loading Commands
 loadCommands(client);
 
+// Market Initialization
+market_model.findOne({ Primary: true }, (err, market) => {
+    if (err) console.log(err);
+    if (!market) {
+        var market = new market_model({
+            Primary: true,
+            Last_Unique_Value: 0
+        });
+        market.save();
+    }
+});
+
 client.on('message', async (message) => {
     if (message.author.bot) return;
+
+    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -212,7 +227,7 @@ client.on('message', async (message) => {
                                 var ev = 0;
                                 let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
                                 let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
-                                
+
                                 if (atk > def) next_evolutions[0] = "140";
                                 else if (atk < def) next_evolutions[0] = "141";
                                 else next_evolutions[0] = "361";
