@@ -23,7 +23,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For only market command
         if (args.length == 0) {
-            return message.channel.send("Market what ? Apple or Pizza ? Lmao Type something Baka !!");
+            return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about market commands.");
         }
 
         // For market list command
@@ -61,8 +61,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                     });
 
+                    var tax_price = [];
+                    if (args[2] > 1000 && args[2] <= 10000) tax_price = ["1,000", 1.5, percentCalculation(args[2], 1.5).toFixed(0)];
+                    else if (args[2] > 10000 && args[2] <= 100000) tax_price = ["10,000", 3, percentCalculation(args[2], 3).toFixed(0)]
+                    else if (args[2] > 100000 && args[2] <= 1000000) tax_price = ["1,00,000", 4.5, percentCalculation(args[2], 4.5).toFixed(0)];
+                    else if (args[2] > 1000000) tax_price = ["1,000,000", 6, percentCalculation(args[2], 6).toFixed(0)];
+
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]}? Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]} Credits?${tax_price.length > 0 ? ` As your pokemon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${args[2] - tax_price[2]} credits.\n` : ""} Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -506,6 +512,12 @@ function nature_of(int) {
     else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
     else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
     else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+}
+
+// Calculate percentage of given number.
+function percentCalculation(a, b) {
+    var c = (parseFloat(a) * parseFloat(b)) / 100;
+    return parseFloat(c);
 }
 
 // Percentage calculation.

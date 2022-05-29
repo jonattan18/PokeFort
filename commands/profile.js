@@ -19,7 +19,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var wishing_pieces = user.WishingPieces == undefined ? 0 : user.WishingPieces;
         var total_pokemons_catched = user.TotalCaught == undefined ? 0 : user.TotalCaught;
         var total_pokemons_shiny = user.TotalShiny == undefined ? 0 : user.TotalShiny;
-        var raids_completed = user.RaidsCompleted == undefined ? 0 : user.RaidsCompleted;
         var daily_streak = user.DailyStreak == undefined ? 0 : user.DailyStreak;
         var badges = user.Badges.length == 0 ? "None" : user.Badges.join(', ');
         var shards = user.Shards == undefined ? 0 : user.Shards;
@@ -40,7 +39,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + '\n**Total Pokémon Caught:** ' + total_pokemons_catched
                 + '\n**Total Shiny Pokémon Caught:** ' + total_pokemons_shiny
                 + '\n**Total Pokémon:** ' + total_pokemons
-                + '\n**Total Raids Completed:** ' + raids_completed
                 + '\n**Daily Streak:** ' + daily_streak
                 + '\n**Badge:** ' + badges)
 
