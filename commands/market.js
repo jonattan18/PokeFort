@@ -210,11 +210,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Function for arg parsing and understanding.
 function arg_parsing(message, args, prefix, command) {
+    var showiv = false;
     var request_query = [];
     args.shift(); // Remove search from args.
     var order_type = {};
 
-    if (args.length == 0) {
+    if (args.length == 0 || (args.length == 1 && args[0] == "--showiv")) {
+        if (args.length == 1 && args[0] == "--showiv") showiv = true;
         if (command == "search") {
             market_model.find({ "Primary": undefined }).limit(20).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
@@ -224,7 +226,7 @@ function arg_parsing(message, args, prefix, command) {
                     embed.setTitle("PokeFort Market:");
                     var description = "";
                     for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
                     }
                     embed.setDescription(description);
                     embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
@@ -232,7 +234,7 @@ function arg_parsing(message, args, prefix, command) {
                 }
             });
         }
-        else if (command == "listings") {
+        else if (command == "listings" || (args.length == 1 && args[0] == "--showiv")) {
             market_model.find({ "UserID": message.author.id }).limit(100).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
                     return message.channel.send("No market listings found.");
@@ -241,7 +243,7 @@ function arg_parsing(message, args, prefix, command) {
                     embed.setTitle("PokeFort Market:");
                     var description = "";
                     for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
                     }
                     embed.setDescription(description);
                     embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
@@ -250,216 +252,230 @@ function arg_parsing(message, args, prefix, command) {
             });
         }
     }
+    else {
+        // Multi commmand controller.
+        var error = [];
+        var total_args = args.join(" ").replace(/--/g, ",--").split(",");
+        total_args = _.without(total_args, "", " ");
+        for (j = 0; j < total_args.length; j++) {
+            new_args = total_args[j].split(" ").filter(it => it != "");
+            error[0] = new_args[0];
+            if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
+            else if (new_args.length == 1 && _.isEqual(new_args[0], "--showiv")) { show_iv(new_args); }
+            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
+            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
+            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--held"))) { held(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
+            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
+            else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order"))) { order(new_args); }
+            else { message.channel.send("Invalid command."); return; }
 
-    // Multi commmand controller.
-    var error = [];
-    var total_args = args.join(" ").replace(/--/g, ",--").split(",");
-    total_args = _.without(total_args, "", " ");
-    for (j = 0; j < total_args.length; j++) {
-        new_args = total_args[j].split(" ").filter(it => it != "");
-        error[0] = new_args[0];
-        if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
-        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
-        else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
-        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
-        else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order"))) { order(new_args); }
-        else { message.channel.send("Invalid command."); return; }
-
-        // Check if error occurred in previous loop
-        if (error.length > 1) {
-            message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
-            break;
-        }
-        if (j == total_args.length - 1) {
-            if (command == "listings") request_query.unshift({ "UserID": message.author.id });
-            market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
-                if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("No market listings found for your search.");
-                } else {
-                    var embed = new Discord.MessageEmbed();
-                    embed.setTitle("PokeFort Market:");
-                    var description = "";
-                    for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+            // Check if error occurred in previous loop
+            if (error.length > 1) {
+                message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                break;
+            }
+            if (j == total_args.length - 1) {
+                if (command == "listings") request_query.unshift({ "UserID": message.author.id });
+                market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
+                    if (market == undefined || market == null || !market || market.length == 0) {
+                        return message.channel.send("No market listings found for your search.");
+                    } else {
+                        var embed = new Discord.MessageEmbed();
+                        embed.setTitle("PokeFort Market:");
+                        var description = "";
+                        for (a = 0; a < market.length; a++) {
+                            description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                        }
+                        embed.setDescription(description);
+                        embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                        message.channel.send(embed);
                     }
-                    embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
-                    message.channel.send(embed);
-                }
-            });
+                });
+            }
         }
-    }
 
-    // For market --shiny command.
-    function shiny(args) {
-        request_query.push({ "Shiny": true });
-    }
+        // For market --shiny command.
+        function shiny(args) {
+            request_query.push({ "Shiny": true });
+        }
 
-    // For market --type command.
-    function type(args) {
-        request_query.push({ "Type": { $regex: new RegExp(`^${args[1]}`, 'i') } });
-    }
+        // For market --showiv command.
+        function show_iv(args) {
+            showiv = true;
+        }
 
-    // For market --name command.
-    function name(args) {
-        const [, ...name] = args;
-        request_query.push({ "PokemonName": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
-    }
+        // For market --type command.
+        function type(args) {
+            request_query.push({ "Type": { $regex: new RegExp(`^${args[1]}`, 'i') } });
+        }
 
-    // For market --level command.
-    function level(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --name command.
+        function name(args) {
+            const [, ...name] = args;
+            request_query.push({ "PokemonName": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "Level": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "Level": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "Level": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --iv command.
-    function iv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --held command.
+        function held(args) {
+            const [, ...name] = args;
+            request_query.push({ "Held": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
         }
-        else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
-            request_query.push({ "IVPercentage": parseFloat(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-            request_query.push({ "IVPercentage": { $gt: parseFloat(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-            request_query.push({ "IVPercentage": { $lt: parseFloat(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --hpiv command.
-    function hpiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --level command.
+        function level(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "Level": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "Level": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "Level": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.0": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.0": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.0": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --atkiv command.
-    function atkiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --iv command.
+        function iv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
+                request_query.push({ "IVPercentage": parseFloat(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+                request_query.push({ "IVPercentage": { $gt: parseFloat(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+                request_query.push({ "IVPercentage": { $lt: parseFloat(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.1": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.1": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.1": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --defiv command.
-    function defiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --hpiv command.
+        function hpiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.0": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.0": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.0": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.2": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.2": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.2": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --spatkiv command.
-    function spatkiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --atkiv command.
+        function atkiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.1": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.1": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.1": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.3": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.3": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.3": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --spdefiv command.
-    function spdefiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --defiv command.
+        function defiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.2": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.2": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.2": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.4": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.4": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.4": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --speediv command.
-    function spdiv(args) {
-        if (args.length == 1) {
-            return error[1] = [false, "Please specify a value."]
+        // For market --spatkiv command.
+        function spatkiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.3": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.3": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.3": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
         }
-        else if (args.length == 2 && isInt(args[1])) {
-            request_query.push({ "IV.5": parseInt(args[1]) });
-        }
-        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-            request_query.push({ "IV.5": { $gt: parseInt(args[2]) } });
-        }
-        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-            request_query.push({ "IV.5": { $lt: parseInt(args[2]) } });
-        }
-        else { return error[1] = [false, "Invalid argument syntax."] }
-    }
 
-    // For market --order command.
-    function order(args) {
-        var order_arrange = "asc";
-        if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
-        if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
-        if (args[1].toLowerCase() == "iv") { order_type = { "IVPercentage": order_arrange } }
-        else if (args[1].toLowerCase() == "id") { order_type = { "MarketID": order_arrange } }
-        else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = { "Level": order_arrange } }
-        else if (args[1].toLowerCase() == "name") { order_type = { "PokemonName": order_arrange } }
-        else if (args[1].toLowerCase() == "price") { order_type = { "Price": order_arrange } }
-        else { return error[1] = [false, "Invalid argument syntax."] }
+        // For market --spdefiv command.
+        function spdefiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.4": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.4": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.4": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
+        }
+
+        // For market --speediv command.
+        function spdiv(args) {
+            if (args.length == 1) {
+                return error[1] = [false, "Please specify a value."]
+            }
+            else if (args.length == 2 && isInt(args[1])) {
+                request_query.push({ "IV.5": parseInt(args[1]) });
+            }
+            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                request_query.push({ "IV.5": { $gt: parseInt(args[2]) } });
+            }
+            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                request_query.push({ "IV.5": { $lt: parseInt(args[2]) } });
+            }
+            else { return error[1] = [false, "Invalid argument syntax."] }
+        }
+
+        // For market --order command.
+        function order(args) {
+            var order_arrange = "asc";
+            if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
+            if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
+            if (args[1].toLowerCase() == "iv") { order_type = { "IVPercentage": order_arrange } }
+            else if (args[1].toLowerCase() == "id") { order_type = { "MarketID": order_arrange } }
+            else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = { "Level": order_arrange } }
+            else if (args[1].toLowerCase() == "name") { order_type = { "PokemonName": order_arrange } }
+            else if (args[1].toLowerCase() == "price") { order_type = { "Price": order_arrange } }
+            else { return error[1] = [false, "Invalid argument syntax."] }
+        }
     }
 }
 
