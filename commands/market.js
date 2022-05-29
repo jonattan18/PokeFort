@@ -9,18 +9,17 @@ const prompt_model = require('../models/prompt');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
-const pagination = require('../utils/pagination');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
-    page = 1;
     //Get user data.
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (!user) return;
         if (err) console.log(err);
 
-        var request_url = "";
+        // Convert all args to lowercase.
+        args = args.map(arg => arg.toLowerCase());
 
         // For only market command
         if (args.length == 0) {
@@ -46,9 +45,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
 
-                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _trade) => {
+                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
                     if (err) return console.log(err);
-                    if (_trade) return message.channel.send("You can't add market listing now!");
+                    if (_data) return message.channel.send("You can't add market listing now!");
 
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
@@ -63,7 +62,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     });
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name} on the market for ${args[2]}? Type \`\`${prefix}confirmlist\`\` to continue or \`\`${prefix}cancel\`\` to cancel the lisitng.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]}? Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -78,7 +77,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == market.PokemonId)[0];
 
-                     //Get Pokemon Name from Pokemon ID.
+                    //Get Pokemon Name from Pokemon ID.
                     var pokemon_name = getPokemons.get_pokemon_name_from_id(market.PokemonId, pokemons, market.Shiny, true);
 
                     let exp = market.Experience;
@@ -105,7 +104,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     let spd = (floor(0.01 * (2 * pokemon_db["Special Defense Stat"] + spd_iv + floor(0.25 * ev)) * level) + 5);
                     let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * ev)) * level) + 5);
                     let total_iv = ((hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv) / 186 * 100).toFixed(2);
-        
+
                     // Nature Change
                     var nature_value = nature_of(nature);
                     hp += percentage(hp, nature_value[1]);
@@ -114,7 +113,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     spa += percentage(spa, nature_value[4]);
                     spd += percentage(spd, nature_value[5]);
                     spe += percentage(spe, nature_value[6]);
-        
+
                     // Image url
                     var form = pokemon_db["Alternate Form Name"];
                     var str = "" + pokemon_db["Pokedex Number"];
@@ -127,7 +126,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
                     else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
                     var image_url = './assets/images/' + image_name.replace("%", "");
-                    var held_item = market.Held != undefined ? `**\n_Holding: ${market.Held}_**` : "";        
+                    var held_item = market.Held != undefined ? `**\n_Holding: ${market.Held}_**` : "";
 
                     var embed = new Discord.MessageEmbed();
                     embed.attachFiles(image_url)
@@ -149,415 +148,319 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
             });
         }
-
-        // Multi commmand controller.
-        var error = [];
-        var total_args = args.join(" ").replace(/--/g, ",--").split(",");
-        total_args = _.without(total_args, "", " ");
-        for (j = 0; j < total_args.length; j++) {
-            var is_not = false;
-            new_args = total_args[j].split(" ").filter(it => it != "");
-            if (new_args[0] == "--not") {
-                var old_pokemons = user_pokemons;
-                is_not = true;
-                new_args.splice(0, 1);
-                new_args[0] = "--" + new_args[0];
-            }
-            error[0] = new_args[0];
-            if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--l") || _.isEqual(new_args[0], "--legendary"))) { legendary(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
-            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
-            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
-            else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
-            else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--limit") || _.isEqual(new_args[0], "--l"))) { limit(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--trip") || _.isEqual(new_args[0], "--triple"))) { triple(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--double"))) { double(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
-            else if (new_args.length == 2 && (_.isEqual(new_args[0], "--order"))) { return order(new_args); }
-            else { message.channel.send("Invalid command."); return; }
-
-            // Check if error occurred in previous loop
-            if (error.length > 1) {
-                message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
-                break;
-            }
-            if (is_not) {
-                user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
-            }
-            if (j == total_args.length - 1) { create_pagination(message, pokemons, user_pokemons); }
-        }
-
-        // For pk --shiny command.
-        function shiny(args) {
-            user_pokemons = user_pokemons.filter(pokemon => pokemon.Shiny);
-        }
-
-        // For pk --legendary command.
-        function legendary(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId.toString())[0];
-                if (pokemon_db["Legendary Type"] === "Legendary" || pokemon_db["Legendary Type"] === "Sub-Legendary" && pokemon_db["Alternate Form Name"] === "NULL" && pokemon_db["Primary Ability"] != "Beast Boost") {
-                    filtered_pokemons.push(user_pokemons[i]);
+        // For market buy command
+        else if (args[0] == "buy" && args.length == 2 && isInt(args[1])) {
+            market_model.findOne({ "MarketID": args[1] }, (err, market) => {
+                if (market == undefined || market == null || !market || market.length == 0) {
+                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
                 }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --mythical command.
-        function mythical(args) {
-            if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
-                var filtered_pokemons = [];
-                for (i = 0; i < user_pokemons.length; i++) {
-                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                    if (pokemon_db["Legendary Type"] === "Mythical" && pokemon_db["Alternate Form Name"] === "NULL") {
-                        filtered_pokemons.push(user_pokemons[i]);
-                    }
+                else if (market.UserID == message.author.id) return message.channel.send("You can't buy your own pokemon.");
+                else {
+                    var update_data = new prompt_model({
+                        ChannelID: message.channel.id,
+                        PromptType: "ConfirmBuy",
+                        UserID: {
+                            User1ID: message.author.id
+                        },
+                        List: {
+                            PokemonUID: market.PokemonUID,
+                            MarketID: market.MarketID
+                        }
+                    });
+                    update_data.save().then(() => {
+                        return message.channel.send(`Are you sure you want to buy level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmbuy\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the stop buying.`);
+                    });
                 }
-                user_pokemons = filtered_pokemons;
-            }
-        }
-
-        // For pk --ultrabeast command.
-        function ultrabeast(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Primary Ability"] === "Beast Boost" && pokemon_db["Alternate Form Name"] === "NULL") {
-                    filtered_pokemons.push(user_pokemons[i]);
-                }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --alolan command.
-        function alolan(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Alternate Form Name"] === "Alola") {
-                    filtered_pokemons.push(user_pokemons[i]);
-                }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --galarian command.
-        function galarian(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Alternate Form Name"] === "Galar") {
-                    filtered_pokemons.push(user_pokemons[i]);
-                }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --favourite command.
-        function favourite(args) {
-            user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
-        }
-
-        // For pk --type command.
-        function type(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Primary Type"].toLowerCase() == args[1].toLowerCase() || pokemon_db["Secondary Type"].toLowerCase() == args[1].toLowerCase()) {
-                    filtered_pokemons.push(user_pokemons[i]);
-                }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --name command.
-        function name(args) {
-            var filtered_pokemons = [];
-            for (i = 0; i < user_pokemons.length; i++) {
-                var user_name = args.slice(1).join(" ").toLowerCase();
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                if (pokemon_db["Pokemon Name"].toLowerCase() == user_name) {
-                    filtered_pokemons.push(user_pokemons[i]);
-                }
-            }
-            user_pokemons = filtered_pokemons;
-        }
-
-        // For pk --nickname command.
-        function nickname(args) {
-            if (args.length == 1) {
-                user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
-            } else {
-                args = args.slice(1);
-                user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined && pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());
-            }
-        }
-
-        // For pk --level command.
-        function level(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --iv command.
-        function iv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
-                filtered_pokemons = user_pokemons.filter(pokemon => total_iv(pokemon.IV) == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-                filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) > parseFloat(args[2]));
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-                filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) < parseFloat(args[2]));
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --hpiv command.
-        function hpiv() {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --atkiv command.
-        function atkiv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --defiv command.
-        function defiv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --spatkiv command.
-        function spatkiv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --spdefiv command.
-        function spdefiv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --speediv command.
-        function spdiv(args) {
-            var filtered_pokemons = [];
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] == args[1]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] > args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] < args[2]);
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --limit command.
-        function limit(args) {
-            if (args.length == 1) {
-                return error[1] = [false, "Please specify a value."]
-            }
-            else if (args.length == 2 && isInt(args[1])) {
-                user_pokemons = user_pokemons.slice(0, args[1]);
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --triple command.
-        function triple(args) {
-            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                var filtered_pokemons = [];
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3, args[1]));
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --quadra command.
-        function quadra(args) {
-            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                var filtered_pokemons = [];
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4, args[1]));
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --penta command.
-        function penta(args) {
-            if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                var filtered_pokemons = [];
-                filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5, args[1]));
-                user_pokemons = filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-        }
-
-        // For pk --order command.
-        function order(args) {
-            var order_type = "";
-            if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
-            else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = "Level"; }
-            else if (args[1].toLowerCase() == "alphabet") { order_type = "Alphabet"; }
-            else if (args[1].toLowerCase() == "number") { order_type = "Number"; }
-            else { return error[1] = [false, "Invalid argument syntax."] }
-            user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { OrderType: order_type } }, { new: true }, (err, doc) => {
-                if (err) return console.log(err);
-                return message.channel.send("Pokemon Order updated.");
             });
         }
-
-        // For pk --evolution command.
-        function evolution(args) {
-            var filtered_pokemons = [];
-            if (args.length == 2) {
-                var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-                if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
-                filtered_pokemons.push(found_pokemon["Pokemon Id"]);
-
-                var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
-                if (pre_evolution) filtered_pokemons.push(pre_evolution["Pokemon Id"]);
-
-                var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
-                if (pre_pre_evolution) filtered_pokemons.push(pre_pre_evolution["Pokemon Id"]);
-
-                if (pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
-                if (post_evolution) filtered_pokemons.push(post_evolution["Pokemon Id"]);
-
-                if (pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
-                if (post_post_evolution) filtered_pokemons.push(post_post_evolution["Pokemon Id"]);
-
-                duo_filtered_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
-                user_pokemons = duo_filtered_pokemons;
-            }
-            else { return error[1] = [false, "Invalid argument syntax."] }
+        // For market remove command
+        else if (args[0] == "remove" && args.length == 2 && isInt(args[1])) {
+            market_model.findOne({ $and: [{ "UserID": message.author.id }, { "MarketID": args[1] }] }, (err, market) => {
+                if (market == undefined || market == null || !market || market.length == 0) {
+                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
+                }
+                else {
+                    var update_data = new prompt_model({
+                        ChannelID: message.channel.id,
+                        PromptType: "ConfirmRemove",
+                        UserID: {
+                            User1ID: message.author.id
+                        },
+                        List: {
+                            PokemonUID: market.PokemonUID,
+                            MarketID: market.MarketID
+                        }
+                    });
+                    update_data.save().then(() => {
+                        return message.channel.send(`Are you sure you want to remove your level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmremove\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the removing.`);
+                    });
+                }
+            });
+        }
+        // For market listings command
+        else if (args[0] == "listings") {
+            return arg_parsing(message, args, prefix, "listings")
+        }
+        // For market search command.
+        else if (args[0] == "search") {
+            return arg_parsing(message, args, prefix, "search");
         }
     });
+}
+
+// Function for arg parsing and understanding.
+function arg_parsing(message, args, prefix, command) {
+    var request_query = [];
+    args.shift(); // Remove search from args.
+    var order_type = {};
+
+    if (args.length == 0) {
+        if (command == "search") {
+            market_model.find({ "Primary": undefined }).limit(20).exec((err, market) => {
+                if (market == undefined || market == null || !market || market.length == 0) {
+                    return message.channel.send("No market listings found.");
+                } else {
+                    var embed = new Discord.MessageEmbed();
+                    embed.setTitle("PokeFort Market:");
+                    var description = "";
+                    for (a = 0; a < market.length; a++) {
+                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+                    }
+                    embed.setDescription(description);
+                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                    return message.channel.send(embed);
+                }
+            });
+        }
+        else if (command == "listings") {
+            market_model.find({ "UserID": message.author.id }).limit(100).exec((err, market) => {
+                if (market == undefined || market == null || !market || market.length == 0) {
+                    return message.channel.send("No market listings found.");
+                } else {
+                    var embed = new Discord.MessageEmbed();
+                    embed.setTitle("PokeFort Market:");
+                    var description = "";
+                    for (a = 0; a < market.length; a++) {
+                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+                    }
+                    embed.setDescription(description);
+                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                    return message.channel.send(embed);
+                }
+            });
+        }
+    }
+
+    // Multi commmand controller.
+    var error = [];
+    var total_args = args.join(" ").replace(/--/g, ",--").split(",");
+    total_args = _.without(total_args, "", " ");
+    for (j = 0; j < total_args.length; j++) {
+        new_args = total_args[j].split(" ").filter(it => it != "");
+        error[0] = new_args[0];
+        if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
+        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
+        else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
+        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
+        else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order"))) { order(new_args); }
+        else { message.channel.send("Invalid command."); return; }
+
+        // Check if error occurred in previous loop
+        if (error.length > 1) {
+            message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+            break;
+        }
+        if (j == total_args.length - 1) {
+            if (command == "listings") request_query.unshift({ "UserID": message.author.id });
+            market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
+                if (market == undefined || market == null || !market || market.length == 0) {
+                    return message.channel.send("No market listings found for your search.");
+                } else {
+                    var embed = new Discord.MessageEmbed();
+                    embed.setTitle("PokeFort Market:");
+                    var description = "";
+                    for (a = 0; a < market.length; a++) {
+                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]} | Price: ${market[a]["Price"]} Credits\n`;
+                    }
+                    embed.setDescription(description);
+                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                    message.channel.send(embed);
+                }
+            });
+        }
+    }
+
+    // For market --shiny command.
+    function shiny(args) {
+        request_query.push({ "Shiny": true });
+    }
+
+    // For market --type command.
+    function type(args) {
+        request_query.push({ "Type": { $regex: new RegExp(`^${args[1]}`, 'i') } });
+    }
+
+    // For market --name command.
+    function name(args) {
+        const [, ...name] = args;
+        request_query.push({ "PokemonName": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
+    }
+
+    // For market --level command.
+    function level(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "Level": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "Level": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "Level": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --iv command.
+    function iv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
+            request_query.push({ "IVPercentage": parseFloat(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+            request_query.push({ "IVPercentage": { $gt: parseFloat(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+            request_query.push({ "IVPercentage": { $lt: parseFloat(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --hpiv command.
+    function hpiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.0": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.0": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.0": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --atkiv command.
+    function atkiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.1": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.1": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.1": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --defiv command.
+    function defiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.2": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.2": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.2": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --spatkiv command.
+    function spatkiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.3": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.3": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.3": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --spdefiv command.
+    function spdefiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.4": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.4": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.4": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --speediv command.
+    function spdiv(args) {
+        if (args.length == 1) {
+            return error[1] = [false, "Please specify a value."]
+        }
+        else if (args.length == 2 && isInt(args[1])) {
+            request_query.push({ "IV.5": parseInt(args[1]) });
+        }
+        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+            request_query.push({ "IV.5": { $gt: parseInt(args[2]) } });
+        }
+        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+            request_query.push({ "IV.5": { $lt: parseInt(args[2]) } });
+        }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
+
+    // For market --order command.
+    function order(args) {
+        var order_arrange = "asc";
+        if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
+        if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
+        if (args[1].toLowerCase() == "iv") { order_type = { "IVPercentage": order_arrange } }
+        else if (args[1].toLowerCase() == "id") { order_type = { "MarketID": order_arrange } }
+        else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = { "Level": order_arrange } }
+        else if (args[1].toLowerCase() == "name") { order_type = { "PokemonName": order_arrange } }
+        else if (args[1].toLowerCase() == "price") { order_type = { "Price": order_arrange } }
+        else { return error[1] = [false, "Invalid argument syntax."] }
+    }
 }
 
 // Function to get the nature from number.
@@ -614,6 +517,9 @@ function isInt(value) {
     x = parseFloat(value);
     return (x | 0) === x;
 }
+
+// Check if given value is float.
+function isFloat(x) { return !!(x % 1); }
 
 module.exports.config = {
     name: "market",

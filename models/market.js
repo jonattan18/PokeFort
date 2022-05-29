@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-// Verify if pokemon already exists in market when lisiting.
-
 const MarketSchema = new mongoose.Schema({
     Primary: Boolean,
     Last_Unique_Value: Number,

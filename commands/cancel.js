@@ -38,6 +38,18 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                 message.channel.send('You cancelled market listing.');
             });
         }
+        // If user prompt is for confirmremove
+        else if (prompt.PromptType == "ConfirmRemove") {
+            prompt.remove().then(() => {
+                message.channel.send('You cancelled removing your pokemon from market.');
+            });
+        }
+        // If user prompt is for confirmbuy
+        else if (prompt.PromptType == "ConfirmBuy") {
+            prompt.remove().then(() => {
+                message.channel.send('You cancelled buying pokemon from market.');
+            });
+        }
         else return message.channel.send('No prompt asked for to use ``cancel`` command.');
 
     });

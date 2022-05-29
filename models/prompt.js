@@ -16,7 +16,8 @@ const PromptSchema = new mongoose.Schema({
     },
     List: {
         PokemonUID: String,
-        Price: Number
+        Price: Number,
+        MarketID: Number
     },
     Trade: {
         Accepted: Boolean,

@@ -19,6 +19,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 var user_pokemons = pokemons_from_database;
                 if (user_pokemons.length < 2) return message.channel.send('You should have more than 1 pokemon to list in the market.');
                 var selected_pokemon = user_pokemons.filter(it => it._id == prompt.List.PokemonUID)[0];
+
+                if (selected_pokemon == undefined) return message.channel.send("Can't find that pokemon. Try again !");
+
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, false);
