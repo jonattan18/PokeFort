@@ -16,6 +16,7 @@
     "@smogon/calc": "^0.6.0",
     "canvas": "^2.9.0",
     "cloc": "^2.9.0",
+    "codic": "^2.0.6",
     "discord.js": "^12.3.1",
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
@@ -23,7 +24,7 @@
     "merge-images-v2": "^2.0.1",
     "mongodb": "^4.3.0",
     "mongoose": "5.9",
-    "pokemon-showdown": "^0.11.7",
+    "neoplan": "^1.1.1",
     "readdirp": "^3.6.0",
     "remove": "^0.1.5",
     "save": "^2.4.0"

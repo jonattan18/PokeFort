@@ -16,7 +16,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var timestamp = new Date(user.Joined);
         var date_started = timestamp.getDate() + '/' + (timestamp.getMonth() + 1) + '/' + timestamp.getFullYear()
         var redeems = user.Redeems == undefined ? 0 : user.Redeems;
-        var wishing_pieces = user.WishingPieces == undefined ? 0 : user.WishingPieces;
         var total_pokemons_catched = user.TotalCaught == undefined ? 0 : user.TotalCaught;
         var total_pokemons_shiny = user.TotalShiny == undefined ? 0 : user.TotalShiny;
         var daily_streak = user.DailyStreak == undefined ? 0 : user.DailyStreak;
@@ -35,7 +34,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems
                 + '\n**Shards:** ' + shards
-                + '\n**Wishing Pieces:** ' + wishing_pieces
                 + '\n**Total Pokémon Caught:** ' + total_pokemons_catched
                 + '\n**Total Shiny Pokémon Caught:** ' + total_pokemons_shiny
                 + '\n**Total Pokémon:** ' + total_pokemons
