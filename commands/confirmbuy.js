@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         user1.save().then(() => {
                                             var embed = new Discord.MessageEmbed();
                                             embed.setTitle(`Congratulations! Your Pokemon was sold!`);
-                                            embed.setDescription(`${tax_price.length > 0 ? ` As your pokemon sold for over ${tax_price[0]} credits, ${tax_price[1]}% has been taken as tax and you have received ${args[2] - tax_price[2]} credits.\n` : ""}Your ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has sold and you have received ${market.Price} Credits.`);
+                                            embed.setDescription(`${tax_price.length > 0 ? ` _As your pokemon sold for over ${tax_price[0]} credits, ${tax_price[1]}% has been taken as tax and you have received ${args[2] - tax_price[2]} credits._\n` : ""}Your ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has sold and you have received ${market.Price} Credits.`);
                                             user.send(embed);
                                         });
                                     });

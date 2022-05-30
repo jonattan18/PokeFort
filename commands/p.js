@@ -57,12 +57,14 @@ function add(bot, message, args, pokemons, prompt) {
         }
 
         if (current_user == 1) {
+            prompt.Trade.User2IConfirm = false;
             if ((processed_add_items.length + prompt.Trade.User2Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
                 processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User2Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
                 message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
             }
         }
         else {
+            prompt.Trade.User1IConfirm = false;
             if ((processed_add_items.length + prompt.Trade.User1Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
                 processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User1Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
                 message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
@@ -146,6 +148,7 @@ function add(bot, message, args, pokemons, prompt) {
                                 for (i = 0; i < opp_user_fields.length; i++) {
                                     new_embed.fields[new_field.length + i] = { name: opp_user_fields[i].name, value: opp_user_fields[i].value, inline: false };
                                 }
+                                new_embed.fields[new_embed.fields.length - 1].name = (new_embed.fields[new_embed.fields.length - 1].name).replace(' | :white_check_mark:', '');
                             }
                             // Check for empty fields.
                             for (i = 0; i < new_embed.fields.length; i++) {
@@ -164,6 +167,7 @@ function add(bot, message, args, pokemons, prompt) {
                                 for (i = 0; i < new_field.length; i++) {
                                     new_embed.fields[opp_user_fields.length + i] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
                                 }
+                                new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
                             }
                             // Check for empty fields.
                             for (i = 0; i < new_embed.fields.length; i++) {
@@ -224,8 +228,14 @@ function remove(bot, message, args, pokemons, prompt) {
             }
         }
 
-        if (current_user == 1) prompt.Trade.User1Items = update_items;
-        else prompt.Trade.User2Items = update_items;
+        if (current_user == 1) {
+            prompt.Trade.User2IConfirm = false;
+            prompt.Trade.User1Items = update_items;
+        }
+        else {
+            prompt.Trade.User1IConfirm = false;
+            prompt.Trade.User2Items = update_items;
+        }
 
         prompt.save().then(() => {
             var user1id = prompt.UserID.User1ID;
@@ -285,7 +295,7 @@ function remove(bot, message, args, pokemons, prompt) {
                                 for (i = 0; i < opp_user_fields.length; i++) {
                                     new_embed.fields[new_field.length + i] = { name: opp_user_fields[i].name, value: opp_user_fields[i].value, inline: false };
                                 }
-
+                                new_embed.fields[new_embed.fields.length - 1].name = (new_embed.fields[new_embed.fields.length - 1].name).replace(' | :white_check_mark:', '');
                                 // Check for empty fields.
                                 for (i = 0; i < new_embed.fields.length; i++) {
                                     if (new_embed.fields[i].name.includes(user2name + '#' + tag2) && new_embed.fields[i].value == '``` ```') {
@@ -305,7 +315,7 @@ function remove(bot, message, args, pokemons, prompt) {
                                 for (i = 0; i < new_field.length; i++) {
                                     new_embed.fields[opp_user_fields.length + i] = { name: `${user2name + '#' + tag2}'s is offering`, value: '```' + new_field[i] + '```', inline: false };
                                 }
-
+                                new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
                                 // Check for empty fields.
                                 for (i = 0; i < new_embed.fields.length; i++) {
                                     if (new_embed.fields[i].name.includes(user2name + '#' + tag2) && new_embed.fields[i].value == '``` ```') {

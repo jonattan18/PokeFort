@@ -376,6 +376,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
     var chunked_dex = chunkArray(dex_pokemons, 21);
     var no_of_dex = dex_pokemons.length;
     var global_embed = [];
+    var total_caught = 0;
     var old_chunked_dex_count = 1;
     var not_caught_count = 0;
     var no_of_caught = 0;
@@ -396,6 +397,7 @@ function create_pagination(message, dex_pokemons, description_string = "", field
         for (i = 0; i < chunked_dex[a].length; i++) {
             if (user_index.includes(chunked_index[i])) {
                 no_of_caught = user_index.filter(x => x == chunked_index[i]).length
+                total_caught++;
                 embed.addField(field_prefix + chunked_dex[a][i]["Pokemon Name"], `${no_of_caught} caught!  :white_check_mark:`, true);
             } else {
                 not_caught_count++;
@@ -408,9 +410,9 @@ function create_pagination(message, dex_pokemons, description_string = "", field
     }
 
     for (i = 0; i < global_embed.length; i++) {
-        if (total_pokemons_uncaught > 0) { global_embed[i].setDescription(`You have caught ${no_of_caught} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
+        if (total_pokemons_uncaught > 0) { global_embed[i].setDescription(`You have caught ${total_caught} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
         else if (not_caught_count == 0) { global_embed[i].setDescription("You have caught all pokemons."); }
-        else { global_embed[i].setDescription(`You have caught ${no_of_caught - total_pokemons_uncaught} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
+        else { global_embed[i].setDescription(`You have caught ${total_caught} out of ${dex_pokemons.length} ${description_string}pokemons.\n`); }
     }
 
     if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }

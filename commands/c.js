@@ -48,9 +48,11 @@ function add(message, args, prompt, user_data) {
     if (new_credit > user_data.PokeCredits) { return message.channel.send('You do not have enough credits!'); }
 
     if (current_user == 1) {
+        prompt.Trade.User2IConfirm = false;
         prompt.Trade.Credits.User1 = new_credit;
         prompt.save();
     } else {
+        prompt.Trade.User1IConfirm = false;
         prompt.Trade.Credits.User2 = new_credit;
         prompt.save();
     }
@@ -61,9 +63,11 @@ function add(message, args, prompt, user_data) {
             var user_items = prompt.Trade.User1Items;
             var last_index = parseInt((user_items.length - 1) / config.TRADE_POKEMON_PER_PAGE);
             var msg = get_message(current_user, prompt, new_embed.fields[last_index].value, new_credit);
+            new_embed.fields[new_embed.fields.length - 1].name = (new_embed.fields[new_embed.fields.length - 1].name).replace(' | :white_check_mark:', '');
             new_embed.fields[last_index].value = '```' + msg + '```';
         } else {
             var msg = get_message(current_user, prompt, new_embed.fields[new_embed.fields.length - 1].value, new_credit);
+            new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
         message_old.edit(new_embed);
@@ -92,9 +96,11 @@ function remove(message, args, prompt) {
     if (new_credit < 0) { return message.channel.send('Invalid amount to remove!'); }
 
     if (current_user == 1) {
+        prompt.Trade.User2IConfirm = false;
         prompt.Trade.Credits.User1 = new_credit;
         prompt.save();
     } else {
+        prompt.Trade.User1IConfirm = false;
         prompt.Trade.Credits.User2 = new_credit;
         prompt.save();
     }
@@ -105,9 +111,11 @@ function remove(message, args, prompt) {
             var user_items = prompt.Trade.User1Items;
             var last_index = parseInt((user_items.length - 1) / config.TRADE_POKEMON_PER_PAGE);
             var msg = get_message(current_user, prompt, new_embed.fields[last_index].value, new_credit);
+            new_embed.fields[new_embed.fields.length - 1].name = (new_embed.fields[new_embed.fields.length - 1].name).replace(' | :white_check_mark:', '');
             new_embed.fields[last_index].value = '```' + msg + '```';
         } else {
             var msg = get_message(current_user, prompt, new_embed.fields[new_embed.fields.length - 1].value, new_credit);
+            new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
         message_old.edit(new_embed);
