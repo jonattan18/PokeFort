@@ -27,7 +27,9 @@ const AuctionSchema = new mongoose.Schema({
     Reason: String,
     Mega: String,
     BidTime: Number,
-    Bought: Boolean
+    Bought: Boolean,
+    UserClaimed: Boolean,
+    OwnerClaimed: Boolean
 });
 
 const MessageModel = module.exports = mongoose.model('auctions', AuctionSchema);

@@ -11,10 +11,6 @@ const prompt_model = require('../models/prompt');
 const getPokemons = require('../utils/getPokemon');
 
 /*
-search
-listings
-view/info
-bid
 claim
 */
 
@@ -58,6 +54,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) return console.log(err);
                     if (_data) return message.channel.send("You can't add auction listing now!");
 
+                    var listing_fee = 125;
+                    if (args[2] > 9999 && args[2] < 100000) listing_fee = percentCalculation(args[2], 1.5).toFixed(0);
+                    else if (args[2] > 99999 && args[2] < 1000000) listing_fee = percentCalculation(args[2], 3).toFixed(0);
+                    else if (args[2] > 999999) listing_fee = percentCalculation(args[2], 5).toFixed(0);
+
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
                         PromptType: "ConfirmList",
@@ -67,12 +68,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         List: {
                             PokemonUID: selected_pokemon._id,
                             Price: args[2],
-                            BidTime: args[3]
+                            BidTime: args[3],
+                            ListingFees: listing_fee
                         }
                     });
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h", "")} hours with a buyout of ${args[2]} Credits? A listing fee of 175 credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h", "")} hours with a buyout of ${args[2]} Credits? A listing fee of ${listing_fee} credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -82,7 +84,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if ((args[0] == "view" || args[0] == "info") && args.length == 2) {
             if (!isInt(args[1])) return message.channel.send("Please type a valid pokemon ID.");
 
-            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
+            auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
                 if (!auction) return message.channel.send("No pokemon exists with that ID.");
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == auction.PokemonId)[0];
@@ -140,8 +142,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                     var bid_time = new Date(auction.BidTime);
                     var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                    if (time_left.getTime() < 0) { var time_left_string = `:hourglass: Ended`; }
-                    else var time_left_string = `:hourglass_flowing_sand: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours " : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes " : ""}`;
+                    var time_left_string = `:hourglass_flowing_sand: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours " : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes " : ""}`;
 
                     var embed = new Discord.MessageEmbed();
                     embed.attachFiles(image_url)
@@ -157,26 +158,25 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
                         `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
                         `\n**Total IV**: ${total_iv}%` +
-                        `\nCurrent Bid: ${auction.BidPrice} - ${time_left_string}`);
+                        `\nCurrent Bid: ${auction.BidPrice == undefined ? "None" : auction.BidPrice} - ${time_left_string}`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To bid on this pokemon, place a bid of ${auction.BidPrice} credits or more typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
+                    embed.setFooter(`To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? " by" : "of " + auction.BidPrice + " credits or more by"}  typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
                     message.channel.send(embed)
                 }
             });
         }
         // For auction bid command
         else if (args[0] == "bid" && args.length == 3 && isInt(args[2])) {
-            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
+            auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
                     return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
                 }
                 else if (auction.UserID == message.author.id) return message.channel.send("You can't bid on your own pokemon.");
+                else if (auction.BidUser == message.author.id) return message.channel.send("You already have a bid on this pokemon.");
                 else {
-                    var bid_time = new Date(auction.BidTime);
-                    var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                    if (time_left.getTime() < 0) return message.channel.send("This auction has ended.");
                     if (args[2] > user.PokeCredits) return message.channel.send("You have insufficient balance to bid on this pokemon.");
                     if (args[2] <= auction.BidPrice) return message.channel.send(`You must bid higher than the current bid. The current bid is ${auction.Price}`);
+                    if (args[2] > auction.BuyOut) return message.channel.send(`You can't bid higher than the buyout price. The buyout price is ${auction.BuyOut}`);
 
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
@@ -194,6 +194,71 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         return message.channel.send(`Are you sure you want to bid ${args[2]} credits on this level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} ?\nType \`\`${prefix}confirmbid\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the bid.`);
                     });
                 }
+            });
+        }
+        // For auction claim command
+        else if (args[0] == "claim" && args.length == 2 && isInt(args[1])) {
+            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
+
+                // Credits claim.
+                if (auction.UserID == message.author.id && auction.BidTime < new Date() && auction.BidUser != message.author.id && auction.BidPrice != undefined && auction.OwnerClaimed == undefined) {
+                    var tax_price = [];
+                    if (args[2] > 9999 && args[2] < 100000) tax_price = ["10,000", 1.5, percentCalculation(args[2], 1.5).toFixed(0)];
+                    else if (args[2] > 99999 && args[2] < 100000) tax_price = ["1,00,000", 3, percentCalculation(args[2], 3).toFixed(0)]
+                    else if (args[2] > 999999) tax_price = ["10,00,000", 5, percentCalculation(args[2], 5).toFixed(0)];
+
+                    auction.OwnerClaimed = true;
+                    if (auction.UserClaimed == true) auction.remove();
+                    else auction.save();
+                    user.PokeCredits += auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0);
+
+                    user.save().then(() => {
+                        message.channel.send(`Successfully claimed ${auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0)} credits from auction ID ${auction.AuctionID}. ${tax_price.length > 0 ? `As your pokemon was auctioned for over ${tax_price[0]}, ${tax_price[1]}% tax was taken and you received ${auction.BidPrice - tax_price[2]}.` : ""}`);
+                    });
+
+                }
+                // Pokemon claim not auctioned by anyone.
+                else if (auction.UserID == message.author.id && auction.BidPrice == undefined) {
+                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim your pokemon or credits once the auction time has ended.")
+                    let pokemon_data = {
+                        CatchedOn: auction.CatchedOn,
+                        IV: auction.IV,
+                        PokemonId: auction.PokemonId,
+                        Experience: auction.Experience,
+                        Level: auction.Level,
+                        Nature: auction.NatureValue,
+                        Shiny: auction.Shiny,
+                        Reason: auction.Reason
+                    }
+                    auction.remove().then(() => {
+                        getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                            message.channel.send(`Successfully claimed your pokemon from auction ID ${auction.AuctionID}`);
+                        });
+                    });
+                }
+                // Pokemon claim by bid user.
+                else if (auction.UserID != message.author.id && auction.BidUser == message.author.id && auction.BidPrice != undefined && auction.UserClaimed == undefined) {
+                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim any pokemon if the auction time has ended.")
+                    let pokemon_data = {
+                        CatchedOn: auction.CatchedOn,
+                        IV: auction.IV,
+                        PokemonId: auction.PokemonId,
+                        Experience: auction.Experience,
+                        Level: auction.Level,
+                        Nature: auction.NatureValue,
+                        Shiny: auction.Shiny,
+                        Reason: auction.Reason
+                    }
+                    auction.UserClaimed = true;
+                    if (auction.OwnerClaimed == true) auction.remove();
+                    else auction.save();
+
+                    getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                        message.channel.send(`Successfully claimed your pokemon from auction ID ${auction.AuctionID}`);
+                    });
+                }
+                else return message.channel.send("You can't claim this pokemon.");
             });
         }
         // For auction listings command
@@ -218,7 +283,7 @@ function arg_parsing(message, args, prefix, command) {
     if (args.length == 0 || (args.length == 1 && args[0] == "--showiv")) {
         if (args.length == 1 && args[0] == "--showiv") showiv = true;
         if (command == "search") {
-            auction_model.find({ "Primary": undefined }).limit(20).exec((err, auction) => {
+            auction_model.find({ $and: [{ "Primary": undefined }, { "BidTime": { $gt: new Date() } }] }).limit(20).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
                     return message.channel.send("No auction listings found.");
                 } else {
@@ -226,16 +291,18 @@ function arg_parsing(message, args, prefix, command) {
                     embed.setTitle("PokeFort Auction:");
                     var description = "";
                     for (a = 0; a < auction.length; a++) {
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
+                        var bid_time = new Date(auction[a].BidTime);
+                        var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
                     }
                     embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
+                    embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
                     return message.channel.send(embed);
                 }
             });
         }
         else if (command == "listings" || (args.length == 1 && args[0] == "--showiv")) {
-            auction_model.find({ "UserID": message.author.id }).limit(100).exec((err, auction) => {
+            auction_model.find({ $and: [{ "UserID": message.author.id }, { "OwnerClaimed": undefined }] }).limit(100).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
                     return message.channel.send("No auction listings found.");
                 } else {
@@ -243,10 +310,12 @@ function arg_parsing(message, args, prefix, command) {
                     embed.setTitle("PokeFort Auction:");
                     var description = "";
                     for (a = 0; a < auction.length; a++) {
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
+                        var bid_time = new Date(auction[a].BidTime);
+                        var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Buyout: ${auction[a]["BuyOut"]} Credits | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "|Finished" : ""}\n`;
                     }
                     embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
+                    embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
                     return message.channel.send(embed);
                 }
             });
@@ -283,6 +352,7 @@ function arg_parsing(message, args, prefix, command) {
             }
             if (j == total_args.length - 1) {
                 if (command == "listings") request_query.unshift({ "UserID": message.author.id });
+                if (command == "search") request_query.push({ "BidTime": { $gt: new Date() } });
                 auction_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, auction) => {
                     if (auction == undefined || auction == null || !auction || auction.length == 0) {
                         return message.channel.send("No auction listings found for your search.");
@@ -291,7 +361,9 @@ function arg_parsing(message, args, prefix, command) {
                         embed.setTitle("PokeFort Auction:");
                         var description = "";
                         for (a = 0; a < auction.length; a++) {
-                            description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
+                            var bid_time = new Date(auction[a].BidTime);
+                            var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                            description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
                         }
                         embed.setDescription(description);
                         embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);

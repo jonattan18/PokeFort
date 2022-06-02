@@ -20,7 +20,8 @@ const PromptSchema = new mongoose.Schema({
         MarketID: Number,
         AuctionID: Number,
         AuctionPrice: Number,
-        BidTime: String
+        BidTime: String,
+        ListingFees: Number
     },
     Trade: {
         Accepted: Boolean,
