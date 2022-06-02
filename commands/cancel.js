@@ -35,13 +35,13 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
         // If user prompt is for confirmlist
         else if (prompt.PromptType == "ConfirmList") {
             prompt.remove().then(() => {
-                message.channel.send('You cancelled market listing.');
+                message.channel.send(`You cancelled ${prompt.List.BidTime != undefined ? "auction" : "market"} listing.`);
             });
         }
         // If user prompt is for confirmremove
         else if (prompt.PromptType == "ConfirmRemove") {
             prompt.remove().then(() => {
-                message.channel.send('You cancelled removing your pokemon from market.');
+                message.channel.send('You cancelled removing your pokemon.');
             });
         }
         // If user prompt is for confirmbuy

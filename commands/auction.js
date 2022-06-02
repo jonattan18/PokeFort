@@ -4,11 +4,21 @@ const floor = require('lodash/floor');
 
 // Models
 const user_model = require('../models/user');
-const market_model = require('../models/market');
+const auction_model = require('../models/auction');
 const prompt_model = require('../models/prompt');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+
+/*
+List done
+remove done
+search done
+listings done
+view/info done
+bid
+claim
+*/
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -21,17 +31,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         // Convert all args to lowercase.
         args = args.map(arg => arg.toLowerCase());
 
-        // For only market command
+        // For only auction command
         if (args.length == 0) {
-            return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about market commands.");
+            return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
         }
 
-        // For market list command
-        if (args[0] == "list" && args.length == 3) {
+        // For auction list command
+        if (args[0] == "list" && args.length == 4) {
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                if (!isInt(args[2])) return message.channel.send("When listing on a market, you must specify a price.");
-                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokemon ? Minimum price is 1.");
+                if (args[3][args[3].length - 1] != "h") return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
+                if (!isInt(args[2])) return message.channel.send("When listing on a auction, you must specify a buyout.");
+                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokemon ? Minimum buyout is 1.");
                 if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokemon ? Maximum price is 1,000,000,000.");
 
                 // If arguments is latest or l
@@ -47,7 +58,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
                     if (err) return console.log(err);
-                    if (_data) return message.channel.send("You can't add market listing now!");
+                    if (_data) return message.channel.send("You can't add auction listing now!");
 
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
@@ -57,18 +68,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         },
                         List: {
                             PokemonUID: selected_pokemon._id,
-                            Price: args[2]
+                            Price: args[2],
+                            BidTime: args[3]
                         }
                     });
 
-                    var tax_price = [];
-                    if (args[2] > 1000 && args[2] <= 10000) tax_price = ["1,000", 1.5, percentCalculation(args[2], 1.5).toFixed(0)];
-                    else if (args[2] > 10000 && args[2] <= 100000) tax_price = ["10,000", 3, percentCalculation(args[2], 3).toFixed(0)]
-                    else if (args[2] > 100000 && args[2] <= 1000000) tax_price = ["1,00,000", 4.5, percentCalculation(args[2], 4.5).toFixed(0)];
-                    else if (args[2] > 1000000) tax_price = ["1,000,000", 6, percentCalculation(args[2], 6).toFixed(0)];
-
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]} Credits?${tax_price.length > 0 ? ` _As your pokemon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${args[2] - tax_price[2]} credits._\n` : ""} Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h","")} hours with a buyout of ${args[2]} Credits? A listing fee of 175 credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -78,24 +84,24 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if ((args[0] == "view" || args[0] == "info") && args.length == 2) {
             if (!isInt(args[1])) return message.channel.send("Please type a valid pokemon ID.");
 
-            market_model.findOne({ "MarketID": args[1] }, (err, market) => {
-                if (!market) return message.channel.send("No pokemon exists with that ID.");
+            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
+                if (!auction) return message.channel.send("No pokemon exists with that ID.");
                 else {
-                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == market.PokemonId)[0];
+                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == auction.PokemonId)[0];
 
                     //Get Pokemon Name from Pokemon ID.
-                    var pokemon_name = getPokemons.get_pokemon_name_from_id(market.PokemonId, pokemons, market.Shiny, true);
+                    var pokemon_name = getPokemons.get_pokemon_name_from_id(auction.PokemonId, pokemons, auction.Shiny, true);
 
-                    let exp = market.Experience;
-                    let level = market.Level;
-                    let hp_iv = market.IV[0];
-                    let atk_iv = market.IV[1];
-                    let def_iv = market.IV[2];
-                    let spa_iv = market.IV[3];
-                    let spd_iv = market.IV[4];
-                    let spe_iv = market.IV[5];
-                    let nature = market.NatureValue;
-                    let shiny = market.Shiny;
+                    let exp = auction.Experience;
+                    let level = auction.Level;
+                    let hp_iv = auction.IV[0];
+                    let atk_iv = auction.IV[1];
+                    let def_iv = auction.IV[2];
+                    let spa_iv = auction.IV[3];
+                    let spd_iv = auction.IV[4];
+                    let spe_iv = auction.IV[5];
+                    let nature = auction.NatureValue;
+                    let shiny = auction.Shiny;
                     let ev = 0;
 
                     let description = `${exp}/${exp_to_level(level)}XP`;
@@ -132,11 +138,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
                     else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
                     var image_url = './assets/images/' + image_name.replace("%", "");
-                    var held_item = market.Held != undefined ? `**\n_Holding: ${market.Held}_**` : "";
+                    var held_item = auction.Held != undefined ? `**\n_Holding: ${auction.Held}_**` : "";
+
+                    var bid_time = new Date(auction.BidTime);
+                    var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                    var time_left_string = `${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours ": ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes ": ""}`;
 
                     var embed = new Discord.MessageEmbed();
                     embed.attachFiles(image_url)
-                    embed.setTitle(`Level ${market.Level} ${pokemon_name} - ID: ${market.MarketID} - Price: ${market.Price}`);
+                    embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID} - Price: ${auction.Price}`);
                     embed.setColor(message.member.displayHexColor);
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
@@ -147,9 +157,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\n**Sp. Atk**: ${spa} - IV ${spa_iv}/31` +
                         `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
                         `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
-                        `\n**Total IV**: ${total_iv}%`);
+                        `\n**Total IV**: ${total_iv}%` +
+                        `\nCurrent Bid: ${auction.Price} - :hourglass_flowing_sand:${time_left_string}`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To buy this pokemon, type ${prefix}market buy ${market.MarketID}`);
+                    embed.setFooter(`To bid on this pokemon, place a bid of ${auction.Price} credits or more typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
                     message.channel.send(embed)
                 }
             });
@@ -179,11 +190,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
             });
         }
-        // For market remove command
+        // For auction remove command
         else if (args[0] == "remove" && args.length == 2 && isInt(args[1])) {
-            market_model.findOne({ $and: [{ "UserID": message.author.id }, { "MarketID": args[1] }] }, (err, market) => {
-                if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
+            auction_model.findOne({ $and: [{ "UserID": message.author.id }, { "AuctionID": args[1] }] }, (err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                    return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
                 }
                 else {
                     var update_data = new prompt_model({
@@ -193,21 +204,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             User1ID: message.author.id
                         },
                         List: {
-                            PokemonUID: market.PokemonUID,
-                            MarketID: market.MarketID
+                            PokemonUID: auction.PokemonUID,
+                            AuctionID: auction.AuctionID
+
                         }
                     });
                     update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to remove your level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmremove\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the removing.`);
+                        return message.channel.send(`Are you sure you want to remove your level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} from auction? Type \`\`${prefix}confirmremove\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the removing.`);
                     });
                 }
             });
         }
-        // For market listings command
+        // For auction listings command
         else if (args[0] == "listings") {
             return arg_parsing(message, args, prefix, "listings")
         }
-        // For market search command.
+        // For auction search command.
         else if (args[0] == "search") {
             return arg_parsing(message, args, prefix, "search");
         }
@@ -225,35 +237,35 @@ function arg_parsing(message, args, prefix, command) {
     if (args.length == 0 || (args.length == 1 && args[0] == "--showiv")) {
         if (args.length == 1 && args[0] == "--showiv") showiv = true;
         if (command == "search") {
-            market_model.find({ "Primary": undefined }).limit(20).exec((err, market) => {
-                if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("No market listings found.");
+            auction_model.find({ "Primary": undefined }).limit(20).exec((err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                    return message.channel.send("No auction listings found.");
                 } else {
                     var embed = new Discord.MessageEmbed();
-                    embed.setTitle("PokeFort Market:");
+                    embed.setTitle("PokeFort Auction:");
                     var description = "";
-                    for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                    for (a = 0; a < auction.length; a++) {
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
                     }
                     embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                    embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
                     return message.channel.send(embed);
                 }
             });
         }
         else if (command == "listings" || (args.length == 1 && args[0] == "--showiv")) {
-            market_model.find({ "UserID": message.author.id }).limit(100).exec((err, market) => {
-                if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("No market listings found.");
+            auction_model.find({ "UserID": message.author.id }).limit(100).exec((err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                    return message.channel.send("No auction listings found.");
                 } else {
                     var embed = new Discord.MessageEmbed();
-                    embed.setTitle("PokeFort Market:");
+                    embed.setTitle("PokeFort Auction:");
                     var description = "";
-                    for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                    for (a = 0; a < auction.length; a++) {
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
                     }
                     embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                    embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
                     return message.channel.send(embed);
                 }
             });
@@ -290,52 +302,52 @@ function arg_parsing(message, args, prefix, command) {
             }
             if (j == total_args.length - 1) {
                 if (command == "listings") request_query.unshift({ "UserID": message.author.id });
-                market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
-                    if (market == undefined || market == null || !market || market.length == 0) {
-                        return message.channel.send("No market listings found for your search.");
+                auction_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, auction) => {
+                    if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                        return message.channel.send("No auction listings found for your search.");
                     } else {
                         var embed = new Discord.MessageEmbed();
-                        embed.setTitle("PokeFort Market:");
+                        embed.setTitle("PokeFort Auction:");
                         var description = "";
-                        for (a = 0; a < market.length; a++) {
-                            description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                        for (a = 0; a < auction.length; a++) {
+                            description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Price: ${auction[a]["Price"]} Credits\n`;
                         }
                         embed.setDescription(description);
-                        embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                        embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
                         message.channel.send(embed);
                     }
                 });
             }
         }
 
-        // For market --shiny command.
+        // For auction --shiny command.
         function shiny(args) {
             request_query.push({ "Shiny": true });
         }
 
-        // For market --showiv command.
+        // For auction --showiv command.
         function show_iv(args) {
             showiv = true;
         }
 
-        // For market --type command.
+        // For auction --type command.
         function type(args) {
             request_query.push({ "Type": { $regex: new RegExp(`^${args[1]}`, 'i') } });
         }
 
-        // For market --name command.
+        // For auction --name command.
         function name(args) {
             const [, ...name] = args;
             request_query.push({ "PokemonName": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
         }
 
-        // For market --held command.
+        // For auction --held command.
         function held(args) {
             const [, ...name] = args;
             request_query.push({ "Held": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
         }
 
-        // For market --level command.
+        // For auction --level command.
         function level(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -352,7 +364,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --iv command.
+        // For auction --iv command.
         function iv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -369,7 +381,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --hpiv command.
+        // For auction --hpiv command.
         function hpiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -386,7 +398,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --atkiv command.
+        // For auction --atkiv command.
         function atkiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -403,7 +415,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --defiv command.
+        // For auction --defiv command.
         function defiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -420,7 +432,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --spatkiv command.
+        // For auction --spatkiv command.
         function spatkiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -437,7 +449,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --spdefiv command.
+        // For auction --spdefiv command.
         function spdefiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -454,7 +466,7 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --speediv command.
+        // For auction --speediv command.
         function spdiv(args) {
             if (args.length == 1) {
                 return error[1] = [false, "Please specify a value."]
@@ -471,13 +483,13 @@ function arg_parsing(message, args, prefix, command) {
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
 
-        // For market --order command.
+        // For auction --order command.
         function order(args) {
             var order_arrange = "asc";
             if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
             if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
             if (args[1].toLowerCase() == "iv") { order_type = { "IVPercentage": order_arrange } }
-            else if (args[1].toLowerCase() == "id") { order_type = { "MarketID": order_arrange } }
+            else if (args[1].toLowerCase() == "id") { order_type = { "AuctionID": order_arrange } }
             else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = { "Level": order_arrange } }
             else if (args[1].toLowerCase() == "name") { order_type = { "PokemonName": order_arrange } }
             else if (args[1].toLowerCase() == "price") { order_type = { "Price": order_arrange } }
@@ -551,6 +563,6 @@ function isInt(value) {
 function isFloat(x) { return !!(x % 1); }
 
 module.exports.config = {
-    name: "market",
+    name: "auction",
     aliases: []
 }

@@ -11,6 +11,7 @@ const channel_model = require('./models/channel');
 const user_model = require('./models/user');
 const pokemons_model = require('./models/pokemons');
 const market_model = require('./models/market');
+const auction_model = require('./models/auction');
 
 //Utils
 const { loadCommands } = require('./utils/loadCommands');
@@ -57,6 +58,18 @@ market_model.findOne({ Primary: true }, (err, market) => {
             Last_Unique_Value: 0
         });
         market.save();
+    }
+});
+
+// Auction Initialization
+auction_model.findOne({ Primary: true }, (err, auction) => {
+    if (err) console.log(err);
+    if (!auction) {
+        var auction = new auction_model({
+            Primary: true,
+            Last_Unique_Value: 0
+        });
+        auction.save();
     }
 });
 
