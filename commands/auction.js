@@ -190,31 +190,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
             });
         }
-        // For auction remove command
-        else if (args[0] == "remove" && args.length == 2 && isInt(args[1])) {
-            auction_model.findOne({ $and: [{ "UserID": message.author.id }, { "AuctionID": args[1] }] }, (err, auction) => {
-                if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
-                }
-                else {
-                    var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
-                        PromptType: "ConfirmRemove",
-                        UserID: {
-                            User1ID: message.author.id
-                        },
-                        List: {
-                            PokemonUID: auction.PokemonUID,
-                            AuctionID: auction.AuctionID
-
-                        }
-                    });
-                    update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to remove your level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} from auction? Type \`\`${prefix}confirmremove\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the removing.`);
-                    });
-                }
-            });
-        }
         // For auction listings command
         else if (args[0] == "listings") {
             return arg_parsing(message, args, prefix, "listings")

@@ -37,31 +37,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
             });
         }
-        else if (prompt.List.MarketID == undefined && prompt.List.AuctionID != undefined) {
-            auction_model.findOne({ $and: [{ "AuctionID": prompt.List.AuctionID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, auction) => {
-                if (err) return console.log(err);
-                if (!auction) return message.channel.send('Sorry, the pokemon you are trying to remove is not found.');
-
-                let pokemon_data = {
-                    CatchedOn: auction.CatchedOn,
-                    IV: auction.IV,
-                    PokemonId: auction.PokemonId,
-                    Experience: auction.Experience,
-                    Level: auction.Level,
-                    Nature: auction.NatureValue,
-                    Shiny: auction.Shiny,
-                    Reason: auction.Reason
-                }
-
-                getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
-                    prompt.remove().then(() => {
-                        auction.remove().then(() => {
-                            message.channel.send(`Your Level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} has been removed from the auction.`);
-                        });
-                    });
-                });
-            });
-        }
     });
 }
 
