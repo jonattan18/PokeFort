@@ -11,11 +11,9 @@ const prompt_model = require('../models/prompt');
 const getPokemons = require('../utils/getPokemon');
 
 /*
-List done
-remove done
-search done
-listings done
-view/info done
+search
+listings
+view/info
 bid
 claim
 */
@@ -74,7 +72,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     });
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h","")} hours with a buyout of ${args[2]} Credits? A listing fee of 175 credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h", "")} hours with a buyout of ${args[2]} Credits? A listing fee of 175 credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -142,11 +140,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                     var bid_time = new Date(auction.BidTime);
                     var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                    var time_left_string = `${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours ": ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes ": ""}`;
+                    if (time_left.getTime() < 0) { var time_left_string = `:hourglass: Ended`; }
+                    else var time_left_string = `:hourglass_flowing_sand: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours " : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes " : ""}`;
 
                     var embed = new Discord.MessageEmbed();
                     embed.attachFiles(image_url)
-                    embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID} - Price: ${auction.Price}`);
+                    embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID} - Price: ${auction.BidPrice}`);
                     embed.setColor(message.member.displayHexColor);
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
@@ -158,34 +157,41 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
                         `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
                         `\n**Total IV**: ${total_iv}%` +
-                        `\nCurrent Bid: ${auction.Price} - :hourglass_flowing_sand:${time_left_string}`);
+                        `\nCurrent Bid: ${auction.BidPrice} - ${time_left_string}`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To bid on this pokemon, place a bid of ${auction.Price} credits or more typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
+                    embed.setFooter(`To bid on this pokemon, place a bid of ${auction.BidPrice} credits or more typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
                     message.channel.send(embed)
                 }
             });
         }
-        // For market buy command
-        else if (args[0] == "buy" && args.length == 2 && isInt(args[1])) {
-            market_model.findOne({ "MarketID": args[1] }, (err, market) => {
-                if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
+        // For auction bid command
+        else if (args[0] == "bid" && args.length == 3 && isInt(args[2])) {
+            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                    return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
                 }
-                else if (market.UserID == message.author.id) return message.channel.send("You can't buy your own pokemon.");
+                else if (auction.UserID == message.author.id) return message.channel.send("You can't bid on your own pokemon.");
                 else {
+                    var bid_time = new Date(auction.BidTime);
+                    var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                    if (time_left.getTime() < 0) return message.channel.send("This auction has ended.");
+                    if (args[2] > user.PokeCredits) return message.channel.send("You have insufficient balance to bid on this pokemon.");
+                    if (args[2] <= auction.BidPrice) return message.channel.send(`You must bid higher than the current bid. The current bid is ${auction.Price}`);
+
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
-                        PromptType: "ConfirmBuy",
+                        PromptType: "ConfirmBid",
                         UserID: {
                             User1ID: message.author.id
                         },
                         List: {
-                            PokemonUID: market.PokemonUID,
-                            MarketID: market.MarketID
+                            PokemonUID: auction.PokemonUID,
+                            AuctionID: auction.AuctionID,
+                            AuctionPrice: args[2]
                         }
                     });
                     update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to buy level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmbuy\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the stop buying.`);
+                        return message.channel.send(`Are you sure you want to bid ${args[2]} credits on this level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} ?\nType \`\`${prefix}confirmbid\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the bid.`);
                     });
                 }
             });

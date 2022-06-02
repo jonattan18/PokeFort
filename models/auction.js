@@ -20,12 +20,14 @@ const AuctionSchema = new mongoose.Schema({
     IV: [Number, Number, Number, Number, Number, Number],
     Shiny: Boolean,
     Held: String,
-    Price: Number,
+    BuyOut: Number,
+    BidPrice: Number,
     BidUser: String,
     Nickname: String,
     Reason: String,
     Mega: String,
-    BidTime: Number
+    BidTime: Number,
+    Bought: Boolean
 });
 
 const MessageModel = module.exports = mongoose.model('auctions', AuctionSchema);

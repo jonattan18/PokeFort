@@ -72,7 +72,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             IV: [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv],
                             Shiny: shiny,
                             Held: selected_pokemon.Held,
-                            Price: prompt.List.Price,
+                            BuyOut: prompt.List.Price,
                             Nickname: selected_pokemon.Nickname,
                             Reason: selected_pokemon.Reason,
                             Mega: selected_pokemon.Mega,

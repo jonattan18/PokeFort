@@ -1,6 +1,5 @@
 // Models
 const market_model = require('../models/market');
-const auction_model = require('../models/auction');
 const prompt_model = require('../models/prompt');
 
 // Utils

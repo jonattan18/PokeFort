@@ -19,6 +19,7 @@ const PromptSchema = new mongoose.Schema({
         Price: Number,
         MarketID: Number,
         AuctionID: Number,
+        AuctionPrice: Number,
         BidTime: String
     },
     Trade: {
