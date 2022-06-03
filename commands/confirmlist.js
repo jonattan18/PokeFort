@@ -51,6 +51,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (prompt.List.BidTime[prompt.List.BidTime.length - 1] == "h") {
                         // Add that much hours to  current timestamp.
                         var time = new Date().addHours(parseInt(prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)));
+                    } else if (prompt.List.BidTime[prompt.List.BidTime.length - 1] == "m") {
+                        var time = new Date().addHours(parseInt(prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)) / 60);
                     } else var time = undefined;
 
                     auction_model.findOne({ "Primary": true }, (err, auction_unqiue) => {
@@ -87,7 +89,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         if (selected_pokemon._id == user.Selected) {
                                             var new_pokemon = user_pokemons.filter(it => it._id !== selected_pokemon._id)[0];
                                             user.Selected = new_pokemon._id;
-                                            user.PokeCredits -= 170;
+                                            user.PokeCredits -= 125 + (parseInt(prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)) * 25);
                                             user.save().then(() => {
                                                 message.channel.send(`You have added your seleted pokemon to auction list. Auto Selecting first pokemon.`);
                                             });
@@ -183,10 +185,10 @@ function nature_of(int) {
 }
 
 // Add hours to the time.
-Date.prototype.addHours = function(h) {
-    this.setTime(this.getTime() + (h*60*60*1000));
+Date.prototype.addHours = function (h) {
+    this.setTime(this.getTime() + (h * 60 * 60 * 1000));
     return this;
-  }
+}
 
 // Percentage calculation.
 function percentage(percent, total) {

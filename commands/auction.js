@@ -34,7 +34,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (args[0] == "list" && args.length == 4) {
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                if (args[3][args[3].length - 1] != "h") return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
+                if (args[3][args[3].length - 1] != "h" && args[3][args[3].length - 1] != "m") return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
                 if (!isInt(args[2])) return message.channel.send("When listing on a auction, you must specify a buyout.");
                 if (args[2] < 1) return message.channel.send("Isn't that too low for a pokemon ? Minimum buyout is 1.");
                 if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokemon ? Maximum price is 1,000,000,000.");
@@ -55,9 +55,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (_data) return message.channel.send("You can't add auction listing now!");
 
                     var listing_fee = 125;
-                    if (args[2] > 9999 && args[2] < 100000) listing_fee = percentCalculation(args[2], 1.5).toFixed(0);
-                    else if (args[2] > 99999 && args[2] < 1000000) listing_fee = percentCalculation(args[2], 3).toFixed(0);
-                    else if (args[2] > 999999) listing_fee = percentCalculation(args[2], 5).toFixed(0);
+                    if (args[3][args[3].length - 1] == "h") listing_fee = 125 + (parseInt(args[3].replace("h", "")) * 25);
 
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
@@ -74,7 +72,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     });
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].replace("h", "")} hours with a buyout of ${args[2]} Credits? A listing fee of ${listing_fee} credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        var time_string = args[3][args[3].length - 1] == "h" ? "hours" : "minutes";
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].substring(0, args[3].length - 1)} ${time_string} with a buyout of ${args[2]} Credits? A listing fee of ${listing_fee} credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -146,7 +145,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                     var embed = new Discord.MessageEmbed();
                     embed.attachFiles(image_url)
-                    embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID} - Price: ${auction.BidPrice}`);
+                    embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID}`);
                     embed.setColor(message.member.displayHexColor);
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
@@ -175,7 +174,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 else if (auction.BidUser == message.author.id) return message.channel.send("You already have a bid on this pokemon.");
                 else {
                     if (args[2] > user.PokeCredits) return message.channel.send("You have insufficient balance to bid on this pokemon.");
-                    if (args[2] <= auction.BidPrice) return message.channel.send(`You must bid higher than the current bid. The current bid is ${auction.Price}`);
+                    if (args[2] <= auction.BidPrice) return message.channel.send(`You must bid higher than the current bid. The current bid is ${auction.BidPrice}`);
                     if (args[2] > auction.BuyOut) return message.channel.send(`You can't bid higher than the buyout price. The buyout price is ${auction.BuyOut}`);
 
                     var update_data = new prompt_model({
