@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@smogon/calc": "^0.6.0",
+    "axios": "^0.27.2",
     "canvas": "^2.9.0",
     "cloc": "^2.9.0",
     "codic": "^2.0.6",
