@@ -205,18 +205,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
         // For market listings command
         else if (args[0] == "listings") {
-            return arg_parsing(message, args, prefix, "listings")
+            return arg_parsing(message, args, prefix, "listings", pokemons)
         }
         // For market search command.
         else if (args[0] == "search") {
-            return arg_parsing(message, args, prefix, "search");
+            return arg_parsing(message, args, prefix, "search", pokemons);
         }
         else return message.channel.send("Invalid command. Type `" + prefix + "help` for a list of commands.");
     });
 }
 
 // Function for arg parsing and understanding.
-function arg_parsing(message, args, prefix, command) {
+function arg_parsing(message, args, prefix, command, pokemons) {
     var showiv = false;
     var request_query = [];
     args.shift(); // Remove search from args.
@@ -272,6 +272,11 @@ function arg_parsing(message, args, prefix, command) {
             else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
             else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
             else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--held"))) { held(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--l") || _.isEqual(new_args[0], "--legendary"))) { legendary(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
@@ -333,6 +338,56 @@ function arg_parsing(message, args, prefix, command) {
         function held(args) {
             const [, ...name] = args;
             request_query.push({ "Held": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
+        }
+
+        // For auction --legendary command.
+        function legendary() {
+            var legendaries = pokemons.filter(it => it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL" && it["Primary Ability"] != "Beast Boost");
+            var legend_list = [];
+            for (var i = 0; i < legendaries.length; i++) {
+                legend_list.push(legendaries[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: legend_list } });
+        }
+
+        // For auction --mythical command.
+        function mythical() {
+            var mythicals = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
+            var myth_list = [];
+            for (var i = 0; i < mythicals.length; i++) {
+                myth_list.push(mythicals[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: myth_list } });
+        }
+
+        // For auction --ultrabeast command.
+        function ultrabeast() {
+            var ultrabeasts = pokemons.filter(it => it["Legendary Type"] === "Ultra Beast" && it["Alternate Form Name"] === "NULL");
+            var ultra_list = [];
+            for (var i = 0; i < ultrabeasts.length; i++) {
+                ultra_list.push(ultrabeasts[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: ultra_list } });
+        }
+
+        // For auction --alolan command.
+        function alolan() {
+            var alolans = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
+            var alolan_list = [];
+            for (var i = 0; i < alolans.length; i++) {
+                alolan_list.push(alolans[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: alolan_list } });
+        }
+
+        // For auction --galarian command.
+        function galarian() {
+            var galarians = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
+            var galarian_list = [];
+            for (var i = 0; i < galarians.length; i++) {
+                galarian_list.push(galarians[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: galarian_list } });
         }
 
         // For market --level command.
