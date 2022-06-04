@@ -6408,7 +6408,16 @@
         "Pokemon Id": "1366",
         "Pokedex Number": 79,
         "Pokemon Name": "Slowpoke",
-        "Evolution": "NULL",
+        "Evolution": [
+            {
+                "Id": "1388",
+                "Reason": "Galarica wreath"
+            },
+            {
+                "Id": "1368",
+                "Reason": "Galarica cuff"
+            }
+        ],
         "Classication": "Dopey Pokemon",
         "Alternate Form Name": "Galar",
         "Legendary Type": "NULL",
@@ -6448,16 +6457,6 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
-        "Evolution Stone": [
-            [
-                "Galarica wreath",
-                "1388"
-            ],
-            [
-                "Galarica cuff",
-                "1368"
-            ]
-        ],
         "dr_name": "Flegmon",
         "fr_name": "Ramoloss",
         "jp_name": [
@@ -15167,7 +15166,11 @@
         "Pokemon Id": "331",
         "Pokedex Number": 207,
         "Pokemon Name": "Gligar",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "717",
+            "Reason": "Razor fang",
+            "Time": "Night"
+        },
         "Classication": "Fly Scorpion Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "NULL",
@@ -15207,11 +15210,6 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
-        "Evolution Stone": [
-            "Razor fang",
-            "717",
-            "Night"
-        ],
         "dr_name": "Skorgla",
         "fr_name": "Scorplane",
         "jp_name": [
@@ -15759,7 +15757,11 @@
         "Pokemon Id": "339",
         "Pokedex Number": 215,
         "Pokemon Name": "Sneasel",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "683",
+            "Reason": "Razor claw",
+            "Time": "Night"
+        },
         "Classication": "Sharp Claw Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "NULL",
@@ -15799,11 +15801,6 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
-        "Evolution Stone": [
-            "Razor claw",
-            "683",
-            "Night"
-        ],
         "dr_name": "Sniebel",
         "fr_name": "Farfuret",
         "jp_name": [
@@ -56397,7 +56394,16 @@
         "Pokemon Id": "1501",
         "Pokedex Number": 840,
         "Pokemon Name": "Applin",
-        "Evolution": "NULL",
+        "Evolution": [
+            {
+                "Id": "1503",
+                "Reason": "Sweet apple"
+            },
+            {
+                "Id": "1502",
+                "Reason": "Tart apple"
+            }
+        ],
         "Classication": "Apple Core Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "NULL",
@@ -56437,16 +56443,6 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
-        "Evolution Stone": [
-            [
-                "Sweet apple",
-                "1503"
-            ],
-            [
-                "Tart apple",
-                "1502"
-            ]
-        ],
         "dr_name": "Knapfel",
         "fr_name": "Verpom",
         "jp_name": [
@@ -57540,7 +57536,10 @@
         "Pokemon Id": "1513",
         "Pokedex Number": 854,
         "Pokemon Name": "Sinistea",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "1514",
+            "Reason": "Cracked pot"
+        },
         "Classication": "Black Tea Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "NULL",
@@ -57580,10 +57579,6 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
-        "Evolution Stone": [
-            "Cracked pot",
-            "1514"
-        ],
         "dr_name": "Fatalitee",
         "fr_name": "Théffroi",
         "jp_name": [
