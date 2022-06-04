@@ -54,7 +54,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var evolution = "";
         var type = "";
 
-        if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined) {
+        // Tyrogue Exception
+        if (pokemon["Pokemon Id"] == "360") {
+            evolution = "Tyrogue evolves to Hitmonlee starting from level 20 when its Attack is higher than its Defense, evolves to Hitmonchan starting from level 20 and evolves to Hitmontop starting from level 20 when its Attack is equal to its Defense.\n"
+        }
+        else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined) {
             var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
         }
