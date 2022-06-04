@@ -93,7 +93,6 @@ function page_2(message, balance, prefix) {
     embed.addField('Razor Claw', '``' + prefix + 'buy razor claw``', true)
     embed.addField('Razor Fang', '``' + prefix + 'buy razor fang``', true)
     embed.addField('Friendship bracelet', '``' + prefix + 'buy bracelet``', true)
-    embed.addField('Friendship bracelet (Day/Night)', '``' + prefix + 'buy bracelet (day/night)``', true)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }

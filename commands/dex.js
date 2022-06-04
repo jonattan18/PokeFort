@@ -116,27 +116,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // Evolution Stone
-            if (_.isArray(pokemon["Evolution Stone"][0])) {
+            if (pokemon["Evolution Stone"] != undefined && _.isArray(pokemon["Evolution Stone"][0])) {
                 for (var i = 0; i < pokemon["Evolution Stone"].length; i++) {
                     var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Stone"][i][1], pokemons, false);
                     evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][i][0]} ${pokemon["Evolution Stone"][i][2] != undefined ? "during " + pokemon["Evolution Stone"][i][2].toLowerCase() : ""}\n`;
                 }
                 evolution += "\n";
             }
-            else {
+            else if (pokemon["Evolution Stone"] != undefined) {
                 var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Stone"][1], pokemons, false);
                 evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n\n`;
             }
 
             // Evolution Trade
-            if (_.isArray(pokemon["Evolution Trade"][0])) {
+            if (pokemon["Evolution Trade"] != undefined && _.isArray(pokemon["Evolution Trade"][0])) {
                 for (var i = 0; i < pokemon["Evolution Trade"].length; i++) {
                     var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][i][1], pokemons, false);
                     evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][i][0] != "NULL" ? "with " + pokemon["Evolution Trade"][i][0] : ""} ${pokemon["Evolution Trade"][i][2] != undefined ? "during " + pokemon["Evolution Trade"][i][2].toLowerCase() : ""}\n`;
                 }
                 evolution += "\n";
             }
-            else {
+            else if (pokemon["Evolution Trade"] != undefined) {
                 var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][1], pokemons, false);
                 evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][0] != "NULL" ? "with " + pokemon["Evolution Trade"][0] : ""} ${pokemon["Evolution Trade"][2] != undefined ? "during " + pokemon["Evolution Trade"][2].toLowerCase() : ""}\n\n`;
             }

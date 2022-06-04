@@ -59,7 +59,7 @@ function buyitem(message, args) {
 
 // Function to buy evolve items
 function buyevolveitems(message, args, pokemons) {
-    var evolve_items = ["sweet apple", "tart apple", "cracked pot", "galarica wreath", "galarica cuff", "razor claw", "razon fang", "bracelet", "bracelet day", "bracelet night"];
+    var evolve_items = ["sweet apple", "tart apple", "cracked pot", "galarica wreath", "galarica cuff", "razor claw", "razon fang", "bracelet"];
     if (!evolve_items.includes(args.join(" ").toLowerCase())) return message.channel.send("Please specify a valid item to purchase!");
 
     var given_item = args.join(" ").toLowerCase().capitalize();
@@ -78,24 +78,65 @@ function buyevolveitems(message, args, pokemons) {
             if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokemon with held item!");
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-            if (pokemon_db["Evolution Stone"] != undefined) {
+            if (given_item == "Bracelet" && pokemon_db.Evolution != "NULL") {
+                if (message.channel.name == "day") {
+                    if (_.isArray(pokemon_db.Evolution)) {
+                        var evo = pokemon_db.Evolution.filter(it => it.Time == "Day" && it.Reason == "Bracelet")[0];
+                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        var evo_id = evo.Id;
+                    }
+                    else {
+                        var evo_id = pokemon_db.Evolution.Time == "Day" ? pokemon_db.Evolution.Id : undefined;
+                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                    }
+                    evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
+                }
+                else if (message.channel.name == "night") {
+                    if (_.isArray(pokemon_db.Evolution)) {
+                        var evo = pokemon_db.Evolution.filter(it => it.Time == "Night" && it.Reason == "Bracelet")[0];
+                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        var evo_id = evo.Id;
+                    }
+                    else {
+                        var evo_id = pokemon_db.Evolution.Time == "Night" ? pokemon_db.Evolution.Id : undefined;
+                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                    }
+                    evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
+                }
+                else {
+                    if (_.isArray(pokemon_db.Evolution)) {
+                        var evo = pokemon_db.Evolution.filter(it => it.Time == undefined && it.Reason == "Bracelet")[0];
+                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        var evo_id = evo.Id;
+                    }
+                    else {
+                        var evo_id = pokemon_db.Evolution.Time == undefined ? pokemon_db.Evolution.Id : undefined;
+                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                    }
+                    evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
+                }
+            }
+            else if (pokemon_db["Evolution Stone"] != undefined) {
                 if (pokemon_db["Evolution Stone"].some(it => it.includes(given_item))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(given_item))[1];
                 if (update_pokemon_id == null) return message.channel.send("This pokemon can't evolve with this item!");
                 if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == given_item) {
                     update_pokemon_id = pokemon_db["Evolution Stone"][1];
                 }
+                evolve_pokemon(pokemon_db["Pokemon Id"], update_pokemon_id, selected_pokemon.Shiny);
+            } else return message.channel.send("This pokemon is not eligible for this item!");
 
-                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, selected_pokemon.Shiny);
-                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(update_pokemon_id, pokemons, selected_pokemon.Shiny);
+            function evolve_pokemon(old_pokemon_id, new_pokemon_id, shiny) {
+                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(old_pokemon_id, pokemons, shiny);
+                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(new_pokemon_id, pokemons, shiny);
                 user.PokeCredits -= 150;
                 // Update database
-                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": update_pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": new_pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
                     user.save();
                     message.channel.send(`Your ${old_pokemon_name} evolved into ${new_pokemon_name}!`);
                     return true;
                 });
-            } else return message.channel.send("This pokemon is not eligible for this item!");
+            }
         });
     });
 }
@@ -353,7 +394,7 @@ function buycandy(message, args, pokemons) {
 
                                     // Double evolution check.
                                     var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
-                                    
+
                                     if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
                                         var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
                                         pokemon_id = double_pokemon_data.Evolution.Id;
