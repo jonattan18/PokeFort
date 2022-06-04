@@ -32,11 +32,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     auction.BidPrice = prompt.List.AuctionPrice;
                     auction.BidUser = message.author.id;
                     if (auction.BidUser != undefined && auction.BidUser != message.author.id) {
-                        bot.users.fetch(auction.BidUser).then(user => {
+                        bot.users.fetch(auction.BidUser).then(outbid_user => {
                             user_model.findOne({ UserID: auction.BidUser }, (err, owner_data) => {
                                 owner_data.PokeCredits += auction.BidPrice;
                                 owner_data.save().then(() => {
-                                    user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`);
+                                    outbid_user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`);
                                 });
                             });
                         });
@@ -76,8 +76,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         user_model.findOne({ UserID: auction.BidUser }, (err, owner_data) => {
                             owner_data.PokeCredits += auction.BidPrice;
                             owner_data.save().then(() => {
-                                bot.users.fetch(auction.BidUser).then(user => {
-                                    user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The new bid is ${prompt.List.AuctionPrice} credits.`);
+                                bot.users.fetch(auction.BidUser).then(outbid_user => {
+                                   outbid_user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The new bid is ${prompt.List.AuctionPrice} credits.`);
                                 });
                             });
                         });
