@@ -94,7 +94,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                             // Adding to dex.
                             var dex_data = { PokemonId: pokemon["Pokemon Id"] };
-                            getDexes.insertdex(message.author.id, dex_data);
+                            getDexes.insertdex(message.author.id, dex_data).then(result => {
 
                                 var message_string = "";
 
@@ -109,6 +109,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
                             });
                         });
+                    });
                 });
 
                 // Removing pokemon in channel database.

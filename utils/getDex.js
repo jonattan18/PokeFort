@@ -26,7 +26,7 @@ let insertdex = (UserID, Pokemons) => new Promise((resolve, reject) => {
 
         // No database found. Create new and insert pokemons.
         if (pokemon_data.length == 0) {
-            let new_pokemon_database = new pokemons_model({
+            let new_pokemon_database = new dex_model({
                 UserID: UserID,
                 Pokemons: [Pokemons]
             });
