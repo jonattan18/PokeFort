@@ -90,6 +90,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n`;
             }
         }
+        else if (move_evolve(pokemon["Pokemon Id"]) != "NULL") {
+            var move_evolve_return = move_evolve(pokemon["Pokemon Id"]);
+            var evolves_to = getPokemons.get_pokemon_name_from_id(move_evolve_return[0], pokemons, false);
+            evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by learning ${move_evolve_return[1]}\n`;
+        }
         else if (pokemon["Evolution Stone"] != undefined || pokemon["Evolution Trade"] != undefined) {
 
             if (pokemon.Evolution != "NULL") {
@@ -139,6 +144,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (pokemon["Evolution Trade"] != undefined) {
                 var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][1], pokemons, false);
                 evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][0] != "NULL" ? "with " + pokemon["Evolution Trade"][0] : ""} ${pokemon["Evolution Trade"][2] != undefined ? "during " + pokemon["Evolution Trade"][2].toLowerCase() : ""}\n\n`;
+            }
+
+            // Evolution Move
+            if (move_evolve(pokemon["Pokemon Id"]) != "NULL") {
+                var move_evolve_return = move_evolve(pokemon["Pokemon Id"]);
+                var evolves_to = getPokemons.get_pokemon_name_from_id(move_evolve_return[0], pokemons, false);
+                evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by learning ${move_evolve_return[1]}\n`;
             }
         }
 
@@ -491,6 +503,55 @@ function create_pagination(message, dex_pokemons, description_string = "", field
         if (global_embed.length == 1) return;
         pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
     });
+}
+
+// Function to get evolve by move names.
+function move_evolve(PokemonID) {
+
+    if (PokemonID == "142") {
+        var evolve_to = "685";
+        var move_name = "Rollout";
+    }
+    else if (PokemonID == "148") {
+        var evolve_to = "687";
+        var move_name = "Ancient Power";
+    }
+    else if (PokemonID == "637") {
+        var evolve_to = "218";
+        var move_name = "Mimic";
+    }
+    else if (PokemonID == "636") {
+        var evolve_to = "285";
+        var move_name = "Mimic";
+    }
+    else if (PokemonID == "290") {
+        var evolve_to = "622";
+        var move_name = "Double Hit";
+    }
+    else if (PokemonID == "293") {
+        var evolve_to = "714";
+        var move_name = "Ancient Power";
+    }
+    else if (PokemonID == "345") {
+        var evolve_to = "718";
+        var move_name = "Ancient Power";
+    }
+    else if (PokemonID == "1290") {
+        var evolve_to = "1291";
+        var move_name = "Stomp";
+    }
+    else if (PokemonID == "1334") {
+        var evolve_to = "1335";
+        var move_name = "Dragon Pulse";
+    }
+    else if (PokemonID == "1511") {
+        var evolve_to = "1512";
+        var move_name = "Taunt";
+    }
+    else {
+        return null;
+    }
+    return [evolve_to, move_name];
 }
 
 // Chunk array into equal parts.
