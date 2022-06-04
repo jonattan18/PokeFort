@@ -94,19 +94,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                             // Adding to dex.
                             var dex_data = { PokemonId: pokemon["Pokemon Id"] };
-                            getDexes.insertdex(message.author.id, dex_data);
+                            getDexes.insertdex(message.author.id, dex_data).then(result => {
 
-                            var message_string = "";
+                                var message_string = "";
 
-                            // Pokemon Name
-                            var message_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, channel.Shiny);
-                            if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
-                            else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
-                            else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
-                            else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
-                            else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
-                            message.channel.send(message_string);
-                            if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                                // Pokemon Name
+                                var message_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, channel.Shiny);
+                                if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
+                                else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
+                                else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
+                                else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
+                                else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
+                                message.channel.send(message_string);
+                                if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                            });
                         });
                     });
                 });

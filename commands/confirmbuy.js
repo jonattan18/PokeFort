@@ -20,6 +20,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (err) return console.log(err);
                 if (!market) return message.channel.send('Sorry, the pokemon you are trying to buy is not found.');
 
+                if (user.PokeCredits < market.Price) return message.channel.send("You have insufficient balance to buy this pokemon.");
+
                 let pokemon_data = {
                     CatchedOn: market.CatchedOn,
                     IV: market.IV,
@@ -37,7 +39,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     prompt.remove().then(() => {
                         market.remove().then(() => {
                             user.save().then(() => {
-                                bot.users.fetch(market.UserID).then(user => {
+                           //     bot.users.fetch(market.UserID).then(user => {
                                     user_model.findOne({ UserID: user.id }, (err, user1) => {
 
                                         var tax_price = [];
@@ -56,7 +58,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     });
                                 });
                                 message.channel.send(`Your have bought Level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market for ${market.Price} Credits.`);
-                            });
+                          //  });
                         });
                     });
                 });
