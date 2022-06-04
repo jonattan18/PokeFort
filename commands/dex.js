@@ -90,7 +90,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n`;
             }
         }
-        else if (move_evolve(pokemon["Pokemon Id"]) != "NULL") {
+        else if (move_evolve(pokemon["Pokemon Id"]) != null) {
             var move_evolve_return = move_evolve(pokemon["Pokemon Id"]);
             var evolves_to = getPokemons.get_pokemon_name_from_id(move_evolve_return[0], pokemons, false);
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by learning ${move_evolve_return[1]}\n`;
@@ -147,7 +147,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // Evolution Move
-            if (move_evolve(pokemon["Pokemon Id"]) != "NULL") {
+            if (move_evolve(pokemon["Pokemon Id"]) != null) {
                 var move_evolve_return = move_evolve(pokemon["Pokemon Id"]);
                 var evolves_to = getPokemons.get_pokemon_name_from_id(move_evolve_return[0], pokemons, false);
                 evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by learning ${move_evolve_return[1]}\n`;
