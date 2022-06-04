@@ -230,8 +230,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                     if (held != "Everstone") {
                         // Get pokemon evolution.
-                        var evo_tree = evolution_tree(pokemons, pokemon_id);
-                        var next_evolutions = evo_tree.filter(it => it[0] > pokemon_id && it[1].includes('Level'));
+                        var pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
                         //Exections for Tyrogue
                         if (pokemon_id == "360" && pokemon_level >= 20) {
                             var ev = 0;
@@ -241,20 +240,31 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             if (atk > def) next_evolutions[0] = "140";
                             else if (atk < def) next_evolutions[0] = "141";
                             else next_evolutions[0] = "361";
-                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny, true);
+                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny);
                             pokemon_id = next_evolutions[0];
                             evolved = true;
                             new_evolved_name = new_pokemon_name;
 
-                        } else {
-                            if (next_evolutions != undefined && next_evolutions.length > 0) {
-                                next_evolutions = next_evolutions[0];
-                                var required_level = next_evolutions[1].match(/\d/g).join("");
-                                if (pokemon_level >= required_level) {
-                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, shiny, true);
-                                    pokemon_id = next_evolutions[0];
-                                    evolved = true;
-                                    new_evolved_name = new_pokemon_name;
+                        }
+                        else {
+                            if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
+                                if (pokemon_level >= pokemon_data.Evolution.Level) {
+                                    if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
+
+                                        // Double evolution check.
+                                        var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
+
+                                        if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, shiny);
+                                            pokemon_id = double_pokemon_data.Evolution.Id;
+                                        }
+                                        else {
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_data.Evolution.Id, pokemons, shiny);
+                                            pokemon_id = pokemon_data.Evolution.Id;
+                                        }
+                                        evolved = true;
+                                        new_evolved_name = new_pokemon_name;
+                                    }
                                 }
                             }
                         }
@@ -291,28 +301,6 @@ function duel_copy(old_prompt, new_prompt) {
         }
     }
     return new_prompt;
-}
-
-// Get evolution tree of pokemons.
-function evolution_tree(pokemons, pokemon_id) {
-    var filtered_pokemons = [];
-    var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == pokemon_id)[0];
-    if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
-    filtered_pokemons.push(parseInt(found_pokemon["Pokemon Id"]));
-
-    var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
-    if (pre_evolution) filtered_pokemons.push([parseInt(pre_evolution["Pokemon Id"]), pre_evolution["Evolution Details"]]);
-
-    var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
-    if (pre_pre_evolution) filtered_pokemons.push([parseInt(pre_pre_evolution["Pokemon Id"]), pre_pre_evolution["Evolution Details"]]);
-
-    if (pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
-    if (post_evolution) filtered_pokemons.push([parseInt(post_evolution["Pokemon Id"]), post_evolution["Evolution Details"]]);
-
-    if (pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
-    if (post_post_evolution) filtered_pokemons.push([parseInt(post_post_evolution["Pokemon Id"]), post_post_evolution["Evolution Details"]]);
-
-    return filtered_pokemons;
 }
 
 // Exp to level up.

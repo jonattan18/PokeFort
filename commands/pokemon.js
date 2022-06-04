@@ -442,20 +442,24 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
                     filtered_pokemons.push(found_pokemon["Pokemon Id"]);
 
-                    var pre_evolution = pokemons.filter(it => it["Pokemon Id"] === found_pokemon["Pre-Evolution Pokemon Id"].toString())[0];
-                    if (pre_evolution) filtered_pokemons.push(pre_evolution["Pokemon Id"]);
+                    if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
+                        filtered_pokemons.push(found_pokemon.Evolution.Id);
+                        var double_found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
+                        if (double_found_pokemon.Evolution != undefined && double_found_pokemon.Evolution.Reason == "Level") {
+                            filtered_pokemons.push(double_found_pokemon.Evolution.Id);
+                        }
+                    }
 
-                    var pre_pre_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(found_pokemon["Pokemon Id"]))[0];
-                    if (pre_pre_evolution) filtered_pokemons.push(pre_pre_evolution["Pokemon Id"]);
+                    var pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == found_pokemon["Pokemon Id"])[0];
+                    if (pre_found_pokemon != undefined && pre_found_pokemon.Evolution.Reason == "Level") {
+                        filtered_pokemons.push(pre_found_pokemon["Pokemon Id"]);
+                        var double_pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == pre_found_pokemon["Pokemon Id"])[0];
+                        if (double_pre_found_pokemon != undefined && double_pre_found_pokemon.Evolution.Reason == "Level") {
+                            filtered_pokemons.push(double_pre_found_pokemon["Pokemon Id"]);
+                        }
+                    }
 
-                    if (pre_evolution) var post_evolution = pokemons.filter(it => it["Pokemon Id"] === pre_evolution["Pre-Evolution Pokemon Id"].toString())[0];
-                    if (post_evolution) filtered_pokemons.push(post_evolution["Pokemon Id"]);
-
-                    if (pre_pre_evolution) var post_post_evolution = pokemons.filter(it => it["Pre-Evolution Pokemon Id"] === parseInt(pre_pre_evolution["Pokemon Id"]))[0];
-                    if (post_post_evolution) filtered_pokemons.push(post_post_evolution["Pokemon Id"]);
-
-                    duo_filtered_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
-                    user_pokemons = duo_filtered_pokemons;
+                    user_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
                 }
                 else { return error[1] = [false, "Invalid argument syntax."] }
             }
