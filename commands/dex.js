@@ -58,15 +58,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (pokemon["Pokemon Id"] == "360") {
             evolution = "Tyrogue evolves to Hitmonlee starting from level 20 when its Attack is higher than its Defense, evolves to Hitmonchan starting from level 20 and evolves to Hitmontop starting from level 20 when its Attack is equal to its Defense.\n"
         }
-        else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined) {
+        else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
             var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
         }
-        else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Bracelet" && pokemon["Evolution Stone"] == undefined) {
+        else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Bracelet" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
             var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding friendship bracelet ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
         }
-        else if (pokemon.Evolution == "NULL" && pokemon["Evolution Stone"] != undefined) {
+        else if (pokemon.Evolution == "NULL" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] != undefined) {
+            if (_.isArray(pokemon["Evolution Trade"][0])) {
+                for (var i = 0; i < pokemon["Evolution Trade"].length; i++) {
+                    var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][i][1], pokemons, false);
+                    evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][i][0] != "NULL" ? "with " + pokemon["Evolution Trade"][i][0] : ""} ${pokemon["Evolution Trade"][i][2] != undefined ? "during " + pokemon["Evolution Trade"][i][2].toLowerCase() : ""}\n`;
+                }
+            }
+            else {
+                var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][1], pokemons, false);
+                evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][0] != "NULL" ? "with " + pokemon["Evolution Trade"][0] : ""} ${pokemon["Evolution Trade"][2] != undefined ? "during " + pokemon["Evolution Trade"][2].toLowerCase() : ""}\n`;
+            }
+        }
+        else if (pokemon.Evolution == "NULL" && pokemon["Evolution Stone"] != undefined && pokemon["Evolution Trade"] == undefined) {
             if (_.isArray(pokemon["Evolution Stone"][0])) {
                 for (var i = 0; i < pokemon["Evolution Stone"].length; i++) {
                     var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Stone"][i][1], pokemons, false);
@@ -78,27 +90,29 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n`;
             }
         }
-        else if (pokemon.Evolution != "NULL" && pokemon["Evolution Stone"] != undefined) {
+        else if (pokemon["Evolution Stone"] != undefined || pokemon["Evolution Trade"] != undefined) {
 
-            // Evolution By Level
-            if (pokemon.Evolution.Reason == "Level") {
-                var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
-                evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n\n`;
-            }
-
-            // Evolution By Level/Bracelet -in Array
-            if (_.isArray(pokemon.Evolution)) {
-                for (var i = 0; i < pokemon.Evolution.length; i++) {
-                    if (pokemon.Evolution[i].Reason == "Level") {
-                        var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution[i].Id, pokemons, false);
-                        evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution[i].Level} Level ${pokemon.Evolution[i].Time != undefined ? "during " + pokemon.Evolution[i].Time.toLowerCase() : ""}\n`;
-                    }
-                    else if (pokemon.Evolution[i].Reason == "Bracelet") {
-                        var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution[i].Id, pokemons, false);
-                        evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding friendship bracelet ${pokemon.Evolution[i].Time != undefined ? "during " + pokemon.Evolution[i].Time.toLowerCase() : ""}\n`;
-                    }
+            if (pokemon.Evolution != "NULL") {
+                // Evolution By Level
+                if (pokemon.Evolution.Reason == "Level") {
+                    var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
+                    evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n\n`;
                 }
-                evolution += "\n";
+
+                // Evolution By Level/Bracelet -in Array
+                if (_.isArray(pokemon.Evolution)) {
+                    for (var i = 0; i < pokemon.Evolution.length; i++) {
+                        if (pokemon.Evolution[i].Reason == "Level") {
+                            var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution[i].Id, pokemons, false);
+                            evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution[i].Level} Level ${pokemon.Evolution[i].Time != undefined ? "during " + pokemon.Evolution[i].Time.toLowerCase() : ""}\n`;
+                        }
+                        else if (pokemon.Evolution[i].Reason == "Bracelet") {
+                            var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution[i].Id, pokemons, false);
+                            evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding friendship bracelet ${pokemon.Evolution[i].Time != undefined ? "during " + pokemon.Evolution[i].Time.toLowerCase() : ""}\n`;
+                        }
+                    }
+                    evolution += "\n";
+                }
             }
 
             // Evolution Stone
@@ -107,10 +121,24 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Stone"][i][1], pokemons, false);
                     evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][i][0]} ${pokemon["Evolution Stone"][i][2] != undefined ? "during " + pokemon["Evolution Stone"][i][2].toLowerCase() : ""}\n`;
                 }
+                evolution += "\n";
             }
             else {
                 var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Stone"][1], pokemons, false);
-                evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n`;
+                evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by using ${pokemon["Evolution Stone"][0]} ${pokemon["Evolution Stone"][2] != undefined ? "during " + pokemon["Evolution Stone"][2].toLowerCase() : ""}\n\n`;
+            }
+
+            // Evolution Trade
+            if (_.isArray(pokemon["Evolution Trade"][0])) {
+                for (var i = 0; i < pokemon["Evolution Trade"].length; i++) {
+                    var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][i][1], pokemons, false);
+                    evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][i][0] != "NULL" ? "with " + pokemon["Evolution Trade"][i][0] : ""} ${pokemon["Evolution Trade"][i][2] != undefined ? "during " + pokemon["Evolution Trade"][i][2].toLowerCase() : ""}\n`;
+                }
+                evolution += "\n";
+            }
+            else {
+                var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon["Evolution Trade"][1], pokemons, false);
+                evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} by trading ${pokemon["Evolution Trade"][0] != "NULL" ? "with " + pokemon["Evolution Trade"][0] : ""} ${pokemon["Evolution Trade"][2] != undefined ? "during " + pokemon["Evolution Trade"][2].toLowerCase() : ""}\n\n`;
             }
         }
 
