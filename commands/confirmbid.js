@@ -34,9 +34,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (auction.BidUser != undefined && auction.BidUser != message.author.id) {
 
                         // Send Message
-                        const outbid_user = await bot.users.fetch(auction.BidUser).catch(() => null);
+                        const outbid_user = bot.users.fetch(auction.BidUser).catch(() => null);
                         if (outbid_user) {
-                            await outbid_user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`).catch(() => { });
+                            outbid_user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`).catch(() => { });
                         } else bot.users.cache.get(auction.BidUser).send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`);
 
                         user_model.findOne({ UserID: auction.BidUser }, (err, owner_data) => {
@@ -62,9 +62,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
 
                                 // Send Message
-                                const owner = await bot.users.fetch(auction.UserID).catch(() => null);
+                                const owner = bot.users.fetch(auction.UserID).catch(() => null);
                                 if (owner) {
-                                    await owner.send(`Your level ${auction.Level} ${auction.PokemonName} has bought out for ${auction.BidPrice} credits.`).catch(() => { });
+                                    owner.send(`Your level ${auction.Level} ${auction.PokemonName} has bought out for ${auction.BidPrice} credits.`).catch(() => { });
                                 } else bot.users.cache.get(auction.UserID).send(`Your level ${auction.Level} ${auction.PokemonName} has bought out for ${auction.BidPrice} credits.`);
 
                                 message.channel.send(`You have bought out the auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}) for ${prompt.List.AuctionPrice} credits.`);
@@ -85,9 +85,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             owner_data.save().then(() => {
 
                                 // Send Message
-                                const outbid_user = await bot.users.fetch(auction.BidUser).catch(() => null);
+                                const outbid_user = bot.users.fetch(auction.BidUser).catch(() => null);
                                 if (outbid_user) {
-                                    await user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The new bid is ${prompt.List.AuctionPrice} credits.`).catch(() => { });
+                                    user.send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The new bid is ${prompt.List.AuctionPrice} credits.`).catch(() => { });
                                 } else bot.users.cache.get(auction.BidUser).send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The new bid is ${prompt.List.AuctionPrice} credits.`);
 
                             });
