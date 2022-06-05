@@ -76,6 +76,8 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 client.on('message', async (message) => {
     if (message.author.bot) return;
 
+    if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
+
     if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
