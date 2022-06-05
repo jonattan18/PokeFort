@@ -203,9 +203,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             embed.setDescription(description);
-            message.channel.send(embed).then(() => {
-                message.delete();
-            });
+            message.channel.send(embed);
+            message.delete();
         }
 
         //#region Pokemon XP Update.
