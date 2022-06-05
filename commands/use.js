@@ -64,12 +64,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 new_prompt.save().then(() => { prompt.remove(); });
 
                 // Send Message
-                const user2 = bot.users.fetch(prompt.UserID.User2ID).catch(() => null);
-                if (user2) {
-                    if (user2_data.DuelDM != true) user2.send(usr_embed).catch(() => { });
-                } else {
+             //   const user2 = bot.users.fetch(prompt.UserID.User2ID).catch(() => null);
+             //   if (user2) {
+            //        if (user2_data.DuelDM != true) user2.send(usr_embed).catch(() => { });
+             //   } else {
                     if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
-                }
+              //  }
             });
 
         }
@@ -143,12 +143,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 new_prompt.save().then(() => { prompt.remove(); });
 
                 // Send Message
-                const user1 = bot.users.fetch(prompt.UserID.User1ID).catch(() => null);
-                if (user1) {
-                    if (user1_data.DuelDM != true) user1.send(usr_embed).catch(() => { });
-                } else {
+               // const user1 = bot.users.fetch(prompt.UserID.User1ID).catch(() => null);
+             //   if (user1) {
+             //       if (user1_data.DuelDM != true) user1.send(usr_embed).catch(() => { });
+           //     } else {
                     if (user1_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User1ID).send(usr_embed);
-                }
+             //   }
             }
 
             function player1_is_winner() {
