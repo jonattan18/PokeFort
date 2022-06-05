@@ -58,12 +58,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `${user2_data.Moves[2]} ${prefix}use 3\n\n`;
                 description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(description);
-                bot.users.fetch(prompt.UserID.User2ID).then(user => {
-                    if (user2_data.DuelDM != true) user.send(usr_embed);
-                    var new_prompt = new prompt_model();
-                    new_prompt = duel_copy(prompt, new_prompt);
-                    new_prompt.save().then(() => { prompt.remove(); });
-                });
+
+                // Send Message
+                const user2 = bot.users.fetch(prompt.UserID.User2ID).catch(() => null);
+                if (user2) {
+                    if (user2_data.DuelDM != true) user2.send(usr_embed).catch(() => { });
+                } else {
+                    if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
+                }
+
+                var new_prompt = new prompt_model();
+                new_prompt = duel_copy(prompt, new_prompt);
+                new_prompt.save().then(() => { prompt.remove(); });
             });
 
         }
@@ -131,12 +137,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 usr_description += `${user1_data.Moves[2]} ${prefix}use 3\n\n`;
                 usr_description += `${user1_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(usr_description);
-                bot.users.fetch(prompt.UserID.User1ID).then(user => {
-                    if (user1_data.DuelDM != true) user.send(usr_embed);
-                    var new_prompt = new prompt_model();
-                    new_prompt = duel_copy(prompt, new_prompt);
-                    new_prompt.save().then(() => { prompt.remove(); });
-                });
+
+                // Send Message
+                const user1 = bot.users.fetch(prompt.UserID.User1ID).catch(() => null);
+                if (user1) {
+                    if (user1_data.DuelDM != true) user1.send(usr_embed).catch(() => { });
+                } else {
+                    if (user1_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User1ID).send(usr_embed);
+                }
+
+                var new_prompt = new prompt_model();
+                new_prompt = duel_copy(prompt, new_prompt);
+                new_prompt.save().then(() => { prompt.remove(); });
             }
 
             function player1_is_winner() {

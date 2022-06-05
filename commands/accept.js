@@ -202,9 +202,15 @@ function duel(bot, message, prefix, prompt, pokemons) {
                                 description += `${user1pokemon_moves[2]} ${prefix}use 3\n\n`;
                                 description += `${user1pokemon_moves[3]} ${prefix}use 4\n\n`;
                                 usr_embed.setDescription(description);
-                                bot.users.fetch(user1.UserID).then(user => {
-                                    user.send(usr_embed);
-                                });
+
+                                // Send Message
+                                const user1 = bot.users.fetch(user1.UserID).catch(() => null);
+                                if (user1) {
+                                    if (user1_data.DuelDM != true) user1.send(usr_embed).catch(() => { });
+                                } else {
+                                    if (user1_data.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
+                                }
+
                             }
                         });
                     });
