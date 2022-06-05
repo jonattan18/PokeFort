@@ -25,6 +25,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+                selected_pokemon.name_no_shiny = getPokemons.get_pokemon_name_from_id(selected_pokemon["PokemonId"], pokemons, false);
+                selected_pokemon["Pokemon Id"] = selected_pokemon.PokemonId;
                 pokemon_embed(selected_pokemon);
             })
         })

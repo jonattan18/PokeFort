@@ -41,32 +41,30 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else var damage = battle.calculate_damage(user_1_pokemon, user1_data.Attack, user2_data.Defense, pokemon_level, move_used_info, user_2_pokemon);
 
             prompt.Duel.User2Pokemon.ActiveHP -= damage[0];
-            message.delete().then(() => {
-                prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
-                prompt.Duel.Turn = 2;
+            prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
+            prompt.Duel.Turn = 2;
 
-                if (user1_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
+            if (user1_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
 
-                var usr_embed = new Discord.MessageEmbed();
-                usr_embed.setColor(message.guild.me.displayHexColor);
-                usr_embed.setTitle(`Battle VS ${duel_data.User1name}`);
-                var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
-                description += "\n\n";
-                description += "Available moves:\n\n"
-                description += `${user2_data.Moves[0]} ${prefix}use 1\n\n`;
-                description += `${user2_data.Moves[1]} ${prefix}use 2\n\n`;
-                description += `${user2_data.Moves[2]} ${prefix}use 3\n\n`;
-                description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
-                usr_embed.setDescription(description);
+            var usr_embed = new Discord.MessageEmbed();
+            usr_embed.setColor(message.guild.me.displayHexColor);
+            usr_embed.setTitle(`Battle VS ${duel_data.User1name}`);
+            var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
+            description += "\n\n";
+            description += "Available moves:\n\n"
+            description += `${user2_data.Moves[0]} ${prefix}use 1\n\n`;
+            description += `${user2_data.Moves[1]} ${prefix}use 2\n\n`;
+            description += `${user2_data.Moves[2]} ${prefix}use 3\n\n`;
+            description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
+            usr_embed.setDescription(description);
 
-                var new_prompt = new prompt_model();
-                new_prompt = duel_copy(prompt, new_prompt);
-                new_prompt.save().then(() => { prompt.remove(); });
+            var new_prompt = new prompt_model();
+            new_prompt = duel_copy(prompt, new_prompt);
+            new_prompt.save().then(() => { prompt.remove(); });
 
-                // Send Message
-                if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
-            });
-
+            // Send Message
+            if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
+            message.delete();
         }
 
         // Player 2
