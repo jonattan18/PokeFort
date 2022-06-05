@@ -59,6 +59,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(description);
 
+                var new_prompt = new prompt_model();
+                new_prompt = duel_copy(prompt, new_prompt);
+                new_prompt.save().then(() => { prompt.remove(); });
+
                 // Send Message
                 const user2 = bot.users.fetch(prompt.UserID.User2ID).catch(() => null);
                 if (user2) {
@@ -66,10 +70,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 } else {
                     if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
                 }
-
-                var new_prompt = new prompt_model();
-                new_prompt = duel_copy(prompt, new_prompt);
-                new_prompt.save().then(() => { prompt.remove(); });
             });
 
         }
@@ -138,6 +138,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 usr_description += `${user1_data.Moves[3]} ${prefix}use 4\n\n`;
                 usr_embed.setDescription(usr_description);
 
+                var new_prompt = new prompt_model();
+                new_prompt = duel_copy(prompt, new_prompt);
+                new_prompt.save().then(() => { prompt.remove(); });
+
                 // Send Message
                 const user1 = bot.users.fetch(prompt.UserID.User1ID).catch(() => null);
                 if (user1) {
@@ -145,10 +149,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 } else {
                     if (user1_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User1ID).send(usr_embed);
                 }
-
-                var new_prompt = new prompt_model();
-                new_prompt = duel_copy(prompt, new_prompt);
-                new_prompt.save().then(() => { prompt.remove(); });
             }
 
             function player1_is_winner() {
