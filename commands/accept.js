@@ -204,12 +204,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                                 usr_embed.setDescription(description);
 
                                 // Send Message
-                                const user1 = bot.users.fetch(user1.UserID).catch(() => null);
-                                if (user1) {
-                                    if (user1_data.DuelDM != true) user1.send(usr_embed).catch(() => { });
-                                } else {
-                                    if (user1_data.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
-                                }
+                                if (user1_data.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
 
                             }
                         });

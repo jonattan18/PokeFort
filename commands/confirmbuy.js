@@ -55,10 +55,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         embed.setDescription(`${tax_price.length > 0 ? ` _As your pokemon sold for over ${tax_price[0]} credits, ${tax_price[1]}% has been taken as tax and you have received ${args[2] - tax_price[2]} credits._\n` : ""}Your ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has sold and you have received ${market.Price} Credits.`);
                                         
                                         // Send Message
-                                        const owner = bot.users.fetch(market.UserID).catch(() => null);
-                                        if (owner) {
-                                            owner.send(embed).catch(() => { });
-                                        } else bot.users.cache.get(market.UserID).send(embed);
+                                        bot.users.cache.get(market.UserID).send(embed);
 
                                     });
                                 });
