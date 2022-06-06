@@ -345,7 +345,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     if (random > 995) {
         let random_legendary = getRandomInt(0, spawn_legendary_type.length);
         spawn_pokemon = spawn_legendary_type[random_legendary];
-        if (shiny_random = getRandomInt(0, 1000) > 970) {
+        if (shiny_random = getRandomInt(0, 1000) > 990) {
             is_shiny = true;
         }
     }
@@ -353,7 +353,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     else if (random > 990) {
         let random_galarian = getRandomInt(0, galarian_pokemons.length);
         spawn_pokemon = galarian_pokemons[random_galarian];
-        if (shiny_random = getRandomInt(0, 1000) > 970) {
+        if (shiny_random = getRandomInt(0, 1000) > 990) {
             is_shiny = true;
         }
     }
@@ -361,7 +361,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     else if (random > 985) {
         let random_alolan = getRandomInt(0, alolan_pokemons.length);
         spawn_pokemon = alolan_pokemons[random_alolan];
-        if (shiny_random = getRandomInt(0, 1000) > 970) {
+        if (shiny_random = getRandomInt(0, 1000) > 990) {
             is_shiny = true;
         }
     }
@@ -369,7 +369,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     else {
         let random_normal_pokemon = getRandomInt(0, normal_pokemons.length);
         spawn_pokemon = normal_pokemons[random_normal_pokemon];
-        if (shiny_random = getRandomInt(0, 1000) > 970) {
+        if (shiny_random = getRandomInt(0, 1000) > 990) {
             is_shiny = true;
         }
     }
