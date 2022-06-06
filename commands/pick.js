@@ -52,7 +52,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             OrderType: "Number",
             Joined: Date.now(),
             PokeCredits: 100000,
-            Redeems: 0,
+            Redeems: 25,
             Shards: 0,
         });
 
@@ -61,7 +61,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { Selected: result.Pokemons[0]._id } }, { new: true }, (err, updated) => {
                     if (err) return console.log(err)
                     message.channel.send("Congratulations! " + pokemon["Pokemon Name"] + " is your first pokemon! Type ``" + prefix + "info`` to see it!");
-                    message.channel.send("We welcome you for taking part in beta program of this bot. We have credited you 1,00,000 PokeCredits for testing. Help yourself !");
+                    message.channel.send("We welcome you for taking part in beta program of this bot. We have credited you 100,000 PokeCredits and 25 Redeems for testing. Help yourself !");
                 });
             }, err => { console.log(err) });
         });
