@@ -80,7 +80,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // For view or info pokemon command  
-        else if ((args[0] == "view" || args[0] == "info") && args.length == 2) {
+        else if ((args[0] == "view" || args[0] == "info" || args[0] == "i") && args.length == 2) {
             if (!isInt(args[1])) return message.channel.send("Please type a valid pokemon ID.");
 
             auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
@@ -157,9 +157,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
                         `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
                         `\n**Total IV**: ${total_iv}%` +
-                        `\nCurrent Bid: ${auction.BidPrice == undefined ? "None" : auction.BidPrice} - ${time_left_string}`);
+                        `\nCurrent Bid: ${auction.BidPrice == undefined ? "None" : auction.BidPrice} - ${time_left_string}` +
+                        `\n**Buyout: ${auction.BuyOut} Credits**`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? " by" : "of " + auction.BidPrice + " credits or more by"}  typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
+                    embed.setFooter(`To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? "by" : `of credits more than ${auction.BidPrice} by`} typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
                     message.channel.send(embed)
                 }
             });
@@ -261,11 +262,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             });
         }
         // For auction listings command
-        else if (args[0] == "listings") {
+        else if (args[0] == "listings" || args[0] == "lis") {
             return arg_parsing(message, args, prefix, "listings", pokemons)
         }
         // For auction search command.
-        else if (args[0] == "search") {
+        else if (args[0] == "search" || args[0] == "s") {
             return arg_parsing(message, args, prefix, "search", pokemons);
         }
         else return message.channel.send("Invalid command. Type `" + prefix + "help` for a list of commands.");
@@ -292,7 +293,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     for (a = 0; a < auction.length; a++) {
                         var bid_time = new Date(auction[a].BidTime);
                         var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getMinutes() < 10 ? "| :hourglass_flowing_sand:" : ""}\n`;
                     }
                     embed.setDescription(description);
                     embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
@@ -311,7 +312,8 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     for (a = 0; a < auction.length; a++) {
                         var bid_time = new Date(auction[a].BidTime);
                         var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Buyout: ${auction[a]["BuyOut"]} Credits | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "|Finished" : ""}\n`;
+                        var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h" : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Buyout: ${auction[a]["BuyOut"]} Credits | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "| Finished" : `| ${time_left_string}`}\n`;
                     }
                     embed.setDescription(description);
                     embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
@@ -346,7 +348,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
-            else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order"))) { order(new_args); }
+            else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order") || _.isEqual(new_args[0], "--o"))) { order(new_args); }
             else { message.channel.send("Invalid command."); return; }
 
             // Check if error occurred in previous loop
@@ -594,12 +596,13 @@ function arg_parsing(message, args, prefix, command, pokemons) {
         function order(args) {
             var order_arrange = "asc";
             if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
+            if (args.length == 3 && (args[2] == "asc" || args[2] == "ascending" || args[2] == 'a')) order_arrange = "asc";
             if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
             if (args[1].toLowerCase() == "iv") { order_type = { "IVPercentage": order_arrange } }
             else if (args[1].toLowerCase() == "id") { order_type = { "AuctionID": order_arrange } }
-            else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl") { order_type = { "Level": order_arrange } }
-            else if (args[1].toLowerCase() == "name") { order_type = { "PokemonName": order_arrange } }
-            else if (args[1].toLowerCase() == "price") { order_type = { "Price": order_arrange } }
+            else if (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl" || args[1].toLowerCase() == "l") { order_type = { "Level": order_arrange } }
+            else if (args[1].toLowerCase() == "name" || args[1].toLowerCase() == "n") { order_type = { "PokemonName": order_arrange } }
+            else if (args[1].toLowerCase() == "price" || args[1].toLowerCase() == "p") { order_type = { "Price": order_arrange } }
             else { return error[1] = [false, "Invalid argument syntax."] }
         }
     }

@@ -64,7 +64,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // Send Message
             if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
-            message.delete();
+            message.delete().then((msg) => { });
         }
 
         // Player 2
@@ -204,7 +204,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             embed.setDescription(description);
             message.channel.send(embed);
-            message.delete();
+            message.delete().then((msg) => { });
         }
 
         //#region Pokemon XP Update.

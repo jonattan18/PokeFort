@@ -28,11 +28,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && (it["Alternate Form Name"] == "Mega" || it["Alternate Form Name"] == "Primal"))[0];
                 }
-                else if (mega_type == "Mega X" && args.length == 1 && args[0] == "x") {
+                else if (mega_type == "Mega X" && args.length == 1 && args[0].toLowerCase() == "x") {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega X")[0];
                 }
-                else if (mega_type == "Mega Y" && args.length == 1 && args[0] == "y") {
+                else if (mega_type == "Mega Y" && args.length == 1 && args[0].toLowerCase() == "y") {
                     var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                     var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega Y")[0];
                 }

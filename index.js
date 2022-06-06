@@ -129,28 +129,28 @@ client.on('message', async (message) => {
         else {
             // Update message count
             // [SPAM SYSTEM]
-            if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
+            //   if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
 
-                //Caching last message user.
-                channel_message_cache[message.channel.id] = message.author.id;
-                channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-                    let channel_id = message.channel.id;
-                    var message_count = channel.MessageCount + 1;
-                    var spawn_limit = channel.SpawnLimit;
-                    if (spawn_limit == 0) {
-                        spawn_limit = getRandomInt(10, 20);
-                    }
-                    if (spawn_limit == message_count) {
-                        spawn_limit = 0;
-                        message_count = 0;
-                        spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
-                    }
+            //Caching last message user.
+            channel_message_cache[message.channel.id] = message.author.id;
+            channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                let channel_id = message.channel.id;
+                var message_count = channel.MessageCount + 1;
+                var spawn_limit = channel.SpawnLimit;
+                if (spawn_limit == 0) {
+                    spawn_limit = getRandomInt(10, 20);
+                }
+                if (spawn_limit == message_count) {
+                    spawn_limit = 0;
+                    message_count = 0;
+                    spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
+                }
 
-                    channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
-                        if (err) { console.log(err) }
-                    });
+                channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
+                    if (err) { console.log(err) }
                 });
-            }
+            });
+            //   }
         }
     });
     //#endregion
@@ -324,7 +324,7 @@ client.on('guildCreate', guild => {
 function redirect_command(command, prefix) {
     // Commands to redirect
     command = command.slice(prefix.length);
-    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["m", "moves"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"], ["tms", "tmmoves"]];
+    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"], ["tms", "tmmoves"], ["m", "market"], ["auc", "auction"]];
     redirect_list = redirect_list.filter(it => it[0] == command);
     if (redirect_list.length > 0) {
         var index = redirect_list.findIndex(it => it[0] == command);
