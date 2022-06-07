@@ -9,10 +9,7 @@ const prompt_model = require('../models/prompt');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
-
-/*
-claim
-*/
+const pagination = require('../utils/pagination');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -27,7 +24,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For only auction command
         if (args.length == 0) {
-            return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
+            return message.channel.send("Invalid Syntax. Use " + prefix + "help to know about auction commands.");
         }
 
         // For auction list command
@@ -280,10 +277,21 @@ function arg_parsing(message, args, prefix, command, pokemons) {
     args.shift(); // Remove search from args.
     var order_type = {};
 
-    if (args.length == 0 || (args.length == 1 && args[0] == "--showiv")) {
+    if (args.length == 0 || (args.length == 1 && args[0] == "--showiv") || ((args.length == 2 || args.length == 3) && ((args[0] == "--o" || args[0] == "--order") && (args[1] == "--showiv" || args[2] == "--showiv"))) || ((args.length == 3 || args.length == 4) && ((args[0] == "--showiv" || (args[1] == "--o") && args[1] == "--order")))) {
         if (args.length == 1 && args[0] == "--showiv") showiv = true;
+
+        var order_arrange = "asc";
+        if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
+        if (args.length == 3 && (args[2] == "asc" || args[2] == "ascending" || args[2] == 'a')) order_arrange = "asc";
+        if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
+        if (args[1] != undefined && (args[1].toLowerCase() == "iv")) { order_type = { "IVPercentage": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "id")) { order_type = { "MarketID": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl" || args[1].toLowerCase() == "l")) { order_type = { "Level": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "name" || args[1].toLowerCase() == "n")) { order_type = { "PokemonName": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "price" || args[1].toLowerCase() == "p")) { order_type = { "Price": order_arrange } }
+
         if (command == "search") {
-            auction_model.find({ $and: [{ "Primary": undefined }, { "BidTime": { $gt: new Date() } }] }).limit(20).exec((err, auction) => {
+            auction_model.find({ $and: [{ "Primary": undefined }, { "BidTime": { $gt: new Date() } }] }).limit(20).sort(order_arrange).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
                     return message.channel.send("No auction listings found.");
                 } else {
@@ -302,23 +310,36 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 }
             });
         }
-        else if (command == "listings" || (args.length == 1 && args[0] == "--showiv")) {
-            auction_model.find({ $and: [{ "UserID": message.author.id }, { "OwnerClaimed": undefined }] }).limit(100).exec((err, auction) => {
+        else if (command == "listings") {
+            auction_model.find({ $and: [{ "UserID": message.author.id }, { "OwnerClaimed": undefined }] }).sort(order_arrange).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
                     return message.channel.send("No auction listings found.");
                 } else {
-                    var embed = new Discord.MessageEmbed();
-                    embed.setTitle("PokeFort Auction:");
-                    var description = "";
-                    for (a = 0; a < auction.length; a++) {
-                        var bid_time = new Date(auction[a].BidTime);
-                        var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                        var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h " : ""}${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Buyout: ${auction[a]["BuyOut"]} Credits | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "| Finished" : `| ${time_left_string}`}\n`;
+
+                    var temp_counter = 0;
+                    var tot_len = auction.length;
+                    var split_chunks = spliceIntoChunks(auction, 20);
+                    var embeds = [];
+                    var current_index = 0;
+                    for (i = 0; i < split_chunks.length; i++) {
+                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i].setTitle("Your Auction Listings:");
+                        var description = "";
+                        temp_counter += split_chunks[i].length;
+                        for (j = 0; j < split_chunks[i].length; j++) {
+                            current_index = temp_counter - split_chunks[i].length + 1;
+                            var bid_time = new Date(split_chunks[i][j].BidTime);
+                            var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                            var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h " : ""}${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
+                            description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Buyout: ${split_chunks[i][j]["BuyOut"]} Credits | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "| Finished" : `| ${time_left_string}`}\n`;
+                        }
+                        embeds[i].setDescription(description);
+                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
                     }
-                    embed.setDescription(description);
-                    embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
-                    return message.channel.send(embed);
+                    message.channel.send(embeds[0]).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                        else return;
+                    });
                 }
             });
         }
@@ -358,25 +379,58 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 break;
             }
             if (j == total_args.length - 1) {
-                if (command == "listings") request_query.unshift({ "UserID": message.author.id });
-                if (command == "search") request_query.push({ "BidTime": { $gt: new Date() } });
-                auction_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, auction) => {
-                    if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                        return message.channel.send("No auction listings found for your search.");
-                    } else {
-                        var embed = new Discord.MessageEmbed();
-                        embed.setTitle("PokeFort Auction:");
-                        var description = "";
-                        for (a = 0; a < auction.length; a++) {
-                            var bid_time = new Date(auction[a].BidTime);
-                            var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                            description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                if (command == "listings") {
+                    request_query.unshift({ "UserID": message.author.id });
+                    auction_model.find({ $and: request_query }).sort(order_type).exec((err, auction) => {
+                        if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                            return message.channel.send("No auction listings found for your search.");
+                        } else {
+                            var temp_counter = 0;
+                            var tot_len = auction.length;
+                            var split_chunks = spliceIntoChunks(auction, 20);
+                            var embeds = [];
+                            var current_index = 0;
+                            for (i = 0; i < split_chunks.length; i++) {
+                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i].setTitle("Your Auction Listings:");
+                                var description = "";
+                                temp_counter += split_chunks[i].length;
+                                for (j = 0; j < split_chunks[i].length; j++) {
+                                    current_index = temp_counter - split_chunks[i].length + 1;
+                                    var bid_time = new Date(split_chunks[i][j].BidTime);
+                                    var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                                    description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                                }
+                                embeds[i].setDescription(description);
+                                embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                            }
+                            message.channel.send(embeds[0]).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                                else return;
+                            });
                         }
-                        embed.setDescription(description);
-                        embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
-                        message.channel.send(embed);
-                    }
-                });
+                    });
+                }
+                if (command == "search") {
+                    request_query.push({ "BidTime": { $gt: new Date() } });
+                    auction_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, auction) => {
+                        if (auction == undefined || auction == null || !auction || auction.length == 0) {
+                            return message.channel.send("No auction listings found for your search.");
+                        } else {
+                            var embed = new Discord.MessageEmbed();
+                            embed.setTitle("PokeFort Auction:");
+                            var description = "";
+                            for (a = 0; a < auction.length; a++) {
+                                var bid_time = new Date(auction[a].BidTime);
+                                var time_left = new Date(bid_time.getTime() - new Date().getTime());
+                                description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                            }
+                            embed.setDescription(description);
+                            embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
+                            message.channel.send(embed);
+                        }
+                    });
+                }
             }
         }
 
@@ -653,6 +707,16 @@ function percentage(percent, total) {
 function total_iv(iv) {
     var total_iv = ((iv[0] + iv[1] + iv[2] + iv[3] + iv[4] + iv[5]) / 186 * 100).toFixed(2);
     return total_iv;
+}
+
+// Function to chunk given data.
+function spliceIntoChunks(arr, chunkSize) {
+    const res = [];
+    while (arr.length > 0) {
+        const chunk = arr.splice(0, chunkSize);
+        res.push(chunk);
+    }
+    return res;
 }
 
 // Exp to level up.

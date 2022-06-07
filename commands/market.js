@@ -9,6 +9,7 @@ const prompt_model = require('../models/prompt');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const pagination = require('../utils/pagination');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -222,10 +223,25 @@ function arg_parsing(message, args, prefix, command, pokemons) {
     args.shift(); // Remove search from args.
     var order_type = {};
 
-    if (args.length == 0 || (args.length == 1 && args[0] == "--showiv")) {
-        if (args.length == 1 && args[0] == "--showiv") showiv = true;
+    if (args.length == 0 || (args.length == 1 && args[0] == "--showiv") || ((args.length == 2 || args.length == 3) && ((args[0] == "--o" || args[0] == "--order") && (args[1] == "--showiv" || args[2] == "--showiv"))) || ((args.length == 3 || args.length == 4) && ((args[0] == "--showiv" || (args[1] == "--o") && args[1] == "--order")))) {
+        if (args.includes("--showiv")) {
+            // Remove --showiv from args.
+            args = args.filter(arg => arg != "--showiv");
+            showiv = true;
+        }
+
+        var order_arrange = "asc";
+        if (Object.keys(order_type).length != 0) return error[1] = [false, "You can only use order command once."];
+        if (args.length == 3 && (args[2] == "asc" || args[2] == "ascending" || args[2] == 'a')) order_arrange = "asc";
+        if (args.length == 3 && (args[2] == "desc" || args[2] == "descending" || args[2] == 'd')) order_arrange = "desc";
+        if (args[1] != undefined && (args[1].toLowerCase() == "iv")) { order_type = { "IVPercentage": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "id")) { order_type = { "MarketID": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "level" || args[1].toLowerCase() == "lvl" || args[1].toLowerCase() == "l")) { order_type = { "Level": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "name" || args[1].toLowerCase() == "n")) { order_type = { "PokemonName": order_arrange } }
+        else if (args[1] != undefined && (args[1].toLowerCase() == "price" || args[1].toLowerCase() == "p")) { order_type = { "Price": order_arrange } }
+
         if (command == "search") {
-            market_model.find({ "Primary": undefined }).limit(20).exec((err, market) => {
+            market_model.find({ "Primary": undefined }).limit(20).sort(order_arrange).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
                     return message.channel.send("No market listings found.");
                 } else {
@@ -241,20 +257,32 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 }
             });
         }
-        else if (command == "listings" || (args.length == 1 && args[0] == "--showiv")) {
-            market_model.find({ "UserID": message.author.id }).limit(100).exec((err, market) => {
+        else if (command == "listings") {
+            market_model.find({ "UserID": message.author.id }).sort(order_arrange).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
                     return message.channel.send("No market listings found.");
                 } else {
-                    var embed = new Discord.MessageEmbed();
-                    embed.setTitle("PokeFort Market:");
-                    var description = "";
-                    for (a = 0; a < market.length; a++) {
-                        description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                    var temp_counter = 0;
+                    var tot_len = market.length;
+                    var split_chunks = spliceIntoChunks(market, 20);
+                    var embeds = [];
+                    var current_index = 0;
+                    for (i = 0; i < split_chunks.length; i++) {
+                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i].setTitle("Your Market Listings:");
+                        var description = "";
+                        temp_counter += split_chunks[i].length;
+                        for (j = 0; j < split_chunks[i].length; j++) {
+                            current_index = temp_counter - split_chunks[i].length + 1;
+                            description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["MarketID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Price: ${split_chunks[i][j]["Price"]} Credits\n`;
+                        }
+                        embeds[i].setDescription(description);
+                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
                     }
-                    embed.setDescription(description);
-                    embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
-                    return message.channel.send(embed);
+                    message.channel.send(embeds[0]).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                        else return;
+                    });
                 }
             });
         }
@@ -294,22 +322,53 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 break;
             }
             if (j == total_args.length - 1) {
-                if (command == "listings") request_query.unshift({ "UserID": message.author.id });
-                market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
-                    if (market == undefined || market == null || !market || market.length == 0) {
-                        return message.channel.send("No market listings found for your search.");
-                    } else {
-                        var embed = new Discord.MessageEmbed();
-                        embed.setTitle("PokeFort Market:");
-                        var description = "";
-                        for (a = 0; a < market.length; a++) {
-                            description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                if (command == "listings") {
+                    request_query.unshift({ "UserID": message.author.id });
+                    market_model.find({ $and: request_query }).sort(order_type).exec((err, market) => {
+                        if (market == undefined || market == null || !market || market.length == 0) {
+                            return message.channel.send("No market listings found for your search.");
+                        } else {
+                            var temp_counter = 0;
+                            var tot_len = market.length;
+                            var split_chunks = spliceIntoChunks(market, 20);
+                            var embeds = [];
+                            var current_index = 0;
+                            for (i = 0; i < split_chunks.length; i++) {
+                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i].setTitle("Your Market Listings:");
+                                var description = "";
+                                temp_counter += split_chunks[i].length;
+                                for (j = 0; j < split_chunks[i].length; j++) {
+                                    current_index = temp_counter - split_chunks[i].length + 1;
+                                    description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["MarketID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Price: ${split_chunks[i][j]["Price"]} Credits\n`;
+                                }
+                                embeds[i].setDescription(description);
+                                embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                            }
+                            message.channel.send(embeds[0]).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                                else return;
+                            });
                         }
-                        embed.setDescription(description);
-                        embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
-                        message.channel.send(embed);
-                    }
-                });
+                    });
+                }
+                else {
+                    market_model.find({ $and: request_query }).sort(order_type).limit(20).exec((err, market) => {
+                        if (market == undefined || market == null || !market || market.length == 0) {
+                            return message.channel.send("No market listings found for your search.");
+                        } else {
+                            var embed = new Discord.MessageEmbed();
+                            embed.setTitle("PokeFort Market:");
+                            var description = "";
+                            for (a = 0; a < market.length; a++) {
+                                description += `Level ${market[a]["Level"]} ${market[a]["PokemonName"]}${market[a].Shiny == true ? " :star:" : ""} | ID: ${market[a]["MarketID"]}${showiv == true ? ` | IV: ${market[a].IVPercentage}% ` : ``} | Price: ${market[a]["Price"]} Credits\n`;
+                            }
+                            embed.setDescription(description);
+                            embed.setFooter(`To buy this pokemon type ${prefix}market buy <Pokemon Id>`);
+                            message.channel.send(embed);
+                        }
+                    });
+                }
             }
         }
 
@@ -569,6 +628,16 @@ function nature_of(int) {
     else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
     else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
     else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+}
+
+// Function to chunk given data.
+function spliceIntoChunks(arr, chunkSize) {
+    const res = [];
+    while (arr.length > 0) {
+        const chunk = arr.splice(0, chunkSize);
+        res.push(chunk);
+    }
+    return res;
 }
 
 // Calculate percentage of given number.
