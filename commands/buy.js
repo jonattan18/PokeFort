@@ -115,7 +115,7 @@ function buyevolveitems(message, args, pokemons) {
                     }
                     evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
                 }
-            }
+            } else return message.channel.send("Your pokemon doesn't suit for this item!");
 
             function evolve_pokemon(old_pokemon_id, new_pokemon_id, shiny) {
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(old_pokemon_id, pokemons, shiny);

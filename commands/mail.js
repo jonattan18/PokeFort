@@ -127,7 +127,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var pokemons_to_add = [];
                     for (var i = 0; i < mail_attachment.Pokemons.length; i++) {
                         var crnt_pokemon = mail_attachment.Pokemons[i];
-                        claimed_message += `Level ${crnt_pokemon.Level} ` + getPokemons.get_pokemon_name_from_id(crnt_pokemon.PokemonId, pokemons, crnt_pokemon.Shiny);
+                        claimed_message += `**Level ${crnt_pokemon.Level} ` + getPokemons.get_pokemon_name_from_id(crnt_pokemon.PokemonId, pokemons, crnt_pokemon.Shiny) + "**";
                         let pokemon_data = {
                             _id: new Mongoose.Types.ObjectId(),
                             PokemonId: crnt_pokemon.PokemonId,
@@ -161,7 +161,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Unix the time
 function unixTime(unixtime) {
-    var u = new Date(unixtime * 1000);
+    var u = new Date(unixtime);
     return ('0' + u.getUTCDate()).slice(-2) +
         '/' + ('0' + u.getUTCMonth()).slice(-2) +
         '/' + u.getUTCFullYear() + " " + u.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
