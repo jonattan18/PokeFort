@@ -336,7 +336,7 @@ client.on('guildCreate', guild => {
 function redirect_command(command, prefix) {
     // Commands to redirect
     command = command.slice(prefix.length);
-    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"], ["tms", "tmmoves"], ["m", "market"], ["auc", "auction"]];
+    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"], ["tms", "tmmoves"], ["m", "market"], ["auc", "auction"], ["mails", "mail"]];
     redirect_list = redirect_list.filter(it => it[0] == command);
     if (redirect_list.length > 0) {
         var index = redirect_list.findIndex(it => it[0] == command);
@@ -379,7 +379,8 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     }
     // To Spawn Normal
     else {
-        let random_normal_pokemon = getRandomInt(0, normal_pokemons.length);
+        // To not to spawn new pokemons arceus... Remove me
+        let random_normal_pokemon = getRandomInt(0, normal_pokemons.length - 7);
         spawn_pokemon = normal_pokemons[random_normal_pokemon];
         if (shiny_random = getRandomInt(0, 1000) > 990) {
             if (getRandomInt(0, 1000) > 980) {
