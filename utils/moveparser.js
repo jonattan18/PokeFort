@@ -1,6 +1,16 @@
 const _ = require('lodash');
 const movesinfo = require('../assets/movesinfo.json');
 
+/* Moves Data
+M= Machine
+L# = Level
+T = Tutor
+E = Egg
+S = Event
+The first character is the gen
+oh and V is Virtual Console
+*/
+
 // Function to get all pokemons from a given user id.
 function normalmoves(moveset, nolock = false) {
     var moves = [];
