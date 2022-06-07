@@ -76,9 +76,10 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 client.on('message', async (message) => {
     if (message.author.bot) return;
 
+    // Remove this
     if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
 
-    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
+    if (message.guild === null ) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
