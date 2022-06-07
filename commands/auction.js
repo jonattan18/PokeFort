@@ -302,7 +302,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                         var bid_time = new Date(auction[a].BidTime);
                         var time_left = new Date(bid_time.getTime() - new Date().getTime());
                         var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h " : ""}${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
-                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getMinutes() < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
+                        description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getUTCMinutes < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                     }
                     embed.setDescription(description);
                     embed.setFooter(`To bid on this pokemon type ${prefix}auction bid <ID> <bid>`);
@@ -399,7 +399,8 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                                     current_index = temp_counter - split_chunks[i].length + 1;
                                     var bid_time = new Date(split_chunks[i][j].BidTime);
                                     var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                                    description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                                    var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h " : ""}${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
+                                    description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                                 }
                                 embeds[i].setDescription(description);
                                 embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
@@ -423,7 +424,8 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             for (a = 0; a < auction.length; a++) {
                                 var bid_time = new Date(auction[a].BidTime);
                                 var time_left = new Date(bid_time.getTime() - new Date().getTime());
-                                description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : ""}\n`;
+                                var time_left_string = `Left: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + "h " : ""}${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + "min" : ""}`;
+                                description += `Level ${auction[a]["Level"]} ${auction[a]["PokemonName"]}${auction[a].Shiny == true ? " :star:" : ""} | ID: ${auction[a]["AuctionID"]}${showiv == true ? ` | IV: ${auction[a].IVPercentage}% ` : ``} | Bid: ${auction[a]["BidPrice"] != undefined ? auction[a]["BidPrice"] + " Credits" : "None"} ${time_left.getUTCMinutes < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                             }
                             embed.setDescription(description);
                             embed.setFooter(`To buy this pokemon type ${prefix}auction buy <Pokemon Id>`);
