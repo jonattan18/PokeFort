@@ -15,7 +15,9 @@
         "meloetta",
         "zygarde",
         "keldeo",
-        "giratina"
+        "giratina",
+        "palkia",
+        "dialga"
     ],
     "allowed_forms": [
         "alolan",
@@ -181,6 +183,22 @@
         },
         "giratina": {
             "Pokedex Number": 487,
+            "Dex Search": "Back",
+            "forms": [
+                "origin",
+                "null"
+            ]
+        },
+        "palkia": {
+            "Pokedex Number": 484,
+            "Dex Search": "Back",
+            "forms": [
+                "origin",
+                "null"
+            ]
+        },
+        "dialga": {
+            "Pokedex Number": 483,
             "Dex Search": "Back",
             "forms": [
                 "origin",
