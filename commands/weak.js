@@ -7,20 +7,33 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length == 0) { return message.channel.send(`You should specify a pokemon name!`); }
 
-    // Get pokemon name.
-    var pokemon_info = getPokemons.getPokemonData(args, pokemons, false);
-    if (pokemon_info == null) { return message.channel.send(`Could not find the pokemon!`); }
-    
-    var pokemon_name = pokemon_info["Pokemon Name"];
-    var primary_type = pokemon_info["Primary Type"];
-    var secondary_type = pokemon_info["Secondary Type"];
-    var weak = [];
-    var neutral = [];
-    var resist = [];
-    var immune = [];
+    var types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"];
+    var embed = new Discord.MessageEmbed()
+
+    if (args.length == 1 && types.includes(args[0].capitalize())) {
+        var primary_type = args[0].capitalize();
+        var secondary_type = "NULL";
+        var weak = [];
+        var neutral = [];
+        var resist = [];
+        var immune = [];
+        embed.setTitle(args[0].capitalize() + " (Type)");
+    } else {
+        // Get pokemon name.
+        var pokemon_info = getPokemons.getPokemonData(args, pokemons, false);
+        if (pokemon_info == null) { return message.channel.send(`Could not find the pokemon!`); }
+
+        var pokemon_name = pokemon_info["Pokemon Name"];
+        var primary_type = pokemon_info["Primary Type"];
+        var secondary_type = pokemon_info["Secondary Type"];
+        var weak = [];
+        var neutral = [];
+        var resist = [];
+        var immune = [];
+        embed.setTitle(`${pokemon_name} (${primary_type}${secondary_type == "NULL" ? "" : "/" + secondary_type})`);
+    }
 
     // Get collecting weakness data.
-    var types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"];
     for (var i = 0; i < types.length; i++) {
         var type_effectiveness = type_calc(types[i].toLowerCase(), primary_type.toLowerCase(), secondary_type.toLowerCase());
         if (type_effectiveness == 0) { immune.push(types[i]); }
@@ -29,8 +42,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (type_effectiveness > 1 && type_effectiveness <= 4) { weak.push(types[i]); }
     }
 
-    var embed  = new Discord.MessageEmbed()
-    embed.setTitle(`${pokemon_name} (${primary_type}${secondary_type == "NULL" ? "" : "/" + secondary_type})`)
     embed.fields = [
         { name: "Weak", value: weak.length == 0 ? "None" : weak.join(", ") },
         { name: "Neutral", value: neutral.length == 0 ? "None" : neutral.join(", ") },
