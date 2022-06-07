@@ -60820,6 +60820,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Fire Stone",
+            "1608"
+        ],
         "dr_name": "Fukano",
         "fr_name": "Caninos",
         "jp_name": [
@@ -60924,6 +60928,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Leaf Stone",
+            "1610"
+        ],
         "dr_name": "Voltobal",
         "fr_name": "Voltorbe",
         "jp_name": [
@@ -61246,7 +61254,11 @@
         "Pokemon Id": "1616",
         "Pokedex Number": 570,
         "Pokemon Name": "Zorua",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "1617",
+            "Reason": "Level",
+            "Level": "30"
+        },
         "Classication": "Spiteful Pokemon",
         "Alternate Form Name": "Hisuian",
         "Legendary Type": "NULL",
@@ -61402,7 +61414,12 @@
         "Pokemon Id": "1619",
         "Pokedex Number": 705,
         "Pokemon Name": "Sliggoo",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "1620",
+            "Reason": "Level",
+            "Level": "50",
+            "Time": "Rain"
+        },
         "Classication": "Snail Pokemon",
         "Alternate Form Name": "Hisuian",
         "Legendary Type": "NULL",
