@@ -58,7 +58,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 Level: auction.Level,
                                 Nature: auction.NatureValue,
                                 Shiny: auction.Shiny,
-                                Reason: auction.Reason
+                                Reason: "Market"
                             }
 
                             getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {

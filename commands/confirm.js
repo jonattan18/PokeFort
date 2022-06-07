@@ -368,15 +368,25 @@ function recycle(message, user_prompt, load_pokemons) {
                                 let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
                                 let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
 
-                                if (atk > def) next_evolutions[0] = "140";
-                                else if (atk < def) next_evolutions[0] = "141";
-                                else next_evolutions[0] = "361";
-                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(next_evolutions[0], pokemons, selected_pokemon.Shiny);
-                                pokemon_id = next_evolutions[0];
+                                if (atk > def) pokemon_id = "140";
+                                else if (atk < def) pokemon_id = "141";
+                                else pokemon_id = "361";
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
                                 evolved = true;
                                 new_evolved_name = new_pokemon_name;
+                            }
+                            // Exception for Cosmoem
+                            else if (pokemon_id == "1320" && pokemon_level >= 53) {
+                                if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
+                                else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
-                            } else {
+                                if (evolved) {
+                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                                    pokemon_id = pokemon_id;
+                                    new_evolved_name = new_pokemon_name;
+                                }
+                            }
+                            else {
                                 if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
                                     if (pokemon_level >= pokemon_data.Evolution.Level) {
                                         if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {

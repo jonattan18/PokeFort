@@ -52981,11 +52981,7 @@
         "Pokemon Id": "1320",
         "Pokedex Number": 790,
         "Pokemon Name": "Cosmoem",
-        "Evolution": {
-            "Id": "1321",
-            "Reason": "Level",
-            "Level": "53"
-        },
+        "Evolution": "NULL",
         "Classication": "Protostar Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "Legendary",

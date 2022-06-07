@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     Level: market.Level,
                     Nature: market.NatureValue,
                     Shiny: market.Shiny,
-                    Reason: market.Reason
+                    Reason: "Market"
                 }
 
                 user.PokeCredits -= market.Price;

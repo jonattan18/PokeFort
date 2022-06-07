@@ -58,6 +58,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (pokemon["Pokemon Id"] == "360") {
             evolution = "Tyrogue evolves to Hitmonlee starting from level 20 when its Attack is higher than its Defense, evolves to Hitmonchan starting from level 20 and evolves to Hitmontop starting from level 20 when its Attack is equal to its Defense.\n"
         }
+        // Cosmoem Exception
+        else if (pokemon["Pokemon Id"] == "1320") {
+            evolution = "Cosmoem evolves to Solgaleo starting from level 53 during day and evolves to Lunala starting from level 53 during night."
+        }
         else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
             var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
