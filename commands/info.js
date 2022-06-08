@@ -106,7 +106,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             var image_url = './assets/images/' + image_name.replace("%", "");
-            var held_item = selected_pokemon.Held != undefined && selected_pokemon.Held != null ? `**\n_Holding: ${selected_pokemon.Held}_**` : "";
+            var held_item = selected_pokemon.Held != undefined && selected_pokemon.Held != null && selected_pokemon.Held != "null" ? `**\n_Holding: ${selected_pokemon.Held}_**` : "";
 
 
             //Embed message.

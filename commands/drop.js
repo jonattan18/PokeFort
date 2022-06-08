@@ -23,7 +23,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
                 var _id = selected_pokemon._id;
 
-                if (selected_pokemon.Held == undefined || selected_pokemon.Held == null) return message.channel.send(`You don't have any holding item to remove from your pokemon.`);
+                if (selected_pokemon.Held == undefined || selected_pokemon.Held == null || selected_pokemon.Held == "null") return message.channel.send(`You don't have any holding item to remove from your pokemon.`);
                 else {
                     pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $unset: { "Pokemons.$[elem].Held": 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                         if (err) return console.log(err);

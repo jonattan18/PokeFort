@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     user.PokeCredits -= auction.BuyOut;
                     var old_price = auction.BidPrice;
                     var old_usr = auction.BidUser;
-                    if (auction.BidUser != undefined && auction.BidUser != message.author.id) {
+                    if (auction.BidUser != undefined && auction.BidUser != message.author.id && (old_usr != undefined || old_usr != null)) {
 
                         // Send Message
                         bot.users.cache.get(old_usr).send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`);
@@ -78,7 +78,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     user.PokeCredits -= prompt.List.AuctionPrice;
                     var old_price = auction.BidPrice;
                     var old_usr = auction.BidUser;
-                    if (auction.BidUser != undefined && auction.BidUser != message.author.id) {
+                    if (auction.BidUser != undefined && auction.BidUser != message.author.id && (old_usr != undefined || old_usr != null)) {
                         user_model.findOne({ UserID: old_usr }, (err, old_bid) => {
                             old_bid.PokeCredits += old_price;
                             old_bid.save().then(() => {
