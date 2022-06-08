@@ -28,6 +28,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) return console.log(err);
                     if (prompt2 != undefined && prompt2.Duel.Accepted == true) return message.channel.send(`Mentioned user is already in battle with someone!`);
 
+                    // Check if any non active prompt found and delete it.
+                    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $and: [{ $or: [{ "Trade.Accepted": undefined }, { "Trade.Accepted": false }] }, { $or: [{ "Duel.Accepted": undefined }, { "Duel.Accepted": false }] }] }] }, (err, del_prompt) => {
+                        if (del_prompt) del_prompt.remove();
+                    });
+
                     if (args.length == 2 && args[1].toLowerCase() == "--tm") var TM_Allowed = true;
                     else var TM_Allowed = false;
 

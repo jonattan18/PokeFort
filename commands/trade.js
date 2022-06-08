@@ -28,6 +28,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) return console.log(err);
                     if (prompt2 != undefined && prompt2.Trade.Accepted == true) return message.channel.send(`Mentioned user is already trading with someone!`);
 
+                    // Check if any non active prompt found and delete it.
+                    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $and: [{ $or: [{ "Trade.Accepted": undefined }, { "Trade.Accepted": false }] }, { $or: [{ "Duel.Accepted": undefined }, { "Duel.Accepted": false }] }] }] }, (err, del_prompt) => {
+                        if (del_prompt) del_prompt.remove();
+                    });
+
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
                         PromptType: "Trade",
