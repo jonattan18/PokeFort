@@ -23,7 +23,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Duel.Accepted": true }] }, (err, prompt) => {
         if (err) return console.log(err);
         if (!prompt) return message.channel.send('You are not in a duel!');
-
+        message.delete();
         var duel_data = prompt.Duel;
         var user1_data = duel_data.User1Pokemon;
         var user2_data = duel_data.User2Pokemon;
@@ -64,7 +64,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // Send Message
             if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
-            message.delete().then((msg) => { });
         }
 
         // Player 2
@@ -152,10 +151,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User1name} wins!**`;
                 if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
-                else description += `\n${duel_data.User1name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                else description += `\n${duel_data.User1name} was awarded ${xp}XP`;
                 prompt.remove().then(() => {
                     user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user1 => {
-                        user1.PokeCredits += 10;
                         user1.TotalDueled += 1;
                         user1.DuelWon += 1;
 
@@ -184,10 +182,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User2name} wins!**`;
                 if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
-                else description += `\n${duel_data.User2name} was awarded ${xp}XP and 10 credits for winning! :moneybag:`;
+                else description += `\n${duel_data.User2name} was awarded ${xp}XP`;
                 prompt.remove().then(() => {
                     user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user2 => {
-                        user2.PokeCredits += 10;
                         user2.TotalDueled += 1;
                         user2.DuelWon += 1;
 
@@ -206,7 +203,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             embed.setDescription(description);
             message.channel.send(embed);
-            message.delete().then((msg) => { });
         }
 
         //#region Pokemon XP Update.

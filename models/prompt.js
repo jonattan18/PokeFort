@@ -46,6 +46,7 @@ const PromptSchema = new mongoose.Schema({
     Duel: {
         Accepted: Boolean,
         Turn: Number,
+        TM_Allowed: Boolean,
         User1name: String,
         User2name: String,
         ImageCache: String,

@@ -75,7 +75,9 @@ function duel(bot, message, prefix, prompt, pokemons) {
 
                     for (var i = 0; i < 4; i++) {
                         if (user1pokemon.Moves != undefined && user1pokemon.Moves[i + 1] != undefined) {
-                            var move_name = user1pokemon.Moves[i + 1].replace(" (TM)", "");
+                            var move_name = user1pokemon.Moves[i + 1];
+                            if (prompt.Duel.TM_Allowed == false && move_name.includes("(TM)")) move_name = "Tackle";
+                            else move_name = move_name.replace(" (TM)", "");
                             if (moveparser.movedataname(move_name).category != "Status") user1pokemon_moves.push(move_name);
                             else user1pokemon_moves.push(`Tackle`);
                         } else user1pokemon_moves.push(`Tackle`)
@@ -83,7 +85,9 @@ function duel(bot, message, prefix, prompt, pokemons) {
 
                     for (var i = 0; i < 4; i++) {
                         if (user2pokemon.Moves != undefined && user2pokemon.Moves[i + 1] != undefined) {
-                            var move_name = user2pokemon.Moves[i + 1].replace(" (TM)", "");
+                            var move_name = user2pokemon.Moves[i + 1];
+                            if (prompt.Duel.TM_Allowed == false && move_name.includes("(TM)")) move_name = "Tackle";
+                            else move_name = move_name.replace(" (TM)", "");
                             if (moveparser.movedataname(move_name).category != "Status") user2pokemon_moves.push(move_name);
                             else user2pokemon_moves.push(`Tackle`);
                         } else user2pokemon_moves.push(`Tackle`)
@@ -251,8 +255,8 @@ function trade(bot, message, prefix, prompt) {
 
 // Function to get the nature from number.
 function nature_of(int) {
-    if (int == 0) { return ["Adament", 0, 10, 0, -10, 0, 0] }
-    else if (int == 1) { return ["Adament", 0, 10, 0, -10, 0, 0] }
+    if (int == 0) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
+    else if (int == 1) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
     else if (int == 2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
     else if (int == 3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
     else if (int == 4) { return ["Brave", 0, 10, 0, 0, 0, -10] }

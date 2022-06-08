@@ -106,7 +106,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else if (form != "" && !shiny) { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             else { var image_name = pokedex_num + '-' + form.replace(" ", "-") + '.png'; }
             var image_url = './assets/images/' + image_name.replace("%", "");
-            var held_item = selected_pokemon.Held != undefined ? `**\n_Holding: ${selected_pokemon.Held}_**` : "";
+            var held_item = selected_pokemon.Held != undefined && selected_pokemon.Held != null ? `**\n_Holding: ${selected_pokemon.Held}_**` : "";
 
 
             //Embed message.
@@ -134,8 +134,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 // Function to get the nature from number.
 function nature_of(int) {
-    if (int == 0) { return ["Adament", 0, 10, 0, -10, 0, 0] }
-    else if (int == 1) { return ["Adament", 0, 10, 0, -10, 0, 0] }
+    if (int == 0) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
+    else if (int == 1) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
     else if (int == 2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
     else if (int == 3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
     else if (int == 4) { return ["Brave", 0, 10, 0, 0, 0, -10] }

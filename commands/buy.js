@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length < 1) return message.channel.send("Please specify a name to purchase!");
 
-    if (_.startsWith(args[0], "tm")) { return buytm(message, args, pokemons); }
+    if (_.startsWith(args[0].toLowerCase(), "tm")) { return buytm(message, args, pokemons); }
     else if (args.length == 1 && isInt(args[0]) && args[0] <= 4) { return buyboosters(message, args); }
     else if (args[0].toLowerCase() == "candy") { return buycandy(message, args, pokemons); }
     else if (args[0].toLowerCase() == "nature") { return buynature(message, args, pokemons); }
@@ -268,7 +268,7 @@ function buynature(message, args, pokemons) {
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < 1000) { return message.channel.send("You don't have enough PokeCredits to buy this nature!"); }
 
-        var available_nature = ["adament", "bashful", "bold", "brave", "calm", "careful", "docile", "gentle", "hardy", "hasty", "impish", "jolly", "lax", "lonely", "mild", "modest", "naive", "naughty", "quiet", "quirky", "rash", "relaxed", "sassy", "serious", "timid"];
+        var available_nature = ["adamant", "bashful", "bold", "brave", "calm", "careful", "docile", "gentle", "hardy", "hasty", "impish", "jolly", "lax", "lonely", "mild", "modest", "naive", "naughty", "quiet", "quirky", "rash", "relaxed", "sassy", "serious", "timid"];
         if (available_nature.includes(args[1].toLowerCase())) {
 
             // Get all user pokemons.
@@ -494,7 +494,7 @@ function buytm(message, args, pokemons) {
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
         if (user.PokeCredits < 500) return message.channel.send("You don't have enough PokeCredits to buy this TM!");
-        if (args[0].length != 5 || args[0].substring(0, 2) != "tm" || !isInt(args[0].substring(2, 5))) return message.channel.send("Unable to find this TM move.")
+        if (args[0].length != 5 || args[0].substring(0, 2).toLowerCase() != "tm" || !isInt(args[0].substring(2, 5))) return message.channel.send("Unable to find this TM move.")
         getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
             var user_pokemons = pokemons_from_database;
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];

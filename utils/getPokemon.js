@@ -174,7 +174,7 @@ function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false
     }
 
     if (shiny) {
-        if (star_shiny) var name = ":star: " + pokemon_name;
+        if (star_shiny) var name = "⭐ " + pokemon_name;
         else var name = "Shiny " + pokemon_name;
     }
     else var name = pokemon_name;

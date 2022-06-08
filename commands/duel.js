@@ -28,6 +28,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) return console.log(err);
                     if (prompt2 != undefined && prompt2.Duel.Accepted == true) return message.channel.send(`Mentioned user is already in battle with someone!`);
 
+                    if (args.length == 2 && args[1].toLowerCase() == "--tm") var TM_Allowed = true;
+                    else var TM_Allowed = false;
+
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
                         PromptType: "Duel",
@@ -38,7 +41,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         Duel: {
                             Accepted: false,
                             User1name: message.author.username,
-                            User2name: message.mentions.users.first().username
+                            User2name: message.mentions.users.first().username,
+                            TM_Allowed: TM_Allowed
                         }
                     });
 
