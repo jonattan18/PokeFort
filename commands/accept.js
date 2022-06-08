@@ -192,6 +192,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                             embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
                             embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
                             embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                            embed.setFooter(`Use ${prefix}dm to mute the duel instructions.`);
                             message.channel.send(embed);
 
                             if (user1.DuelDM != undefined && user1.DuelDM != true) {
