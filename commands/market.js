@@ -163,6 +163,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 else if (market.UserID == message.author.id) return message.channel.send("You can't buy your own pokemon.");
                 else {
+                    if (market.Price > user.PokeCredits) return message.channel.send("You don't have enough pokecredits to buy this pokemon.");
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
                         PromptType: "ConfirmBuy",

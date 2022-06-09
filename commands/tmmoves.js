@@ -3,9 +3,6 @@ const fs = require('fs'); // To read json file.
 const user_model = require('../models/user.js'); // To get user model.
 const _ = require('lodash'); // For utils
 
-// To get pokemon moves data.
-const moves = JSON.parse(fs.readFileSync('./assets/moves.json').toString());
-
 // Utils
 const getPokemons = require('../utils/getPokemon');
 const movesparser = require('../utils/moveparser');
@@ -34,7 +31,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     function pokemon_embed(selected_pokemon) {
 
-        var pokemon_moveset = get_pokemon_move(selected_pokemon["Pokemon Id"], pokemons);
+        var pokemon_moveset = movesparser.get_pokemon_move_from_id(selected_pokemon["Pokemon Id"], pokemons, true);
         if (pokemon_moveset.length == 0) return message.channel.send("No TM found for this pokemon.");
 
         var chunked_moveset = chunkArray(pokemon_moveset, 20);
@@ -67,32 +64,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, 0);
         });
     }
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_move(pokemon_id, pokemons) {
-    var moveset = [];
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-
-    if (pokemon_db["Alternate Form Name"] == "Alola") {
-        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase() + "alola";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    else if (pokemon_db["Alternate Form Name"] == "Galar") {
-        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase() + "galar";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    else {
-        temp_name = pokemon_db["Pokemon Name"].replace(" ", "").replace(".", "").toLowerCase();
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    return moveset;
 }
 
 // Chunk array into equal parts.

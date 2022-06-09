@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const movesinfo = require('../assets/movesinfo.json');
+const moves = require('../assets/moves.json');
 
 /* Moves Data
 M= Machine
@@ -11,64 +12,31 @@ The first character is the gen
 oh and V is Virtual Console
 */
 
-// Function to get all pokemons from a given user id.
-function normalmoves(moveset, nolock = false) {
-    var moves = [];
-    for (var i = 0; i < Object.keys(moveset).length; i++) {
-        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8L") || x.includes("4L" || x.includes("3L") || x.includes("2L") || x.includes("1L")));
-        if (temp_move.length > 0) {
-            var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
-            moves.push([temp_move[0].split("L")[1], name]);
+// Function to get pokemon moves from pokemon id.
+function get_pokemon_move_from_id(pokemon_id, pokemons, tm = false, nolock = false) {
+    var pokemon_db = pokemons.filter(x => x["Pokemon Id"] == pokemon_id)[0];
+    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"]}` : ""}`.toLowerCase())[0];
+    if (move_available == undefined) return null;
+    var moves_to_send = [];
+    if (tm == false) {
+        for (var i = 0; i < move_available["Level"].length; i++) {
+            var move_info = movesinfo[move_available["Level"][i][0].replace("-", "").toLowerCase()];
+            var move_name = move_info.name + (move_info.category == "Status" && nolock == true ? " :lock:" : "");
+            moves_to_send.push([move_available["Level"][i][1], move_name]);
         }
+        moves_to_send.sort((a, b) => a[0] - b[0]);
+        return moves_to_send;
     }
-    moves.sort((a, b) => a[0] - b[0]);
-    return moves;
-}
-
-function formmoves(moveset, nolock = false) {
-    var moves = [];
-    for (var i = 0; i < Object.keys(moveset).length; i++) {
-        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8L") || x.includes("7L") || x.includes("6L") || x.includes("5L") || x.includes("4L" || x.includes("3L") || x.includes("2L") || x.includes("1L")));
-        if (temp_move.length > 0) {
-            var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
-            moves.push([temp_move[0].split("L")[1], name]);
+    else if (tm) {
+        for (var i = 0; i < move_available["TM"].length; i++) {
+            var move_info = movesinfo[move_available["TM"][i].replace("-", "").toLowerCase()];
+            if (move_info.tm == undefined) continue;
+            var move_name = move_info.name + (move_info.category == "Status" && nolock == true ? " :lock:" : "");
+            moves_to_send.push([move_info.tm, move_name]);
         }
+        moves_to_send.sort((a, b) => a[0] - b[0]);
+        return moves_to_send;
     }
-    moves.sort((a, b) => a[0] - b[0]);
-    return moves;
-}
-
-
-function megamoves(moveset, nolock = false) {
-    var moves = [];
-    for (var i = 0; i < Object.keys(moveset).length; i++) {
-        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("6L") || x.includes("7L"));
-        if (temp_move.length > 0) {
-            var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
-            moves.push([temp_move[0].split("L")[1], name]);
-        }
-    }
-    moves.sort((a, b) => a[0] - b[0]);
-    return moves;
-}
-
-function tmmoves(moveset, nolock = false) {
-    var moves = [];
-    for (var i = 0; i < Object.keys(moveset).length; i++) {
-        var temp_move = moveset[Object.keys(moveset)[i]].filter(x => x.includes("8M") || x.includes("7M") || x.includes("6M") || x.includes("5M") || x.includes("4M") || x.includes("3M") || x.includes("2M") || x.includes("1M"));
-        if (temp_move.length > 0) {
-            var name = movesinfo[Object.keys(moveset)[i]].name;
-            if (movesinfo[Object.keys(moveset)[i]].category == "Status" && nolock == false) name += " :lock:";
-            var tmno = movesinfo[Object.keys(moveset)[i]].tm;
-            if (tmno == undefined) continue;
-            moves.push([tmno, name]);
-        }
-    }
-    moves.sort((a, b) => a[0] - b[0]);
-    return moves;
 }
 
 function tmdata(tmid, nolock = false) {
@@ -86,4 +54,4 @@ function movedataname(name) {
     return movedata;
 }
 
-module.exports = { normalmoves, megamoves, tmmoves, formmoves, tmdata, movedata, movedataname };
+module.exports = { get_pokemon_move_from_id, tmdata, movedata, movedataname };

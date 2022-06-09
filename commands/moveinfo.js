@@ -15,7 +15,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     if (key_move_info != undefined) {
         var name = key_move_info["name"];
-        if (key_move_info["accuracy"] == true) var accuracy = 100
+        if (key_move_info["accuracy"] == true) var accuracy = "-"
         else var accuracy = key_move_info["accuracy"];
 
         var description = "";

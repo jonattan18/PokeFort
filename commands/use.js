@@ -150,7 +150,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} failed to make a move!\n`;
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User1name} wins!**`;
-                if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
+                if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level`;
                 else description += `\n${duel_data.User1name} was awarded ${xp}XP`;
                 prompt.remove().then(() => {
                     user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user1 => {
@@ -181,7 +181,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User2name} wins!**`;
-                if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level and awarded 10 credits for winning! :moneybag:`;
+                if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level`;
                 else description += `\n${duel_data.User2name} was awarded ${xp}XP`;
                 prompt.remove().then(() => {
                     user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user2 => {

@@ -5,7 +5,6 @@ const Discord = require('discord.js');
 const _ = require('lodash'); // For utils
 
 // To get pokemon moves data.
-const moves = JSON.parse(fs.readFileSync('./assets/moves.json').toString());
 const forms_config = require('../config/forms.json');
 
 // Utils
@@ -498,7 +497,7 @@ function buytm(message, args, pokemons) {
         getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
             var user_pokemons = pokemons_from_database;
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-            var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);
+            var pokemon_moveset = movesparser.get_pokemon_move_from_id(selected_pokemon.PokemonId, pokemons, true);
             if (pokemon_moveset.length == 0) return message.channel.send("No TM found for this pokemon.");
             args[0] = parseInt(args[0].replace(/\D/g, ''));
             var purchased_move = pokemon_moveset.filter(it => it[0] == args[0])[0];
@@ -518,32 +517,6 @@ function buytm(message, args, pokemons) {
             });
         })
     })
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_move(pokemon_id, pokemons) {
-    var moveset = [];
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-
-    if (pokemon_db["Alternate Form Name"] == "Alola") {
-        temp_name = pokemon_db["Pokemon Name"] + "alola";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    else if (pokemon_db["Alternate Form Name"] == "Galar") {
-        temp_name = pokemon_db["Pokemon Name"] + "galar";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    else {
-        temp_name = pokemon_db["Pokemon Name"];
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.tmmoves(learnset);
-    }
-    return moveset;
 }
 
 // Exp to level up.

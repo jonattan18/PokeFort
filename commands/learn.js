@@ -2,9 +2,6 @@ const Discord = require('discord.js'); // For Embedded Message.
 const user_model = require('../models/user.js');
 const fs = require('fs'); // To read json file.
 
-// To get pokemon moves data.
-const moves = JSON.parse(fs.readFileSync('./assets/moves.json').toString());
-
 // Models
 const prompt_model = require('../models/prompt');
 
@@ -38,7 +35,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, false);
 
                 //Get pokemon name.
-                var pokemon_moveset = get_pokemon_move(selected_pokemon.PokemonId, pokemons);
+                var pokemon_moveset = movesparser.get_pokemon_move_from_id(selected_pokemon.PokemonId, pokemons);
                 pokemon_moveset = pokemon_moveset.filter(it => it[0] <= selected_pokemon.Level);
 
                 if (selected_pokemon.TmMoves != undefined && selected_pokemon.TmMoves.length > 0) {
@@ -78,32 +75,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             });
         });
     });
-}
-
-// Get pokemon name from pokemon ID.
-function get_pokemon_move(pokemon_id, pokemons) {
-    var moveset = [];
-    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-
-    if (pokemon_db["Alternate Form Name"] == "Alola") {
-        temp_name = pokemon_db["Pokemon Name"] + "alola";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.formmoves(learnset, true);
-    }
-    else if (pokemon_db["Alternate Form Name"] == "Galar") {
-        temp_name = pokemon_db["Pokemon Name"] + "galar";
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.formmoves(learnset, true);
-    }
-    else {
-        temp_name = pokemon_db["Pokemon Name"];
-        var pokemon_moves = moves.filter(it => it["pokemon"] == temp_name.toLowerCase())[0];
-        var learnset = pokemon_moves.learnset;
-        moveset = movesparser.formmoves(learnset, true);
-    }
-    return moveset;
 }
 
 module.exports.config = {
