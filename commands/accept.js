@@ -175,7 +175,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons, user2pokemon.Shiny);
 
                     mergeImages(["./assets/duel_images/background.jpg",
-                        { src: image1_url, x: 40, y: 20, width: 350, height: 350 }, { src: image2_url, x: 550, y: 20, width: 350, height: 350 }], {
+                        { src: pokemon1_speed >= pokemon2_speed ? image1_url : image2_url, x: 40, y: 20, width: 350, height: 350 }, { src: pokemon1_speed <= pokemon2_speed ? image1_url : image2_url, x: 550, y: 20, width: 350, height: 350 }], {
                         Canvas: Canvas
                     }).then(b64 => {
                         const img_data = b64.split(',')[1];
@@ -190,8 +190,15 @@ function duel(bot, message, prefix, prompt, pokemons) {
                             embed.attachFiles(image_file)
                             embed.setImage('attachment://img.jpeg')
                             embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
-                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
-                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+
+                            if (pokemon1_speed >= pokemon2_speed) {
+                                embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                                embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                            } else {
+                                embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                                embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                            }
+
                             embed.setFooter(`Use ${prefix}dm to mute the duel instructions.`);
                             message.channel.send(embed);
 
@@ -209,7 +216,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
                                 usr_embed.setDescription(description);
 
                                 // Send Message
-                                if (user1_data.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
+                                if (user1.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
 
                             }
                         });

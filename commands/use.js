@@ -104,15 +104,29 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 player2_is_winner();
             }
             else {
-                description = `${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n`;
+                if (prompt.Duel.User1Pokemon.Speed >= prompt.Duel.User2Pokemon.Speed) {
+                    description = `${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n`;
+                }
+                else {
+                    description = `${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n`;
+                }
                 const img_buffer = new Buffer.from(prompt.Duel.ImageCache, 'base64');
                 const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
                 embed.attachFiles(image_file)
                 embed.setImage('attachment://img.jpeg')
-                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
-                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
-                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
-                description += `\n${damage[1]} **-${damage[0]}**`;
+
+                if (prompt.Duel.User1Pokemon.Speed >= prompt.Duel.User2Pokemon.Speed) {
+                    description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                    description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                    description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                    description += `\n${damage[1]} **-${damage[0]}**`;
+                }
+                else {
+                    description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                    description += `\n${damage[1]} **-${damage[0]}**`;
+                    description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                    description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                }
                 prompt.Duel.Turn = 1;
                 prompt.save();
 
@@ -145,9 +159,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 // Description generation.
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
                 description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
-                //  description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
-                //  description += `\n${damage[1]} **-${damage[0]}**\n`;
-                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} failed to make a move!\n`;
+                description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
+                description += `\n${damage[1]} **-${damage[0]}**\n`;
+                // description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} failed to make a move!\n`;
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
                 description += `**\n${duel_data.User1name} wins!**`;
                 if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level`;
@@ -174,9 +188,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 // Xp gained calculations.
                 var xp = battle.xp_calculation(user_2_pokemon, user2_data.PokemonLevel, user_1_pokemon, user1_data.PokemonLevel, user2_data.Traded, false);
                 // Description generation.
-                // description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
-                // description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
-                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} failed to make a move!\n`;
+                description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} used ${duel_data.User1Move[2]}!`;
+                description += `\n${duel_data.User1Move[1]} **-${duel_data.User1Move[0]}**\n`;
+                // description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} failed to make a move!\n`;
                 description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} used ${move_used_info.name}!`;
                 description += `\n${damage[1]} **-${damage[0]}**\n`;
                 description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
