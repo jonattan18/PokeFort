@@ -63,7 +63,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             evolution = "Cosmoem evolves to Solgaleo starting from level 53 during day and evolves to Lunala starting from level 53 during night.\n"
         }
         // No info for eevee
-        else if (pokemon["Pokemon Id"] == "133") {
+        else if (pokemon["Pokemon Id"] == "228") {
             evolution = "";
         }
         else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
