@@ -28,6 +28,7 @@ const gigantamax_pokemons = pokemons.filter(it => it["Alternate Form Name"] === 
 const mega_pokemons = pokemons.filter(it => it["Alternate Form Name"].includes("Mega"));
 const galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
 const alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
+const hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
 const normal_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL");
 
 // Channel
@@ -79,7 +80,7 @@ client.on('message', async (message) => {
     // Remove this
     if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
 
-    if (message.guild === null ) return message.author.send("This bot don't support DM at the moment.");
+    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -354,7 +355,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     var is_shiny = false;
     var spawn_legendary_type = legendary_pokemons.concat(sub_legendary_pokemons).concat(mythical_pokemons).concat(ultra_beast_pokemons);
     // To Spawn Legendary type.
-    if (random > 995) {
+    if (random > 997) {
         let random_legendary = getRandomInt(0, spawn_legendary_type.length);
         spawn_pokemon = spawn_legendary_type[random_legendary];
         if (shiny_random = getRandomInt(0, 1000) > 990) {
@@ -362,15 +363,23 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
         }
     }
     // To Spawn Galarian
-    else if (random > 990) {
+    else if (random > 994) {
         let random_galarian = getRandomInt(0, galarian_pokemons.length);
         spawn_pokemon = galarian_pokemons[random_galarian];
         if (shiny_random = getRandomInt(0, 1000) > 990) {
             is_shiny = true;
         }
     }
+    // To Spawn Hisuian
+    else if (random > 990) {
+        let random_hisuian = getRandomInt(0, hisuian_pokemons.length);
+        spawn_pokemon = hisuian_pokemons[random_hisuian];
+        if (shiny_random = getRandomInt(0, 1000) > 990) {
+            is_shiny = true;
+        }
+    }
     // To Spawn Alolan
-    else if (random > 985) {
+    else if (random > 986) {
         let random_alolan = getRandomInt(0, alolan_pokemons.length);
         spawn_pokemon = alolan_pokemons[random_alolan];
         if (shiny_random = getRandomInt(0, 1000) > 990) {
@@ -379,8 +388,7 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     }
     // To Spawn Normal
     else {
-        // To not to spawn new pokemons arceus... Remove me
-        let random_normal_pokemon = getRandomInt(0, normal_pokemons.length - 7);
+        let random_normal_pokemon = getRandomInt(0, normal_pokemons.length);
         spawn_pokemon = normal_pokemons[random_normal_pokemon];
         if (shiny_random = getRandomInt(0, 1000) > 990) {
             if (getRandomInt(0, 1000) > 980) {

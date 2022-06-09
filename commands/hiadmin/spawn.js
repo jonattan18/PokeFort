@@ -29,6 +29,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         args.splice(args.length - 1, 1)
     }
     else if (args[0].toLowerCase() == "mega") { form.push("Mega"); args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "hisuian") { form.push("Hisuian"); args.splice(0, 1) }
 
     if (form.length == 1) { form = form[0] }
     else if (form.length == 2) { form = form[1]; isshiny = true; }
