@@ -88,12 +88,12 @@ function give_pokemon(bot, message, args, prefix, user_available, pokemons, user
     }
 
     pokemon = pokemon[0];
-    choosen_pokemon(message, prefix, pokemon, level, user);
+    choosen_pokemon(message, prefix, pokemon, level, user, pokemons);
 
 }
 
 // Pokemon choosen System
-function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) {
+function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user, pokemons) {
 
     // Pokemon Nature
     let random_nature = getRandomInt(1, 26);
@@ -127,7 +127,7 @@ function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) 
 
     getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
         user.save();
-        var pokemon_name = getPokemons.get_pokemon_name_from_id(choosen_pokemon["Pokemon Id"]);
+        var pokemon_name = getPokemons.get_pokemon_name_from_id(choosen_pokemon["Pokemon Id"], pokemons, false);
         if (pokemon_shiny == true) {
             message.channel.send(`You have been given a Shiny ${pokemon_name}!`);
         }
