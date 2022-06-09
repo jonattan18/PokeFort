@@ -2575,7 +2575,7 @@
     {
         "Pokemon Id": "33",
         "Pokedex Number": 29,
-        "Pokemon Name": "Nidoran (Female)",
+        "Pokemon Name": "Nidoran Female",
         "Evolution": {
             "Id": "17",
             "Reason": "Level",
@@ -2627,11 +2627,11 @@
             "Nidoran Mesu",
             "Nidoran♀"
         ],
-        "fullname": "Nidoran (Female)",
-        "name_no_shiny": "Nidoran (Female)",
+        "fullname": "Nidoran Female",
+        "name_no_shiny": "Nidoran Female",
         "imageurl": "./assets/images/029.png",
         "imagename": "029.png",
-        "pokemon_name": "Nidoran (Female)",
+        "pokemon_name": "Nidoran Female",
         "PokemonId": "33"
     },
     {
@@ -2751,7 +2751,7 @@
     {
         "Pokemon Id": "48",
         "Pokedex Number": 32,
-        "Pokemon Name": "Nidoran (Male)",
+        "Pokemon Name": "Nidoran Male",
         "Evolution": {
             "Id": "49",
             "Reason": "Level",
@@ -2803,11 +2803,11 @@
             "Nidoran Osu",
             "Nidoran♂"
         ],
-        "fullname": "Nidoran (Male)",
-        "name_no_shiny": "Nidoran (Male)",
+        "fullname": "Nidoran Male",
+        "name_no_shiny": "Nidoran Male",
         "imageurl": "./assets/images/032.png",
         "imagename": "032.png",
-        "pokemon_name": "Nidoran (Male)",
+        "pokemon_name": "Nidoran Male",
         "PokemonId": "48"
     },
     {
@@ -3442,8 +3442,8 @@
         "Defense Stat": 70,
         "Special Attack Stat": 65,
         "Special Defense Stat": 75,
-        "Speed Stat": 95,
-        "Base Stat Total": 460,
+        "Speed Stat": 90,
+        "Base Stat Total": 455,
         "Health EV": 0,
         "Attack EV": 0,
         "Defense EV": 0,
@@ -6729,6 +6729,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 46,
         "Evolution Details": "Level 30",
+        "Evolution Stone": [
+            "Thunder Stone",
+            "684"
+        ],
         "dr_name": "Magneton",
         "fr_name": "Magnéton",
         "jp_name": [
@@ -7391,7 +7395,7 @@
         "Pokemon Height": 1.5,
         "Pokemon Weight": 132.5,
         "Primary Type": "Water",
-        "Secondary Type": "NULL",
+        "Secondary Type": "Ice",
         "Primary Ability": "Shell Armor",
         "Secondary Ability": "Skill Link",
         "Hidden Ability": "Overcoat",
@@ -11126,7 +11130,7 @@
         "Base Happiness": 70,
         "Game(s) of Origin": "Red",
         "Region of Origin": "Kanto",
-        "Health Stat": 240,
+        "Health Stat": 160,
         "Attack Stat": 110,
         "Defense Stat": 65,
         "Special Attack Stat": 65,
@@ -11177,7 +11181,7 @@
         "Base Happiness": 70,
         "Game(s) of Origin": "Sword",
         "Region of Origin": "Galar",
-        "Health Stat": 160,
+        "Health Stat": 240,
         "Attack Stat": 110,
         "Defense Stat": 65,
         "Special Attack Stat": 65,

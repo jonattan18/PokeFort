@@ -60,7 +60,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
         // Cosmoem Exception
         else if (pokemon["Pokemon Id"] == "1320") {
-            evolution = "Cosmoem evolves to Solgaleo starting from level 53 during day and evolves to Lunala starting from level 53 during night."
+            evolution = "Cosmoem evolves to Solgaleo starting from level 53 during day and evolves to Lunala starting from level 53 during night.\n"
         }
         else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason == "Level" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
             var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
