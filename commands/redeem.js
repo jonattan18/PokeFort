@@ -57,6 +57,7 @@ function give_pokemon(bot, message, args, prefix, user_available, pokemons, user
     if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; }
     if (args[0].toLowerCase() == "alolan") { form = "Alola"; args.splice(0, 1) }
     else if (args[0].toLowerCase() == "galarian") { form = "Galar"; args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "hisuian") { form = "Hisuian"; args.splice(0, 1) }
 
     let given_name = args.join(" ")._normalize();
 
@@ -126,11 +127,12 @@ function choosen_pokemon(message, prefix, choosen_pokemon, pokemon_level, user) 
 
     getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
         user.save();
+        var pokemon_name = getPokemons.get_pokemon_name_from_id(choosen_pokemon["Pokemon Id"]);
         if (pokemon_shiny == true) {
-            message.channel.send(`You have been given a Shiny ${choosen_pokemon["Pokemon Name"]}!`);
+            message.channel.send(`You have been given a Shiny ${pokemon_name}!`);
         }
         else {
-            message.channel.send(`You have been given a ${choosen_pokemon["Pokemon Name"]}!`);
+            message.channel.send(`You have been given a ${pokemon_name}!`);
         }
     });
 

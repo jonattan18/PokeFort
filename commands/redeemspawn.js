@@ -31,6 +31,7 @@ function give_pokemon(bot, message, args, prefix, user_available, pokemons, user
     if (args[0] == undefined) { message.channel.send("That is not a valid pokemon!"); return; }
     if (args[0].toLowerCase() == "alolan") { form = "Alola"; args.splice(0, 1) }
     else if (args[0].toLowerCase() == "galarian") { form = "Galar"; args.splice(0, 1) }
+    else if (args[0].toLowerCase() == "hisuian") { form = "Hisuian"; args.splice(0, 1) }
 
     let given_name = args.join(" ")._normalize();
 
