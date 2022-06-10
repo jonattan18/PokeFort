@@ -28,6 +28,11 @@ const UserSchema = new mongoose.Schema({
         RewardAmount: Number,
         RewardDescription: String
     }],
+    Teams: [{
+        TeamName: String,
+        Pokemons: Array,
+        Selected: Boolean
+    }],
     Mails: [{
         From: String,
         Subject: String,
