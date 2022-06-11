@@ -29,6 +29,8 @@ const RaidSchema = new mongoose.Schema({
     },
     Trainers: Array,
     TrainersTag: Array,
+    CurrentDuel: String,
+    CompletedDuel: Array,
     TrainersTeam: Array
 });
 

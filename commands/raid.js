@@ -13,7 +13,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     if (args.length == 1 && args[0].toLowerCase() == "spawn") {
         // User check if raid scheme has trainer included.
-        raid_model.findOne({ Trainers: { $in: message.author.id } }, (err, raid) => {
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
             if (raid) {
                 message.channel.send(`You are already in a raid.`);
@@ -149,6 +149,44 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
         });
     }
+    else if (args.length == 1 && args[0].toLowerCase() == "duel") {
+        // User check if raid scheme has trainer included.
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            if (err) { console.log(err); return; }
+            if (raid) {
+                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                    var team = user.Teams.filter(team => team.Selected == true)[0];
+                    if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
+                    if (!raid.Started) return message.channel.send("This raid has not started yet!");
+                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
+                    if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
+                    raid.save().then(() => {
+                        raid.CurrentDuel = message.author.id;
+                        raid.save().then(() => {
+                            
+                        });
+                    });
+                });
+            }
+            else return message.channel.send(`You are not in a raid.`);
+        });
+    }
+    else if (args.length == 1 && args[0].toLowerCase() == "start") {
+        // User check if raid scheme has trainer included.
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            if (err) { console.log(err); return; }
+            if (raid) {
+                if (raid.Trainers[0] != message.author.id) return message.channel.send(`You are not the raid leader.`);
+                else {
+                    raid.Started = true;
+                    raid.save().then(() => {
+                        message.channel.send(`You have started the raid.`);
+                    });
+                }
+            }
+            else return message.channel.send(`You are not in a raid.`);
+        });
+    }
     else if (args.length == 2 && args[0].toLowerCase() == "join" && digits_only(args[1])) {
         // User check if raid scheme has trainer included.
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
@@ -228,12 +266,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 var embed = new Discord.MessageEmbed();
                 embed.attachFiles(raid_boss_image[1]);
-                embed.setTitle(`${message.author.username} has joined a raid battle!`);
+                if (raid_data.Started) embed.setTitle(`Raid Has Started!`);
+                else embed.setTitle(`Raid Has Not Started!`);
                 embed.addField(`Level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name}`, stats_string, false);
 
                 var trainer_data = "";
                 for (var i = 0; i < 4; i++) {
-                    trainer_data += `Trainer #${i + 1}: ${raid_data.TrainersTag[i] != undefined ? raid_data.TrainersTag[i] : "None"}\n`
+                    trainer_data += `Trainer #${i + 1}: ${raid_data.TrainersTag[i] != undefined ? raid_data.TrainersTag[i] : "None"}`
+                    if (raid_data.CompletedDuel != undefined && raid_data.CompletedDuel.includes(raid_data.Trainers[i])) trainer_data += " :white_check_mark:\n";
+                    else if (raid_data.CurrentDuel != undefined && raid_data.CurrentDuel == raid_data.Trainers[i]) trainer_data += " -> Currently Attacking\n";
+                    else trainer_data += "\n";
                 }
 
                 embed.addField(`Trainers:`, trainer_data, false);
