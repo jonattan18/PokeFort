@@ -149,28 +149,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
         });
     }
-    else if (args.length == 1 && args[0].toLowerCase() == "duel") {
-        // User check if raid scheme has trainer included.
-        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
-            if (err) { console.log(err); return; }
-            if (raid) {
-                user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                    var team = user.Teams.filter(team => team.Selected == true)[0];
-                    if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
-                    if (!raid.Started) return message.channel.send("This raid has not started yet!");
-                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
-                    if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
-                    raid.save().then(() => {
-                        raid.CurrentDuel = message.author.id;
-                        raid.save().then(() => {
-                            
-                        });
-                    });
-                });
-            }
-            else return message.channel.send(`You are not in a raid.`);
-        });
-    }
     else if (args.length == 1 && args[0].toLowerCase() == "start") {
         // User check if raid scheme has trainer included.
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
@@ -350,7 +328,91 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else return message.channel.send("You are not in a raid.");
         });
     }
+    else if (args.length == 1 && args[0].toLowerCase() == "duel") {
+        // User check if raid scheme has trainer included.
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            if (err) { console.log(err); return; }
+            if (raid) {
+                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                    var team = user.Teams.filter(team => team.Selected == true)[0];
+                    if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
+                    if (!raid.Started) return message.channel.send("This raid has not started yet!");
+                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
+                    if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
+
+                    //   raid.CurrentDuel = message.author.id;
+                    //   raid.save().then(() => {
+
+                    // Get pokemons details
+                    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+
+                        // Transfer team pokemons to trainers data.
+                        var trainer_data = transferTeamData(team, user_pokemons, pokemons);
+
+                        console.log(trainer_data);
+
+
+
+                        //     var embed = new Discord.MessageEmbed();
+                        //      embed.setTitle(`${message.author.username} VS Raid Boss!`);
+                        //     embed.setDescription(`**Weather: Clear Skies**`);
+
+
+                        //      mergeImages(["./assets/raid_images/background.png",
+                        //          { src: image1_url, x: 40, y: 20, width: 350, height: 350 }, { src: image2_url, x: 550, y: 20, width: 350, height: 350 }], {
+                        //          Canvas: Canvas
+                        //     }).then(b64 => {
+                        //          const img_data = b64.split(',')[1];
+                        //         prompt.Duel.ImageCache = img_data;
+                        //         const img_buffer = new Buffer.from(img_data, 'base64');
+                        //         const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                        //     });
+                    });
+                    //  });
+                });
+            }
+            else return message.channel.send(`You are not in a raid.`);
+        });
+    }
     else return message.channel.send("Invalid syntax.");
+}
+
+// Transfer team data to trainers data.
+function transferTeamData(team_data, user_pokemons, pokemons) {
+    var trainersteam = [];
+    for (i = 0; i < team_data.Pokemons.length; i++) {
+
+        // First step check if data is null.
+        if (team_data["Pokemons"][i] == null) trainersteam.push(null);
+
+        // Second step check if user still have that pokemon.
+        else {
+            var pokemon_from_db = user_pokemons.filter(it => it._id == team_data["Pokemons"][i])[0];
+            if (pokemon_from_db == undefined) trainersteam.push(null);
+
+            // Third step add pokemon to trainer team.
+            else {
+                var move_data = [];
+                for (var j = 0; j < 4; j++) {
+                    if (pokemon_from_db.Moves != undefined && pokemon_from_db.Moves[j + 1] != undefined) {
+                        var move_name = pokemon_from_db.Moves[j + 1].replace(" (TM)", "");
+                        move_data.push(move_name);
+                    } else move_data.push(`Tackle`)
+                }
+                var data_to_add = {
+                    UniqueID: pokemon_from_db._id,
+                    ID: pokemon_from_db.PokemonId,
+                    Name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, pokemon_from_db.Shiny, true),
+                    Level: pokemon_from_db.Level,
+                    IV: pokemon_from_db.IV,
+                    Nature: pokemon_from_db.Nature,
+                    Moves: move_data
+                }
+                trainersteam.push(data_to_add);
+            }
+        }
+    }
+    return trainersteam;
 }
 
 // Decide raid stats calculation formula.

@@ -31,7 +31,15 @@ const RaidSchema = new mongoose.Schema({
     TrainersTag: Array,
     CurrentDuel: String,
     CompletedDuel: Array,
-    TrainersTeam: Array
+    TrainersTeam: [{
+        UniqueID: String,
+        ID: Number,
+        Name: String,
+        Level: Number,
+        IV: Array,
+        Nature: String,
+        Moves: Array
+    }]
 });
 
 const MessageModel = module.exports = mongoose.model('raids', RaidSchema);

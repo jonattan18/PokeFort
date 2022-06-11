@@ -42,7 +42,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 var move_arr = [];
                                 for (var j = 0; j < 4; j++) {
                                     if (pokemon_from_db.Moves != undefined && pokemon_from_db.Moves[j + 1] != undefined) {
-                                        var move_name = selected_pokemon.Moves[j + 1];
+                                        var move_name = pokemon_from_db.Moves[j + 1];
                                         move_arr.push(move_name);
                                     } else move_arr.push(`Tackle`)
                                 }
