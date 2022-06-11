@@ -111,8 +111,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             embed.setFooter(`To join this raid, do ${prefix}r join ${unique}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
 
                             // Type of pokemon.
-                            var type = [raid_boss["Primary Type"]];
-                            if (raid_boss["Secondary Type"] != "NULL") type.push(raid_boss["Secondary Type"]);
+                            var type = [raid_boss["Primary Type"], raid_boss["Secondary Type"]];
 
                             // Start server side works.
                             raid_data = new raid_model({
@@ -449,8 +448,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                 var image = getPokemons.imagefromid(pokemon_from_db.PokemonId, pokemons, pokemon_from_db.Shiny, true);
 
                 // Type of pokemon.
-                var type = [static_pokemons["Primary Type"]];
-                if (static_pokemons["Secondary Type"] != "NULL") type.push(static_pokemons["Secondary Type"]);
+                var type = [static_pokemons["Primary Type"], static_pokemons["Secondary Type"]];
 
                 var data_to_add = {
                     UniqueID: pokemon_from_db._id,

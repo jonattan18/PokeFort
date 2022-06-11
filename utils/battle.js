@@ -420,4 +420,4 @@ function rand(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-module.exports = { calculate_damage, xp_calculation };
+module.exports = { calculate_damage, xp_calculation, type_calc };

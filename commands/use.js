@@ -365,12 +365,27 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
 
 
     // Get all moves of raid pokemon.
-    var pokemon_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
-    console.log(pokemon_moveset);
+    var raid_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
+    var raid_move = move_thinker(raid_moveset, raid_data.TrainersTeam[raid_data.CurrentPokemon].Type[0], raid_data.TrainersTeam[raid_data.CurrentPokemon].Type[1]);
+    console.log(raid_move);
 }
 
 // Move thinker based on type effectiveness.
-function move_thinker() {
+function move_thinker(available_moves, foe_type1, foe_type2) {
+    var move_list = [];
+    for (var i = 0; i < available_moves.length; i++) {
+        var effectiveness = battle.type_calc(available_moves[i][1].toLowerCase(), foe_type1.toLowerCase(), foe_type2.toLowerCase());
+        move_list.push([available_moves[i][0], effectiveness]);
+    }
+    move_list.sort((a, b) => b[1] - a[1]);
+    if (move_list.length == 0) return "Tackle";
+    else {
+        // Filter the elements which has highest effectiveness.
+        var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1]);
+        // Randomly select a move.
+        var move_list_random = move_list_filtered[Math.floor(Math.random() * move_list_filtered.length)];
+        return move_list_random[0];
+    }
 }
 
 // Check if value is int.
