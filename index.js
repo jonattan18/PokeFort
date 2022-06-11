@@ -75,18 +75,6 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
     }
 });
 
-// Raid Initialization
-raid_model.findOne({ Primary: true }, (err, raid) => {
-    if (err) console.log(err);
-    if (!raid) {
-        var raid = new raid_model({
-            Primary: true,
-            Last_Unique_Value: 0
-        });
-        raid.save();
-    }
-});
-
 client.on('message', async (message) => {
     if (message.author.bot) return;
 

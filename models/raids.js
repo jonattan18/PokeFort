@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 
 const RaidSchema = new mongoose.Schema({
-    Primary: Boolean,
-    Last_Unique_Value: Number,
     RaidID: Number,
-    Leader: String,
+    RaidType: Number,
     Started: Boolean,
     Timestamp: Number,
     Ban: [String],
@@ -17,13 +15,21 @@ const RaidSchema = new mongoose.Schema({
         Defense: Number,
         SpAttack: Number,
         SpDefense: Number,
-        Speed: Number
+        Speed: Number,
+        Weather: {
+            Name: String,
+            Turns: Number,
+            MaxTurn: Number
+        },
+        Terrain: {
+            Name: String,
+            Turns: Number,
+            MaxTurn: Number
+        }
     },
     Trainers: Array,
-    TrainersData: [{
-        TagName: String,
-        Pokemons: Array
-    }]
+    TrainersTag: Array,
+    TrainersTeam: Array
 });
 
 const MessageModel = module.exports = mongoose.model('raids', RaidSchema);
