@@ -10,7 +10,10 @@ const RaidSchema = new mongoose.Schema({
         ID: Number,
         Name: String,
         Level: Number,
+        Image: [String, String],
+        Type: [String, String],
         Health: Number,
+        MaxHealth: Number,
         Attack: Number,
         Defense: Number,
         SpAttack: Number,
@@ -31,14 +34,25 @@ const RaidSchema = new mongoose.Schema({
     TrainersTag: Array,
     CurrentDuel: String,
     CompletedDuel: Array,
+    CurrentPokemon: Number,
     TrainersTeam: [{
         UniqueID: String,
         ID: Number,
         Name: String,
         Level: Number,
         IV: Array,
+        Type: [String, String],
+        MaxHealth: Number,
+        Health: Number,
+        Attack: Number,
+        Defense: Number,
+        SpAttack: Number,
+        SpDefense: Number,
+        Image: [String, String],
+        Speed: Number,
         Nature: String,
-        Moves: Array
+        Moves: Array,
+        Fainted: Boolean
     }]
 });
 

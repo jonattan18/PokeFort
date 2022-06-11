@@ -1,4 +1,6 @@
 const Discord = require('discord.js');
+const mergeImages = require('merge-images-v2');
+const Canvas = require('canvas');
 
 // Models
 const user_model = require('../models/user');
@@ -108,6 +110,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             embed.setDescription(description);
                             embed.setFooter(`To join this raid, do ${prefix}r join ${unique}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
 
+                            // Type of pokemon.
+                            var type = [raid_boss["Primary Type"]];
+                            if (raid_boss["Secondary Type"] != "NULL") type.push(raid_boss["Secondary Type"]);
+
                             // Start server side works.
                             raid_data = new raid_model({
                                 RaidID: unique,
@@ -118,12 +124,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     ID: raid_boss["Pokemon Id"],
                                     Name: raid_boss_name,
                                     Level: raid_level,
+                                    Image: raid_boss_image,
                                     Health: stats[0],
+                                    MaxHealth: stats[0],
                                     Attack: stats[1],
                                     Defense: stats[2],
                                     SpAttack: stats[3],
                                     SpDefense: stats[4],
-                                    Speed: stats[5]
+                                    Speed: stats[5],
+                                    Weather: {
+                                        Name: "Clear Skies"
+                                    },
                                 },
                                 Trainers: [message.author.id],
                                 TrainersTag: [message.author.tag]
@@ -339,9 +350,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (!raid.Started) return message.channel.send("This raid has not started yet!");
                     if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
                     if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
-
-                    //   raid.CurrentDuel = message.author.id;
-                    //   raid.save().then(() => {
+                    if (team.Pokemons.isNull()) return message.channel.send("Your team should not be empty.");
 
                     // Get pokemons details
                     getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
@@ -349,26 +358,44 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         // Transfer team pokemons to trainers data.
                         var trainer_data = transferTeamData(team, user_pokemons, pokemons);
 
-                        console.log(trainer_data);
+                        // Get image url of user team pokemon.
+                        var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null)[0];
+                        var user_image_data = user_pokemon_data.Image;
+                        var current_pokemon = trainer_data.indexOf(user_pokemon_data);
 
+                        // Packing raid data.
+                        raid.CurrentDuel = message.author.id;
+                        raid.TrainersTeam = trainer_data;
+                        raid.CurrentPokemon = current_pokemon;
 
+                        raid.save().then(() => {
 
-                        //     var embed = new Discord.MessageEmbed();
-                        //      embed.setTitle(`${message.author.username} VS Raid Boss!`);
-                        //     embed.setDescription(`**Weather: Clear Skies**`);
+                            // Get image url of raid boss.
+                            var raid_boss_image_data = raid.RaidPokemon.Image;
 
+                            // Creating Image for embed.
+                            mergeImages(["./assets/raid_images/background.jpeg",
+                                { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
+                                Canvas: Canvas
+                            }).then(b64 => {
+                                const img_data = b64.split(',')[1];
+                                const img_buffer = new Buffer.from(img_data, 'base64');
+                                const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
 
-                        //      mergeImages(["./assets/raid_images/background.png",
-                        //          { src: image1_url, x: 40, y: 20, width: 350, height: 350 }, { src: image2_url, x: 550, y: 20, width: 350, height: 350 }], {
-                        //          Canvas: Canvas
-                        //     }).then(b64 => {
-                        //          const img_data = b64.split(',')[1];
-                        //         prompt.Duel.ImageCache = img_data;
-                        //         const img_buffer = new Buffer.from(img_data, 'base64');
-                        //         const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-                        //     });
+                                // Sending duel message.
+                                var embed = new Discord.MessageEmbed();
+                                embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
+                                embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.Name} | ${user_pokemon_data.Health}/${user_pokemon_data.MaxHealth}HP`, true);
+                                embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
+                                embed.setColor(message.guild.me.displayHexColor);
+                                embed.attachFiles(image_file)
+                                embed.setImage('attachment://img.jpeg');
+                                embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                                message.channel.send(embed);
+                            });
+                        });
                     });
-                    //  });
                 });
             }
             else return message.channel.send(`You are not in a raid.`);
@@ -399,14 +426,50 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                         move_data.push(move_name);
                     } else move_data.push(`Tackle`)
                 }
+
+                var static_pokemons = pokemons.filter(it => it["Pokemon Id"] == pokemon_from_db.PokemonId)[0];
+
+                // Add stats to the pokemons.
+                var nature_value = nature_of(pokemon_from_db.Nature);
+
+                var health = floor(0.01 * (2 * static_pokemons["Health Stat"] + pokemon_from_db.IV[0] + floor(0.25 * 0)) * pokemon_from_db.Level) + pokemon_from_db.Level + 10;
+                health += percentage(health, nature_value[1]);
+                var attack = floor(0.01 * (2 * static_pokemons["Attack Stat"] + pokemon_from_db.IV[1] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
+                attack += percentage(attack, nature_value[2]);
+                var defense = floor(0.01 * (2 * static_pokemons["Defense Stat"] + pokemon_from_db.IV[2] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
+                defense += percentage(defense, nature_value[3]);
+                var special_attack = floor(0.01 * (2 * static_pokemons["Special Attack Stat"] + pokemon_from_db.IV[3] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
+                special_attack += percentage(special_attack, nature_value[4]);
+                var special_defense = floor(0.01 * (2 * static_pokemons["Special Defense Stat"] + pokemon_from_db.IV[4] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
+                special_defense += percentage(special_defense, nature_value[5]);
+                var speed = floor(0.01 * (2 * static_pokemons["Speed Stat"] + pokemon_from_db.IV[5] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
+                speed += percentage(speed, nature_value[6]);
+
+                // Get image url.
+                var image = getPokemons.imagefromid(pokemon_from_db.PokemonId, pokemons, pokemon_from_db.Shiny, true);
+
+                // Type of pokemon.
+                var type = [static_pokemons["Primary Type"]];
+                if (static_pokemons["Secondary Type"] != "NULL") type.push(static_pokemons["Secondary Type"]);
+
                 var data_to_add = {
                     UniqueID: pokemon_from_db._id,
                     ID: pokemon_from_db.PokemonId,
                     Name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, pokemon_from_db.Shiny, true),
                     Level: pokemon_from_db.Level,
                     IV: pokemon_from_db.IV,
+                    Type: type,
+                    MaxHealth: health,
+                    Health: health,
+                    Attack: attack,
+                    Defense: defense,
+                    SpAttack: special_attack,
+                    SpDefense: special_defense,
+                    Speed: speed,
+                    Image: image,
                     Nature: pokemon_from_db.Nature,
-                    Moves: move_data
+                    Moves: move_data,
+                    Fainted: false
                 }
                 trainersteam.push(data_to_add);
             }
@@ -455,6 +518,11 @@ function getRaidStats(base_stat, raid_level, difficulty) {
     return raid_stats;
 }
 
+// Prototype to check if array is only null.
+Array.prototype.isNull = function () {
+    return this.join().replace(/,/g, '').length === 0;
+};
+
 // Digits only check.
 const digits_only = string => [...string].every(c => '0123456789'.includes(c));
 
@@ -500,6 +568,41 @@ function getRewards(difficulty, raid_boss_name) {
             break;
     }
     return raid_rewards;
+}
+
+// Function to get the nature from number.
+function nature_of(int) {
+    if (int == 0) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
+    else if (int == 1) { return ["Adamant", 0, 10, 0, -10, 0, 0] }
+    else if (int == 2) { return ["Bashful", 0, 0, 0, 0, 0, 0] }
+    else if (int == 3) { return ["Bold", 0, -10, 10, 0, 0, 0] }
+    else if (int == 4) { return ["Brave", 0, 10, 0, 0, 0, -10] }
+    else if (int == 5) { return ["Calm", 0, -10, 0, 0, 10, 0] }
+    else if (int == 6) { return ["Careful", 0, 0, 0, -10, 10, 0] }
+    else if (int == 7) { return ["Docile", 0, 0, 0, 0, 0, 0] }
+    else if (int == 8) { return ["Gentle", 0, 0, -10, 0, 10, 0] }
+    else if (int == 9) { return ["Hardy", 0, 0, 0, 0, 0, 0] }
+    else if (int == 10) { return ["Hasty", 0, 0, -10, 0, 0, 10] }
+    else if (int == 11) { return ["Impish", 0, 0, 10, -10, 0, 0] }
+    else if (int == 12) { return ["Jolly", 0, 0, 0, -10, 0, 10] }
+    else if (int == 13) { return ["Lax", 0, 10, 0, 0, -10, 0] }
+    else if (int == 14) { return ["Lonely", 0, 10, -10, 0, 0, 0] }
+    else if (int == 15) { return ["Mild", 0, 0, -10, 10, 0, 0] }
+    else if (int == 16) { return ["Modest", 0, 0, 0, 10, 0, -10] }
+    else if (int == 17) { return ["Naive", 0, 0, 0, 0, -10, 10] }
+    else if (int == 18) { return ["Naughty", 0, 10, 0, 0, -10, 0] }
+    else if (int == 19) { return ["Quiet", 0, 0, 0, 10, 0, -10] }
+    else if (int == 20) { return ["Quirky", 0, 0, 0, 0, 0, 0] }
+    else if (int == 21) { return ["Rash", 0, 0, 0, 10, -10, 0] }
+    else if (int == 22) { return ["Relaxed", 0, 0, 10, 0, 0, -10] }
+    else if (int == 23) { return ["Sassy", 0, 0, 0, 0, 10, -10] }
+    else if (int == 24) { return ["Serious", 0, 0, 0, 0, 0, 0] }
+    else if (int == 25) { return ["Timid", 0, -10, 0, 0, 0, 10] }
+}
+
+// Percentage calculation.
+function percentage(percent, total) {
+    return parseInt(((percent / 100) * total).toFixed(0));
 }
 
 // Check if value is int.

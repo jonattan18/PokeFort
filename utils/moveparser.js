@@ -39,6 +39,28 @@ function get_pokemon_move_from_id(pokemon_id, pokemons, tm = false, nolock = fal
     }
 }
 
+function get_raid_moves_from_id(pokemon_id, pokemons) {
+    var pokemon_db = pokemons.filter(x => x["Pokemon Id"] == pokemon_id)[0];
+    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"]}` : ""}`.toLowerCase())[0];
+    if (move_available == undefined) return null;
+    var moves_to_send = [];
+
+    // Normal moves (No Status)
+    for (var i = 0; i < move_available["Level"].length; i++) {
+        var move_info = movesinfo[move_available["Level"][i][0].replace("-", "").toLowerCase()];
+        if (move_info.category != "Status") moves_to_send.push(move_info.name);
+    }
+
+    // TM moves (No Status)
+    for (var i = 0; i < move_available["TM"].length; i++) {
+        var move_info = movesinfo[move_available["TM"][i].replace("-", "").toLowerCase()];
+        if (move_info.tm == undefined) continue;
+        if (move_info.category != "Status") moves_to_send.push(move_info.name);
+    }
+
+    return _.uniqWith(moves_to_send, _.isEqual);
+}
+
 function tmdata(tmid, nolock = false) {
     var movedata = _.find(movesinfo, { tm: tmid });
     return movedata;
@@ -54,4 +76,4 @@ function movedataname(name) {
     return movedata;
 }
 
-module.exports = { get_pokemon_move_from_id, tmdata, movedata, movedataname };
+module.exports = { get_pokemon_move_from_id, get_raid_moves_from_id, tmdata, movedata, movedataname };
