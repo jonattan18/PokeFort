@@ -1,6 +1,3 @@
-const Discord = require('discord.js'); // For Embedded Message.
-const _ = require('lodash'); // For utils
-
 // Models
 const user_model = require('../models/user');
 const prompt_model = require('../models/prompt');
@@ -10,20 +7,30 @@ const config = require('../config/config.json');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length < 2) { return message.channel.send(`Invalid Command.`); }
 
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
-        if (err) return console.log(err);
-        if (!prompt) return message.channel.send('You are not in a trade!');
+    // Raid check
+    var raid_cmds = ["spawn","start", "join"];
+    if (raid_cmds.includes(args[0].toLowerCase())) {
+        const commandfile = bot.commands.get("raid") || client.commands.get(client.aliases.get("raid"));
+        if (!commandfile) return message.channel.send(`Invalid Command.`); 
+        return commandfile.run(bot, message, args, prefix, user_available, pokemons);
+    }
+    else {
+        if (args.length < 2) { return message.channel.send(`Invalid Command.`); }
 
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
-            if (!user) return;
-            if (err) console.log(err);
+        prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
+            if (err) return console.log(err);
+            if (!prompt) return message.channel.send('You are not in a trade!');
 
-            if (args[0].toLowerCase() == "add") return add(message, args.splice(1), prompt, user);
-            else if (args[0].toLowerCase() == "remove") return remove(message, args.splice(1), prompt);
+            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                if (!user) return;
+                if (err) console.log(err);
+
+                if (args[0].toLowerCase() == "add") return add(message, args.splice(1), prompt, user);
+                else if (args[0].toLowerCase() == "remove") return remove(message, args.splice(1), prompt);
+            });
         });
-    });
+    }
 }
 
 // Function to add redeems to trade.

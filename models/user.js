@@ -20,6 +20,7 @@ const UserSchema = new mongoose.Schema({
     MoveReplace: Array,
     TotalDueled: Number,
     DuelWon: Number,
+    RaidSpawn: Number,
     Boosters: { Hours: Number, Level: Number, Timestamp: Number },
     Suspend: { Hours: Number, Reason: String, Timestamp: Number },
     DexRewards: [{

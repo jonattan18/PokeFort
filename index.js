@@ -12,6 +12,7 @@ const user_model = require('./models/user');
 const pokemons_model = require('./models/pokemons');
 const market_model = require('./models/market');
 const auction_model = require('./models/auction');
+const raid_model = require('./models/raids');
 
 //Utils
 const { loadCommands } = require('./utils/loadCommands');
@@ -71,6 +72,18 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
             Last_Unique_Value: 0
         });
         auction.save();
+    }
+});
+
+// Raid Initialization
+raid_model.findOne({ Primary: true }, (err, raid) => {
+    if (err) console.log(err);
+    if (!raid) {
+        var raid = new raid_model({
+            Primary: true,
+            Last_Unique_Value: 0
+        });
+        raid.save();
     }
 });
 

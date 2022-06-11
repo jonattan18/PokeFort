@@ -138,7 +138,7 @@ function getPokemonData(args, pokemons, shiny_allowed) {
 }
 
 // Function to get image from given pokemon id.
-function imagefromid(pokemonid, pokemons, shiny) {
+function imagefromid(pokemonid, pokemons, shiny, need_name = false) {
     var pokemon = pokemons.filter(it => it["Pokemon Id"] === pokemonid);
     pokemon = pokemon[0];
     var str = "" + pokemon["Pokedex Number"]
@@ -148,7 +148,8 @@ function imagefromid(pokemonid, pokemons, shiny) {
     else { var image_name = pokedex_num + '-' + pokemon["Alternate Form Name"].replace(" ", "-") }
     if (shiny) var image_url = './assets/images/' + image_name + '-Shiny.png';
     else var image_url = './assets/images/' + image_name + '.png';
-    return image_url.replace("%", "");
+    if (need_name) return [image_name.replace("%", ""), image_url.replace("%", "")];
+    else return image_url.replace("%", "");
 }
 
 // Get pokemon name from pokemon ID.

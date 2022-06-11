@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
 const RaidSchema = new mongoose.Schema({
+    Primary: Boolean,
+    Last_Unique_Value: Number,
     RaidID: Number,
     Leader: String,
     Started: Boolean,
     Timestamp: Number,
+    Ban: [String],
     RaidPokemon: {
         ID: Number,
         Name: String,
@@ -16,10 +19,10 @@ const RaidSchema = new mongoose.Schema({
         SpDefense: Number,
         Speed: Number
     },
-    Trainers: [{
-        UserID: String,
-        Username: String,
-        Fight: Boolean
+    Trainers: Array,
+    TrainersData: [{
+        TagName: String,
+        Pokemons: Array
     }]
 });
 
