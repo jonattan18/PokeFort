@@ -360,6 +360,14 @@
         "flags": {
             "snatch": 1
         },
+        "process": {
+            "code": 1,
+            "do": "Raise",
+            "raise": "Defense",
+            "target": "Self",
+            "by": "Level",
+            "amount": 2
+        },
         "isZ": null,
         "critRatio": 0,
         "secondary": null,
@@ -705,6 +713,14 @@
         "category": "Status",
         "priority": 0,
         "flags": {},
+        "process": {
+            "code": 1,
+            "do": "Raise",
+            "raise": "Defense",
+            "target": "Self",
+            "by": "Level",
+            "amount": 2
+        },
         "isZ": null,
         "critRatio": 0,
         "secondary": null,
@@ -958,6 +974,14 @@
         "accuracy": true,
         "pp": 15,
         "category": "Status",
+        "process": {
+            "code": 2,
+            "do": "Stops",
+            "what": "Move",
+            "target": "Foe",
+            "turns": 1,
+            "text": "# took the kind offer"
+        },
         "priority": 0,
         "flags": {
             "authentic": 1,
@@ -1046,6 +1070,14 @@
         "accuracy": true,
         "pp": 30,
         "category": "Status",
+        "process": {
+            "code": 1,
+            "do": "Raise",
+            "raise": "Speed",
+            "target": "Self",
+            "by": "Level",
+            "amount": 2
+        },
         "priority": 0,
         "flags": {
             "snatch": 1
@@ -1390,6 +1422,9 @@
         "accuracy": true,
         "pp": 15,
         "category": "Status",
+        "process": {
+            "code": 0
+        },
         "priority": 2,
         "flags": {},
         "isZ": null,
@@ -1475,6 +1510,14 @@
         "accuracy": true,
         "pp": 20,
         "category": "Status",
+        "process": {
+            "code": 1,
+            "do": "Raise",
+            "raise": "Special Defense",
+            "target": "Self",
+            "by": "Level",
+            "amount": 2
+        },
         "priority": 0,
         "flags": {
             "snatch": 1
@@ -1921,6 +1964,15 @@
         "accuracy": true,
         "pp": 20,
         "category": "Status",
+        "process": {
+            "code": 3,
+            "do": "Gains",
+            "gains": "HP",
+            "target": "Self",
+            "by": "FormulaxMax",
+            "formula": 0.0625,
+            "text": "$ surrounded itself with a veil of water"
+        },
         "priority": 0,
         "flags": {
             "snatch": 1
@@ -2180,6 +2232,14 @@
         "accuracy": true,
         "pp": 5,
         "category": "Status",
+        "process": {
+            "code": 4,
+            "do": "Heal",
+            "heal": "Effects",
+            "effects": "all",
+            "target": "Self",
+            "text": "A soothing aroma wafted through the area!"
+        },
         "priority": 0,
         "flags": {
             "snatch": 1,
@@ -2270,6 +2330,16 @@
         "accuracy": true,
         "pp": 20,
         "category": "Status",
+        "process": {
+            "code": 2,
+            "do": "Raise",
+            "raise": "Special Defense",
+            "target": "Self",
+            "By": "Level",
+            "amount": 1,
+            "fails_foe_in": "Crafty Shield",
+            "fails_foe_last_move": ["Bounce", "Dig", "Dive", "Fly", "Phantom Force", "Shadow Force", "Sky Drop"]
+        },
         "priority": 0,
         "flags": {
             "authentic": 1
@@ -2358,6 +2428,9 @@
         "accuracy": true,
         "pp": 20,
         "category": "Status",
+        "process": {
+            "code": 0
+        },
         "priority": 0,
         "flags": {},
         "isZ": null,
@@ -2787,6 +2860,7 @@
         "accuracy": 100,
         "pp": 15,
         "category": "Status",
+        "process": [0, null, null, null, null, null, null],
         "priority": 0,
         "flags": {
             "protect": 1,
@@ -3144,6 +3218,7 @@
         "accuracy": true,
         "pp": 20,
         "category": "Status",
+        "process": [2, "Reduce", "All", "Self", "Formula", "1/2", ["Confusion", "Critical Hits"]],
         "priority": 0,
         "flags": {
             "snatch": 1

@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 var targets = 1; // The pokemon has 1 target
 var pb = 1; // No second strike Parental Blood
 var weather = 1; // No weather specified
@@ -46,6 +48,137 @@ function STAB(pokemon_type, pokemon_secondary_type, move_type) {
     }
 }
 
+function status_move(user1stats, user2stats, effects, move_info) {
+    // Today upto 10 moves data entered.
+
+    //#region codes and meanings
+    // Code 0 = Doesn't change anything or do nothing.
+    // Code 1 = Raise one of the allies stats. [Roses sharply]
+    // Code 2 = Stops the current move. [Took the kind offer]
+    // Code 3 = Gains allies stat at end of every turn. No End [Exceptional]
+    // Code 4 = Heals all effects or removes status moves. [Exceptional]
+    //#endregion
+
+    //#region Status Move Process
+    var move_process = move_info.process;
+
+    /* stats receive pre condition
+        .Level = level of the pokemon
+        .Base = [Base_HP, Base_Attack, Base_Defense, Base_SpAttack, Base_SpDefense, Base_Speed]
+        .HP = HP of the pokemon
+        .Attack = Attack of the pokemon
+        .Defense = Defense of the pokemon
+        .Special Attack = Special Attack of the pokemon
+        .Special Defense = Special Defense of the pokemon
+        .Speed = Speed of the pokemon
+    */
+
+    //#region Process 0
+    if (move_process.code == 0) {
+        return [user1stats, user2stats, "$ failed to make a move."];
+    }
+    //#endregion
+    //#region Process 1
+    else if (move_process.code == 1) {
+        if (move_process.do == "Raise") {
+            if (move_process.raise == "Attack") {
+                if (move_process.by == "Level") {
+                    if (move_process.target == "Self") {
+                        user1stats.Attack += find_stat_current_level_minus_future_level(user1stats.Base[1], move_process.Level, move_process.Level + 2);
+                        return [user1stats, user2stats, `$'s attack sharply rose.`];
+                    }
+                }
+            }
+            else if (move_process.raise == "Defense") {
+                if (move_process.by == "Level") {
+                    if (move_process.target == "Self") {
+                        user1stats.Defense += find_stat_current_level_minus_future_level(user1stats.Base[2], move_process.Level, move_process.Level + 2);
+                        return [user1stats, user2stats, `$'s defense sharply rose.`];
+                    }
+                }
+            }
+            else if (move_process.raise == "Special Attack") {
+                if (move_process.by == "Level") {
+                    if (move_process.target == "Self") {
+                        user1stats.SpecialAttack += find_stat_current_level_minus_future_level(user1stats.Base[3], move_process.Level, move_process.Level + 2);
+                        return [user1stats, user2stats, `$'s special attack sharply rose.`];
+                    }
+                }
+            }
+            else if (move_process.raise == "Special Defense") {
+                if (move_process.by == "Level") {
+                    if (move_process.target == "Self") {
+                        user1stats.SpecialDefense += find_stat_current_level_minus_future_level(user1stats.Base[4], move_process.Level, move_process.Level + 2);
+                        return [user1stats, user2stats, `$'s special defense sharply rose.`];
+                    }
+                }
+            }
+            else if (move_process.raise == "Speed") {
+                if (move_process.by == "Level") {
+                    if (move_process.target == "Self") {
+                        user1stats.Speed += find_stat_current_level_minus_future_level(user1stats.Base[5], move_process.Level, move_process.Level + 2);
+                        return [user1stats, user2stats, `$'s speed sharply rose.`];
+                    }
+                }
+            }
+        }
+    }
+    //#endregion
+    //#region Process 2
+    else if (move_process.code == 2) {
+        if (move_process.do == "Stop") {
+            if (move_process.what == "Move") {
+                if (move_process.target == "Foe") {
+                    if (move_process.turns = 1) {
+                        return [user1stats, user2stats, move_process.text != undefined ? move_process.text : `# unable to move.`];
+                    }
+                }
+            }
+        }
+    }
+    //#endregion
+    //#region Process 3
+    else if (move_process.code == 3) {
+        if (move_process.do == "Gain") {
+            if (move_process.gains == "HP") {
+                if (move_process.by == "FormulaxMax") {
+                    if (move_process.target == "Self") {
+                        var increment = find_max_HP(user1stats.Base[0], move_process.formula);
+                        user1stats.HP += increment;
+                        return [user1stats, user2stats, move_info.text != undefined ? move_info.text : `$ gained ${increment} HP.`];
+                    }
+                }
+            }
+        }
+    }
+    //#endregion
+    //#region Process 4
+    else if (move_process.code == 4) {
+        if (move_process.do == "Heal") {
+            if (move_process.Heal == "Effects") {
+                if (move_process.effects == "all") {
+                    if (move_process.target == "Self") {
+                        if (move_process.effects.length == 0) return [user1stats, user2stats, null, `$ had no effects to heal.`];
+                        return [user1stats, user2stats, null, move_info.text != undefined ? move_info.text : `All effects healed.`];
+                    }
+                }
+            }
+        }
+    }
+    //#endregion
+}
+
+// Find max HP of a pokemon
+function find_max_HP(hp_stat, formula) {
+    return hp = (_.floor(0.01 * (2 * hp_stat + 0 + 0) * 100) + 100 + 10) * formula;
+}
+
+// Function to find pokemons stats by level.
+function find_stat_current_level_minus_future_level(base, level, future_level) {
+    return ((_.floor(0.01 * (2 * base + 0 + 0) * future_level) + 5) - (_.floor(0.01 * (2 * base + 0 + 0) * level) + 5));
+}
+
+// Function to calculate the type effectiveness of the move.
 function type_calc(att_type, def_type, sec_def_type) {
 
     if (sec_def_type != "null") {
@@ -420,4 +553,4 @@ function rand(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-module.exports = { calculate_damage, xp_calculation, type_calc };
+module.exports = { calculate_damage, xp_calculation, type_calc, status_move };

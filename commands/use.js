@@ -349,7 +349,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
 
     // Get selected moves of user pokemon.
     var moves = raid_data.TrainersTeam[raid_data.CurrentPokemon].Moves;
-    var used_move = moveinfo[moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase()];
+    var used_move = moveinfo[moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase()];;
 
     // User move is physical.
     if (used_move.category == "Physical") {
@@ -361,6 +361,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
 
     // User move is status.
     else if (used_move.category == "Status") {
+        var status_move = battle.status_move(stat1, stat2, used_move)
     }
 
 
