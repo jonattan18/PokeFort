@@ -9,13 +9,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     // Raid check
-    var raid_cmds = ["spawn", "start", "join", "leave", "kick", "ban", "info", "duel"];
-    if (raid_cmds.includes(args[0].toLowerCase())) {
-        const commandfile = bot.commands.get("raid") || client.commands.get(client.aliases.get("raid"));
-        if (!commandfile) return message.channel.send(`Invalid Command.`);
-        return commandfile.run(bot, message, args, prefix, user_available, pokemons);
-    }
-    else {
+    //var raid_cmds = ["spawn", "start", "join", "leave", "kick", "ban", "info", "duel"];
+   // if (raid_cmds.includes(args[0].toLowerCase())) {
+    //    const commandfile = bot.commands.get("raid") || client.commands.get(client.aliases.get("raid"));
+   //     if (!commandfile) return message.channel.send(`Invalid Command.`);
+    //    return commandfile.run(bot, message, args, prefix, user_available, pokemons);
+   // }
+   // else {
         if (args.length < 2) { return message.channel.send(`Invalid Command.`); }
 
         prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
@@ -30,7 +30,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 else if (args[0].toLowerCase() == "remove") return remove(message, args.splice(1), prompt);
             });
         });
-    }
+  //  }
 }
 
 // Function to add redeems to trade.
