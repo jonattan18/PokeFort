@@ -12,6 +12,7 @@ const RaidSchema = new mongoose.Schema({
         Level: Number,
         Image: [String, String],
         Type: [String, String],
+        IV: Array,
         Health: Number,
         MaxHealth: Number,
         Attack: Number,
@@ -23,37 +24,15 @@ const RaidSchema = new mongoose.Schema({
             Name: String,
             Turns: Number,
             MaxTurn: Number
-        },
-        Terrain: {
-            Name: String,
-            Turns: Number,
-            MaxTurn: Number
         }
     },
     Trainers: Array,
     TrainersTag: Array,
+    TrainersTeam: Array,
     CurrentDuel: String,
     CompletedDuel: Array,
     CurrentPokemon: Number,
-    TrainersTeam: [{
-        UniqueID: String,
-        ID: Number,
-        Name: String,
-        Level: Number,
-        IV: Array,
-        Type: [String, String],
-        MaxHealth: Number,
-        Health: Number,
-        Attack: Number,
-        Defense: Number,
-        SpAttack: Number,
-        SpDefense: Number,
-        Image: [String, String],
-        Speed: Number,
-        Nature: String,
-        Moves: Array,
-        Fainted: Boolean
-    }]
+    Stream: Object
 });
 
 const MessageModel = module.exports = mongoose.model('raids', RaidSchema);

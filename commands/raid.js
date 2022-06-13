@@ -6,9 +6,14 @@ const Canvas = require('canvas');
 const user_model = require('../models/user');
 const raid_model = require('../models/raids');
 
-//Utils
+// Utils
 const getPokemons = require('../utils/getPokemon');
 const { floor } = require('lodash');
+const movesparser = require('../utils/moveparser');
+const raidstart = require('../utils/raidstart');
+
+// Raid Sim
+const { BattleStreams, Teams } = require('@pkmn/sim');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -29,7 +34,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var last_raid_time = user.RaidSpawn;
                         // check if 3 hours passed since last raid spawn.
                         // Remove me last ride cooldown.
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) < 10800000) {
+                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (new Date().getTime() - last_raid_time) < 10800000) {
                             // Decide raid boss based on random.
                             const mythical_pokemons = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
                             const ultra_beast_pokemons = pokemons.filter(it => it["Primary Ability"] === "Beast Boost" && it["Alternate Form Name"] === "NULL");
@@ -124,6 +129,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     Name: raid_boss_name,
                                     Level: raid_level,
                                     Image: raid_boss_image,
+                                    IV: [stats[6][0], stats[6][1], stats[6][2], stats[6][3], stats[6][4], stats[6][5]],
                                     Health: stats[0],
                                     MaxHealth: stats[0],
                                     Attack: stats[1],
@@ -357,6 +363,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         // Transfer team pokemons to trainers data.
                         var trainer_data = transferTeamData(team, user_pokemons, pokemons);
 
+                        var raid_moveset = movesparser.get_raid_moves_from_id(raid.RaidPokemon.ID, pokemons);
+                        var raidmoves_to_stream = [];
+                        for (i = 0; i < raid_moveset.length; i++) {
+                            raidmoves_to_stream.push(raid_moveset[i][0]);
+                        }
+
+                        // Team Packing
+                        var packed_team_1 = Teams.pack(trainer_data);
+                        var packed_team_2 = Teams.pack([{
+                            name: raid.RaidPokemon.Name,
+                            species: raid.RaidPokemon.Name,
+                            level: raid.RaidPokemon.Level,
+                            gender: '',
+                            shiny: false,
+                            gigantamax: false,
+                            moves: raidmoves_to_stream,
+                            ability: "",
+                            evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+                            ivs: { hp: raid.RaidPokemon.IV[0], atk: raid.RaidPokemon.IV[1], def: raid.RaidPokemon.IV[2], spa: raid.RaidPokemon.IV[3], spd: raid.RaidPokemon.IV[4], spe: raid.RaidPokemon.IV[5] },
+                        }]);
+
                         // Get image url of user team pokemon.
                         var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null)[0];
                         var user_image_data = user_pokemon_data.Image;
@@ -367,32 +394,46 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         raid.TrainersTeam = trainer_data;
                         raid.CurrentPokemon = current_pokemon;
 
-                        raid.save().then(() => {
+                        const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
+                        const p2spec = { name: '$Player2', team: packed_team_2 };
 
-                            // Get image url of raid boss.
-                            var raid_boss_image_data = raid.RaidPokemon.Image;
+                        // Start raid duel.
 
-                            // Creating Image for embed.
-                            mergeImages(["./assets/raid_images/background.jpeg",
-                                { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
-                                Canvas: Canvas
-                            }).then(b64 => {
-                                const img_data = b64.split(',')[1];
-                                const img_buffer = new Buffer.from(img_data, 'base64');
-                                const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                        raidstart.startraid().then(result => {
 
-                                // Sending duel message.
-                                var embed = new Discord.MessageEmbed();
-                                embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
-                                embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.Name} | ${user_pokemon_data.Health}/${user_pokemon_data.MaxHealth}HP`, true);
-                                embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
-                                embed.setColor(message.guild.me.displayHexColor);
-                                embed.attachFiles(image_file)
-                                embed.setImage('attachment://img.jpeg');
-                                embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
-                                message.channel.send(embed);
-                            });
+                            console.log(result)
+                            var received_data = result.split('\n');
+                            if (received_data.includes("|start")) {
+
+                                /*   raid.save().then(() => {
+                                       // Get image url of raid boss.
+                                       var raid_boss_image_data = raid.RaidPokemon.Image;
+   
+                                       // Creating Image for embed.
+                                       mergeImages(["./assets/raid_images/background.jpeg",
+                                           { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
+                                           Canvas: Canvas
+                                       }).then(b64 => {
+                                           const img_data = b64.split(',')[1];
+                                           const img_buffer = new Buffer.from(img_data, 'base64');
+                                           const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+   
+                                           // Sending duel message.
+                                           var embed = new Discord.MessageEmbed();
+                                           embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                           embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
+                                           embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.Name} | ${user_pokemon_data.Health}/${user_pokemon_data.MaxHealth}HP`, true);
+                                           embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
+                                           embed.setColor(message.guild.me.displayHexColor);
+                                           embed.attachFiles(image_file)
+                                           embed.setImage('attachment://img.jpeg');
+                                           embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                                           message.channel.send(embed);
+                                       });
+                                   }); */
+                            } else {
+                                return message.channel.send(`Something went wrong, we could not start the raid duel.`);
+                            }
                         });
                     });
                 });
@@ -409,12 +450,12 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
     for (i = 0; i < team_data.Pokemons.length; i++) {
 
         // First step check if data is null.
-        if (team_data["Pokemons"][i] == null) trainersteam.push(null);
+        if (team_data["Pokemons"][i] == null) trainersteam.push({});
 
         // Second step check if user still have that pokemon.
         else {
             var pokemon_from_db = user_pokemons.filter(it => it._id == team_data["Pokemons"][i])[0];
-            if (pokemon_from_db == undefined) trainersteam.push(null);
+            if (pokemon_from_db == undefined) trainersteam.push({});
 
             // Third step add pokemon to trainer team.
             else {
@@ -426,48 +467,27 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                     } else move_data.push(`Tackle`)
                 }
 
-                var static_pokemons = pokemons.filter(it => it["Pokemon Id"] == pokemon_from_db.PokemonId)[0];
-
                 // Add stats to the pokemons.
-                var nature_value = nature_of(pokemon_from_db.Nature);
-
-                var health = floor(0.01 * (2 * static_pokemons["Health Stat"] + pokemon_from_db.IV[0] + floor(0.25 * 0)) * pokemon_from_db.Level) + pokemon_from_db.Level + 10;
-                health += percentage(health, nature_value[1]);
-                var attack = floor(0.01 * (2 * static_pokemons["Attack Stat"] + pokemon_from_db.IV[1] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
-                attack += percentage(attack, nature_value[2]);
-                var defense = floor(0.01 * (2 * static_pokemons["Defense Stat"] + pokemon_from_db.IV[2] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
-                defense += percentage(defense, nature_value[3]);
-                var special_attack = floor(0.01 * (2 * static_pokemons["Special Attack Stat"] + pokemon_from_db.IV[3] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
-                special_attack += percentage(special_attack, nature_value[4]);
-                var special_defense = floor(0.01 * (2 * static_pokemons["Special Defense Stat"] + pokemon_from_db.IV[4] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
-                special_defense += percentage(special_defense, nature_value[5]);
-                var speed = floor(0.01 * (2 * static_pokemons["Speed Stat"] + pokemon_from_db.IV[5] + floor(0.25 * 0)) * pokemon_from_db.Level) + 5;
-                speed += percentage(speed, nature_value[6]);
+                var nature_name = nature_of(pokemon_from_db.Nature)[0];
 
                 // Get image url.
                 var image = getPokemons.imagefromid(pokemon_from_db.PokemonId, pokemons, pokemon_from_db.Shiny, true);
 
-                // Type of pokemon.
-                var type = [static_pokemons["Primary Type"], static_pokemons["Secondary Type"]];
-
                 var data_to_add = {
-                    UniqueID: pokemon_from_db._id,
-                    ID: pokemon_from_db.PokemonId,
-                    Name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, pokemon_from_db.Shiny, true),
-                    Level: pokemon_from_db.Level,
-                    IV: pokemon_from_db.IV,
-                    Type: type,
-                    MaxHealth: health,
-                    Health: health,
-                    Attack: attack,
-                    Defense: defense,
-                    SpAttack: special_attack,
-                    SpDefense: special_defense,
-                    Speed: speed,
+                    name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
+                    species: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
+                    gender: "",
+                    shiny: pokemon_from_db.Shiny,
+                    gigantamax: false,
+                    level: pokemon_from_db.Level,
+                    ivs: { hp: pokemon_from_db.IV[0], atk: pokemon_from_db.IV[1], def: pokemon_from_db.IV[2], spa: pokemon_from_db.IV[3], spd: pokemon_from_db.IV[4], spe: pokemon_from_db.IV[5] },
                     Image: image,
-                    Nature: pokemon_from_db.Nature,
-                    Moves: move_data,
-                    Fainted: false
+                    ability: "",
+                    evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+                    nature: nature_name,
+                    moves: move_data,
+                    fainted: false,
+                    selected: false
                 }
                 trainersteam.push(data_to_add);
             }
@@ -478,6 +498,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
 
 // Decide raid stats calculation formula.
 function getRaidStats(base_stat, raid_level, difficulty) {
+    var IV = [Math.floor(Math.random() * 31)];
     var raid_stats = [];
     raid_stats.push(floor(floor(0.01 * (2 * 100 + Math.floor(Math.random() * 31)) * raid_level) + raid_level * 10 * 2.31 * 2.11));
 
@@ -485,34 +506,45 @@ function getRaidStats(base_stat, raid_level, difficulty) {
         // Easy
         case 0:
             for (var i = 1; i < 6; i++) {
-                raid_stats.push(floor(floor(0.01 * (2 * base_stat[i] + Math.floor(Math.random() * 31)) * raid_level) / 1.81));
+                var iv = Math.floor(Math.random() * 31);
+                IV.push(iv);
+                raid_stats.push(floor(floor(0.01 * (2 * base_stat[i] + iv) * raid_level) / 1.81));
             }
             break;
         // Normal
         case 1:
             for (var i = 1; i < 6; i++) {
-                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + Math.floor(Math.random() * 31)) * raid_level) / 2.22) / 2.12));
+                var iv = Math.floor(Math.random() * 31);
+                IV.push(iv);
+                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + iv) * raid_level) / 2.22) / 2.12));
             }
             break;
         // Hard
         case 2:
             for (var i = 1; i < 6; i++) {
-                raid_stats.push(floor(floor(0.01 * (2 * base_stat[i] + Math.floor(Math.random() * 31)) * raid_level) / 3.2 / 3.2) + 20);
+                var iv = Math.floor(Math.random() * 31);
+                IV.push(iv);
+                raid_stats.push(floor(floor(0.01 * (2 * base_stat[i] + iv) * raid_level) / 3.2 / 3.2) + 20);
             }
             break;
         // Challenge
         case 3:
             for (var i = 1; i < 6; i++) {
-                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + Math.floor(Math.random() * 31)) * raid_level) / 4) / 3.3));
+                var iv = Math.floor(Math.random() * 31);
+                IV.push(iv);
+                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + iv) * raid_level) / 4) / 3.3));
             }
             break;
         // Intense
         case 4:
             for (var i = 1; i < 6; i++) {
-                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + Math.floor(Math.random() * 31)) * raid_level) / 5.2) / 3) + Math.floor(Math.random() * 30));
+                var iv = Math.floor(Math.random() * 31);
+                IV.push(iv);
+                raid_stats.push(floor((floor(0.01 * (2 * base_stat[i] + iv) * raid_level) / 5.2) / 3) + Math.floor(Math.random() * 30));
             }
             break;
     }
+    raid_stats.push(IV);
     return raid_stats;
 }
 

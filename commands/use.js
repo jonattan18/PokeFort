@@ -29,11 +29,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) return console.log(err);
         if (!prompt) {
             // Raid check.
-            raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
-                if (err) { console.log(err); return; }
-                if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons);
-                else return message.channel.send('You are not in a duel!');
-            });
+       //     raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
+       //         if (err) { console.log(err); return; }
+       //         if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons);
+       //         else return message.channel.send('You are not in a duel!');
+       //     });
+            return message.channel.send('You are not in a duel!');
         }
         else {
 
@@ -354,7 +355,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
     var moves = raid_data.TrainersTeam[raid_data.CurrentPokemon].Moves;
     var used_move = moveinfo[moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase()];;
 
-    
+
 
     // Get all moves of raid pokemon.
     var raid_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
