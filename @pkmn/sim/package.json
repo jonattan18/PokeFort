@@ -1,0 +1,44 @@
+{
+  "name": "@pkmn/sim",
+  "version": "0.5.19",
+  "description": "An automatically generated extraction of just the simulator portion of Pokémon Showdown",
+  "homepage": "https://psim.us",
+  "main": "build/sim/index.js",
+  "types": "build/sim/index.d.ts",
+  "exports": {
+    ".": "./build/sim/index.js",
+    "./tools": "./build/sim/tools/index.js"
+  },
+  "repository": "github:pkmn/ps",
+  "author": "Guangcong Luo <guangcongluo@gmail.com> (http://guangcongluo.com)",
+  "contributors": [
+    "Cathy J. Fitzpatrick <cathy@cathyjf.com> (https://cathyjf.com)",
+    "Bill Meltsner <bill@meltsner.com> (http://www.meltsner.com)"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "build",
+    "config",
+    "data",
+    "lib",
+    "sim"
+  ],
+  "dependencies": {
+    "@pkmn/sets": "^3.0.0",
+    "@pkmn/streams": "^1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "build": "npm run compile",
+    "test": "mocha test/main.js test/sim/**/*.js -R dot -u bdd --exit",
+    "lint": "eslint . --cache --ext .js,.ts",
+    "pretest": "npm run build",
+    "posttest": "npm run lint"
+  }
+}

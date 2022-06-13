@@ -1,0 +1,1 @@
+{"version":3,"file":"rulesets.js","sourceRoot":"","sources":["../../../../data/mods/gen3/rulesets.ts"],"names":[],"mappings":";;;AAAa,QAAA,QAAQ,GAAoC;IACxD,QAAQ,EAAE;QACT,UAAU,EAAE,eAAe;QAC3B,IAAI,EAAE,UAAU;QAChB,IAAI,EAAE,6EAA6E;QACnF,OAAO,EAAE,CAAC,YAAY,EAAE,kBAAkB,EAAE,4BAA4B,EAAE,gBAAgB,EAAE,iBAAiB,EAAE,aAAa,EAAE,sBAAsB,EAAE,uBAAuB,EAAE,mBAAmB,EAAE,YAAY,CAAC;KACjN;CACD,CAAC"}

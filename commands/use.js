@@ -2,6 +2,9 @@ const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash');
 const fs = require('fs');
 
+// Raid battler.
+const sim = require("@pkmn/sim");
+
 // Get moveinfo.
 const moveinfo = JSON.parse(fs.readFileSync('./assets/movesinfo.json').toString());
 
@@ -351,19 +354,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
     var moves = raid_data.TrainersTeam[raid_data.CurrentPokemon].Moves;
     var used_move = moveinfo[moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase()];;
 
-    // User move is physical.
-    if (used_move.category == "Physical") {
-    }
-
-    // User move is special.
-    else if (used_move.category == "Special") {
-    }
-
-    // User move is status.
-    else if (used_move.category == "Status") {
-        var status_move = battle.status_move(stat1, stat2, used_move)
-    }
-
+    
 
     // Get all moves of raid pokemon.
     var raid_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
