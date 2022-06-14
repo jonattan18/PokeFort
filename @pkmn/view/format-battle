@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+'use strict';
+
+try {
+  require('source-map-support').install();
+} catch (err) {
+  if (err.code !== 'MODULE_NOT_FOUND') throw err;
+}
+
+const packages = [];
+for (const dep of ['@pkmn/dex', '@pkmn/data', '@pkmn/client']) {
+  try {
+    require.resolve(dep);
+  } catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') throw err;
+    packages.push(dep);
+  }
+}
+if (packages.length) {
+  require('child_process').execSync(`npm install ${packages.join(' ')} --no-audit --no-save`, {
+    stdio: 'inherit',
+    cwd: __dirname,
+  });
+  console.error('Please rerun now that dependencies have been resolved.');
+  process.exit(1);
+}
+
+const readline = require('readline');
+
+const {Battle} = require('@pkmn/client');
+const {Dex} = require('@pkmn/dex');
+const {Generations} = require('@pkmn/data');
+const {Protocol} = require('@pkmn/protocol');
+
+const {LogFormatter} = require('./build');
+
+const gens = new Generations(Dex);
+const battle = new Battle(gens);
+const formatter = new LogFormatter(process.argv[2] ? 1 : 0, battle);
+
+readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+}).on('line', line => {
+  const {args, kwArgs} = Protocol.parseBattleLine(line);
+  const request = args[0] === 'request';
+  const formatted = formatter.formatText(args, kwArgs);
+  if (formatted) process.stdout.write(formatted);
+  if (request) battle.update();
+  battle.add(args, kwArgs);
+  if (request) battle.update();
+});

@@ -32,7 +32,8 @@ const RaidSchema = new mongoose.Schema({
     CurrentDuel: String,
     CompletedDuel: Array,
     CurrentPokemon: Number,
-    Stream: Object
+    Stream: String,
+    OldStreamText: Number
 });
 
 const MessageModel = module.exports = mongoose.model('raids', RaidSchema);

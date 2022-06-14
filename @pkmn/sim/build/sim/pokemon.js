@@ -968,7 +968,6 @@ class Pokemon {
        //     spe: 1,
       //      hp: 1,
       //  }
-        console.log(stats)
         if (this.species.maxHP)
             stats.hp = this.species.maxHP;
         if (!this.maxhp) {

@@ -1678,23 +1678,23 @@ class Battle {
             const name = effect.fullname === 'tox' ? 'psn' : effect.fullname;
             switch (effect.id) {
                 case 'partiallytrapped':
-                    this.add('-damage', target, target.getHealth, '[from] ' + this.effectState.sourceEffect.fullname, '[partiallytrapped]');
+                    this.add('-damage', targetDamage, target, target.getHealth, '[from] ' + this.effectState.sourceEffect.fullname, '[partiallytrapped]');
                     break;
                 case 'powder':
-                    this.add('-damage', target, target.getHealth, '[silent]');
+                    this.add('-damage', targetDamage, target, target.getHealth, '[silent]');
                     break;
                 case 'confused':
-                    this.add('-damage', target, target.getHealth, '[from] confusion');
+                    this.add('-damage', targetDamage, target, target.getHealth, '[from] confusion');
                     break;
                 default:
                     if (effect.effectType === 'Move' || !name) {
-                        this.add('-damage', target, target.getHealth);
+                        this.add('-damage', targetDamage, target, target.getHealth);
                     }
                     else if (source && (source !== target || effect.effectType === 'Ability')) {
-                        this.add('-damage', target, target.getHealth, '[from] ' + name, '[of] ' + source);
+                        this.add('-damage', targetDamage, target, target.getHealth, '[from] ' + name, '[of] ' + source);
                     }
                     else {
-                        this.add('-damage', target, target.getHealth, '[from] ' + name);
+                        this.add('-damage', targetDamage, target, target.getHealth, '[from] ' + name);
                     }
                     break;
             }
@@ -1783,13 +1783,13 @@ class Battle {
         damage = target.damage(damage, source, effect);
         switch (effect.id) {
             case 'strugglerecoil':
-                this.add('-damage', target, target.getHealth, '[from] recoil');
+                this.add('-damage', damage, target, target.getHealth, '[from] recoil');
                 break;
             case 'confusion':
-                this.add('-damage', target, target.getHealth, '[from] confusion');
+                this.add('-damage', damage, target, target.getHealth, '[from] confusion');
                 break;
             default:
-                this.add('-damage', target, target.getHealth);
+                this.add('-damage', damage, target, target.getHealth);
                 break;
         }
         if (target.fainted)
@@ -1903,7 +1903,8 @@ class Battle {
         let statName;
         for (statName in modStats) {
             const stat = baseStats[statName];
-            if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
+            if (set.level > 100 && statName === 'spe') modStats[statName] = 0;
+            else if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
             else if (set.level >= 600 && set.level <= 800) modStats[statName] = tr(tr((0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 2.22) / 2.12);
             else if (set.level >= 1600 && set.level <= 1800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 3.2 / 3.2) + 20);
             else if (set.level >= 2600 && set.level <= 2800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 4) / 3.3);

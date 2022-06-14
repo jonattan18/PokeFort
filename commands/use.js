@@ -2,8 +2,12 @@ const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash');
 const fs = require('fs');
 
-// Raid battler.
-const sim = require("@pkmn/sim");
+// Raid Sim
+const { BattleStreams, Dex } = require('@pkmn/sim');
+const { Protocol } = require('@pkmn/protocol');
+const { LogFormatter } = require('@pkmn/view');
+const { Battle } = require('@pkmn/client');
+const { Generations } = require('@pkmn/data')
 
 // Get moveinfo.
 const moveinfo = JSON.parse(fs.readFileSync('./assets/movesinfo.json').toString());
@@ -29,12 +33,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) return console.log(err);
         if (!prompt) {
             // Raid check.
-       //     raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
-       //         if (err) { console.log(err); return; }
-       //         if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons);
-       //         else return message.channel.send('You are not in a duel!');
-       //     });
-            return message.channel.send('You are not in a duel!');
+            raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
+                if (err) { console.log(err); return; }
+                if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons);
+                else return message.channel.send('You are not in a duel!');
+            });
         }
         else {
 
@@ -347,20 +350,156 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 
-function raid(raid_data, bot, message, args, prefix, user_available, pokemons) {
-
-    if (args.length != 1 || !isInt(args[0])) return message.channel.send("Please enter a valid move.");
-
-    // Get selected moves of user pokemon.
-    var moves = raid_data.TrainersTeam[raid_data.CurrentPokemon].Moves;
-    var used_move = moveinfo[moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase()];;
-
-
+function raid(raid_data, bot, message, args, prefix, user_available, pokemons, loop = 0) {
+    if (args.length != 1 || !isInt(args[0]) || args[0] > 4 || args[0] < 1) return message.channel.send("Please enter a valid move.");
 
     // Get all moves of raid pokemon.
     var raid_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
-    var raid_move = move_thinker(raid_moveset, raid_data.TrainersTeam[raid_data.CurrentPokemon].Type[0], raid_data.TrainersTeam[raid_data.CurrentPokemon].Type[1]);
-    console.log(raid_move);
+    var raid_move = move_thinker(raid_moveset, raid_data.TrainersTeam[raid_data.CurrentPokemon].type[0], raid_data.TrainersTeam[raid_data.CurrentPokemon].type[1]);
+    var raidmoves_to_stream = [];
+    for (i = 0; i < raid_moveset.length; i++) {
+        raidmoves_to_stream.push(raid_moveset[i][0]);
+    }
+    var move_index = raidmoves_to_stream.indexOf(raid_move) + 1;
+
+    // If over looping
+    if (loop > 0) {
+        if (loop > 5) return;
+        // Get any random move.
+        var random_move = raid_moveset[Math.floor(Math.random() * raid_moveset.length)];
+        move_index = raidmoves_to_stream.indexOf(random_move[0]) + 1;
+    }
+
+    // Get battle data.
+    var _battlestream = new BattleStreams.BattleStream();
+    const streams = BattleStreams.getPlayerStreams(_battlestream);
+    var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
+    void streams.omniscient.write(write_data);
+    const battle = new Battle(new Generations(Dex));
+    const formatter = new LogFormatter('p1', battle);
+
+    void (async () => {
+        for await (var chunk of streams.omniscient) {
+            var received_data = chunk;
+            received_data = received_data.split('\n');
+            //console.log(received_data);
+            if (received_data[received_data.length - 1] != "|upkeep" && received_data[received_data.length - 2] != "|upkeep" && received_data[received_data.length - 3] != "|" && received_data[received_data.length - 2] != "|") return raid(raid_data, bot, message, args, prefix, user_available, pokemons, loop + 1);
+            else {
+                var show_str = [];
+                for (const { args, kwArgs } of Protocol.parse(chunk)) {
+                    var formatted = formatter.formatText(args, kwArgs);
+
+                    // Execption
+                    if (formatted == "\n") continue;
+                    if (formatted.startsWith("\n== Turn")) continue;
+                    if (formatted.startsWith("\nGo!")) continue;
+                    if (formatted.startsWith("\n$Player2 sent out")) continue;
+                    if (formatted.startsWith("Battle started between")) continue;
+
+                    // Remove opposing.
+                    formatted = formatted.replace("The opposing ", "");
+                    // Remove newlines.
+                    formatted = formatted.replaceAll("\n", "");
+                    // Remove asterisks.
+                    formatted = formatted.replaceAll("*", "");
+                    // Remove brackets.
+                    formatted = formatted.replaceAll("(", "").replaceAll(")", "");
+                    // Remove exclaimation marks.
+                    formatted = formatted.replaceAll("!", "");
+
+                    if (formatted) show_str.push(formatted);
+                }
+
+                // Get message text to show user.
+                if (raid_data.Stream) show_str.splice(0, raid_data.OldStreamText - 1);
+
+                // Formatting for sending message.
+                var first_user_message = [show_str[0]];
+                show_str.splice(0, 1);
+                for (var i = 0; i < show_str.length; i++) {
+                    if (show_str[i].startsWith("  ")) {
+                        first_user_message.push(show_str[i]);
+                    }
+                    else {
+                        show_str.splice(0, i);
+                        if (show_str[0].includes("fainted")) {
+                            raid_boss_fainted();
+                        }
+                        else if (show_str[0].includes("|win|$Player2")) {
+                            raid_boss_won();
+                        }
+                        else if (show_str[0].includes("|win|$Player1")) {
+                            raid_boss_fainted();
+                        }
+                        break;
+                    }
+                }
+
+                var second_user_message = [show_str[0]];
+                show_str.splice(0, 1);
+                for (var i = 0; i < show_str.length; i++) {
+                    if (show_str[i].startsWith("  ")) {
+                        second_user_message.push(show_str[i]);
+                    }
+                    else {
+                        show_str.splice(0, i);
+                        if (show_str[0].includes("fainted")) {
+                            user_pokemon_fainted();
+                        }
+                        else if (show_str[0].includes("|win|$Player2")) {
+                            raid_boss_won();
+                        }
+                        else if (show_str[0].includes("|win|$Player1")) {
+                            raid_boss_fainted();
+                        }
+                        break;
+                    }
+                }
+
+                console.log(first_user_message);
+                console.log(second_user_message);
+
+                // User Pokemon fainted.
+                function user_pokemon_fainted() {
+                    console.log("User Pokemon fainted.");
+                    raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted = true;
+                    // Check if pokemon exists.
+                    var non_fainted_pokemon = raid_data.TrainersTeam.filter(x => (x != null || x != undefined || x != {}) && !x.fainted && x.fainted != undefined);
+                    if (non_fainted_pokemon.length > 0) {
+                        console.log("User pokemon fainted, switch to next pokemon.");
+                    } else {
+                        // Check if other user exists.
+                        raid_data.CompletedDuel.push(message.author.id);
+
+                        // Find a user which has not completed duel.
+                        var non_battled_user = raid_data.Trainers.filter(x => !raid_data.CompletedDuel.includes(x) && x != null);
+                        if (non_battled_user.length > 0) {
+                            console.log("User pokemon fainted, switch to next user.");
+                        }
+                        else {
+                            raid_boss_won();
+                        }
+                    }
+                }
+
+                // Raid Boss fainted.
+                function raid_boss_fainted() {
+                    console.log("Raid Boss fainted.");
+                }
+
+                // Raid Boss won.
+                function raid_boss_won() {
+                    console.log("Raid Boss won.");
+                }
+
+                raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
+                raid_data.Stream = write_data;
+                raid_data.save().then(() => {
+                    console.log("Saved raid data.");
+                });
+            }
+        }
+    })();
 }
 
 // Move thinker based on type effectiveness.

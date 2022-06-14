@@ -10,10 +10,9 @@ const raid_model = require('../models/raids');
 const getPokemons = require('../utils/getPokemon');
 const { floor } = require('lodash');
 const movesparser = require('../utils/moveparser');
-const raidstart = require('../utils/raidstart');
 
 // Raid Sim
-const { BattleStreams, Teams } = require('@pkmn/sim');
+const { BattleStreams, Teams, Streams } = require('@pkmn/sim');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -41,12 +40,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             const legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL");
                             const sub_legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL");
                             const gigantamax_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Gigantamax");
-                            const mega_pokemons = pokemons.filter(it => it["Alternate Form Name"].includes("Mega"));
+                            //const mega_pokemons = pokemons.filter(it => it["Alternate Form Name"].includes("Mega"));
                             const galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
                             const alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
-                            const hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
+                            // const hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
 
-                            var raid_pokemons = mythical_pokemons.concat(ultra_beast_pokemons, legendary_pokemons, sub_legendary_pokemons, galarian_pokemons, alolan_pokemons, mega_pokemons, hisuian_pokemons);
+                            var raid_pokemons = mythical_pokemons.concat(ultra_beast_pokemons, legendary_pokemons, sub_legendary_pokemons, galarian_pokemons, alolan_pokemons);
                             var raid_boss = raid_pokemons[Math.floor(Math.random() * raid_pokemons.length)];
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
 
@@ -103,6 +102,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                             var embed = new Discord.MessageEmbed();
                             embed.attachFiles(raid_boss_image[1]);
+                            embed.setColor(getRaidColor(difficulty));
                             embed.setTitle(`${message.author.username} has started a raid battle!`);
                             embed.addField(`Level ${raid_level} ${raid_boss_name}`, stats_string, false);
                             embed.addField(`Trainers:`, `Trainer #1: ${message.author.tag}\nTrainer #2: None\nTrainer #3: None\nTrainer #4: None`, false);
@@ -218,6 +218,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                                                 var embed = new Discord.MessageEmbed();
                                                 embed.attachFiles(raid_boss_image[1]);
+                                                embed.setColor(getRaidColor(raid_data.RaidType));
                                                 embed.setTitle(`${message.author.username} has joined a raid battle!`);
                                                 embed.addField(`Level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name}`, stats_string, false);
 
@@ -262,6 +263,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 embed.attachFiles(raid_boss_image[1]);
                 if (raid_data.Started) embed.setTitle(`Raid Has Started!`);
                 else embed.setTitle(`Raid Has Not Started!`);
+                embed.setColor(getRaidColor(raid_data.RaidType));
                 embed.addField(`Level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name}`, stats_string, false);
 
                 var trainer_data = "";
@@ -389,52 +391,58 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var user_image_data = user_pokemon_data.Image;
                         var current_pokemon = trainer_data.indexOf(user_pokemon_data);
 
+                        var _battleStream = new BattleStreams.BattleStream();
+                        const streams = BattleStreams.getPlayerStreams(_battleStream);
+                        const spec = { formatid: 'customgame' };
+
+                        const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
+                        const p2spec = { name: '$Player2', team: packed_team_2 };
+
                         // Packing raid data.
                         raid.CurrentDuel = message.author.id;
                         raid.TrainersTeam = trainer_data;
                         raid.CurrentPokemon = current_pokemon;
 
-                        const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
-                        const p2spec = { name: '$Player2', team: packed_team_2 };
-
                         // Start raid duel.
+                        var write_data = `>start ${JSON.stringify(spec)}\n>player p1 ${JSON.stringify(p1spec)}\n>player p2 ${JSON.stringify(p2spec)}\n>p1 team 123\n>p2 team 1`;
+                        void streams.omniscient.write(write_data);
 
-                        raidstart.startraid().then(result => {
+                        void (async () => {
+                            for await (var chunk of streams.omniscient) {
+                                var received_data = chunk.split('\n');
+                                if (received_data.includes("|start")) {
+                                    raid.Stream = write_data;
+                                    raid.save().then(() => {
+                                        // Get image url of raid boss.
+                                        var raid_boss_image_data = raid.RaidPokemon.Image;
 
-                            console.log(result)
-                            var received_data = result.split('\n');
-                            if (received_data.includes("|start")) {
+                                        // Creating Image for embed.
+                                        mergeImages(["./assets/raid_images/background.jpeg",
+                                            { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
+                                            Canvas: Canvas
+                                        }).then(b64 => {
+                                            const img_data = b64.split(',')[1];
+                                            const img_buffer = new Buffer.from(img_data, 'base64');
+                                            const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
 
-                                /*   raid.save().then(() => {
-                                       // Get image url of raid boss.
-                                       var raid_boss_image_data = raid.RaidPokemon.Image;
-   
-                                       // Creating Image for embed.
-                                       mergeImages(["./assets/raid_images/background.jpeg",
-                                           { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
-                                           Canvas: Canvas
-                                       }).then(b64 => {
-                                           const img_data = b64.split(',')[1];
-                                           const img_buffer = new Buffer.from(img_data, 'base64');
-                                           const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-   
-                                           // Sending duel message.
-                                           var embed = new Discord.MessageEmbed();
-                                           embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                           embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
-                                           embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.Name} | ${user_pokemon_data.Health}/${user_pokemon_data.MaxHealth}HP`, true);
-                                           embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
-                                           embed.setColor(message.guild.me.displayHexColor);
-                                           embed.attachFiles(image_file)
-                                           embed.setImage('attachment://img.jpeg');
-                                           embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
-                                           message.channel.send(embed);
-                                       });
-                                   }); */
-                            } else {
-                                return message.channel.send(`Something went wrong, we could not start the raid duel.`);
+                                            // Sending duel message.
+                                            var embed = new Discord.MessageEmbed();
+                                            embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                            embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
+                                            embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
+                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
+                                            embed.setColor(message.guild.me.displayHexColor);
+                                            embed.attachFiles(image_file)
+                                            embed.setImage('attachment://img.jpeg');
+                                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                                            message.channel.send(embed);
+                                        });
+                                    });
+                                } else {
+                                    return message.channel.send(`Something went wrong, we could not start the raid duel.`);
+                                }
                             }
-                        });
+                        })();
                     });
                 });
             }
@@ -473,6 +481,11 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                 // Get image url.
                 var image = getPokemons.imagefromid(pokemon_from_db.PokemonId, pokemons, pokemon_from_db.Shiny, true);
 
+                // Pokemon Health Stat.
+                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_from_db.PokemonId)[0];
+                var hp = pokemon_db["Health Stat"];
+                var type = [pokemon_db["Primary Type"], pokemon_db["Secondary Type"]];
+
                 var data_to_add = {
                     name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
                     species: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
@@ -487,7 +500,9 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                     nature: nature_name,
                     moves: move_data,
                     fainted: false,
-                    selected: false
+                    selected: false,
+                    max_hp: floor(0.01 * (2 * hp + pokemon_from_db.IV[0] + floor(0.25 * 0)) * pokemon_from_db.Level) + pokemon_from_db.Level + 10,
+                    type: type
                 }
                 trainersteam.push(data_to_add);
             }
@@ -569,6 +584,22 @@ function getDifficultyString(difficulty) {
             return "Challenge";
         case 4:
             return "Intense";
+    }
+}
+
+// Function to get raid color.
+function getRaidColor(difficulty) {
+    switch (difficulty) {
+        case 0:
+            return "#00ff00";
+        case 1:
+            return "#0000ff";
+        case 2:
+            return "#ff0000";
+        case 3:
+            return "#800080";
+        case 4:
+            return "#ffd900";
     }
 }
 
