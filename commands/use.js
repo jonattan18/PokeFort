@@ -23,11 +23,12 @@ const battle = require('../utils/battle');
 const getPokemons = require('../utils/getPokemon');
 const movesparser = require('../utils/moveparser');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
+module.exports.run = async (bot, message, args, prefix, user_available, pokemons, _switch = false) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length != 1) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
     if (isInt(args[0]) == false) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
-    if (args[0] > 4 || args[0] < 1) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
+    if (_switch == false && (args[0] > 4 || args[0] < 1)) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
+    if (_switch == true && (args[0] > 6 || args[0] < 1)) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to raid.`); }
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Duel.Accepted": true }] }, (err, prompt) => {
         if (err) return console.log(err);
@@ -35,7 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             // Raid check.
             raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
                 if (err) { console.log(err); return; }
-                if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons);
+                if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch);
                 else return message.channel.send('You are not in a duel!');
             });
         }
@@ -350,7 +351,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 
-function raid(raid_data, bot, message, args, prefix, user_available, pokemons, loop = 0) {
+function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0) {
     if (args.length != 1 || !isInt(args[0]) || args[0] > 4 || args[0] < 1) return message.channel.send("Please enter a valid move.");
 
     // Get all moves of raid pokemon.
@@ -366,14 +367,33 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
     if (loop > 0) {
         if (loop > 5) return;
         // Get any random move.
-        var random_move = raid_moveset[Math.floor(Math.random() * raid_moveset.length)];
+        var random_move = raid_moveset[Math.floor(Math.random() * (raid_moveset.length > 24 ? 24 : raid_moveset.length))];
         move_index = raidmoves_to_stream.indexOf(random_move[0]) + 1;
     }
 
     // Get battle data.
     var _battlestream = new BattleStreams.BattleStream();
     const streams = BattleStreams.getPlayerStreams(_battlestream);
-    var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
+
+    if (_switch == true) {
+        if (raid_data.ChangeOnFainted) {
+            console.log("Changing pokemon.");
+            raid_data.ChangeOnFainted = false;
+            raid_data.CurrentPokemon = args[0] - 1;
+            var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
+            if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && !switch_pokemon.fainted && switch_pokemon.fainted != undefined) {
+                var write_data = `${raid_data.Stream}\n>p1 switch ${args[0]}`;
+            } else return message.channel.send("Please enter a valid pokemon to switch.");
+        }
+        else {
+            raid_data.CurrentPokemon = args[0] - 1;
+            var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
+            if ((switch_pokemon != null && switch_pokemon != undefined && switch_pokemon != {}) && switch_pokemon.fainted != false && switch_pokemon.fainted != undefined) {
+                console.log("Changing pokemon 2");
+                var write_data = `${raid_data.Stream}\n>p1 switch ${args[0]}\n>p2 move ${move_index}`;
+            } else return message.channel.send("Please enter a valid pokemon to switch.");
+        }
+    } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
     void streams.omniscient.write(write_data);
     const battle = new Battle(new Generations(Dex));
     const formatter = new LogFormatter('p1', battle);
@@ -382,8 +402,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
         for await (var chunk of streams.omniscient) {
             var received_data = chunk;
             received_data = received_data.split('\n');
-            //console.log(received_data);
-            if (received_data[received_data.length - 1] != "|upkeep" && received_data[received_data.length - 2] != "|upkeep" && received_data[received_data.length - 3] != "|" && received_data[received_data.length - 2] != "|") return raid(raid_data, bot, message, args, prefix, user_available, pokemons, loop + 1);
+            console.log(received_data);
+            if (received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn + 1}` && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
             else {
                 var show_str = [];
                 for (const { args, kwArgs } of Protocol.parse(chunk)) {
@@ -393,6 +413,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
                     if (formatted == "\n") continue;
                     if (formatted.startsWith("\n== Turn")) continue;
                     if (formatted.startsWith("\nGo!")) continue;
+                    if (formatted.startsWith("Go!")) continue;
                     if (formatted.startsWith("\n$Player2 sent out")) continue;
                     if (formatted.startsWith("Battle started between")) continue;
 
@@ -411,7 +432,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
                 }
 
                 // Get message text to show user.
-                if (raid_data.Stream) show_str.splice(0, raid_data.OldStreamText - 1);
+                if (raid_data.OldStreamText) show_str.splice(0, raid_data.OldStreamText);
+                raid_data.CurrentTurn = raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn + 1 : 1;
+                raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
 
                 // Formatting for sending message.
                 var first_user_message = [show_str[0]];
@@ -466,6 +489,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
                     // Check if pokemon exists.
                     var non_fainted_pokemon = raid_data.TrainersTeam.filter(x => (x != null || x != undefined || x != {}) && !x.fainted && x.fainted != undefined);
                     if (non_fainted_pokemon.length > 0) {
+                        raid_data.ChangeOnFainted = true;
+                        raid_data.markModified('TrainersTeam');
                         console.log("User pokemon fainted, switch to next pokemon.");
                     } else {
                         // Check if other user exists.
@@ -492,8 +517,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, l
                     console.log("Raid Boss won.");
                 }
 
-                raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
-                raid_data.Stream = write_data;
+                raid_data.Stream = _battlestream.battle.inputLog.join('\n');
                 raid_data.save().then(() => {
                     console.log("Saved raid data.");
                 });
@@ -515,7 +539,7 @@ function move_thinker(available_moves, foe_type1, foe_type2) {
         // Filter the elements which has highest effectiveness.
         var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1]);
         // Randomly select a move.
-        var move_list_random = move_list_filtered[Math.floor(Math.random() * move_list_filtered.length)];
+        var move_list_random = move_list_filtered[Math.floor(Math.random() * (move_list_filtered.length > 24 ? 24 : move_list_filtered.length))];
         return move_list_random[0];
     }
 }

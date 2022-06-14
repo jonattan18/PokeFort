@@ -485,7 +485,7 @@ class Handler {
     '|faint|'(args) {
         const [, pokemon] = args;
         const template = this.parser.template('faint');
-        return template.replace('[POKEMON]', this.parser.pokemon(pokemon));
+        return template.replace('[POKEMON]', this.parser.pokemon(pokemon)).replace('[SIDE]', pokemon);
     }
     '|swap|'(args, kwArgs) {
         const [, pokemon, target] = args;

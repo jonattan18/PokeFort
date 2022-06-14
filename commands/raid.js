@@ -402,6 +402,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         raid.CurrentDuel = message.author.id;
                         raid.TrainersTeam = trainer_data;
                         raid.CurrentPokemon = current_pokemon;
+                        raid.CurrentTurn = 0;
 
                         // Start raid duel.
                         var write_data = `>start ${JSON.stringify(spec)}\n>player p1 ${JSON.stringify(p1spec)}\n>player p2 ${JSON.stringify(p2spec)}\n>p1 team 123\n>p2 team 1`;
@@ -411,7 +412,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             for await (var chunk of streams.omniscient) {
                                 var received_data = chunk.split('\n');
                                 if (received_data.includes("|start")) {
-                                    raid.Stream = write_data;
+                                    raid.Stream = _battleStream.battle.inputLog.join('\n');
                                     raid.save().then(() => {
                                         // Get image url of raid boss.
                                         var raid_boss_image_data = raid.RaidPokemon.Image;
