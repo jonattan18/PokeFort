@@ -418,12 +418,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && !switch_pokemon.fainted && switch_pokemon.fainted != undefined) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 move ${move_index}`;
-                console.log(write_data);
             } else return message.channel.send("Please enter a valid pokemon to switch.");
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
 
-    console.log(write_data);
     void streams.omniscient.write(write_data);
     const battle = new Battle(new Generations(Dex));
     const formatter = new LogFormatter('p1', battle);
@@ -471,7 +469,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 for (var i = 0; i < show_str.length; i++) {
                     if (show_str[i].startsWith("  ")) {
                         if (show_str[i].endsWith(":prepare")) {
-                            show_str[i].replace(":prepare", "");
+                            show_str[i] = show_str[i].replace(":prepare", "");
                             raid_data.PreparationMove = args[0];
                         }
                         first_user_message.push(show_str[i]);
@@ -493,7 +491,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 for (var i = 0; i < show_str.length; i++) {
                     if (show_str[i].startsWith("  ")) {
                         if (show_str[i].endsWith(":prepare")) {
-                            show_str[i].replace(":prepare", "");
+                            show_str[i] = show_str[i].replace(":prepare", "");
                             raid_data.RaidPokemon.PreparationMove = move_index;
                         }
                         second_user_message.push(show_str[i]);
@@ -515,19 +513,31 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
                 }
 
-                console.log(first_user_message);
-                console.log(second_user_message);
+                // Create user pokemon message.
+                var usr_embed = new Discord.MessageEmbed();
+                usr_embed.setTitle(first_user_message[0]);
+                usr_embed.setDescription(first_user_message.slice(1).join(""));
+                message.channel.send(usr_embed);
+
+                // Create raid boss message.
+                var raid_embed = new Discord.MessageEmbed();
+                raid_embed.setTitle(`${message.author.username}'s ${second_user_message[0]}`);
+                raid_embed.setDescription(second_user_message.slice(1).join(""));
+                message.channel.send(raid_embed);
 
                 // User Pokemon fainted.
                 function user_pokemon_fainted() {
-                    console.log("User Pokemon fainted.");
                     raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted = true;
                     // Check if pokemon exists.
                     var non_fainted_pokemon = raid_data.TrainersTeam.filter(x => (x != null || x != undefined || x != {}) && !x.fainted && x.fainted != undefined);
                     if (non_fainted_pokemon.length > 0) {
                         raid_data.ChangeOnFainted = true;
                         raid_data.markModified('TrainersTeam');
-                        console.log("User pokemon fainted, switch to next pokemon.");
+
+                        var fainted_embed = new Discord.MessageEmbed();
+                        fainted_embed.setTitle(`${message.author.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name} fainted.`);
+                        fainted_embed.setDescription(`${message.author.username}, please do ${prefix}switch <number> to switch your selected pokemon.`);
+                        message.channel.send(fainted_embed);
                     } else {
                         // Check if other user exists.
                         raid_data.CompletedDuel.push(message.author.id);
@@ -535,7 +545,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         // Find a user which has not completed duel.
                         var non_battled_user = raid_data.Trainers.filter(x => !raid_data.CompletedDuel.includes(x) && x != null);
                         if (non_battled_user.length > 0) {
-                            console.log("User pokemon fainted, switch to next user.");
+                            message.channel.send(`${message.author.username} fainted. Let the other user play.`);
                         }
                         else {
                             raid_boss_won();
@@ -545,18 +555,16 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                 // Raid Boss fainted.
                 function raid_boss_fainted() {
-                    console.log("Raid Boss fainted.");
+                    message.channel.send(`Raid boss fainted. User win.`);
                 }
 
                 // Raid Boss won.
                 function raid_boss_won() {
-                    console.log("Raid Boss won.");
+                    message.channel.send(`Raid boss won and raid is over.`);
                 }
 
                 raid_data.Stream = _battlestream.battle.inputLog.join('\n');
-                raid_data.save().then(() => {
-                    console.log("Saved raid data.");
-                });
+                raid_data.save();
             }
         }
     })();
@@ -574,10 +582,9 @@ function move_thinker(available_moves, foe_type1, foe_type2) {
     else {
         // Filter the elements which has highest effectiveness.
         var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1] && move_list.indexOf(it) < 25);
-
-        // Randomly select a move.
-        if (move_list_filtered.length > 24) return move_list_filtered[randomNumber(1, 24)][0];
-        else return move_list_filtered[randomNumber(1, move_list_filtered.length)][0];
+        if (move_list_filtered.length == 0) return move_list[0][0];
+        var move_name = move_list_filtered[randomNumber(0, move_list_filtered.length - 1)][0];
+        return move_name;
     }
 }
 
