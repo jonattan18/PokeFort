@@ -373,14 +373,21 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     //Preparation move for player.
     if (raid_data.PreparationMove != undefined) {
-        var prep_move_index = raidmoves_to_stream.indexOf(raid_data.PreparationMove) + 1;
-        if (args[0] != prep_move_index && raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted != true) return message.channel.send("You can't use that move now.");
+        if (args[0] != raid_data.PreparationMove && raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted != true) return message.channel.send("You can't use that move now.");
+        else {
+            raid_data.PreparationMove = undefined;
+        }
     }
 
     // Preparation move for raid boss.
     if (raid_data.RaidPokemon.PreparationMove != undefined) {
-        move_index = raidmoves_to_stream.indexOf(raid_data.RaidPokemon.PreparationMove) + 1;
+        move_index = raid_data.RaidPokemon.PreparationMove;
         raid_data.RaidPokemon.PreparationMove = undefined;
+    }
+
+    // Fainted move block.
+    if (raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted == true && _switch == false) {
+        return message.channel.send("Your pokemon is fainted. Use switch to switch pokemon.");
     }
 
     // Get battle data.
@@ -425,7 +432,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         for await (var chunk of streams.omniscient) {
             var received_data = chunk;
             received_data = received_data.split('\n');
-            if (received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn + 1}` && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
+            if ((received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn + 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
             else {
                 var show_str = [];
                 for (const { args, kwArgs } of Protocol.parse(chunk)) {
@@ -463,6 +470,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 show_str.splice(0, 1);
                 for (var i = 0; i < show_str.length; i++) {
                     if (show_str[i].startsWith("  ")) {
+                        if (show_str[i].endsWith(":prepare")) {
+                            show_str[i].replace(":prepare", "");
+                            raid_data.PreparationMove = args[0];
+                        }
                         first_user_message.push(show_str[i]);
                     }
                     else {
@@ -481,6 +492,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 show_str.splice(0, 1);
                 for (var i = 0; i < show_str.length; i++) {
                     if (show_str[i].startsWith("  ")) {
+                        if (show_str[i].endsWith(":prepare")) {
+                            show_str[i].replace(":prepare", "");
+                            raid_data.RaidPokemon.PreparationMove = move_index;
+                        }
                         second_user_message.push(show_str[i]);
                     }
                     else {
@@ -497,7 +512,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                 // Undefined Notification if switch is off.
                 if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
-                    return message.channel.send("Your last move is not acceptable. Please use different move.");
+                    return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
                 }
 
                 console.log(first_user_message);
@@ -558,10 +573,11 @@ function move_thinker(available_moves, foe_type1, foe_type2) {
     if (move_list.length == 0) return "Tackle";
     else {
         // Filter the elements which has highest effectiveness.
-        var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1]);
+        var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1] && move_list.indexOf(it) < 25);
+
         // Randomly select a move.
-        if (move_list_filtered.length > 24) return move_list_filtered[Math.floor(Math.random() * 24)][0];
-        else return move_list_filtered[Math.floor(Math.random() * move_list_filtered.length)][0];
+        if (move_list_filtered.length > 24) return move_list_filtered[randomNumber(1, 24)][0];
+        else return move_list_filtered[randomNumber(1, move_list_filtered.length)][0];
     }
 }
 
