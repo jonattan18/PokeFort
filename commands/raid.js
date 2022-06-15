@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
 
                             // Decide Easy, Normal, Hard, Challenge, Intense based on random.
-                            var difficulty = Math.floor(Math.random() * 4);
+                            var difficulty = Math.floor(Math.random() * 5);
                             var raid_type = "";
                             var raid_level = 0;
                             var raid_rewards = "";
