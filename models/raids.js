@@ -20,6 +20,7 @@ const RaidSchema = new mongoose.Schema({
         SpAttack: Number,
         SpDefense: Number,
         Speed: Number,
+        PreparationMove: String,
         Weather: {
             Name: String,
             Turns: Number,
@@ -32,6 +33,7 @@ const RaidSchema = new mongoose.Schema({
     CurrentDuel: String,
     CompletedDuel: Array,
     CurrentPokemon: Number,
+    PreparationMove: String,
     CurrentTurn: Number,
     Stream: String,
     OldStreamText: Number,
