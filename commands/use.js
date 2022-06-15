@@ -1,6 +1,8 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash');
 const fs = require('fs');
+const mergeImages = require('merge-images-v2');
+const Canvas = require('canvas');
 
 // Raid Sim
 const { BattleStreams, Dex } = require('@pkmn/sim');
@@ -463,6 +465,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 raid_data.CurrentTurn = raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn + 1 : 1;
                 raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
 
+                var _user_pokemon_fainted = false;
+                var _raid_pokemon_fainted = false;
+
                 // Formatting for sending message.
                 var first_user_message = [show_str[0]];
                 show_str.splice(0, 1);
@@ -477,10 +482,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     else {
                         show_str.splice(0, i);
                         if (show_str[0].includes("fainted:p1a:")) {
-                            user_pokemon_fainted();
+                            _user_pokemon_fainted = true;
                         }
                         else if (show_str[0].includes("fainted:p2a:")) {
-                            raid_boss_fainted();
+                            _raid_pokemon_fainted = true;
                         }
                         break;
                     }
@@ -499,31 +504,67 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     else {
                         show_str.splice(0, i);
                         if (show_str[0].includes("fainted:p1a:")) {
-                            user_pokemon_fainted();
+                            _user_pokemon_fainted = true;
                         }
                         else if (show_str[0].includes("fainted:p2a:")) {
-                            raid_boss_fainted();
+                            _raid_pokemon_fainted = true;
                         }
                         break;
                     }
+                }
+
+                if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
+
+                    // Create user pokemon message.
+                    var usr_embed = new Discord.MessageEmbed();
+                    usr_embed.setTitle(first_user_message[0]);
+                    usr_embed.setDescription(first_user_message.slice(1).join(""));
+                    message.channel.send(usr_embed);
+
+                    // Create raid boss message.
+                    var raid_embed = new Discord.MessageEmbed();
+                    raid_embed.setTitle(`${message.author.username}'s ${second_user_message[0]}`);
+                    raid_embed.setDescription(second_user_message.slice(1).join(""));
+                    message.channel.send(raid_embed);
+
+                    // Check if user pokemon fainted.
+                    if (_user_pokemon_fainted) user_pokemon_fainted();
+                    else if (_raid_pokemon_fainted) raid_boss_fainted();
+
+                }
+
+                if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
+
+                    var raid_boss_image_data = raid_data.RaidPokemon.Image;
+                    var user_image_data = raid_data.TrainersTeam[raid_data.CurrentPokemon].Image;
+
+                    // Creating Image for embed.
+                    mergeImages(["./assets/raid_images/background.jpeg",
+                        { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
+                        Canvas: Canvas
+                    }).then(b64 => {
+                        const img_data = b64.split(',')[1];
+                        const img_buffer = new Buffer.from(img_data, 'base64');
+                        const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+
+                        // Sending duel message.
+                        var embed = new Discord.MessageEmbed();
+                        embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                        embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _battlestream.battle.field.weather}**`);
+                        embed.addField(`${message.author.username}'s Pokémon`, `${_battlestream.battle.sides[0].pokemon[0].name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
+                        embed.addField(`Raid Boss`, `${raid_data.RaidPokemon.Name} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, true);
+                        embed.setColor(message.guild.me.displayHexColor);
+                        embed.attachFiles(image_file)
+                        embed.setImage('attachment://img.jpeg');
+                        embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                        message.channel.send(embed);
+                    });
                 }
 
                 // Undefined Notification if switch is off.
                 if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
                     return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
                 }
-
-                // Create user pokemon message.
-                var usr_embed = new Discord.MessageEmbed();
-                usr_embed.setTitle(first_user_message[0]);
-                usr_embed.setDescription(first_user_message.slice(1).join(""));
-                message.channel.send(usr_embed);
-
-                // Create raid boss message.
-                var raid_embed = new Discord.MessageEmbed();
-                raid_embed.setTitle(`${message.author.username}'s ${second_user_message[0]}`);
-                raid_embed.setDescription(second_user_message.slice(1).join(""));
-                message.channel.send(raid_embed);
 
                 // User Pokemon fainted.
                 function user_pokemon_fainted() {
@@ -573,16 +614,18 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 // Move thinker based on type effectiveness.
 function move_thinker(available_moves, foe_type1, foe_type2) {
     var move_list = [];
+    var non_sorted = [];
     for (var i = 0; i < available_moves.length; i++) {
         var effectiveness = battle.type_calc(available_moves[i][1].toLowerCase(), foe_type1.toLowerCase(), foe_type2.toLowerCase());
         move_list.push([available_moves[i][0], effectiveness]);
+        non_sorted.push([available_moves[i][0], effectiveness]);
     }
     move_list.sort((a, b) => b[1] - a[1]);
-    if (move_list.length == 0) return "Tackle";
+    if (move_list.length == 0) return 1;
     else {
         // Filter the elements which has highest effectiveness.
-        var move_list_filtered = move_list.filter(it => it[1] == move_list[0][1] && move_list.indexOf(it) < 25);
-        if (move_list_filtered.length == 0) return move_list[0][0];
+        var move_list_filtered = move_list.filter(it => (non_sorted.findIndex(x => x[0] == it[0]) < 25) && it[1] == move_list[0][1]);
+        if (move_list_filtered.length == 0) return non_sorted[0][0];
         var move_name = move_list_filtered[randomNumber(0, move_list_filtered.length - 1)][0];
         return move_name;
     }
