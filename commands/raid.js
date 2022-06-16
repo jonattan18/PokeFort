@@ -356,6 +356,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
                     if (!raid.Started) return message.channel.send("This raid has not started yet!");
                     if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
+                    if (raid.CompletedDuel.includes(message.author.id)) return message.channel.send("You have already completed this raid duel!");
                     if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
                     if (team.Pokemons.isNull()) return message.channel.send("Your team should not be empty.");
 
@@ -413,6 +414,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 var received_data = chunk.split('\n');
                                 if (received_data.includes("|start")) {
                                     raid.Stream = _battleStream.battle.inputLog.join('\n');
+                                    raid.RaidPokemon.RaidStream = JSON.stringify(_battleStream.battle.sides[1].pokemon[0]);
                                     raid.save().then(() => {
                                         // Get image url of raid boss.
                                         var raid_boss_image_data = raid.RaidPokemon.Image;
@@ -429,7 +431,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             // Sending duel message.
                                             var embed = new Discord.MessageEmbed();
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                            embed.setDescription(`**Weather: ${raid.RaidPokemon.Weather.Name}**`);
+                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
                                             embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);

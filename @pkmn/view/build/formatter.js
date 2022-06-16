@@ -967,7 +967,7 @@ class Handler {
     '|-damage|'(args, kwArgs) {
         const [, damage, pokemon, health] = args;
         const percentage = kwArgs.from ? undefined : this.tracker.damagePercentage(pokemon, health);
-        let template = this.parser.template('damage', kwArgs.from, 'NODEFAULT');
+        let template = this.parser.template('damagePercentage', kwArgs.from, 'NODEFAULT');
         const line1 = this.parser.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
         const id = LogFormatter.effectId(kwArgs.from);
         if (template)
@@ -975,7 +975,7 @@ class Handler {
             .replace('[POKEMON]', this.parser.pokemon(pokemon))
             .replace('[DAMAGE]', damage);
         if (!kwArgs.from) {
-            template = this.parser.template(percentage ? 'damagePercentage' : 'damage');
+            template = this.parser.template(percentage ? 'damagePercentage' : 'damagePercentage');
             return (line1 + template
                 .replace('[POKEMON]', this.parser.pokemon(pokemon))
                 .replace('[DAMAGE]', damage));
@@ -993,7 +993,7 @@ class Handler {
                 .replace('[POKEMON]', this.parser.pokemon(pokemon))
                 .replace('[MOVE]', this.parser.effect(kwArgs.from)));
         }
-        template = this.parser.template('damage');
+        template = this.parser.template('damagePercentage');
         return line1 + template.replace('[DAMAGE]', damage);
     }
     '|-heal|'(args, kwArgs) {

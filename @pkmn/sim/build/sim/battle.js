@@ -1944,9 +1944,16 @@ class Battle {
     getCategory(move) {
         return this.dex.moves.get(move).category || 'Physical';
     }
-    randomizer(baseDamage) {
+    randomizer(baseDamage, pokemon) {
         const tr = this.trunc;
-        return tr(tr(baseDamage * (100 - this.random(16))) / 100);
+        if (pokemon == undefined) return tr(tr(baseDamage * (100 - this.random(16))) / 100)
+        else {
+            if (pokemon.level < 101) {
+                return tr(tr(baseDamage * (100 - this.random(16))) / 5);
+            } else {
+                return tr(tr(baseDamage * (100 - this.random(16))) / 200);
+            }
+        }
     }
     /**
      * Returns whether a proposed target for a move is valid.
