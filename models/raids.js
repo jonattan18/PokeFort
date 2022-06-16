@@ -21,11 +21,7 @@ const RaidSchema = new mongoose.Schema({
         SpDefense: Number,
         Speed: Number,
         PreparationMove: Number,
-        Weather: {
-            Name: String,
-            Turns: Number,
-            MaxTurn: Number
-        }
+        RaidStream: String
     },
     Trainers: Array,
     TrainersTag: Array,

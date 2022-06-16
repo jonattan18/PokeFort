@@ -438,8 +438,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 for (const { args, kwArgs } of Protocol.parse(chunk)) {
                     var formatted = formatter.formatText(args, kwArgs);
 
-                    console.log(formatted);
-
                     // Execption
                     if (formatted == "\n") continue;
                     if (formatted.startsWith("\n== Turn")) continue;
@@ -456,8 +454,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     formatted = formatted.replaceAll("*", "");
                     // Remove brackets.
                     formatted = formatted.replaceAll("(", "").replaceAll(")", "");
-                    // Remove exclaimation marks.
-                    formatted = formatted.replaceAll("!", "");
 
                     if (formatted) show_str.push(formatted);
                 }
@@ -483,10 +479,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     }
                     else {
                         show_str.splice(0, i);
-                        if (show_str[0].includes("fainted:p1a:")) {
+                        if (show_str[0].includes("fainted!:p1a:")) {
                             _user_pokemon_fainted = true;
                         }
-                        else if (show_str[0].includes("fainted:p2a:")) {
+                        else if (show_str[0].includes("fainted!:p2a:")) {
                             _raid_pokemon_fainted = true;
                         }
                         break;
@@ -505,11 +501,15 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     }
                     else {
                         show_str.splice(0, i);
-                        if (show_str[0].includes("fainted:p1a:")) {
+                        if (show_str[0].includes("fainted!:p1a:")) {
                             _user_pokemon_fainted = true;
                         }
-                        else if (show_str[0].includes("fainted:p2a:")) {
+                        else if (show_str[0].includes("fainted!:p2a:")) {
                             _raid_pokemon_fainted = true;
+                        }
+                        while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
+                            second_user_message.push("\n" + show_str[i]);
+                            i++;
                         }
                         break;
                     }
@@ -525,7 +525,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                     // Create raid boss message.
                     var raid_embed = new Discord.MessageEmbed();
-                    raid_embed.setTitle(`${message.author.username}'s ${second_user_message[0]}`);
+                    raid_embed.setTitle(`${second_user_message[0]}`);
                     raid_embed.setDescription(second_user_message.slice(1).join(""));
                     message.channel.send(raid_embed);
 
@@ -540,8 +540,15 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     var raid_boss_image_data = raid_data.RaidPokemon.Image;
                     var user_image_data = raid_data.TrainersTeam[raid_data.CurrentPokemon].Image;
 
+                    // Background image url.
+                    var image_url = "./assets/raid_images/background.jpeg";
+                    if (_battlestream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
+                    else if (_battlestream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
+                    else if (_battlestream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
+                    else if (_battlestream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
+
                     // Creating Image for embed.
-                    mergeImages(["./assets/raid_images/background.jpeg",
+                    mergeImages([image_url,
                         { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
                         Canvas: Canvas
                     }).then(b64 => {
