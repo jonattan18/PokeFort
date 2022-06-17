@@ -353,7 +353,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 
-function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0) {
+function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0, _default = 0) {
     if (args.length != 1 || !isInt(args[0]) || (_switch && (args[0] > 6 || args[0] < 1)) || (!_switch && (args[0] > 4 || args[0] < 1))) return message.channel.send("Please enter a valid move.");
 
     // Get all moves of raid pokemon.
@@ -419,10 +419,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && !switch_pokemon.fainted && switch_pokemon.fainted != undefined) {
-                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 move ${move_index}`;
+                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default == 1 ? "default" : "move " +  move_index}`;
             } else return message.channel.send("Please enter a valid pokemon to switch.");
         }
-    } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
+    } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
 
     // Parse stream data.
     var first_five = true;
@@ -547,6 +547,13 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                     }
 
+                    // Undefined Notification if switch is off.
+                    if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
+                        if (_default == 0) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop, 1);
+                        else if (_default == 1) return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
+                    }
+
+
                     if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
 
                         var raid_boss_image_data = raid_data.RaidPokemon.Image;
@@ -580,11 +587,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
                             message.channel.send(embed);
                         });
-                    }
-
-                    // Undefined Notification if switch is off.
-                    if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
-                        return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
                     }
 
                     // User Pokemon fainted.
@@ -638,7 +640,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         raid_data.Stream = _battlestream.battle.inputLog.join('\n');
                         raid_data.RaidPokemon.RaidStream = JSON.stringify(_battlestream.battle.sides[1].pokemon[0]);
                         raid_data.save();
-                    } else {
+                    } else if (_raid_boss_fainted == true || _raid_boss_won == true) {
                         raid_data.remove();
                     }
                 }
