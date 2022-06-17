@@ -17,6 +17,8 @@ module.exports.run = async (bot, message, args, prefix) => {
                         `\n\n**Generation VII:**\nRowlet | Litten | Popplio` +
                         `\n\n**Generation VIII:**\nGrookey | Scorbunny | Sobble`)
         .setFooter("Note: Trading in-game content for IRL money or using a form of automation such as macros or selfbots to gain an unfair advantage will result in a ban from the bot. Don't cheat!")
+        .attachFiles('./assets/misc_images/start.png')
+        .setImage('attachment://start.png');
 
     // Send embed message
     message.channel.send(embed);
