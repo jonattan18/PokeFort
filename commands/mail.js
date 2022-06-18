@@ -34,8 +34,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var mail_sent = chunks[i][j].Timestamp;
 
                     var sent_time = new Date(mail_sent);
-                    var time_diff = new Date(sent_time.getTime() - new Date().getTime()).getUTCHours();
-
+                    var time_diff = diff_hours(new Date(), sent_time);
                     if (mail_subject.length > 25) mail_subject = mail_subject.substring(0, 25) + '...';
 
                     if (time_diff < 1) var sent_time_string = "Now";
@@ -46,6 +45,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                     description += `**${mail_read ? `~~${index_string}${mail_subject}~~` : `${index_string}${mail_subject}`}** _• ${sent_time_string}_\n`;
                     description += `${" ".repeat(index_string.length)}_${mail_message.substring(0, 37)}..._${mail_attachment.length != 0 ? " 🄰" : ""}\n\n`;
+                    index_number++;
                 }
                 embeds[i].setDescription(description + "‎");
                 embeds[i].setFooter(`User Inbox - Page ${i + 1}/${chunks.length}`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
@@ -127,7 +127,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var pokemons_to_add = [];
                     for (var i = 0; i < mail_attachment.Pokemons.length; i++) {
                         var crnt_pokemon = mail_attachment.Pokemons[i];
-                        claimed_message += `**Level ${crnt_pokemon.Level} ` + getPokemons.get_pokemon_name_from_id(crnt_pokemon.PokemonId, pokemons, crnt_pokemon.Shiny) + "**";
+                        claimed_message += `**Level ${crnt_pokemon.Level} ` + getPokemons.get_pokemon_name_from_id(crnt_pokemon.PokemonId, pokemons, crnt_pokemon.Shiny) + "**\n";
                         let pokemon_data = {
                             _id: new Mongoose.Types.ObjectId(),
                             PokemonId: crnt_pokemon.PokemonId,
@@ -157,6 +157,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     });
 
+}
+
+function diff_hours(dt2, dt1) {
+    var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+    diff /= (60 * 60);
+    return Math.abs(Math.round(diff));
 }
 
 // Unix the time
