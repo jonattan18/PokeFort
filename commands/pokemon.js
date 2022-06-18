@@ -48,8 +48,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // For only int type command
             if (args.length > 0 && onlyNumbers(args)) {
-                user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-                return create_pagination(message, pokemons, user_pokemons);
+                if (user_pokemons.length > 20) {
+                    page = args[0];
+                    return create_pagination(message, pokemons, user_pokemons);
+                }
+                else {
+                    user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
+                    return create_pagination(message, pokemons, user_pokemons);
+                }
             }
 
             // Multi commmand controller.
