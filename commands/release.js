@@ -4,6 +4,7 @@ const _ = require('lodash');
 // Models
 const user_model = require('../models/user');
 const prompt_model = require('../models/prompt');
+const raid_model = require('../models/raids');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -19,427 +20,434 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (err) return console.log(err);
             if (_trade) return message.channel.send("You can't release pokemon while you are in a trade!");
 
-            //Get user data.
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                if (!user) return;
-                if (err) console.log(err);
-                getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+            raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+                if (err) { console.log(err); return; }
+                if (raid) {
+                    if (raid.Started) return message.channel.send("You can't release pokemon while you are in a raid!");
+                } else {
+                    //Get user data.
+                    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                        if (!user) return;
+                        if (err) console.log(err);
+                        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                    // If no arguments
-                    if (args.length == 0) {
-                        return message.channel.send("Please mention pokemon number or ``latest`` to release latest pokemon.");
-                    }
-
-                    // If arguments is latest or l
-                    else if (args[0].toLowerCase() == "l" || args[0].toLowerCase() == "latest") {
-                        var selected_pokemon = [user_pokemons[user_pokemons.length - 1]];
-                        return release(message, pokemons, selected_pokemon, prefix);
-                    }
-
-                    // For only release int type command.
-                    else if (onlyNumbers(args)) {
-                        user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-                        return release(message, pokemons, user_pokemons, prefix, user);
-                    }
-
-                    // Multi commmand controller.
-                    var error = [];
-                    var total_args = args.join(" ").replace(/--/g, ",--").split(",");
-                    total_args = _.without(total_args, "", " ");
-                    for (j = 0; j < total_args.length; j++) {
-                        var is_not = false;
-                        new_args = total_args[j].split(" ").filter(it => it != "");
-                        if (new_args[0] == "--not") {
-                            var old_pokemons = user_pokemons;
-                            is_not = true;
-                            new_args.splice(0, 1);
-                            new_args[0] = "--" + new_args[0];
-                        }
-                        error[0] = new_args[0];
-                        if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--l") || _.isEqual(new_args[0], "--legendary"))) { legendary(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
-                        else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
-                        else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
-                        else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
-                        else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--limit") || _.isEqual(new_args[0], "--l"))) { limit(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--trip") || _.isEqual(new_args[0], "--triple"))) { triple(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--double"))) { double(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
-                        else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
-                        else { message.channel.send("Invalid command."); return; }
-
-                        // Check if error occurred in previous loop
-                        if (error.length > 1) {
-                            message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
-                            break;
-                        }
-                        if (is_not) {
-                            user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
-                        }
-                        if (j == total_args.length - 1) { release(message, pokemons, user_pokemons, prefix); }
-                    }
-
-                    // For pk --shiny command.
-                    function shiny(args) {
-                        user_pokemons = user_pokemons.filter(pokemon => pokemon.Shiny);
-                    }
-
-                    // For pk --legendary command.
-                    function legendary(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId.toString())[0];
-                            if (pokemon_db["Legendary Type"] === "Legendary" || pokemon_db["Legendary Type"] === "Sub-Legendary" && pokemon_db["Alternate Form Name"] === "NULL" && pokemon_db["Primary Ability"] != "Beast Boost") {
-                                filtered_pokemons.push(user_pokemons[i]);
+                            // If no arguments
+                            if (args.length == 0) {
+                                return message.channel.send("Please mention pokemon number or ``latest`` to release latest pokemon.");
                             }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
 
-                    // For pk --mythical command.
-                    function mythical(args) {
-                        if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
-                            var filtered_pokemons = [];
-                            for (i = 0; i < user_pokemons.length; i++) {
-                                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                                if (pokemon_db["Legendary Type"] === "Mythical" && pokemon_db["Alternate Form Name"] === "NULL") {
-                                    filtered_pokemons.push(user_pokemons[i]);
+                            // If arguments is latest or l
+                            else if (args[0].toLowerCase() == "l" || args[0].toLowerCase() == "latest") {
+                                var selected_pokemon = [user_pokemons[user_pokemons.length - 1]];
+                                return release(message, pokemons, selected_pokemon, prefix);
+                            }
+
+                            // For only release int type command.
+                            else if (onlyNumbers(args)) {
+                                user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
+                                return release(message, pokemons, user_pokemons, prefix, user);
+                            }
+
+                            // Multi commmand controller.
+                            var error = [];
+                            var total_args = args.join(" ").replace(/--/g, ",--").split(",");
+                            total_args = _.without(total_args, "", " ");
+                            for (j = 0; j < total_args.length; j++) {
+                                var is_not = false;
+                                new_args = total_args[j].split(" ").filter(it => it != "");
+                                if (new_args[0] == "--not") {
+                                    var old_pokemons = user_pokemons;
+                                    is_not = true;
+                                    new_args.splice(0, 1);
+                                    new_args[0] = "--" + new_args[0];
                                 }
+                                error[0] = new_args[0];
+                                if (new_args.length == 1 && (_.isEqual(new_args[0], "--s") || _.isEqual(new_args[0], "--shiny"))) { shiny(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--l") || _.isEqual(new_args[0], "--legendary"))) { legendary(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
+                                else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
+                                else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--nn") || _.isEqual(new_args[0], "--nickname"))) { nickname(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--atkiv") || _.isEqual(new_args[0], "--attackiv"))) { atkiv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--defiv") || _.isEqual(new_args[0], "--defenseiv"))) { defiv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spatkiv") || _.isEqual(new_args[0], "--specialattackiv"))) { spatkiv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
+                                else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--limit") || _.isEqual(new_args[0], "--l"))) { limit(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--trip") || _.isEqual(new_args[0], "--triple"))) { triple(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--double"))) { double(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
+                                else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
+                                else { message.channel.send("Invalid command."); return; }
+
+                                // Check if error occurred in previous loop
+                                if (error.length > 1) {
+                                    message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                                    break;
+                                }
+                                if (is_not) {
+                                    user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
+                                }
+                                if (j == total_args.length - 1) { release(message, pokemons, user_pokemons, prefix); }
                             }
-                            user_pokemons = filtered_pokemons;
-                        }
-                    }
 
-                    // For pk --ultrabeast command.
-                    function ultrabeast(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                            if (pokemon_db["Primary Ability"] === "Beast Boost" && pokemon_db["Alternate Form Name"] === "NULL") {
-                                filtered_pokemons.push(user_pokemons[i]);
+                            // For pk --shiny command.
+                            function shiny(args) {
+                                user_pokemons = user_pokemons.filter(pokemon => pokemon.Shiny);
                             }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
 
-                    // For pk --alolan command.
-                    function alolan(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                            if (pokemon_db["Alternate Form Name"] === "Alola") {
-                                filtered_pokemons.push(user_pokemons[i]);
+                            // For pk --legendary command.
+                            function legendary(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId.toString())[0];
+                                    if (pokemon_db["Legendary Type"] === "Legendary" || pokemon_db["Legendary Type"] === "Sub-Legendary" && pokemon_db["Alternate Form Name"] === "NULL" && pokemon_db["Primary Ability"] != "Beast Boost") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
                             }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
 
-                    // For pk --galarian command.
-                    function galarian(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                            if (pokemon_db["Alternate Form Name"] === "Galar") {
-                                filtered_pokemons.push(user_pokemons[i]);
-                            }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
-
-                    // For pk --favourite command.
-                    function favourite(args) {
-                        user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
-                    }
-
-                    // For pk --type command.
-                    function type(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                            if (pokemon_db["Primary Type"].toLowerCase() == args[1].toLowerCase() || pokemon_db["Secondary Type"].toLowerCase() == args[1].toLowerCase()) {
-                                filtered_pokemons.push(user_pokemons[i]);
-                            }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
-
-                    // For pk --name command.
-                    function name(args) {
-                        var filtered_pokemons = [];
-                        for (i = 0; i < user_pokemons.length; i++) {
-                            var user_name = args.slice(1).join(" ").toLowerCase();
-                            var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                            if (pokemon_db["Pokemon Name"].toLowerCase() == user_name) {
-                                filtered_pokemons.push(user_pokemons[i]);
-                            }
-                        }
-                        user_pokemons = filtered_pokemons;
-                    }
-
-                    // For pk --nickname command.
-                    function nickname(args) {
-                        if (args.length == 1) {
-                            user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "" || pokemon.Nickname != null || pokemon.Nickname != undefined);
-                        } else {
-                            args = args.slice(1);
-                            user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());
-                        }
-                    }
-
-                    // For pk --level command.
-                    function level(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --iv command.
-                    function iv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => total_iv(pokemon.IV) == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) > parseFloat(args[2]));
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) < parseFloat(args[2]));
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --hpiv command.
-                    function hpiv() {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --atkiv command.
-                    function atkiv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --defiv command.
-                    function defiv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --spatkiv command.
-                    function spatkiv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --spdefiv command.
-                    function spdefiv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --speediv command.
-                    function spdiv(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] == args[1]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] > args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
-                            filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] < args[2]);
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --limit command.
-                    function limit(args) {
-                        if (args.length == 1) {
-                            return error[1] = [false, "Please specify a value."]
-                        }
-                        else if (args.length == 2 && isInt(args[1])) {
-                            user_pokemons = user_pokemons.slice(0, args[1]);
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --triple command.
-                    function triple(args) {
-                        if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                            var filtered_pokemons = [];
-                            filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3, args[1]));
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --quadra command.
-                    function quadra(args) {
-                        if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                            var filtered_pokemons = [];
-                            filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4, args[1]));
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --penta command.
-                    function penta(args) {
-                        if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
-                            var filtered_pokemons = [];
-                            filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5, args[1]));
-                            user_pokemons = filtered_pokemons;
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
-
-                    // For pk --evolution command.
-                    function evolution(args) {
-                        var filtered_pokemons = [];
-                        if (args.length == 2) {
-                            var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-                            if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
-                            filtered_pokemons.push(found_pokemon["Pokemon Id"]);
-
-                            if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
-                                filtered_pokemons.push(found_pokemon.Evolution.Id);
-                                var double_found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
-                                if (double_found_pokemon.Evolution != undefined && double_found_pokemon.Evolution.Reason == "Level") {
-                                    filtered_pokemons.push(double_found_pokemon.Evolution.Id);
+                            // For pk --mythical command.
+                            function mythical(args) {
+                                if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
+                                    var filtered_pokemons = [];
+                                    for (i = 0; i < user_pokemons.length; i++) {
+                                        var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                        if (pokemon_db["Legendary Type"] === "Mythical" && pokemon_db["Alternate Form Name"] === "NULL") {
+                                            filtered_pokemons.push(user_pokemons[i]);
+                                        }
+                                    }
+                                    user_pokemons = filtered_pokemons;
                                 }
                             }
 
-                            var pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == found_pokemon["Pokemon Id"])[0];
-                            if (pre_found_pokemon != undefined && pre_found_pokemon.Evolution.Reason == "Level") {
-                                filtered_pokemons.push(pre_found_pokemon["Pokemon Id"]);
-                                var double_pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == pre_found_pokemon["Pokemon Id"])[0];
-                                if (double_pre_found_pokemon != undefined && double_pre_found_pokemon.Evolution.Reason == "Level") {
-                                    filtered_pokemons.push(double_pre_found_pokemon["Pokemon Id"]);
+                            // For pk --ultrabeast command.
+                            function ultrabeast(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Primary Ability"] === "Beast Boost" && pokemon_db["Alternate Form Name"] === "NULL") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --alolan command.
+                            function alolan(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Alternate Form Name"] === "Alola") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --galarian command.
+                            function galarian(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Alternate Form Name"] === "Galar") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --favourite command.
+                            function favourite(args) {
+                                user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
+                            }
+
+                            // For pk --type command.
+                            function type(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Primary Type"].toLowerCase() == args[1].toLowerCase() || pokemon_db["Secondary Type"].toLowerCase() == args[1].toLowerCase()) {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --name command.
+                            function name(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var user_name = args.slice(1).join(" ").toLowerCase();
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Pokemon Name"].toLowerCase() == user_name) {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --nickname command.
+                            function nickname(args) {
+                                if (args.length == 1) {
+                                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "" || pokemon.Nickname != null || pokemon.Nickname != undefined);
+                                } else {
+                                    args = args.slice(1);
+                                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());
                                 }
                             }
 
-                            user_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
-                        }
-                        else { return error[1] = [false, "Invalid argument syntax."] }
-                    }
+                            // For pk --level command.
+                            function level(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.Level < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
 
-                });
+                            // For pk --iv command.
+                            function iv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1]) || isFloat(parseFloat(args[1]))) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => total_iv(pokemon.IV) == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) > parseFloat(args[2]));
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && (isInt(args[2]) || isFloat(parseFloat(args[2])))) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => parseFloat(total_iv(pokemon.IV)) < parseFloat(args[2]));
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --hpiv command.
+                            function hpiv() {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[0] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --atkiv command.
+                            function atkiv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[1] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --defiv command.
+                            function defiv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[2] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --spatkiv command.
+                            function spatkiv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[3] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --spdefiv command.
+                            function spdefiv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[4] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --speediv command.
+                            function spdiv(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] == args[1]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == ">" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] > args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else if (args.length == 3 && args[1] == "<" && isInt(args[2])) {
+                                    filtered_pokemons = user_pokemons.filter(pokemon => pokemon.IV[5] < args[2]);
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --limit command.
+                            function limit(args) {
+                                if (args.length == 1) {
+                                    return error[1] = [false, "Please specify a value."]
+                                }
+                                else if (args.length == 2 && isInt(args[1])) {
+                                    user_pokemons = user_pokemons.slice(0, args[1]);
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --triple command.
+                            function triple(args) {
+                                if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                                    var filtered_pokemons = [];
+                                    filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 3, args[1]));
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --quadra command.
+                            function quadra(args) {
+                                if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                                    var filtered_pokemons = [];
+                                    filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 4, args[1]));
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --penta command.
+                            function penta(args) {
+                                if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
+                                    var filtered_pokemons = [];
+                                    filtered_pokemons = user_pokemons.filter(pokemon => has_repeated(pokemon.IV, 5, args[1]));
+                                    user_pokemons = filtered_pokemons;
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                            // For pk --evolution command.
+                            function evolution(args) {
+                                var filtered_pokemons = [];
+                                if (args.length == 2) {
+                                    var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
+                                    if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
+                                    filtered_pokemons.push(found_pokemon["Pokemon Id"]);
+
+                                    if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
+                                        filtered_pokemons.push(found_pokemon.Evolution.Id);
+                                        var double_found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
+                                        if (double_found_pokemon.Evolution != undefined && double_found_pokemon.Evolution.Reason == "Level") {
+                                            filtered_pokemons.push(double_found_pokemon.Evolution.Id);
+                                        }
+                                    }
+
+                                    var pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == found_pokemon["Pokemon Id"])[0];
+                                    if (pre_found_pokemon != undefined && pre_found_pokemon.Evolution.Reason == "Level") {
+                                        filtered_pokemons.push(pre_found_pokemon["Pokemon Id"]);
+                                        var double_pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == pre_found_pokemon["Pokemon Id"])[0];
+                                        if (double_pre_found_pokemon != undefined && double_pre_found_pokemon.Evolution.Reason == "Level") {
+                                            filtered_pokemons.push(double_pre_found_pokemon["Pokemon Id"]);
+                                        }
+                                    }
+
+                                    user_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
+                                }
+                                else { return error[1] = [false, "Invalid argument syntax."] }
+                            }
+
+                        });
+                    });
+                }
             });
         });
     });

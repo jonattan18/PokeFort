@@ -4,6 +4,7 @@ const Canvas = require('canvas');
 
 // Models
 const user_model = require('../models/user');
+const prompt_model = require('../models/prompt');
 const raid_model = require('../models/raids');
 
 // Utils
@@ -182,67 +183,78 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         });
     }
     else if (args.length == 2 && args[0].toLowerCase() == "join" && digits_only(args[1])) {
-        // User check if raid scheme has trainer included.
-        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
-            if (err) { console.log(err); return; }
-            if (raid) {
-                message.channel.send(`You are already in a raid.`);
-                return;
-            }
-            else {
-                raid_model.findOne({ $and: [{ RaidID: parseInt(args[1]) }, { Timestamp: { $gt: Date.now() } }] }, (err, raid_data) => {
+
+        prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
+            if (err) return console.log(err);
+            if (_trade) return message.channel.send("You can't raid while you are in a trade!");
+
+            prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
+                if (err) return console.log(err);
+                if (_duel) return message.channel.send("You can't raid while you are in a duel!");
+
+                // User check if raid scheme has trainer included.
+                raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
                     if (err) { console.log(err); return; }
-                    if (!raid_data) return message.channel.send(`No raid found with that ID.`);
+                    if (raid) {
+                        message.channel.send(`You are already in a raid.`);
+                        return;
+                    }
                     else {
-                        if (raid_data.Started) return message.channel.send(`Raid has already started.`);
-                        else {
-                            if (raid_data.Ban != undefined && raid_data.Ban.includes(message.author.id)) return message.channel.send(`Sorry, You can't enter this raid.`);
-                            if (raid_data.Trainers.length == 4) return message.channel.send(`The specified raid already has 4 trainers.`);
+                        raid_model.findOne({ $and: [{ RaidID: parseInt(args[1]) }, { Timestamp: { $gt: Date.now() } }] }, (err, raid_data) => {
+                            if (err) { console.log(err); return; }
+                            if (!raid_data) return message.channel.send(`No raid found with that ID.`);
                             else {
-                                user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                                    if (err) { console.log(err); return; }
-                                    if (user) {
-                                        user.RaidsJoined = user.RaidsJoined != undefined ? user.RaidsJoined + 1 : 1;
-                                        raid_data.Trainers.push(message.author.id);
-                                        raid_data.TrainersTag.push(message.author.tag);
-                                        raid_data.save().then(() => {
-                                            user.save().then(() => {
-                                                // Stats String
-                                                var stats_string = `Health: ${raid_data.RaidPokemon.Health}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
-                                                var raid_boss_image = getPokemons.imagefromid(raid_data.RaidPokemon.ID.toString(), pokemons, false, true);
+                                if (raid_data.Started) return message.channel.send(`Raid has already started.`);
+                                else {
+                                    if (raid_data.Ban != undefined && raid_data.Ban.includes(message.author.id)) return message.channel.send(`Sorry, You can't enter this raid.`);
+                                    if (raid_data.Trainers.length == 4) return message.channel.send(`The specified raid already has 4 trainers.`);
+                                    else {
+                                        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                            if (err) { console.log(err); return; }
+                                            if (user) {
+                                                user.RaidsJoined = user.RaidsJoined != undefined ? user.RaidsJoined + 1 : 1;
+                                                raid_data.Trainers.push(message.author.id);
+                                                raid_data.TrainersTag.push(message.author.tag);
+                                                raid_data.save().then(() => {
+                                                    user.save().then(() => {
+                                                        // Stats String
+                                                        var stats_string = `Health: ${raid_data.RaidPokemon.Health}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
+                                                        var raid_boss_image = getPokemons.imagefromid(raid_data.RaidPokemon.ID.toString(), pokemons, false, true);
 
-                                                // Time String
-                                                var raid_time_left_string = "";
-                                                raid_time_left = new Date(new Date(raid_data.Timestamp).getTime() - new Date().getTime());
-                                                raid_time_left_string = `${raid_time_left.getUTCHours()}:${raid_time_left.getUTCMinutes()}:${raid_time_left.getUTCSeconds()}`;
+                                                        // Time String
+                                                        var raid_time_left_string = "";
+                                                        raid_time_left = new Date(new Date(raid_data.Timestamp).getTime() - new Date().getTime());
+                                                        raid_time_left_string = `${raid_time_left.getUTCHours()}:${raid_time_left.getUTCMinutes()}:${raid_time_left.getUTCSeconds()}`;
 
-                                                var embed = new Discord.MessageEmbed();
-                                                embed.attachFiles(raid_boss_image[1]);
-                                                embed.setColor(getRaidColor(raid_data.RaidType));
-                                                embed.setTitle(`${message.author.username} has joined a raid battle!`);
-                                                embed.addField(`Level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name}`, stats_string, false);
+                                                        var embed = new Discord.MessageEmbed();
+                                                        embed.attachFiles(raid_boss_image[1]);
+                                                        embed.setColor(getRaidColor(raid_data.RaidType));
+                                                        embed.setTitle(`${message.author.username} has joined a raid battle!`);
+                                                        embed.addField(`Level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name}`, stats_string, false);
 
-                                                var trainer_data = "";
-                                                for (var i = 0; i < 4; i++) {
-                                                    trainer_data += `Trainer #${i + 1}: ${raid_data.TrainersTag[i] != undefined ? raid_data.TrainersTag[i] : "None"}\n`
-                                                }
+                                                        var trainer_data = "";
+                                                        for (var i = 0; i < 4; i++) {
+                                                            trainer_data += `Trainer #${i + 1}: ${raid_data.TrainersTag[i] != undefined ? raid_data.TrainersTag[i] : "None"}\n`
+                                                        }
 
-                                                embed.addField(`Trainers:`, trainer_data, false);
-                                                embed.addField(`Obtainable Rewards:`, getRewards(raid_data.RaidType, raid_data.RaidPokemon.Name), false);
-                                                embed.setImage('attachment://' + raid_boss_image[0] + ".png")
-                                                description = `**RaidID: ${raid_data.RaidID}\n` + `Difficulty: ${getDifficultyString(raid_data.RaidType)}\n` + `Time Left: ${raid_time_left_string}**`;
-                                                embed.setDescription(description);
-                                                embed.setFooter(`To join this raid, do ${prefix}r join ${raid_data.RaidID}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
-                                                message.channel.send(embed);
-                                            });
+                                                        embed.addField(`Trainers:`, trainer_data, false);
+                                                        embed.addField(`Obtainable Rewards:`, getRewards(raid_data.RaidType, raid_data.RaidPokemon.Name), false);
+                                                        embed.setImage('attachment://' + raid_boss_image[0] + ".png")
+                                                        description = `**RaidID: ${raid_data.RaidID}\n` + `Difficulty: ${getDifficultyString(raid_data.RaidType)}\n` + `Time Left: ${raid_time_left_string}**`;
+                                                        embed.setDescription(description);
+                                                        embed.setFooter(`To join this raid, do ${prefix}r join ${raid_data.RaidID}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
+                                                        message.channel.send(embed);
+                                                    });
+                                                });
+                                            }
                                         });
                                     }
-                                });
+                                }
                             }
-                        }
+                        });
                     }
                 });
-            }
+            });
         });
     }
     else if (args.length == 1 && args[0].toLowerCase() == "info") {

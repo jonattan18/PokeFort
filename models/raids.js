@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const config = require('../config/config.json');
 
 const RaidSchema = new mongoose.Schema({
     RaidID: Number,
@@ -33,7 +34,12 @@ const RaidSchema = new mongoose.Schema({
     CurrentTurn: Number,
     Stream: String,
     OldStreamText: Number,
-    ChangeOnFainted: Boolean
+    ChangeOnFainted: Boolean,
+    expireAt: {
+        type: Date,
+        default: Date.now,
+        index: { expires: config.RAID_EXPIRATION_SECONDS },
+    },
 });
 
 const MessageModel = module.exports = mongoose.model('raids', RaidSchema);

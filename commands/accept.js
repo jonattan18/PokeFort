@@ -6,6 +6,7 @@ const Canvas = require('canvas');
 // Models
 const prompt_model = require('../models/prompt');
 const user_model = require('../models/user');
+const raid_model = require('../models/raids');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -26,19 +27,27 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (err) return console.log(err);
                 if (_trade) return message.channel.send('Requested User is already dueling with someone!');
 
-                // If user prompt is for trade.
-                if (prompt.PromptType == "Trade") {
-                    if (prompt.UserID.User2ID == message.author.id && prompt.Trade.Accepted == false) {
-                        return trade(bot, message, prefix, prompt);
+                raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+                    if (err) { console.log(err); return; }
+                    if (raid) {
+                        if (raid.Started) return message.channel.send("You can't do this while you are in a raid!");
                     }
-                }
-                else if (prompt.PromptType == "Duel") {
-                    if (prompt.UserID.User2ID == message.author.id && prompt.Duel.Accepted == false) {
-                        return duel(bot, message, prefix, prompt, pokemons);
-                    }
-                }
-                else return message.channel.send('No prompt asked for to use ``accept`` command.');
+                    else {
+                        // If user prompt is for trade.
+                        if (prompt.PromptType == "Trade") {
+                            if (prompt.UserID.User2ID == message.author.id && prompt.Trade.Accepted == false) {
+                                return trade(bot, message, prefix, prompt);
+                            }
+                        }
+                        else if (prompt.PromptType == "Duel") {
+                            if (prompt.UserID.User2ID == message.author.id && prompt.Duel.Accepted == false) {
+                                return duel(bot, message, prefix, prompt, pokemons);
+                            }
+                        }
+                        else return message.channel.send('No prompt asked for to use ``accept`` command.');
 
+                    }
+                });
             });
         });
     });
