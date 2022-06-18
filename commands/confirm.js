@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const user_model = require('../models/user');
 const prompt_model = require('../models/prompt');
 const pokemons_model = require('../models/pokemons');
+const raid_model = require('../models/raids');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -20,23 +21,31 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (err) return console.log(err);
         if (!prompt) return message.channel.send('No prompt asked for to use ``confirm`` command.');
 
-        // If user prompt is for release
-        if (prompt.PromptType == "Release") {
-            return release(message, prompt);
-        }
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            if (err) { console.log(err); return; }
+            if (raid) {
+                if (raid.Started) return message.channel.send("You can't do this while you are in a raid!");
+            } else {
 
-        // If user prompt is for recycle
-        else if (prompt.PromptType == "Recycle") {
-            return recycle(message, prompt, pokemons);
-        }
+                // If user prompt is for release
+                if (prompt.PromptType == "Release") {
+                    return release(message, prompt);
+                }
 
-        // If user prompt is for trade
-        else if (prompt.PromptType == "Trade" && prompt.Trade.Accepted == true) {
-            return trade(message, prompt, pokemons);
-        }
+                // If user prompt is for recycle
+                else if (prompt.PromptType == "Recycle") {
+                    return recycle(message, prompt, pokemons);
+                }
 
-        else return message.channel.send('No prompt asked for to use ``confirm`` command.');
+                // If user prompt is for trade
+                else if (prompt.PromptType == "Trade" && prompt.Trade.Accepted == true) {
+                    return trade(message, prompt, pokemons);
+                }
 
+                else return message.channel.send('No prompt asked for to use ``confirm`` command.');
+
+            }
+        });
     });
 }
 
