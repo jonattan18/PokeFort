@@ -59,7 +59,8 @@ const UserSchema = new mongoose.Schema({
         Claimed: { type: Boolean, default: false },
         Read: { type: Boolean, default: false },
         Timestamp: Number
-    }]
+    }],
+    HideWeeklyLeaderboard: Boolean
 });
 
 const MessageModel = module.exports = mongoose.model('users', UserSchema)

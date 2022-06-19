@@ -962,9 +962,9 @@ exports.Moves = {
                         delete source.volatiles['lockedmove'];
                     }
                 }
-                if (this.checkMoveMakesContact(move, source, target)) {
+                if (!this.checkMoveMakesContact(move, source, target)) {
                     source.trySetStatus('psn', target);
-                }
+                } else source.trySetStatus('psn', target);
                 return this.NOT_FAIL;
             },
             onHit(target, source, move) {

@@ -34,5 +34,9 @@
     "readdirp": "^3.6.0",
     "remove": "^0.1.5",
     "save": "^2.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "eslint-config-google": "^0.14.0"
   }
 }

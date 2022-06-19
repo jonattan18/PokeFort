@@ -1,10 +1,15 @@
 // Models
 const channel_model = require('../models/channel');
 const user_model = require('../models/user');
+const leaderboard_model = require('../models/leaderboard');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
 const getDexes = require('../utils/getDex');
+const _ = require('lodash');
+
+// Config file
+const config = require("../config/config.json");
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
@@ -55,59 +60,107 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         if (splitted_number.length == 3 && splitted_number[1] == 0 && splitted_number[2] == 0) { credit_amount = 3500; }
                         if (splitted_number.length == 4 && splitted_number[1] == 0 && splitted_number[2] == 0 && splitted_number[3] == 0) { credit_amount = 35000; }
 
-                        let pokemon_data = {
-                            PokemonId: pokemon["Pokemon Id"],
-                            Experience: 0,
-                            Level: channel.PokemonLevel,
-                            Nature: channel.PokemonNature,
-                            IV: channel.PokemonIV,
-                            Shiny: channel.Shiny,
-                            Reason: "Catched"
-                        }
+                        leaderboard_model.findOne({ Type: "Weekly" }, (err, leaderboard) => {
+                            if (err) console.log(err);
 
-                        getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                            if (leaderboard) {
+                                var current_week_monday = new Date();
+                                var days = ((current_week_monday.getDay() + 7) - 1) % 7;
+                                current_week_monday.setDate(current_week_monday.getDate() - days);
+                                if (new Date(leaderboard.Timestamp).getTime() < current_week_monday.getTime()) {
+                                    leaderboard.Timestamp = current_week_monday;
+                                    leaderboard.Users = [];
+                                }
 
-                            if (no_of_pokemons == 1) {
-                                user.TotalCaught = user.TotalCaught == undefined ? 1 : user.TotalCaught + 1;
-                                if (channel.Shiny) { user.TotalShiny = user.TotalShiny == undefined ? 1 : user.TotalShiny + 1; }
-                                user.DexRewards.push({
-                                    PokemonId: pokemon["Pokemon Id"],
-                                    RewardName: pokemon["Pokemon Name"],
-                                    RewardAmount: credit_amount,
-                                    RewardDescription: `${no_of_pokemons} Caught!`
+                                var user_id = message.author.id;
+                                var username = message.author.username;
+                                if (user.HideWeeklyLeaderboard) username = "???";
+                                var no_of_caught = 1;
+
+                                // Remove user from leaderboard if he already exists.
+                                var users = leaderboard.Users;
+                                var user_index = _.findIndex(users, { UserID: user_id });
+                                if (user_index != -1) {
+                                    no_of_caught = users[user_index].NoOfCaught + 1;
+                                    users.splice(user_index, 1);
+                                }
+
+                                leaderboard.Users.push({ UserID: user_id, Username: username, NoOfCaught: no_of_caught });
+                                leaderboard.Users = _.sortBy(leaderboard.Users, 'NoOfCaught').reverse();
+                                var index_no = leaderboard.Users.findIndex(it => it.UserID == user_id);
+                                if (index_no + 1 < config.LEADERBOARD_MAX_LIMIT) {
+                                    leaderboard.save();
+                                } else {
+                                    leaderboard.Users.pop();
+                                    leaderboard.save();
+                                }
+                            } else {
+                                var user_id = message.author.id;
+                                var username = message.author.username;
+                                if (user.HideWeeklyLeaderboard) username = "???";
+                                var no_of_caught = 1;
+                                var new_leaderboard = new leaderboard_model({
+                                    Type: "Weekly",
+                                    Users: [{ UserID: user_id, Username: username, NoOfCaught: no_of_caught }],
+                                    Timestamp: Date.now()
                                 });
-                                user.save();
+                                new_leaderboard.save();
                             }
-                            else {
-                                user_model.findOneAndUpdate({ UserID: message.author.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
-                                    arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
-                                    new: true
-                                }, (err, user) => {
-                                    if (err) return console.log(err);
-                                });
-                                user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
-                                    arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
-                                    new: true
-                                }, (err, user) => {
-                                    if (err) return console.log(err);
-                                });
+
+                            let pokemon_data = {
+                                PokemonId: pokemon["Pokemon Id"],
+                                Experience: 0,
+                                Level: channel.PokemonLevel,
+                                Nature: channel.PokemonNature,
+                                IV: channel.PokemonIV,
+                                Shiny: channel.Shiny,
+                                Reason: "Catched"
                             }
 
-                            // Adding to dex.
-                            var dex_data = { PokemonId: pokemon["Pokemon Id"] };
-                            getDexes.insertdex(message.author.id, dex_data).then(result => {
+                            getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
 
-                                var message_string = "";
+                                if (no_of_pokemons == 1) {
+                                    user.TotalCaught = user.TotalCaught == undefined ? 1 : user.TotalCaught + 1;
+                                    if (channel.Shiny) { user.TotalShiny = user.TotalShiny == undefined ? 1 : user.TotalShiny + 1; }
+                                    user.DexRewards.push({
+                                        PokemonId: pokemon["Pokemon Id"],
+                                        RewardName: pokemon["Pokemon Name"],
+                                        RewardAmount: credit_amount,
+                                        RewardDescription: `${no_of_pokemons} Caught!`
+                                    });
+                                    user.save();
+                                }
+                                else {
+                                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
+                                        arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
+                                        new: true
+                                    }, (err, user) => {
+                                        if (err) return console.log(err);
+                                    });
+                                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
+                                        arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
+                                        new: true
+                                    }, (err, user) => {
+                                        if (err) return console.log(err);
+                                    });
+                                }
 
-                                // Pokemon Name
-                                var message_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, channel.Shiny);
-                                if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
-                                else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
-                                else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
-                                else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
-                                else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
-                                message.channel.send(message_string);
-                                if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                                // Adding to dex.
+                                var dex_data = { PokemonId: pokemon["Pokemon Id"] };
+                                getDexes.insertdex(message.author.id, dex_data).then(result => {
+
+                                    var message_string = "";
+
+                                    // Pokemon Name
+                                    var message_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, channel.Shiny);
+                                    if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
+                                    else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
+                                    else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
+                                    else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
+                                    else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
+                                    message.channel.send(message_string);
+                                    if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                                });
                             });
                         });
                     });
@@ -121,6 +174,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
     });
 
+}
+
+// Get the monday of current week.
+function getMondayOfCurrentWeek() {
+    const today = new Date();
+    const first = today.getDate() - today.getDay() + 1;
+    const monday = new Date(today.setDate(first));
+    return monday;
 }
 
 // Word search normalizer.
