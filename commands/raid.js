@@ -17,6 +17,7 @@ const { BattleStreams, Teams, Streams } = require('@pkmn/sim');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+    return message.channel.send("Invalid Command!")
 
     if (args.length == 1 && args[0].toLowerCase() == "spawn") {
         // User check if raid scheme has trainer included.

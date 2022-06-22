@@ -313,7 +313,7 @@ function buycandy(message, args, pokemons) {
             var pokemon_level = selected_pokemon.Level;
             var level_to_updated = purchased_candy;
 
-            if (selected_pokemon.Held == "Xp blocker") return message.channel.send("You can't buy candy with held item!");
+            if (selected_pokemon.Held == "Xp blocker" || selected_pokemon.Held == "Everstone") return message.channel.send("You can't buy candy with held item!");
 
             //#region Exceptions
             if (pokemon_id == "958" && purchased_candy == 200 && selected_pokemon.Held != "Everstone") {
