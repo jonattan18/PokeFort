@@ -16287,12 +16287,12 @@ exports.Pokedex = {
         color: "Green",
         eggGroups: ["Undiscovered"],
         tags: ["Restricted Legendary"],
-        otherFormes: ["Calyrex-Ice", "Calyrex-Shadow"],
-        formeOrder: ["Calyrex", "Calyrex-Ice", "Calyrex-Shadow"],
+        otherFormes: ["Calyrex-Ice-Rider", "Calyrex-Shadow-Rider"],
+        formeOrder: ["Calyrex", "Calyrex-Ice-Rider", "Calyrex-Shadow-Rider"],
     },
-    calyrexice: {
+    calyrexicerider: {
         num: 898,
-        name: "Calyrex-Ice",
+        name: "Calyrex-Ice-Rider",
         baseSpecies: "Calyrex",
         forme: "Ice",
         types: ["Psychic", "Ice"],
@@ -16305,9 +16305,9 @@ exports.Pokedex = {
         eggGroups: ["Undiscovered"],
         changesFrom: "Calyrex",
     },
-    calyrexshadow: {
+    calyrexshadowrider: {
         num: 898,
-        name: "Calyrex-Shadow",
+        name: "Calyrex-Shadow-Rider",
         baseSpecies: "Calyrex",
         forme: "Shadow",
         types: ["Psychic", "Ghost"],

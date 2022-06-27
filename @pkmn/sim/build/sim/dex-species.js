@@ -165,6 +165,7 @@ class DexSpecies {
                 galar: ['g', 'galar', 'galarian'],
                 mega: ['m', 'mega'],
                 primal: ['p', 'primal'],
+                hisui: ['h', 'hisui', 'hisuian']
             };
             for (const forme in formeNames) {
                 let pokeName = '';

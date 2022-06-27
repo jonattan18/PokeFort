@@ -4262,6 +4262,85 @@ exports.MovesText = {
         shortDesc: "Averages Attack and Sp. Atk stats with target.",
         activate: "  [POKEMON] shared its power with the target!",
     },
+    powershift: {
+        name: "Power Shift",
+        desc: "The user swaps its offensive and defensive stats.",
+        shortDesc: "The user swaps its offensive and defensive stats.",
+    },
+    psyshieldbash: {
+        name: "Psyshield Bash",
+        desc: "Cloaking itself in psychic energy, the user slams into the target. This may also raise the user's defensive stats.",
+        shortDesc: "Cloaking itself in psychic energy, the user slams into the target. This may also raise the user's defensive stats.",
+    },
+    stoneaxe: {
+        name: "Stone Axe",
+        desc: "The user swings its stone axes at the target, aiming to land a critical hit. Stone splinters left behind by this attack continue to damage the target for several turns.",
+        shortDesc: "The user swings its stone axes at the target, aiming to land a critical hit. Stone splinters left behind by this attack continue to damage the target for several turns.",
+    },
+    headlongrush: {
+        name: "Headlong Rush",
+        desc: "The user smashes into the target in a full-body tackle. This also lowers the user's defensive stats.",
+        shortDesc: "The user smashes into the target in a full-body tackle. This also lowers the user's defensive stats.",
+    },
+    wavecrash: {
+        name: "Wave Crash",
+        desc: "The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user and raises the user's action speed.",
+        shortDesc: "The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user and raises the user's action speed.",
+    },
+    direclaw: {
+        name: "Dire Claw",
+        desc: "The user lashes out at the target with ruinous claws, aiming to land a critical hit. This may also leave the target poisoned, paralyzed, or drowsy.",
+        shortDesc: "The user lashes out at the target with ruinous claws, aiming to land a critical hit. This may also leave the target poisoned, paralyzed, or drowsy.",
+    },
+    barbbarrage: {
+        name: "Barb Barrage",
+        desc: "The user launches countless toxic barbs to inflict damage. This may also poison the target. This move's power is doubled if the target has a status condition.",
+        shortDesc: "The user launches countless toxic barbs to inflict damage. This may also poison the target. This move's power is doubled if the target has a status condition.",
+    },
+    springtidestorm: {
+        name: "Spring Tide Storm",
+        desc: "The user attacks by wrapping the target in fierce winds brimming with love and hate. This move's additional effects depend on the user's form.",
+        shortDesc: "The user attacks by wrapping the target in fierce winds brimming with love and hate. This move's additional effects depend on the user's form.",
+    },
+    infernalparade: {
+        name: "Infernal Parade",
+        desc: "The user attacks with myriad fireballs. This may also leave the target with a burn. This move's power is doubled if the target has a status condition.",
+        shortDesc: "The user attacks with myriad fireballs. This may also leave the target with a burn. This move's power is doubled if the target has a status condition.",
+    },
+    ceaselessedge: {
+        name: "Ceaseless Edge",
+        desc: "The user slashes its shell blade at the target, aiming to land a critical hit. Shell splinters left behind by this attack will continue to damage the target for several turns.",
+        shortDesc: "The user slashes its shell blade at the target, aiming to land a critical hit. Shell splinters left behind by this attack will continue to damage the target for several turns.",
+    },
+    victorydance: {
+        name: "Victory Dance",
+        desc: "The user performs a dance to usher in victory. This raises the user's offensive and defensive stats and increases the damage dealt by the user's moves by 50 percent.",
+        shortDesc: "The user performs a dance to usher in victory. This raises the user's offensive and defensive stats and increases the damage dealt by the user's moves by 50 percent.",
+    },
+    bittermalice: {
+        name: "Bitter Malice",
+        desc: "The user attacks its target with spine-chilling resentment. This may also leave the target with frostbite. This move's power is doubled if the target has a status condition.",
+        shortDesc: "The user attacks its target with spine-chilling resentment. This may also leave the target with frostbite. This move's power is doubled if the target has a status condition.",
+    },
+    esperwing: {
+        name: "Esper Wing",
+        desc: "The user slashes the target with aura-enriched wings. This also raises the user's action speed. This move has a heightened chance of landing a critical hit.",
+        shortDesc: "The user slashes the target with aura-enriched wings. This also raises the user's action speed. This move has a heightened chance of landing a critical hit.",
+    },
+    shelter: {
+        name: "Shelter",
+        desc: "The user makes its skin as hard as an iron shield, raising its defensive stats. Incoming moves also become more likely to miss.",
+        shortDesc: "The user makes its skin as hard as an iron shield, raising its defensive stats. Incoming moves also become more likely to miss.",
+    },
+    mountaingale: {
+        name: "Mountain Gale",
+        desc: "The user hurls giant chunks of ice at the target to inflict damage.",
+        shortDesc: "The user hurls giant chunks of ice at the target to inflict damage.",
+    },
+    triplearrows: {
+        name: "Triple Arrows",
+        desc: "The user delivers an axe kick, then fires three arrows. This raises the chance of its future attacks landing critical hits and also lowers the target's defensive stats.",
+    },
     powerswap: {
         name: "Power Swap",
         desc: "The user swaps its Attack and Special Attack stat stage changes with the target.",

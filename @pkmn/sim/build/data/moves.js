@@ -962,9 +962,9 @@ exports.Moves = {
                         delete source.volatiles['lockedmove'];
                     }
                 }
-                if (!this.checkMoveMakesContact(move, source, target)) {
+                if (this.checkMoveMakesContact(move, source, target)) {
                     source.trySetStatus('psn', target);
-                } else source.trySetStatus('psn', target);
+                }
                 return this.NOT_FAIL;
             },
             onHit(target, source, move) {
@@ -13207,6 +13207,374 @@ exports.Moves = {
         target: "allAdjacentFoes",
         type: "Ground",
         contestType: "Cool",
+    },
+    powershift: {
+        num: 827,
+        name: "Power Shift",
+        alias: "powershift",
+        desc: "The user swaps its offensive and defensive stats.",
+        type: "Normal",
+        basePower: 0,
+        accuracy: true,
+        pp: 10,
+        category: "Status",
+        priority: 0,
+        flags: {
+            contact: 0,
+            protect: 0,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    psyshieldbash: {
+        num: 828,
+        name: "Psyshield Bash",
+        alias: "psyshieldbash",
+        desc: "Cloaking itself in psychic energy, the user slams into the target. This may also raise the user's defensive stats.",
+        type: "Psychic",
+        basePower: 70,
+        accuracy: 90,
+        pp: 10,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    stoneaxe: {
+        num: 829,
+        name: "Stone Axe",
+        alias: "stoneaxe",
+        desc: "The user swings its stone axes at the target, aiming to land a critical hit. Stone splinters left behind by this attack continue to damage the target for several turns.",
+        type: "Rock",
+        basePower: 65,
+        accuracy: 90,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    headlongrush: {
+        num: 830,
+        name: "Headlong Rush",
+        alias: "headlongrush",
+        desc: "The user smashes into the target in a full-body tackle. This also lowers the user's defensive stats.",
+        type: "Ground",
+        basePower: 100,
+        accuracy: 100,
+        pp: 5,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    wavecrash: {
+        num: 831,
+        name: "Wave Crash",
+        alias: "wavecrash",
+        desc: "The user shrouds itself in water and slams into the target with its whole body to inflict damage. This also damages the user and raises the user's action speed.",
+        type: "Water",
+        basePower: 75,
+        accuracy: 100,
+        pp: 10,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    direclaw: {
+        num: 832,
+        name: "Dire Claw",
+        alias: "direclaw",
+        desc: "The user lashes out at the target with ruinous claws, aiming to land a critical hit. This may also leave the target poisoned, paralyzed, or drowsy.",
+        type: "Poison",
+        basePower: 60,
+        accuracy: 100,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    barbbarrage: {
+        num: 833,
+        name: "Barb Barrage",
+        alias: "barbbarrage",
+        desc: "The user launches countless toxic barbs to inflict damage. This may also poison the target. This move's power is doubled if the target has a status condition.",
+        type: "Poison",
+        basePower: 60,
+        accuracy: 100,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    springtidestorm: {
+        num: 834,
+        name: "Spring Tide Storm",
+        alias: "springtidestorm",
+        desc: "The user attacks by wrapping the target in fierce winds brimming with love and hate. This move's additional effects depend on the user's form.",
+        type: "Fairy",
+        basePower: 95,
+        accuracy: 80,
+        pp: 5,
+        category: "Special",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    infernalparade: {
+        num: 835,
+        name: "Infernal Parade",
+        alias: "infernalparade",
+        desc: "The user attacks with myriad fireballs. This may also leave the target with a burn. This move's power is doubled if the target has a status condition.",
+        type: "Ghost",
+        basePower: 60,
+        accuracy: 100,
+        pp: 15,
+        category: "Special",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    ceaselessedge: {
+        num: 836,
+        name: "Ceaseless Edge",
+        alias: "ceaselessedge",
+        desc: "The user slashes its shell blade at the target, aiming to land a critical hit. Shell splinters left behind by this attack will continue to damage the target for several turns.",
+        type: "Dark",
+        basePower: 65,
+        accuracy: 90,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    victorydance: {
+        num: 837,
+        name: "Victory Dance",
+        alias: "victorydance",
+        desc: "The user performs a dance to usher in victory. This raises the user's offensive and defensive stats and increases the damage dealt by the user's moves by 50 percent.",
+        type: "Fighting",
+        basePower: 0,
+        accuracy: true,
+        pp: 10,
+        category: "Status",
+        priority: 0,
+        flags: {
+            contact: 0,
+            protect: 0,
+            mirror: 0
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    bittermalice: {
+        num: 838,
+        name: "Bitter Malice",
+        alias: "bittermalice",
+        desc: "The user attacks its target with spine-chilling resentment. This may also leave the target with frostbite. This move's power is doubled if the target has a status condition.",
+        type: "Ghost",
+        basePower: 60,
+        accuracy: 100,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    esperwing: {
+        num: 839,
+        name: "Esper Wing",
+        alias: "esperwing",
+        desc: "The user slashes the target with aura-enriched wings. This also raises the user's action speed. This move has a heightened chance of landing a critical hit.",
+        type: "Psychic",
+        basePower: 75,
+        accuracy: 90,
+        pp: 10,
+        category: "Special",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    shelter: {
+        num: 840,
+        name: "Shelter",
+        alias: "shelter",
+        desc: "The user makes its skin as hard as an iron shield, raising its defensive stats. Incoming moves also become more likely to miss.",
+        type: "Steel",
+        basePower: 0,
+        accuracy: true,
+        pp: 10,
+        category: "Status",
+        priority: 0,
+        flags: {
+            contact: 0,
+            protect: 0,
+            mirror: 0
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    mountaingale: {
+        num: 841,
+        name: "Mountain Gale",
+        alias: "mountaingale",
+        desc: "The user hurls giant chunks of ice at the target to inflict damage.",
+        type: "Ice",
+        basePower: 100,
+        accuracy: 85,
+        pp: 5,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
+    },
+    triplearrows: {
+        num: 842,
+        name: "Triple Arrows",
+        alias: "triplearrows",
+        desc: "The user delivers an axe kick, then fires three arrows. This raises the chance of its future attacks landing critical hits and also lowers the target's defensive stats.",
+        type: "Fighting",
+        basePower: 50,
+        accuracy: 100,
+        pp: 15,
+        category: "Physical",
+        priority: 0,
+        flags: {
+            contact: 1,
+            protect: 1,
+            mirror: 1
+        },
+        isZ: null,
+        critRatio: 0,
+        secondary: null,
+        target: "adjacentAllyOrSelf",
+        isNonstandard: null,
+        contestType: null
     },
     present: {
         num: 217,

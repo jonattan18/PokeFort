@@ -970,6 +970,10 @@ class Handler {
         let template = this.parser.template('damagePercentage', kwArgs.from, 'NODEFAULT');
         const line1 = this.parser.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
         const id = LogFormatter.effectId(kwArgs.from);
+
+        console.log(args);
+        console.log(kwArgs);
+
         if (template)
             return line1 + template
             .replace('[POKEMON]', this.parser.pokemon(pokemon))
