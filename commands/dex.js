@@ -71,8 +71,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} starting at ${pokemon.Evolution.Level} Level ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
         }
         else if (pokemon.Evolution != "NULL" && pokemon.Evolution.Reason != "Level" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] == undefined) {
-            var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
-            evolution = `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding ${pokemon.Evolution.Reason} ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
+            if (Array.isArray(pokemon.Evolution)) {
+                for (p = 0; p < pokemon.Evolution.length; p++) {
+                    var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution[p].Id, pokemons, false);
+                    evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding ${pokemon.Evolution[p].Reason} ${pokemon.Evolution[p].Time != undefined ? "during " + pokemon.Evolution[p].Time.toLowerCase() : ""}\n`;
+                }
+            }
+            else {
+                var evolves_to = getPokemons.get_pokemon_name_from_id(pokemon.Evolution.Id, pokemons, false);
+                evolution += `${pokemon.name_no_shiny} evolves into ${evolves_to} while holding ${pokemon.Evolution.Reason} ${pokemon.Evolution.Time != undefined ? "during " + pokemon.Evolution.Time.toLowerCase() : ""}\n`;
+            }
         }
         else if (pokemon.Evolution == "NULL" && pokemon["Evolution Stone"] == undefined && pokemon["Evolution Trade"] != undefined) {
             if (_.isArray(pokemon["Evolution Trade"][0])) {
