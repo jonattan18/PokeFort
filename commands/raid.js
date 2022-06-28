@@ -178,6 +178,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     raid.Started = true;
                     raid.save().then(() => {
                         message.channel.send(`You have started the raid.`);
+
+                        // Raid started announcement.
+                        for (var i = 0; i < raid.Trainers.length; i++) {
+                            if (raid.Trainers[i]) {
+                                bot.users.cache.get(raid.Trainers[i]).send(`The ${raid.RaidPokemon.Name} raid has started. Do ${prefix}r duel to duel the raid boss.`);
+                            }
+                        }
                     });
                 }
             }

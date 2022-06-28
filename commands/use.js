@@ -429,6 +429,37 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
     var parsed_stream = write_data.split("\n");
     var first_five_stream_write = parsed_stream[0] + "\n" + parsed_stream[1] + "\n" + parsed_stream[2] + "\n" + parsed_stream[3] + "\n" + parsed_stream[4];
     void streams.omniscient.write(first_five_stream_write);
+
+    // Raid Boss status changes and implementaion.
+    if (raid_data.RaidPokemon.RaidStream != undefined && raid_data.RaidPokemon.RaidStream.raidside != undefined) {
+
+        // Field changes.
+        var field = JSON.parse(raid_data.RaidPokemon.RaidStream.field);
+
+        // Weather changes.
+        if (field.weather != "") {
+            var weather = Dex.conditions.dex.conditions.get(field.weather);
+            weather.duration = field.weatherState.duration;
+            _battlestream.battle.field.setWeather(weather, _battlestream.battle.sides[0].pokemon[0]);
+        }
+
+        // Terrain changes.
+        if (field.terrain != "") {
+            var terrain = Dex.conditions.dex.conditions.get(field.terrain);
+            _battlestream.battle.field.setTerrain(terrain, _battlestream.battle.sides[0].pokemon[0]);
+        }
+
+        // Raid Boss status changes.
+        var raidside = JSON.parse(raid_data.RaidPokemon.RaidStream.raidside);
+
+        // Hp changes.
+        _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
+
+        // Status changes.
+        _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
+   
+    }
+
     var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
     void streams.omniscient.write(except_first_five_stream_write.join("\n"));
 
@@ -437,18 +468,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     void (async () => {
         for await (var chunk of streams.omniscient) {
-            if (first_five) {
-                if (raid_data.RaidPokemon.RaidStream != undefined && raid_data.RaidPokemon.RaidStream.raidside != undefined) {
-                    
-                    // Field changes.
-
-
-                    // Raid Boss status changes.
-                   
-
-                }
-                first_five = false;
-            }
+            if (first_five) first_five = false;
             else {
                 var received_data = chunk;
                 received_data = received_data.split('\n');
@@ -487,6 +507,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                     var _user_pokemon_fainted = false;
                     var _raid_pokemon_fainted = false;
+
+                    if (show_str[0] != undefined && !show_str[0].includes("used")) show_str.splice(0, 1);
 
                     // Formatting for sending message.
                     var first_user_message = [show_str[0]];
