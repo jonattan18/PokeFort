@@ -22,7 +22,10 @@ const RaidSchema = new mongoose.Schema({
         SpDefense: Number,
         Speed: Number,
         PreparationMove: Number,
-        RaidStream: String
+        RaidStream: {
+            field: Object,
+            raidside: Object
+        }
     },
     Trainers: Array,
     TrainersTag: Array,

@@ -431,8 +431,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     void (async () => {
         for await (var chunk of streams.omniscient) {
-            console.log(_battlestream.battle.p2.pokemon[0].hp);
-            console.log(_battlestream.battle.p2.pokemon[0].maxhp);
+            
 
             var received_data = chunk;
             received_data = received_data.split('\n');
@@ -631,10 +630,77 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 }
 
                 if (_raid_boss_fainted == false && _raid_boss_won == false) {
+
+                    // Raid save state.
                     raid_data.Stream = _battlestream.battle.inputLog.join('\n');
-                    raid_data.RaidPokemon.RaidStream = JSON.stringify(_battlestream.battle.sides[1].pokemon[0]);
+
+                    raid_data.RaidPokemon.RaidStream.field = _battlestream.battle.field;
+                    var a = _battlestream.battle.sides[1];
+                    var save_data_raid_stream = {
+                        "lastSelectedMove": a.lastSelectedMove,
+                        "faintedLastTurn": a.faintedLastTurn,
+                        "faintedThisTurn": a.faintedThisTurn,
+                        "zMoveUsed": a.zMoveUsed,
+                        "dynamaxUsed": a.dynamaxUsed,
+                        "sideConditions": a.sideConditions,
+                        "slotConditions": a.slotConditions,
+                        "lastMove": a.lastMove,
+                        "pokemon": [
+                            {
+                                "moveSlots": a.pokemon[0].moveSlots,
+                                "position": a.pokemon[0].position,
+                                "status": a.pokemon[0].status,
+                                "statusState": a.pokemon[0].statusState,
+                                "volatiles": a.pokemon[0].volatiles,
+                                "boosts": a.pokemon[0].boosts,
+                                "trapped": a.pokemon[0].trapped,
+                                "maybeTrapped": a.pokemon[0].maybeTrapped,
+                                "maybeDisabled": a.pokemon[0].maybeDisabled,
+                                "illusion": a.pokemon[0].illusion,
+                                "transformed": a.pokemon[0].transformed,
+                                "types": a.pokemon[0].types,
+                                "addedType": a.pokemon[0].addedType,
+                                "knownType": a.pokemon[0].knownType,
+                                "apparentType": a.pokemon[0].apparentType,
+                                "switchFlag": a.pokemon[0].switchFlag,
+                                "forceSwitchFlag": a.pokemon[0].forceSwitchFlag,
+                                "skipBeforeSwitchOutEventFlag": a.pokemon[0].skipBeforeSwitchOutEventFlag,
+                                "draggedIn": a.pokemon[0].draggedIn,
+                                "newlySwitched": a.pokemon[0].newlySwitched,
+                                "lastMove": a.pokemon[0].lastMove,
+                                "lastMoveUsed": a.pokemon[0].lastMoveUsed,
+                                "moveThisTurn": a.pokemon[0].moveThisTurn,
+                                "statsRaisedThisTurn": a.pokemon[0].statsRaisedThisTurn,
+                                "statsLoweredThisTurn": a.pokemon[0].statsLoweredThisTurn,
+                                "hurtThisTurn": a.pokemon[0].hurtThisTurn,
+                                "lastDamage": a.pokemon[0].lastDamage,
+                                "attackedBy": a.pokemon[0].attackedBy,
+                                "isActive": a.pokemon[0].isActive,
+                                "activeTurns": a.pokemon[0].activeTurns,
+                                "activeMoveActions": a.pokemon[0].activeMoveActions,
+                                "previouslySwitchedIn": a.pokemon[0].previouslySwitchedIn,
+                                "truantTurn": a.pokemon[0].truantTurn,
+                                "isStarted": a.pokemon[0].isStarted,
+                                "duringMove": a.pokemon[0].duringMove,
+                                "weighthg": a.pokemon[0].weighthg,
+                                "speed": a.pokemon[0].speed,
+                                "abilityOrder": a.pokemon[0].abilityOrder,
+                                "canMegaEvo": a.pokemon[0].canMegaEvo,
+                                "canUltraBurst": a.pokemon[0].canUltraBurst,
+                                "canGigantamax": a.pokemon[0].canGigantamax,
+                                "maxhp": a.pokemon[0].maxhp,
+                                "baseMaxhp": a.pokemon[0].baseMaxhp,
+                                "hp": a.pokemon[0].hp,
+                                "moveThisTurnResult": a.pokemon[0].moveThisTurnResult,
+                                "lastMoveTargetLoc": a.pokemon[0].lastMoveTargetLoc
+                            }]
+                    }
+                    raid_data.RaidPokemon.RaidStream.raidside = save_data_raid_stream;
+
+                    // Save to database.
                     raid_data.RaidPokemon.markModified();
                     raid_data.save();
+
                 } else if (_raid_boss_fainted == true || _raid_boss_won == true) {
                     raid_data.remove();
                 }

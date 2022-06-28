@@ -17,7 +17,7 @@ const { BattleStreams, Teams, Streams } = require('@pkmn/sim');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-   // return message.channel.send("Invalid Command!")
+    // return message.channel.send("Invalid Command!")
 
     if (args.length == 1 && args[0].toLowerCase() == "spawn") {
         // User check if raid scheme has trainer included.
@@ -427,13 +427,28 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 var received_data = chunk.split('\n');
                                 if (received_data.includes("|start")) {
                                     raid.Stream = _battleStream.battle.inputLog.join('\n');
-                                    raid.RaidPokemon.RaidStream = JSON.stringify(_battleStream.battle.p2.pokemon[0]);
                                     raid.save().then(() => {
                                         // Get image url of raid boss.
                                         var raid_boss_image_data = raid.RaidPokemon.Image;
 
+                                        if (raid.RaidPokemon.RaidStream != undefined) {
+                                            _battleStream.battle.field = raid.RaidPokemon.RaidStream.field;
+                                            Object.keys(_battleStream.battle.sides[1]).forEach((item) => {
+                                                if (raid.RaidPokemon.RaidStream.raidside.hasOwnProperty(item)) {
+                                                    _battleStream.battle.sides[1][item].value = raid.RaidPokemon.RaidStream.raidside[item].value
+                                                }
+                                            })
+                                        }
+
+                                        // Background image url.
+                                        var image_url = "./assets/raid_images/background.jpeg";
+                                        if (_battleStream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
+                                        else if (_battleStream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
+                                        else if (_battleStream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
+                                        else if (_battleStream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
+
                                         // Creating Image for embed.
-                                        mergeImages(["./assets/raid_images/background.jpeg",
+                                        mergeImages([image_url,
                                             { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
                                             Canvas: Canvas
                                         }).then(b64 => {
@@ -446,7 +461,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                             embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "")} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raid.RaidPokemon.Health}/${raid.RaidPokemon.MaxHealth}HP`, true);
+                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${_battleStream.battle.sides[1].pokemon[0].hp}/${_battleStream.battle.sides[1].pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
                                             embed.attachFiles(image_file)
                                             embed.setImage('attachment://img.jpeg');
