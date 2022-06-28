@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const _ = require('lodash');
 const mergeImages = require('merge-images-v2');
 const Canvas = require('canvas');
 
@@ -431,14 +432,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         // Get image url of raid boss.
                                         var raid_boss_image_data = raid.RaidPokemon.Image;
 
-                                        if (raid.RaidPokemon.RaidStream != undefined) {
-                                            _battleStream.battle.field = raid.RaidPokemon.RaidStream.field;
-                                            Object.keys(_battleStream.battle.sides[1]).forEach((item) => {
-                                                if (raid.RaidPokemon.RaidStream.raidside.hasOwnProperty(item)) {
-                                                    _battleStream.battle.sides[1][item].value = raid.RaidPokemon.RaidStream.raidside[item].value
-                                                }
-                                            })
-                                        }
+                                        var raidside = null;
+                                        if (raid.RaidPokemon.RaidStream != undefined && raid.RaidPokemon.RaidStream.raidside != undefined) {
+                                            _battleStream.battle.field = JSON.parse(raid.RaidPokemon.RaidStream.field);
+                                            raidside = JSON.parse(raid.RaidPokemon.RaidStream.raidside);
+                                        } else raidside = _battleStream.battle.sides[1];
 
                                         // Background image url.
                                         var image_url = "./assets/raid_images/background.jpeg";
@@ -461,7 +459,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                             embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "")} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${_battleStream.battle.sides[1].pokemon[0].hp}/${_battleStream.battle.sides[1].pokemon[0].maxhp}HP`, true);
+                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
                                             embed.attachFiles(image_file)
                                             embed.setImage('attachment://img.jpeg');
