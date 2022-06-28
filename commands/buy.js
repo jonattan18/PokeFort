@@ -313,7 +313,7 @@ function buycandy(message, args, pokemons) {
             var pokemon_level = selected_pokemon.Level;
             var level_to_updated = purchased_candy;
 
-            if (selected_pokemon.Held == "Xp blocker" || selected_pokemon.Held == "Everstone") return message.channel.send("You can't buy candy with held item!");
+            if (selected_pokemon.Held == "Xp blocker") return message.channel.send("You can't buy candy with held item!");
 
             //#region Exceptions
             if (pokemon_id == "958" && purchased_candy == 200 && selected_pokemon.Held != "Everstone") {
@@ -364,50 +364,52 @@ function buycandy(message, args, pokemons) {
                         break;
                     }
 
-                    // Get pokemon evolution.
-                    var pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-                    //Exections for Tyrogue
-                    if (pokemon_id == "360" && pokemon_level >= 20) {
-                        var ev = 0;
-                        let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
-                        let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                    if (selected_pokemon.Held != "Everstone") {
+                        // Get pokemon evolution.
+                        var pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+                        //Exections for Tyrogue
+                        if (pokemon_id == "360" && pokemon_level >= 20) {
+                            var ev = 0;
+                            let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                            let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
 
-                        if (atk > def) pokemon_id = "140";
-                        else if (atk < def) pokemon_id = "141";
-                        else pokemon_id = "361";
-                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
-                        evolved = true;
-                        new_evolved_name = new_pokemon_name;
-
-                    }
-                    //Exception for cosmoem
-                    else if (pokemon_id == "1320" && pokemon_level >= 53) {
-                        if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
-                        else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
-
-                        if (evolved) {
+                            if (atk > def) pokemon_id = "140";
+                            else if (atk < def) pokemon_id = "141";
+                            else pokemon_id = "361";
                             var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                            evolved = true;
                             new_evolved_name = new_pokemon_name;
+
                         }
-                    }
-                    else {
-                        if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
-                            if (pokemon_level >= pokemon_data.Evolution.Level) {
-                                if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
+                        //Exception for cosmoem
+                        else if (pokemon_id == "1320" && pokemon_level >= 53) {
+                            if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
+                            else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
-                                    // Double evolution check.
-                                    var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
+                            if (evolved) {
+                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                                new_evolved_name = new_pokemon_name;
+                            }
+                        }
+                        else {
+                            if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
+                                if (pokemon_level >= pokemon_data.Evolution.Level) {
+                                    if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
 
-                                    if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
-                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
-                                        pokemon_id = double_pokemon_data.Evolution.Id;
+                                        // Double evolution check.
+                                        var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
+
+                                        if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
+                                            pokemon_id = double_pokemon_data.Evolution.Id;
+                                        }
+                                        else {
+                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
+                                            pokemon_id = pokemon_data.Evolution.Id;
+                                        }
+                                        evolved = true;
+                                        new_evolved_name = new_pokemon_name;
                                     }
-                                    else {
-                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
-                                        pokemon_id = pokemon_data.Evolution.Id;
-                                    }
-                                    evolved = true;
-                                    new_evolved_name = new_pokemon_name;
                                 }
                             }
                         }
