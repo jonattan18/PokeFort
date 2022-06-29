@@ -171,15 +171,15 @@
         "damage": "  It hurt itself in its confusion!"
     },
     "drain": { "heal": "  [SOURCE] had its energy drained!" },
-    "flinch": { "cant": "  [POKEMON] flinched and couldn't move!" },
+    "flinch": { "cant": "[POKEMON] flinched and couldn't move!" },
     "heal": { "fail": "  [POKEMON]'s HP is full!" },
     "healreplacement": {
         "activate": "  [POKEMON] will restore its replacement's HP using its Z-Power!"
     },
     "nopp": {
-        "cant": "  [POKEMON] used [MOVE]!\n  But there was no PP left for the move!"
+        "cant": "[POKEMON] used [MOVE]!\n  But there was no PP left for the move!"
     },
-    "recharge": { "cant": "  [POKEMON] must recharge!" },
+    "recharge": { "cant": "[POKEMON] must recharge!" },
     "recoil": { "damage": "  [POKEMON] was damaged by the recoil!" },
     "unboost": {
         "fail": "  [POKEMON]'s stats were not lowered!",
@@ -299,7 +299,7 @@
         "end": "  [POKEMON] got over its infatuation!",
         "endFromItem": "  [POKEMON] cured its infatuation using its [ITEM]!",
         "activate": "  [POKEMON] is in love with [TARGET]!",
-        "cant": "  [POKEMON] is immobilized by love!"
+        "cant": "[POKEMON] is immobilized by love!"
     },
     "auroraveil": {
         "start": "  Aurora Veil made [TEAM] stronger against physical and special moves!",
@@ -454,7 +454,7 @@
     "healblock": {
         "start": "  [POKEMON] was prevented from healing!",
         "end": "  [POKEMON]'s Heal Block wore off!",
-        "cant": "  [POKEMON] can't use [MOVE] because of Heal Block!",
+        "cant": "[POKEMON] can't use [MOVE] because of Heal Block!",
         "fail": "  But it failed to affect [POKEMON]!"
     },
     "healingwish": { "heal": "  The healing wish came true for [POKEMON]!" },
@@ -465,7 +465,7 @@
     "iceburn": { "prepare": "  [POKEMON] became cloaked in freezing air!" },
     "imprison": {
         "start": "  [POKEMON] sealed any moves its target shares with it!",
-        "cant": "  [POKEMON] can't use its sealed [MOVE]!"
+        "cant": "[POKEMON] can't use its sealed [MOVE]!"
     },
     "incinerate": { "removeItem": "  [POKEMON]'s [ITEM] was burned up!" },
     "infestation": {
@@ -599,7 +599,7 @@
     "shelltrap": {
         "start": "  [POKEMON] set a shell trap!",
         "prepare": "  [POKEMON] set a shell trap!",
-        "cant": "  [POKEMON]'s shell trap didn't work!"
+        "cant": "[POKEMON]'s shell trap didn't work!"
     },
     "sketch": { "activate": "  [POKEMON] sketched [MOVE]!" },
     "skillswap": { "activate": "  [POKEMON] swapped Abilities with its target!" },
@@ -671,7 +671,7 @@
         "end": "  [POKEMON] was freed from the telekinesis!"
     },
     "throatchop": {
-        "cant": "  The effects of Throat Chop prevent [POKEMON] from using certain moves!"
+        "cant": "The effects of Throat Chop prevent [POKEMON] from using certain moves!"
     },
     "thundercage": { "start": "  [SOURCE] trapped [POKEMON]!" },
     "torment": {
@@ -805,7 +805,7 @@
     },
     "teravolt": { "start": "  [POKEMON] is radiating a bursting aura!" },
     "trace": { "changeAbility": "  [POKEMON] traced [SOURCE]'s [ABILITY]!" },
-    "truant": { "cant": "  [POKEMON] is loafing around!" },
+    "truant": { "cant": "[POKEMON] is loafing around!" },
     "turboblaze": { "start": "  [POKEMON] is radiating a blazing aura!" },
     "unnerve": { "start": "  [TEAM] is too nervous to eat Berries!" },
     "wanderingspirit": { "activate": "#skillswap" },

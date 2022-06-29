@@ -342,7 +342,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             } else return message.channel.send(`You are not in a raid.`);
         });
     }
-    else if (args.length == 1 && args[0].toLowerCase() == "leave") {
+    else if (args.length == 1 && (args[0].toLowerCase() == "leave" || args[0].toLowerCase() == "l")) {
         // User check if raid scheme has trainer included.
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
@@ -355,6 +355,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var remove_index = raid.Trainers.indexOf(message.author.id);
                         raid.Trainers.splice(remove_index, 1);
                         raid.TrainersTag.splice(remove_index, 1);
+                        raid.CurrentDuel = undefined;
                         raid.save().then(() => {
                             user.save().then(() => {
                                 message.channel.send(`You have left the raid.`);

@@ -2,6 +2,9 @@ const _ = require('lodash');
 const movesinfo = require('../assets/movesinfo.json');
 const moves = require('../assets/moves.json');
 
+// Misc
+const config = require("../config/config.json");
+
 /* Moves Data
 M= Machine
 L# = Level
@@ -48,14 +51,14 @@ function get_raid_moves_from_id(pokemon_id, pokemons) {
     // Normal moves (No Status)
     for (var i = 0; i < move_available["Level"].length; i++) {
         var move_info = movesinfo[move_available["Level"][i][0].replace("-", "").toLowerCase()];
-        if (move_info.category != "Status") moves_to_send.push([move_info.name, move_info.type]);
+        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type]);
     }
 
     // TM moves (No Status)
     for (var i = 0; i < move_available["TM"].length; i++) {
         var move_info = movesinfo[move_available["TM"][i].replace("-", "").toLowerCase()];
         if (move_info.tm == undefined) continue;
-        if (move_info.category != "Status") moves_to_send.push([move_info.name, move_info.type]);
+        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type]);
     }
 
     return _.uniqWith(moves_to_send, _.isEqual);
