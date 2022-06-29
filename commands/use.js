@@ -457,7 +457,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
         // Status changes.
         _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
-   
+
     }
 
     var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
@@ -560,6 +560,30 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     }
 
                     if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
+
+                        // Remove words after fainted!:p1a: in first_user_message
+                        if (_user_pokemon_fainted) {
+                            // Find index of fainted!:p1a:
+                            var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p1a:"));
+                            // Remove every string after fainted!:p1a: in that index.
+                            if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p1a:"));
+                            // Find index of fainted!:p2a:
+                            var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p2a:"));
+                            // Remove every string after fainted!:p2a: in that index.
+                            if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p2a:"));
+                        }
+
+                        // Remove words after fainted!:p2a: in second_user_message
+                        if (_user_pokemon_fainted) {
+                            // Find index of fainted!:p1a:
+                            var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p1a:"));
+                            // Remove every string after fainted!:p1a: in that index.
+                            if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p1a:"));
+                            // Find index of fainted!:p2a:
+                            var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p2a:"));
+                            // Remove every string after fainted!:p2a: in that index.
+                            if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p2a:"));
+                        }
 
                         // Create user pokemon message.
                         var usr_embed = new Discord.MessageEmbed();

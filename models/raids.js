@@ -38,6 +38,10 @@ const RaidSchema = new mongoose.Schema({
     Stream: String,
     OldStreamText: Number,
     ChangeOnFainted: Boolean,
+    Damages: [{
+        UserID: String,
+        Damage: Number
+    }],
     expireAt: {
         type: Date,
         default: Date.now,
