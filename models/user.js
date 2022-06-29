@@ -16,6 +16,7 @@ const UserSchema = new mongoose.Schema({
     RaidsLeft: Number,
     RaidSpawn: Number,
     RaidsJoined: Number,
+    RaidMuted: Boolean,
     WishingPieces: Number,
     Badges: Array,
     Admin: Number,

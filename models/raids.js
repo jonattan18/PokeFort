@@ -38,6 +38,7 @@ const RaidSchema = new mongoose.Schema({
     Stream: String,
     OldStreamText: Number,
     ChangeOnFainted: Boolean,
+    MutedTrainers: Array,
     Damages: [{
         UserID: String,
         Damage: Number

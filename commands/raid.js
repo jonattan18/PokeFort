@@ -142,7 +142,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     },
                                 },
                                 Trainers: [message.author.id],
-                                TrainersTag: [message.author.tag]
+                                TrainersTag: [message.author.tag],
+                                MutedTrainers: user.RaidMuted != undefined && user.RaidMuted != false ? [message.author.id] : [],
                             });
 
                             // Save user data.
@@ -179,7 +180,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         // Raid started announcement.
                         for (var i = 0; i < raid.Trainers.length; i++) {
                             if (raid.Trainers[i]) {
-                                bot.users.cache.get(raid.Trainers[i]).send(`The ${raid.RaidPokemon.Name} raid has started. Do ${prefix}r duel to duel the raid boss.`);
+                                if (!raid.MutedTrainers.includes(raid.Trainers[i])) bot.users.cache.get(raid.Trainers[i]).send(`The ${raid.RaidPokemon.Name} raid has started. Do ${prefix}r duel to duel the raid boss.`);
                             }
                         }
                     });
@@ -221,6 +222,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                                 user.RaidsJoined = user.RaidsJoined != undefined ? user.RaidsJoined + 1 : 1;
                                                 raid_data.Trainers.push(message.author.id);
                                                 raid_data.TrainersTag.push(message.author.tag);
+                                                if (user.RaidMuted != undefined && user.RaidMuted != false) raid_data.MutedTrainers.push(message.author.id);
                                                 raid_data.save().then(() => {
                                                     user.save().then(() => {
                                                         // Stats String
@@ -263,7 +265,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             });
         });
     }
-    else if (args.length == 1 && args[0].toLowerCase() == "info") {
+    else if (args.length == 1 && (args[0].toLowerCase() == "info" || args[0].toLowerCase() == "i" || args[0].toLowerCase() == "view")) {
         // User check if raid scheme has trainer included.
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid_data) => {
             if (err) { console.log(err); return; }
@@ -362,6 +364,32 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
             }
             else return message.channel.send("You are not in a raid.");
+        });
+    }
+    else if (args.length == 1 && args[0].toLowerCase() == "mute") {
+        // User check if raid is already muted.
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) { console.log(err); return; }
+            if (user) {
+                if (user.RaidMuted) return message.channel.send(`You already muted the raid messages.`);
+                user.RaidMuted = true;
+                user.save().then(() => {
+                    message.channel.send(`You have muted the raid messages.`);
+                });
+            }
+        });
+    }
+    else if (args.length == 1 && args[0].toLowerCase() == "unmute") {
+        // User check if raid is already unmuted.
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) { console.log(err); return; }
+            if (user) {
+                if (!user.RaidMuted) return message.channel.send(`You are not muted the raid messages.`);
+                user.RaidMuted = false;
+                user.save().then(() => {
+                    message.channel.send(`You have unmuted the raid messages.`);
+                });
+            }
         });
     }
     else if (args.length == 1 && args[0].toLowerCase() == "duel") {
