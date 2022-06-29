@@ -94,7 +94,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var stats = getRaidStats([raid_boss["Health Stat"], raid_boss["Attack Stat"], raid_boss["Defense Stat"], raid_boss["Special Attack Stat"], raid_boss["Special Defense Stat"], raid_boss["Speed Stat"]], raid_level, difficulty);
 
                             // Stats String
-                            var stats_string = `Health: ${stats[0]}\nAttack: ${stats[1]}\nDefense: ${stats[2]}\nSpecial Attack: ${stats[3]}\nSpecial Defense: ${stats[4]}\nSpeed: ${stats[5]}`;
+                            var stats_string = `Health: ${stats[0].toLocaleString()}\nAttack: ${stats[1]}\nDefense: ${stats[2]}\nSpecial Attack: ${stats[3]}\nSpecial Defense: ${stats[4]}\nSpeed: ${stats[5]}`;
                             var raid_boss_image = getPokemons.imagefromid(raid_boss["Pokemon Id"], pokemons, false, true);
 
                             // Time String
@@ -226,7 +226,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                                 raid_data.save().then(() => {
                                                     user.save().then(() => {
                                                         // Stats String
-                                                        var stats_string = `Health: ${raid_data.RaidPokemon.Health}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
+                                                        var stats_string = `Health: ${raid_data.RaidPokemon.Health.toLocaleString()}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
                                                         var raid_boss_image = getPokemons.imagefromid(raid_data.RaidPokemon.ID.toString(), pokemons, false, true);
 
                                                         // Time String
@@ -271,7 +271,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (err) { console.log(err); return; }
             if (raid_data) {
                 // Stats String
-                var stats_string = `Health: ${raid_data.RaidPokemon.Health}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
+                var stats_string = `Health: ${raid_data.RaidPokemon.Health.toLocaleString()}\nAttack: ${raid_data.RaidPokemon.Attack}\nDefense: ${raid_data.RaidPokemon.Defense}\nSpecial Attack: ${raid_data.RaidPokemon.SpAttack}\nSpecial Defense: ${raid_data.RaidPokemon.SpDefense}\nSpeed: ${raid_data.RaidPokemon.Speed}`;
                 var raid_boss_image = getPokemons.imagefromid(raid_data.RaidPokemon.ID.toString(), pokemons, false, true);
 
                 // Time String
@@ -297,7 +297,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 embed.addField(`Trainers:`, trainer_data, false);
                 embed.addField(`Obtainable Rewards:`, getRewards(raid_data.RaidType, raid_data.RaidPokemon.Name), false);
                 embed.setImage('attachment://' + raid_boss_image[0] + ".png")
-                description = `**RaidID: ${raid_data.RaidID}\n` + `Difficulty: ${getDifficultyString(raid_data.RaidType)}\n` + `Time Left: ${raid_time_left_string}**`;
+                description = `**${raid_data.Started ? `HP: ${raid_data.RaidPokemon.Health.toLocaleString()}/${raid_data.RaidPokemon.MaxHealth.toLocaleString()}\n` : ``}RaidID: ${raid_data.RaidID}\n` + `Difficulty: ${getDifficultyString(raid_data.RaidType)}\n` + `Time Left: ${raid_time_left_string}**`;
                 embed.setDescription(description);
                 embed.setFooter(`To join this raid, do ${prefix}r join ${raid_data.RaidID}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
                 message.channel.send(embed);
@@ -576,7 +576,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
 function getRaidStats(base_stat, raid_level, difficulty) {
     var IV = [Math.floor(Math.random() * 31)];
     var raid_stats = [];
-    raid_stats.push(floor(floor(0.01 * (2 * 100 + Math.floor(Math.random() * 31)) * raid_level) + raid_level * 10 * 2.31 * 2.11));
+    raid_stats.push(floor(floor(0.01 * (2 * base_stat[0] + IV[0]) * raid_level) + raid_level * 10 * 2.31 * 2.11));
 
     switch (difficulty) {
         // Easy

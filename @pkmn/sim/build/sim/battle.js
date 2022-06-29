@@ -1664,6 +1664,16 @@ class Battle {
             }
             if (targetDamage !== 0)
                 targetDamage = this.clampIntRange(targetDamage, 1);
+
+            // Custom Weather and status modifier.
+            if (effect.effectType != 'Move') {
+                if (target.level >= 200 && target.level <= 300) targetDamage = Math.floor(targetDamage / 4);
+                else if (target.level >= 600 && target.level <= 800) targetDamage = Math.floor(targetDamage / 5);
+                else if (target.level >= 1600 && target.level <= 1800) targetDamage = Math.floor(targetDamage / 6);
+                else if (target.level >= 2600 && target.level <= 2800) targetDamage = Math.floor(targetDamage / 6);
+                else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 7);
+            }
+
             if (this.gen <= 1) {
                 if (this.dex.currentMod === 'gen1stadium' ||
                     !['recoil', 'drain'].includes(effect.id) && effect.effectType !== 'Status') {
@@ -1676,16 +1686,6 @@ class Battle {
             if (source && effect.effectType === 'Move')
                 source.lastDamage = targetDamage;
             const name = effect.fullname === 'tox' ? 'psn' : effect.fullname;
-
-             // Custom Weather and status modifier.
-             if (effect.effectType != 'Move') {
-                if (target.level >= 200 && target.level <= 300) targetDamage = Math.floor(targetDamage / 4);
-                else if (target.level >= 600 && target.level <= 800) targetDamage = Math.floor(targetDamage / 5);
-                else if (target.level >= 1600 && target.level <= 1800) targetDamage = Math.floor(targetDamage / 6);
-                else if (target.level >= 2600 && target.level <= 2800) targetDamage = Math.floor(targetDamage / 6);
-                else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 7);
-            }
-
             switch (effect.id) {
                 case 'partiallytrapped':
                     this.add('-damage', targetDamage, target, target.getHealth, '[from] ' + this.effectState.sourceEffect.fullname, '[partiallytrapped]');
@@ -1961,7 +1961,7 @@ class Battle {
             if (pokemon.level < 101) {
                 return tr(tr(baseDamage * (100 - this.random(16))) / 5);
             } else {
-                return tr(tr(baseDamage * (100 - this.random(16))) / 200);
+                return tr(tr(baseDamage * (100 - this.random(16))) / 1800);
             }
         }
     }

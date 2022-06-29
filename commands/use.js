@@ -648,6 +648,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             embed.setImage('attachment://img.jpeg');
                             embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
                             message.channel.send(embed);
+
+                            raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
                         });
                     }
 

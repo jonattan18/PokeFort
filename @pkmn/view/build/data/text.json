@@ -369,7 +369,7 @@
         "end": "  [POKEMON] can use items again!"
     },
     "encore": {
-        "start": "  [POKEMON] must do an encore!",
+        "start": "  [POKEMON] must do same move!",
         "end": "  [POKEMON]'s encore ended!"
     },
     "endure": {
