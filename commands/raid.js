@@ -53,7 +53,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
 
                             // Decide Easy, Normal, Hard, Challenge, Intense based on random.
-                            var difficulty = Math.floor(Math.random() * 5);
+                            var rand_difficulty = Math.floor(Math.random() * 1000);
+                            if (rand_difficulty < 500) difficulty = 0;
+                            else if (rand_difficulty < 700) difficulty = 1;
+                            else if (rand_difficulty < 850) difficulty = 2;
+                            else if (rand_difficulty < 950) difficulty = 3;
+                            else difficulty = 4;
+
                             var raid_type = "";
                             var raid_level = 0;
                             var raid_rewards = "";
@@ -117,9 +123,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             description = `**RaidID: ${unique}\n` + `Difficulty: ${raid_type}\n` + `Time Left: ${raid_time_left_string}**`;
                             embed.setDescription(description);
                             embed.setFooter(`To join this raid, do ${prefix}r join ${unique}. To start the raid, the raid leader needs to do ${prefix}r start. To duel the raid boss, do ${prefix}r duel.`)
-
-                            // Type of pokemon.
-                            var type = [raid_boss["Primary Type"], raid_boss["Secondary Type"]];
 
                             // Start server side works.
                             raid_data = new raid_model({
