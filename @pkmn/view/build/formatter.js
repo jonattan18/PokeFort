@@ -962,7 +962,8 @@ class Handler {
         const template = this.parser.template('prepare', effect);
         return (template
             .replace('[POKEMON]', this.parser.pokemon(pokemon))
-            .replace('[TARGET]', this.parser.pokemon(target || '')));
+            .replace('[TARGET]', this.parser.pokemon(target || ''))
+            .replace('\n', '') + `:prepare|${args[1].substring(0, 3)}\n`);
     }
     '|-damage|'(args, kwArgs) {
         const [, damage, pokemon, health] = args;

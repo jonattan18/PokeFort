@@ -515,9 +515,13 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, 1);
                     for (var i = 0; i < show_str.length; i++) {
                         if (show_str[i].startsWith("  ")) {
-                            if (show_str[i].endsWith(":prepare")) {
-                                show_str[i] = show_str[i].replace(":prepare", "");
+                            if (show_str[i].endsWith(":prepare|p1a")) {
+                                show_str[i] = show_str[i].replace(":prepare|p1a", "");
                                 raid_data.PreparationMove = args[0];
+                            }
+                            else if (show_str[i].endsWith(":prepare|p2a")) {
+                                show_str[i] = show_str[i].replace(":prepare|p2a", "");
+                                raid_data.RaidPokemon.PreparationMove = move_index;
                             }
                             first_user_message.push(show_str[i]);
                         }
@@ -537,8 +541,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, 1);
                     for (var i = 0; i < show_str.length; i++) {
                         if (show_str[i].startsWith("  ")) {
-                            if (show_str[i].endsWith(":prepare")) {
-                                show_str[i] = show_str[i].replace(":prepare", "");
+                            if (show_str[i].endsWith(":prepare|p1a")) {
+                                show_str[i] = show_str[i].replace(":prepare|p1a", "");
+                                raid_data.PreparationMove = args[0];
+                            } else if (show_str[i].endsWith(":prepare|p2a")) {
+                                show_str[i] = show_str[i].replace(":prepare|p2a", "");
                                 raid_data.RaidPokemon.PreparationMove = move_index;
                             }
                             second_user_message.push(show_str[i]);

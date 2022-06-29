@@ -318,7 +318,7 @@
         "activate": "  [POKEMON] is storing energy!"
     },
     "bind": { "start": "  [POKEMON] was squeezed by [SOURCE]!", "move": "#wrap" },
-    "bounce": { "prepare": "  [POKEMON] sprang up!:prepare" },
+    "bounce": { "prepare": "  [POKEMON] sprang up!" },
     "brickbreak": { "activate": "  [POKEMON] shattered [TEAM]'s protections!" },
     "bugbite": { "removeItem": "  [SOURCE] stole and ate its target's [ITEM]!" },
     "burnup": { "typeChange": "  [POKEMON] burned itself out!" },
@@ -349,12 +349,12 @@
         "start": "  [POKEMON] is hoping to take its attacker down with it!",
         "activate": "[POKEMON] took its attacker down with it!"
     },
-    "dig": { "prepare": "  [POKEMON] burrowed its way under the ground!:prepare" },
+    "dig": { "prepare": "  [POKEMON] burrowed its way under the ground!" },
     "disable": {
         "start": "  [POKEMON]'s [MOVE] was disabled!",
         "end": "  [POKEMON]'s move is no longer disabled!"
     },
-    "dive": { "prepare": "  [POKEMON] hid underwater!:prepare" },
+    "dive": { "prepare": "  [POKEMON] hid underwater!" },
     "doomdesire": {
         "start": "  [POKEMON] chose Doom Desire as its destiny!",
         "activate": "  [TARGET] took the Doom Desire attack!"
@@ -393,7 +393,7 @@
     "flameburst": { "damage": "  The bursting flame hit [POKEMON]!" },
     "fling": { "removeItem": "  [POKEMON] flung its [ITEM]!" },
     "flipturn": { "switchOut": "#uturn" },
-    "fly": { "prepare": "  [POKEMON] flew up high!:prepare" },
+    "fly": { "prepare": "  [POKEMON] flew up high!" },
     "focusenergy": {
         "start": "  [POKEMON] is getting pumped!",
         "startFromItem": "  [POKEMON] used the [ITEM] to get pumped!",
@@ -408,7 +408,7 @@
         "startFromZEffect": "  [POKEMON] became the center of attention!"
     },
     "foresight": { "start": "  [POKEMON] was identified!" },
-    "freezeshock": { "prepare": "  [POKEMON] became cloaked in a freezing light!:prepare" },
+    "freezeshock": { "prepare": "  [POKEMON] became cloaked in a freezing light!" },
     "futuresight": {
         "start": "  [POKEMON] foresaw an attack!",
         "activate": "  [TARGET] took the Future Sight attack!"
@@ -462,7 +462,7 @@
     "highjumpkick": { "damage": "#crash" },
     "hyperspacefury": { "activate": "#shadowforce", "fail": "#darkvoid" },
     "hyperspacehole": { "activate": "#shadowforce" },
-    "iceburn": { "prepare": "  [POKEMON] became cloaked in freezing air!:prepare" },
+    "iceburn": { "prepare": "  [POKEMON] became cloaked in freezing air!" },
     "imprison": {
         "start": "  [POKEMON] sealed any moves its target shares with it!",
         "cant": "  [POKEMON] can't use its sealed [MOVE]!"
@@ -514,7 +514,7 @@
     },
     "maxguard": { "activate": "  [POKEMON] protected itself!" },
     "memento": { "heal": "  [POKEMON]'s HP was restored by the Z-Power!" },
-    "meteorbeam": { "prepare": "  [POKEMON] is overflowing with space power!:prepare" },
+    "meteorbeam": { "prepare": "  [POKEMON] is overflowing with space power!" },
     "metronome": { "move": "  Waggling a finger let it use [MOVE]!" },
     "mimic": { "start": "  [POKEMON] learned [MOVE]!" },
     "mindblown": { "damage": "  ([POKEMON] cut its own HP to power up its move!)" },
@@ -572,7 +572,7 @@
         "block": "  Quick Guard protected [POKEMON]!"
     },
     "ragepowder": { "start": "#followme", "startFromZEffect": "#followme" },
-    "razorwind": { "prepare": "  [POKEMON] whipped up a whirlwind!:prepare" },
+    "razorwind": { "prepare": "  [POKEMON] whipped up a whirlwind!" },
     "recycle": { "addItem": "  [POKEMON] found one [ITEM]!" },
     "reflect": {
         "startGen1": "  [POKEMON] gained armor!",
@@ -594,19 +594,19 @@
     "sandtomb": { "start": "  [POKEMON] became trapped by the quicksand!" },
     "shadowforce": {
         "activate": "  It broke through [TARGET]'s protection!",
-        "prepare": "  [POKEMON] vanished instantly!:prepare"
+        "prepare": "  [POKEMON] vanished instantly!"
     },
     "shelltrap": {
         "start": "  [POKEMON] set a shell trap!",
-        "prepare": "  [POKEMON] set a shell trap!:prepare",
+        "prepare": "  [POKEMON] set a shell trap!",
         "cant": "  [POKEMON]'s shell trap didn't work!"
     },
     "sketch": { "activate": "  [POKEMON] sketched [MOVE]!" },
     "skillswap": { "activate": "  [POKEMON] swapped Abilities with its target!" },
-    "skullbash": { "prepare": "  [POKEMON] tucked in its head!:prepare" },
-    "skyattack": { "prepare": "  [POKEMON] became cloaked in a harsh light!:prepare" },
+    "skullbash": { "prepare": "  [POKEMON] tucked in its head!" },
+    "skyattack": { "prepare": "  [POKEMON] became cloaked in a harsh light!" },
     "skydrop": {
-        "prepare": "  [POKEMON] took [TARGET] into the sky!:prepare",
+        "prepare": "  [POKEMON] took [TARGET] into the sky!",
         "end": "  [POKEMON] was freed from the Sky Drop!",
         "failSelect": "Sky Drop won't let [POKEMON] go!",
         "failTooHeavy": "  [POKEMON] is too heavy to be lifted!"
@@ -617,7 +617,7 @@
         "start": "  [POKEMON] is waiting for a target to make a move!",
         "activate": "  [POKEMON] snatched [TARGET]'s move!"
     },
-    "solarbeam": { "prepare": "  [POKEMON] absorbed light!:prepare" },
+    "solarbeam": { "prepare": "  [POKEMON] absorbed light!" },
     "solarblade": { "prepare": "#solarbeam" },
     "spectralthief": {
         "clearBoost": "  [SOURCE] stole the target's boosted stats!"
