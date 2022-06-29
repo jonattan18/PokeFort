@@ -16,6 +16,9 @@ const movesparser = require('../utils/moveparser');
 // Raid Sim
 const { BattleStreams, Teams, Streams } = require('@pkmn/sim');
 
+// Misc
+const config = require("../config/config.json");
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     // return message.channel.send("Invalid Command!")
@@ -37,18 +40,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         // check if 3 hours passed since last raid spawn.
                         // Remove me last ride cooldown.
                         if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (new Date().getTime() - last_raid_time) < 10800000) {
-                            // Decide raid boss based on random.
-                            const mythical_pokemons = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
-                            const ultra_beast_pokemons = pokemons.filter(it => it["Primary Ability"] === "Beast Boost" && it["Alternate Form Name"] === "NULL");
-                            const legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL");
-                            const sub_legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL");
-                            const gigantamax_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Gigantamax");
-                            //const mega_pokemons = pokemons.filter(it => it["Alternate Form Name"].includes("Mega"));
-                            const galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
-                            const alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
-                            // const hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
 
-                            var raid_pokemons = mythical_pokemons.concat(ultra_beast_pokemons, legendary_pokemons, sub_legendary_pokemons, galarian_pokemons, alolan_pokemons);
+                            // Decide raid boss based on random.
+                            const raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] != it["Pokemon Name"] || ae[1] != it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
                             var raid_boss = raid_pokemons[Math.floor(Math.random() * raid_pokemons.length)];
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
 

@@ -4,6 +4,7 @@ const config = require("./config/config.json");
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const mongoose = require('mongoose');
 const fs = require('fs');
+const _ = require('lodash');
 
 // Models
 const guild_model = require('./models/guild')
