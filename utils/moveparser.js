@@ -15,7 +15,7 @@ oh and V is Virtual Console
 // Function to get pokemon moves from pokemon id.
 function get_pokemon_move_from_id(pokemon_id, pokemons, tm = false, nolock = false) {
     var pokemon_db = pokemons.filter(x => x["Pokemon Id"] == pokemon_id)[0];
-    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"]}` : ""}`.toLowerCase())[0];
+    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"].replaceAll(" ", "-")}` : ""}`.toLowerCase())[0];
     if (move_available == undefined) return null;
     var moves_to_send = [];
     if (tm == false) {
@@ -41,7 +41,7 @@ function get_pokemon_move_from_id(pokemon_id, pokemons, tm = false, nolock = fal
 
 function get_raid_moves_from_id(pokemon_id, pokemons) {
     var pokemon_db = pokemons.filter(x => x["Pokemon Id"] == pokemon_id)[0];
-    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"]}` : ""}`.toLowerCase())[0];
+    var move_available = moves.filter(x => x["Pokemon Name"].toLowerCase() == `${pokemon_db["Pokemon Name"]}${pokemon_db["Alternate Form Name"] != "NULL" ? `-${pokemon_db["Alternate Form Name"].replaceAll(" ", "-")}` : ""}`.toLowerCase())[0];
     if (move_available == undefined) return null;
     var moves_to_send = [];
 

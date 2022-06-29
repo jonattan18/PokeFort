@@ -89,6 +89,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             embed.setDescription(`${mail_message}${mail_attachment_string}‎`);
 
+            if (user.Mails[args[1] - 1].ImageURL != undefined && user.Mails[args[1] - 1].ImageURL != "") {
+                embed.setImage(user.Mails[args[1] - 1].ImageURL);
+            }
+
             user.Mails[args[1] - 1].Read = true;
             user.save();
             message.channel.send(embed);

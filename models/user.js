@@ -43,6 +43,7 @@ const UserSchema = new mongoose.Schema({
         From: String,
         Subject: String,
         Message: String,
+        ImageURL: String,
         Attachment: {
             PokeCredits: Number,
             Shards: Number,
