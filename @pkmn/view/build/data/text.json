@@ -198,7 +198,7 @@
         "start": "  A sandstorm kicked up!",
         "end": "  The sandstorm subsided.",
         "upkeep": "  (The sandstorm is raging.)",
-        "damage": "  [POKEMON] is buffeted by the sandstorm!"
+        "damage": "  [POKEMON] is buffeted by the sandstorm! It did [DAMAGE] damage!"
     },
     "sunnyday": {
         "weatherName": "Sun",
@@ -217,7 +217,7 @@
         "start": "  It started to hail!",
         "end": "  The hail stopped.",
         "upkeep": "  (The hail is crashing down.)",
-        "damage": "  [POKEMON] is buffeted by the hail!"
+        "damage": "  [POKEMON] is buffeted by the hail! It did [DAMAGE] damage!"
     },
     "desolateland": {
         "weatherName": "Harsh Sunshine",
