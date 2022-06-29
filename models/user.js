@@ -38,6 +38,7 @@ const UserSchema = new mongoose.Schema({
         Pokemons: Array,
         Selected: Boolean
     }],
+    MailNotice: Boolean,
     Mails: [{
         From: String,
         Subject: String,

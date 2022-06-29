@@ -170,13 +170,26 @@ client.on('message', async (message) => {
         if (user != null && user.Suspend.Hours != undefined) {
             if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
                 user.Suspend = undefined;
-                user.save();
             }
             else issuspend = true;
         }
 
         // Check if the message starts with the prefix.
         if (message.content.toLowerCase().startsWith(prefix)) {
+
+            // Mail notice.
+            if (user != null && user.MailNotice) {
+                var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
+                var embed = new Discord.MessageEmbed();
+                embed.setColor("#1ec5ee");
+                embed.setTitle("Mail notification !");
+                embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `" + prefix + "mails` to check your mails.");
+                embed.setFooter(`App: Inbox, Mails`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
+                message.channel.send(embed);
+                user.MailNotice = false;
+            }
+
+            user.save();
             if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
             cmd = redirect_command(cmd, prefix).slice(prefix.length);
             if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return;
