@@ -356,6 +356,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0, _default = 0) {
     if (args.length != 1 || !isInt(args[0]) || (_switch && (args[0] > 6 || args[0] < 1)) || (!_switch && (args[0] > 4 || args[0] < 1))) return message.channel.send("Please enter a valid move.");
 
+    // Raid boss declaration.
+    var _raid_boss_won = false;
+    var _raid_boss_fainted = false;
+
     // Get all moves of raid pokemon.
     var raid_moveset = movesparser.get_raid_moves_from_id(raid_data.RaidPokemon.ID, pokemons);
     var raid_move = move_thinker(raid_moveset, raid_data.TrainersTeam[raid_data.CurrentPokemon].type[0], raid_data.TrainersTeam[raid_data.CurrentPokemon].type[1]);
@@ -481,13 +485,13 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                         // Execption
                         if (formatted == "\n") continue;
-                        if (formatted.startsWith("\n== Turn")) {
+                        if (formatted.startsWith("\n== Turn") || formatted.startsWith("== Turn")) {
                             next_turn = parseInt(formatted.replace("\n== Turn ", ""));
                             continue;
                         }
-                        if (formatted.startsWith("\nGo!")) continue;
+                        if (formatted.startsWith("\nGo!") || formatted.startsWith("Go!")) continue;
                         if (formatted.startsWith("Go!")) continue;
-                        if (formatted.startsWith("\n$Player2 sent out")) continue;
+                        if (formatted.startsWith("\n$Player2 sent out") || formatted.startsWith("$Player2 sent out")) continue;
                         if (formatted.startsWith("Battle started between")) continue;
 
                         // Remove opposing.
@@ -505,9 +509,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     }
 
                     // Get message text to show user.
-                    if (raid_data.OldStreamText) show_str.splice(0, raid_data.OldStreamText);
+                    var old_stream_no = raid_data.OldStreamText;
+                    raid_data.OldStreamText = show_str.length;
+                    if (raid_data.OldStreamText) show_str.splice(0, old_stream_no);
                     raid_data.CurrentTurn = raid_data.CurrentTurn != undefined ? next_turn : 1;
-                    raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
 
                     var _user_pokemon_fainted = false;
                     var _raid_pokemon_fainted = false;
@@ -610,7 +615,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                         // Check if user pokemon fainted.
                         if (_user_pokemon_fainted) user_pokemon_fainted();
-                        else if (_raid_pokemon_fainted) raid_boss_fainted();
+                        else if (_raid_pokemon_fainted) {
+                            _raid_boss_fainted = true;
+                            raid_boss_fainted();
+                        }
 
                     }
 
@@ -682,26 +690,51 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                 raid_data.OldStreamText = 0;
                                 raid_data.CurrentTurn = 0;
                                 raid_data.markModified('TrainersTeam');
-                                message.channel.send(`${message.author.username} ded. Let the other user play.`);
+
+                                raid_data.RaidPokemon.RaidStream.field = JSON.stringify(_battlestream.battle.field);
+                                var a = _battlestream.battle.sides[1];
+                                var save_data_raid_stream = {
+                                    pokemon: [
+                                        {
+                                            status: a.pokemon[0].status,
+                                            statusState: a.pokemon[0].statusState,
+                                            volatiles: a.pokemon[0].volatiles,
+                                            boosts: a.pokemon[0].boosts,
+                                            hp: a.pokemon[0].hp,
+                                        }]
+                                }
+                                raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
+                                raid_data.markModified('RaidPokemon');
+
+                                message.channel.send(`${message.author.username} unable to complete the raid. Team members can duel now.`);
                             }
                             else {
+                                _raid_boss_won = true;
                                 raid_boss_won();
                             }
                         }
                     }
 
                     // Raid Boss fainted.
-                    var _raid_boss_fainted = false;
                     function raid_boss_fainted() {
-                        _raid_boss_fainted = true;
-                        message.channel.send(`Raid boss fainted. User win.`);
+                        raid_data.remove().then(() => {
+                            for (var i = 0; i < raid_data.Trainers.length; i++) {
+                                if (raid_data.Trainers[i]) {
+                                    if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`Your team have successfully completed the raid! Rewards will be given later.`);
+                                }
+                            }
+                        });
                     }
 
                     // Raid Boss won.
-                    var _raid_boss_won = false;
                     function raid_boss_won() {
-                        _raid_boss_won = true;
-                        message.channel.send(`Raid boss won and raid is over.`);
+                        raid_data.remove().then(() => {
+                            for (var i = 0; i < raid_data.Trainers.length; i++) {
+                                if (raid_data.Trainers[i]) {
+                                    if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
+                                }
+                            }
+                        });
                     }
 
                     if (_raid_boss_fainted == false && _raid_boss_won == false) {
@@ -709,75 +742,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         // Raid save state.
                         raid_data.Stream = _battlestream.battle.inputLog.join('\n');
 
-                        raid_data.RaidPokemon.RaidStream.field = JSON.stringify(_battlestream.battle.field);
-                        var a = _battlestream.battle.sides[1];
-                        var save_data_raid_stream = {
-                            lastSelectedMove: a.lastSelectedMove,
-                            faintedLastTurn: a.faintedLastTurn,
-                            faintedThisTurn: a.faintedThisTurn,
-                            zMoveUsed: a.zMoveUsed,
-                            dynamaxUsed: a.dynamaxUsed,
-                            sideConditions: a.sideConditions,
-                            slotConditions: a.slotConditions,
-                            lastMove: a.lastMove,
-                            pokemon: [
-                                {
-                                    moveSlots: a.pokemon[0].moveSlots,
-                                    position: a.pokemon[0].position,
-                                    status: a.pokemon[0].status,
-                                    statusState: a.pokemon[0].statusState,
-                                    volatiles: a.pokemon[0].volatiles,
-                                    boosts: a.pokemon[0].boosts,
-                                    trapped: a.pokemon[0].trapped,
-                                    maybeTrapped: a.pokemon[0].maybeTrapped,
-                                    maybeDisabled: a.pokemon[0].maybeDisabled,
-                                    illusion: a.pokemon[0].illusion,
-                                    transformed: a.pokemon[0].transformed,
-                                    types: a.pokemon[0].types,
-                                    addedType: a.pokemon[0].addedType,
-                                    knownType: a.pokemon[0].knownType,
-                                    apparentType: a.pokemon[0].apparentType,
-                                    switchFlag: a.pokemon[0].switchFlag,
-                                    forceSwitchFlag: a.pokemon[0].forceSwitchFlag,
-                                    skipBeforeSwitchOutEventFlag: a.pokemon[0].skipBeforeSwitchOutEventFlag,
-                                    draggedIn: a.pokemon[0].draggedIn,
-                                    newlySwitched: a.pokemon[0].newlySwitched,
-                                    lastMove: a.pokemon[0].lastMove,
-                                    lastMoveUsed: a.pokemon[0].lastMoveUsed,
-                                    moveThisTurn: a.pokemon[0].moveThisTurn,
-                                    statsRaisedThisTurn: a.pokemon[0].statsRaisedThisTurn,
-                                    statsLoweredThisTurn: a.pokemon[0].statsLoweredThisTurn,
-                                    hurtThisTurn: a.pokemon[0].hurtThisTurn,
-                                    lastDamage: a.pokemon[0].lastDamage,
-                                    attackedBy: a.pokemon[0].attackedBy,
-                                    isActive: a.pokemon[0].isActive,
-                                    activeTurns: a.pokemon[0].activeTurns,
-                                    activeMoveActions: a.pokemon[0].activeMoveActions,
-                                    previouslySwitchedIn: a.pokemon[0].previouslySwitchedIn,
-                                    truantTurn: a.pokemon[0].truantTurn,
-                                    isStarted: a.pokemon[0].isStarted,
-                                    duringMove: a.pokemon[0].duringMove,
-                                    weighthg: a.pokemon[0].weighthg,
-                                    speed: a.pokemon[0].speed,
-                                    abilityOrder: a.pokemon[0].abilityOrder,
-                                    canMegaEvo: a.pokemon[0].canMegaEvo,
-                                    canUltraBurst: a.pokemon[0].canUltraBurst,
-                                    canGigantamax: a.pokemon[0].canGigantamax,
-                                    maxhp: a.pokemon[0].maxhp,
-                                    baseMaxhp: a.pokemon[0].baseMaxhp,
-                                    hp: a.pokemon[0].hp,
-                                    moveThisTurnResult: a.pokemon[0].moveThisTurnResult,
-                                    lastMoveTargetLoc: a.pokemon[0].lastMoveTargetLoc
-                                }]
-                        }
-                        raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
-
                         // Save to database.
                         raid_data.RaidPokemon.markModified();
                         raid_data.save();
-
-                    } else if (_raid_boss_fainted == true || _raid_boss_won == true) {
-                        raid_data.remove();
                     }
                 }
             }
