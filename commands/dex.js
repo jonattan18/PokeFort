@@ -29,6 +29,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (args[0] == "--l" || args[0] == "--legendary") { dex_legendary(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--m" || args[0] == "--mythical") { dex_mythical(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--a" || args[0] == "--alolan") { dex_alolan(bot, message, args, prefix, user_available, pokemons); return; }
+        if (args[0] == "--h" || args[0] == "--hisuian") { dex_hisuian(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--g" || args[0] == "--galarian") { dex_galarian(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--gen" || args[0] == "--generation" && isInt(args[1])) { dex_generation(bot, message, args, prefix, user_available, pokemons); return; }
         if (args[0] == "--t" || args[0] == "--type" && args[1] != undefined) { dex_type(bot, message, args, prefix, user_available, pokemons); return; }
@@ -308,6 +309,13 @@ function dex_alolan(bot, message, args, prefix, user_available, pokemons) {
     create_pagination(message, dex_pokemons, "alolan ", "Alolan ");
 }
 
+// To print all hisuian pokemons.
+function dex_hisuian(bot, message, args, prefix, user_available, pokemons) {
+    var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
+    dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
+    create_pagination(message, dex_pokemons, "hisuian ", "Hisuian ");
+}
+
 // To print all galarian pokemons.
 function dex_galarian(bot, message, args, prefix, user_available, pokemons) {
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
@@ -325,9 +333,13 @@ function dex_pokemons(bot, message, args, prefix, user_available, pokemons) {
     for (i = 0; i < new_galarian_pokemons.length; i++) {
         new_galarian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_galarian_pokemons[i]["Pokemon Id"], pokemons, false);
     }
+    var new_hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian")
+    for (i = 0; i < new_hisuian_pokemons.length; i++) {
+        new_hisuian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_hisuian_pokemons[i]["Pokemon Id"], pokemons, false);
+    }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
-    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons);
+    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons).concat(new_hisuian_pokemons);
     if (isInt(args[0])) { var page = args[0] - 1 }
     create_pagination(message, dex_pokemons, "", "", page);
 }
@@ -433,9 +445,13 @@ function dex_orderd(bot, message, args, prefix, user_available, pokemons) {
     for (i = 0; i < new_galarian_pokemons.length; i++) {
         new_galarian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_galarian_pokemons[i]["Pokemon Id"], pokemons, false);
     }
+    var new_hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian")
+    for (i = 0; i < new_hisuian_pokemons.length; i++) {
+        new_hisuian_pokemons[i]["Pokemon Name"] = getPokemons.get_pokemon_name_from_id(new_hisuian_pokemons[i]["Pokemon Id"], pokemons, false);
+    }
     var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
     dex_pokemons = _.orderBy(dex_pokemons, ['Pokedex Number'], ['asc']);
-    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons);
+    dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons).concat(new_hisuian_pokemons);
 
     create_pagination(message, dex_pokemons, "", "", 0, 0, true);
 }

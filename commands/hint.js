@@ -1,4 +1,8 @@
+// Models
 const channel_model = require('../models/channel');
+
+// Utils
+const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
@@ -6,8 +10,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     let channel_data = await channel_model.findOne({ ChannelID: message.channel.id });
     if (channel_data.PokemonID == 0) { message.channel.send("No pokemon currently seen on wild."); return; }
     if ((Date.now() - channel_data.Hint) / 1000 < 60 && channel_data.Hint != 0) { message.react('⏳'); return; }
-    let pokemon = pokemons.filter(it => it["Pokemon Id"] === channel_data.PokemonID.toString());
-    pokemon_name = pokemon[0]["Pokemon Name"].split('');
+    var pokemon_name = getPokemons.get_pokemon_name_from_id(channel_data.PokemonID, pokemons, false).split('');
     for (i = 0; i < pokemon_name.length; i++) {
         if (getRandomInt(0, 10) > 6) { continue; }
         pokemon_name[i] = "_";
