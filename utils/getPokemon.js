@@ -125,16 +125,17 @@ function getPokemonData(args, pokemons, shiny_allowed) {
     var image_url = './assets/images/' + image_name.replace("%", "");
 
     // Pokemon Name
+    var return_pokemon = pokemon;
     var pokemon_name = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, shiny);
-    pokemon.fullname = pokemon_name;
-    pokemon.name_no_shiny = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, false);
-    pokemon.imageurl = image_url;
-    pokemon.imagename = image_name;
-    pokemon.pokemon_name = pokemon_name;
-    pokemon.Shiny = shiny;
-    pokemon["PokemonId"] = pokemon["Pokemon Id"]
+    return_pokemon.fullname = pokemon_name;
+    return_pokemon.name_no_shiny = get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, false);
+    return_pokemon.imageurl = image_url;
+    return_pokemon.imagename = image_name;
+    return_pokemon.pokemon_name = pokemon_name;
+    return_pokemon.Shiny = shiny;
+    return_pokemon["PokemonId"] = pokemon["Pokemon Id"]
 
-    return pokemon;
+    return return_pokemon;
 }
 
 // Function to get image from given pokemon id.
