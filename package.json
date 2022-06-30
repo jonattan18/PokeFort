@@ -18,25 +18,14 @@
     "@pkmn/protocol": "^0.4.3",
     "@pkmn/sim": "file:@pkmn/sim",
     "@pkmn/view": "file:@pkmn/view",
-    "@smogon/calc": "^0.6.0",
-    "axios": "^0.27.2",
     "canvas": "^2.9.0",
     "cloc": "^2.9.0",
-    "codic": "^2.0.6",
     "discord.js": "^12.3.1",
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
-    "merge-images": "^2.0.0",
     "merge-images-v2": "^2.0.1",
     "mongodb": "^4.3.0",
     "mongoose": "^5.13.14",
-    "neoplan": "^1.1.1",
-    "readdirp": "^3.6.0",
-    "remove": "^0.1.5",
-    "save": "^2.4.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.18.0",
-    "eslint-config-google": "^0.14.0"
+    "readdirp": "^3.6.0"
   }
 }
