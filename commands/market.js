@@ -318,6 +318,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--m") || _.isEqual(new_args[0], "--mythical"))) { mythical(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--ub") || _.isEqual(new_args[0], "--ultrabeast"))) { ultrabeast(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--hisuian"))) { hisuian(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
@@ -463,6 +464,16 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 alolan_list.push(alolans[i]["Pokemon Id"]);
             }
             request_query.push({ "PokemonId": { $in: alolan_list } });
+        }
+
+        // For auction --hisuian command.
+        function hisuian() {
+            var hisuian = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
+            var hisuian_list = [];
+            for (var i = 0; i < hisuian.length; i++) {
+                hisuian_list.push(hisuian[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: hisuian_list } });
         }
 
         // For auction --galarian command.
