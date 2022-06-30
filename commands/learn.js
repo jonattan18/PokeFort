@@ -15,7 +15,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't learn pokemon moves while you are in a duel!");
+        if (_duel) return message.channel.send("You can't learn pokémon moves while you are in a duel!");
 
         //Get user data.
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -57,7 +57,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     current_move = available_moves.filter(it => it.toLowerCase() == args.join(" ").toLowerCase())[0];
                     user.MoveReplace = [selected_pokemon._id.toString(), 'Move', movesparser.movedataname(current_move).num];
                 }
-                else return message.channel.send(`Your pokemon cannot learn that move.`);
+                else return message.channel.send(`Your pokémon cannot learn that move.`);
 
                 user.save().then(() => {
                     var embed = new Discord.MessageEmbed();

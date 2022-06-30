@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (prompt.List.MarketID != undefined && prompt.List.AuctionID == undefined) {
             market_model.findOne({ $and: [{ "MarketID": prompt.List.MarketID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, market) => {
                 if (err) return console.log(err);
-                if (!market) return message.channel.send('Sorry, the pokemon you are trying to remove is not found.');
+                if (!market) return message.channel.send('Sorry, the pokémon you are trying to remove is not found.');
 
                 let pokemon_data = {
                     CatchedOn: market.CatchedOn,

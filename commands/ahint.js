@@ -9,10 +9,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         if (user.Admin != 1) return;
         message.channel.send("Admin Access Granted!");
         channel_model.findOne({ ChannelID: message.channel.id }, (err, channel_data) => {
-            if (channel_data.PokemonID == 0) { message.channel.send("No pokemon currently seen on wild."); return; }
+            if (channel_data.PokemonID == 0) { message.channel.send("No pokémon currently seen on wild."); return; }
             let pokemon = pokemons.filter(it => it["Pokemon Id"] === channel_data.PokemonID.toString());
             pokemon_name = pokemon[0]["Pokemon Name"];
-            message.channel.send(`The name of the pokemon is ${pokemon_name}`);
+            message.channel.send(`The name of the pokémon is ${pokemon_name}`);
         });
     });
 }

@@ -53,7 +53,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var pokemon_details = "";
                     if (team["Pokemons"][i] == null) {
                         pokemon_title = `Pokemon #${i + 1}`;
-                        pokemon_details = `You do not own the pokemon at this position! Please do ${prefix}teamedit ${i + 1} <pokemon number to replace it.`;
+                        pokemon_details = `You do not own the pokémon at this position! Please do ${prefix}teamedit ${i + 1} <pokemon number to replace it.`;
                         embed.addField(pokemon_title, pokemon_details, true);
                     }
                     else {
@@ -62,7 +62,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var pokemon_title = "";
                             var pokemon_details = "";
                             pokemon_title = `Pokemon #${i + 1}`;
-                            pokemon_details = `You do not own the pokemon at this position! Please do ${prefix}teamedit ${i + 1} <pokemon number to replace it.`;
+                            pokemon_details = `You do not own the pokémon at this position! Please do ${prefix}teamedit ${i + 1} <pokemon number to replace it.`;
                             embed.addField(pokemon_title, pokemon_details, true);
                         }
                         else {
@@ -79,7 +79,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                     }
                 }
-                embed.setFooter(`To edit your team, select it and do ${prefix}teamedit <position> <pokemon number> to add a pokemon to your team!`);
+                embed.setFooter(`To edit your team, select it and do ${prefix}teamedit <position> <pokemon number> to add a pokémon to your team!`);
                 message.channel.send(embed);
             });
         }

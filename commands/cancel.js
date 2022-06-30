@@ -11,13 +11,13 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
         // If user prompt is for release
         if (prompt.PromptType == "Release") {
             prompt.remove().then(() => {
-                message.channel.send('You have cancelled pokemon release.');
+                message.channel.send('You have cancelled pokémon release.');
             });
         }
         // If user prompt is for recycle
         else if (prompt.PromptType == "Recycle") {
             prompt.remove().then(() => {
-                message.channel.send('You have cancelled pokemon recycle.');
+                message.channel.send('You have cancelled pokémon recycle.');
             });
         }
         // If user prompt is for trade
@@ -47,7 +47,7 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
         // If user prompt is for confirmbuy
         else if (prompt.PromptType == "ConfirmBuy") {
             prompt.remove().then(() => {
-                message.channel.send('You cancelled buying pokemon from market.');
+                message.channel.send('You cancelled buying pokémon from market.');
             });
         }
         else return message.channel.send('No prompt asked for to use ``cancel`` command.');

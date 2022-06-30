@@ -222,7 +222,7 @@ function change_trade(message, trade_prompt, pokemons) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User1ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have traded your selected pokemon. Pokemon Number 1 selected!`);
+                                message.channel.send(`You have traded your selected pokemon. Pokémon Number 1 selected!`);
                             })
                         }
 
@@ -268,7 +268,7 @@ function change_trade(message, trade_prompt, pokemons) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User2ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have traded your selected pokemon. Pokemon Number 1 selected!`);
+                                message.channel.send(`You have traded your selected pokemon. Pokémon Number 1 selected!`);
                             })
                         }
 
@@ -340,7 +340,7 @@ function recycle(message, user_prompt, load_pokemons) {
                 if (pokemon_level == 100 || pokemon_level > 100) {
                     var embed = new Discord.MessageEmbed()
                     embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
-                    embed.setDescription(`Your Pokemon in max level!`)
+                    embed.setDescription(`Your Pokémon in max level!`)
                     embed.setColor(message.member.displayHexColor)
                     message.channel.send(embed);
                     return;
@@ -463,7 +463,7 @@ function release(message, user_prompt) {
             user_model.findOne({ UserID: message.author.id }, (err, user) => {
                 var selected_pokemon = new_user_pokemons.filter(it => it._id == user.Selected)[0];
                 if (selected_pokemon == undefined) {
-                    message.channel.send(`You have released your selected pokemon. Pokemon Number 1 selected!`);
+                    message.channel.send(`You have released your selected pokemon. Pokémon Number 1 selected!`);
                     user.Selected = new_user_pokemons[0]._id;
                     user.save();
                 }

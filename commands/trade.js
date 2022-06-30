@@ -14,12 +14,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't trade pokemon while you are in a duel!");
+        if (_duel) return message.channel.send("You can't trade pokémon while you are in a duel!");
 
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
             if (raid) {
-                if (raid.Started) return message.channel.send("You can't trade pokemon while you are in a raid!");
+                if (raid.Started) return message.channel.send("You can't trade pokémon while you are in a raid!");
             }
             else {
                 //Check if user2 is in the database.

@@ -9,13 +9,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     if (args.length == 0) {
-        message.channel.send("You have not mentioned any pokemon number. Use ``" + prefix + "select <pokemon number>`` or ``l`` for latest pokemon.");
+        message.channel.send("You have not mentioned any pokémon number. Use ``" + prefix + "select <pokemon number>`` or ``l`` for latest pokemon.");
         return;
     }
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't select pokemon while you are in a duel!");
+        if (_duel) return message.channel.send("You can't select pokémon while you are in a duel!");
 
         //Get user data.
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -33,7 +33,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var selected_pokemon = user_pokemons[args[0] - 1];
                     }
                     else {
-                        message.channel.send("No pokemon exists with that number.");
+                        message.channel.send("No pokémon exists with that number.");
                         return;
                     }
                 }

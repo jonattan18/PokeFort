@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             auction_model.findOne({ $and: [{ "AuctionID": prompt.List.AuctionID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, auction) => {
                 if (err) return console.log(err);
-                if (!auction) return message.channel.send('Sorry, the pokemon you are trying to bid on is not found.');
+                if (!auction) return message.channel.send('Sorry, the pokémon you are trying to bid on is not found.');
                 var bid_time = new Date(auction.BidTime);
                 var time_left = new Date(bid_time.getTime() - new Date().getTime());
                 if (time_left.getTime() < 0) return message.channel.send("This auction has ended.");
@@ -33,7 +33,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (auction.BidUser != undefined && auction.BidUser != message.author.id && (old_usr != undefined || old_usr != null)) {
 
                         // Send Message
-                        bot.users.cache.get(old_usr).send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokemon is bought out for ${prompt.List.AuctionPrice} credits.`);
+                        bot.users.cache.get(old_usr).send(`You were outbid on auction ID ${auction.AuctionID} (Level ${auction.Level} ${auction.PokemonName}). The pokémon is bought out for ${prompt.List.AuctionPrice} credits.`);
 
                         user_model.findOne({ UserID: old_usr }, (err, old_bid) => {
                             old_bid.PokeCredits += old_price;

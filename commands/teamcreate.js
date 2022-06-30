@@ -19,7 +19,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     // Int Check
     for (let i = 0; i < args.length; i++) {
         if (!isInt(args[i])) {
-            return message.channel.send(`_${args[i]}_ is not a valid pokemon id!`);
+            return message.channel.send(`_${args[i]}_ is not a valid pokémon id!`);
         }
     }
 
@@ -28,7 +28,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         for (let i = 0; i < args.length; i++) {
             if (pokemons_from_database[args[i] - 1] != undefined) {
                 team_pokemons.push(pokemons_from_database[args[i] - 1]._id.toString());
-            } else return message.channel.send(`_${args[i]}_ is not a valid pokemon id!`);
+            } else return message.channel.send(`_${args[i]}_ is not a valid pokémon id!`);
         }
 
         // Create Team.
@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
             }
 
-            if (containsDuplicates(team_pokemons)) return message.channel.send(`You can't have same pokemon in your team!`);
+            if (containsDuplicates(team_pokemons)) return message.channel.send(`You can't have same pokémon in your team!`);
 
             // Replace empty pokemons with null values.
             for (let i = 0; i < 6; i++) {

@@ -10,7 +10,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     if (args.length == 0) {
-        message.channel.send("You have not mentioned any pokemon number. Use ``" + prefix + "addfav <pokemon number>`` or ``l`` for latest pokemon.");
+        message.channel.send("You have not mentioned any pokémon number. Use ``" + prefix + "addfav <pokémon number>`` or ``l`` for latest pokémon.");
         return;
     }
 
@@ -30,14 +30,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var selected_pokemon = user_pokemons[args[0] - 1];
                 }
                 else {
-                    message.channel.send("No pokemon exists with that number.");
+                    message.channel.send("No pokémon exists with that number.");
                     return;
                 }
             }
             else return message.channel.send("Invalid argument.");
 
             // If pokemon is already in favourites.
-            if (selected_pokemon.Favourite == true) { return message.channel.send("This pokemon is already in your favourites."); }
+            if (selected_pokemon.Favourite == true) { return message.channel.send("This pokémon is already in your favourites."); }
             pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].Favourite": true } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                 if (err) return console.log(err);
                 show_msg();

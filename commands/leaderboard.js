@@ -55,7 +55,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var username = leaderboard.Users[i].Username;
                     var no_of_caught = leaderboard.Users[i].NoOfCaught;
                     var rank = leaderboard.Users.indexOf(leaderboard.Users[i]) + 1;
-                    embed.addField(`${rank}) ${username}`, `${no_of_caught} pokemon caught`, true);
+                    embed.addField(`${rank}) ${username}`, `${no_of_caught} pokémon caught`, true);
                 }
             }
             message.channel.send(embed);

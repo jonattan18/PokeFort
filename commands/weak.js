@@ -5,7 +5,7 @@ const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { return message.channel.send(`You should specify a pokemon name!`); }
+    if (args.length == 0) { return message.channel.send(`You should specify a pokémon name!`); }
 
     var types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"];
     var embed = new Discord.MessageEmbed()

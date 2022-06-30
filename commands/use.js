@@ -185,7 +185,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     // description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} failed to make a move!\n`;
                     description += `\n${duel_data.User2name}'s ${user2_data.PokemonName} has fainted!`;
                     description += `**\n${duel_data.User1name} wins!**`;
-                    if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokemon is in Max Level`;
+                    if (user1_data.PokemonLevel >= 100) description += `\n${duel_data.User1name}'s Pokémon is in Max Level`;
                     else description += `\n${duel_data.User1name} was awarded ${xp}XP`;
                     prompt.remove().then(() => {
                         user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user1 => {
@@ -216,7 +216,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     description += `\n${damage[1]} **-${damage[0]}**\n`;
                     description += `\n${duel_data.User1name}'s ${user1_data.PokemonName} has fainted!`;
                     description += `**\n${duel_data.User2name} wins!**`;
-                    if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokemon is in Max Level`;
+                    if (user2_data.PokemonLevel >= 100) description += `\n${duel_data.User2name}'s Pokémon is in Max Level`;
                     else description += `\n${duel_data.User2name} was awarded ${xp}XP`;
                     prompt.remove().then(() => {
                         user_model.findOne({ UserID: prompt.UserID.User1ID }).then(user2 => {
@@ -393,7 +393,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     // Fainted move block.
     if (raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted == true && _switch == false) {
-        return message.channel.send("Your pokemon is fainted. Use switch to switch pokemon.");
+        return message.channel.send("Your pokémon is fainted. Use switch to switch pokemon.");
     }
 
     // Get battle data.
@@ -409,7 +409,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}`;
-            } else return message.channel.send("Please enter a valid pokemon to switch.");
+            } else return message.channel.send("Please enter a valid pokémon to switch.");
         }
         else {
             if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
@@ -418,7 +418,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
-            } else return message.channel.send("Please enter a valid pokemon to switch.");
+            } else return message.channel.send("Please enter a valid pokémon to switch.");
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
 
@@ -655,7 +655,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             embed.setColor(message.guild.me.displayHexColor);
                             embed.attachFiles(image_file)
                             embed.setImage('attachment://img.jpeg');
-                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokémon has available to them!`);
                             message.channel.send(embed);
 
                             raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;

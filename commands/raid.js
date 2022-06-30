@@ -497,7 +497,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             embed.setColor(message.guild.me.displayHexColor);
                                             embed.attachFiles(image_file)
                                             embed.setImage('attachment://img.jpeg');
-                                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokemon has available to them!`);
+                                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokémon has available to them!`);
                                             message.channel.send(embed);
                                         });
                                     });

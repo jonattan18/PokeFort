@@ -13,7 +13,7 @@ const config = require("../config/config.json");
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
-    if (args.length == 0) { message.channel.send("You have not mentioned any pokemon name. Use ``" + prefix + "catch <pokemon>`` to catch."); return; }
+    if (args.length == 0) { message.channel.send("You have not mentioned any pokémon name. Use ``" + prefix + "catch <pokemon>`` to catch."); return; }
 
     var form = "";
     if (args[0].toLowerCase() == "alolan") { form = "Alola"; args.splice(0, 1) }
@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
         if (err) console.log(err);
         if (channel) {
-            if (channel.PokemonID == 0) { message.channel.send("No pokemon currently seen on wild."); return; }
+            if (channel.PokemonID == 0) { message.channel.send("No pokémon currently seen on wild."); return; }
             if (pokemon["Pokemon Id"] == channel.PokemonID) {
                 user_model.findOne({ UserID: message.author.id }, (err, user) => {
                     if (err) console.log(err);

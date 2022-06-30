@@ -42,7 +42,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var index = args[0];
                 }
                 else {
-                    message.channel.send("No pokemon exists with that number.");
+                    message.channel.send("No pokémon exists with that number.");
                     return;
                 }
             }

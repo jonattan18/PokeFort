@@ -11,7 +11,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     if (args.length == 0) {
-        message.channel.send("You have not mentioned any pokemon number. Use ``" + prefix + "addfav <pokemon number>`` or ``l`` for latest pokemon.");
+        message.channel.send("You have not mentioned any pokémon number. Use ``" + prefix + "addfav <pokemon number>`` or ``l`` for latest pokemon.");
         return;
     }
 

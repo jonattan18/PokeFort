@@ -33,17 +33,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 if (args[3][args[3].length - 1] != "h" && args[3][args[3].length - 1] != "m") return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
                 if (!isInt(args[2])) return message.channel.send("When listing on a auction, you must specify a buyout.");
-                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokemon ? Minimum buyout is 1.");
-                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokemon ? Maximum price is 1,000,000,000.");
+                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokémon ? Minimum buyout is 1.");
+                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.");
 
                 // If arguments is latest or l
                 if (args[1].toLowerCase() == "l" || args[1].toLowerCase() == "latest") var selected_pokemon = user_pokemons[user_pokemons.length - 1];
                 // If arguments is number
                 else if (isInt(args[1])) {
                     if (typeof user_pokemons[args[1] - 1] != 'undefined') var selected_pokemon = user_pokemons[args[1] - 1];
-                    else return message.channel.send("No pokemon exists with that number.");
+                    else return message.channel.send("No pokémon exists with that number.");
                 }
-                else return message.channel.send("Please type a valid pokemon number.");
+                else return message.channel.send("Please type a valid pokémon number.");
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
 
@@ -112,10 +112,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For view or info pokemon command  
         else if ((args[0] == "view" || args[0] == "info" || args[0] == "i") && args.length == 2) {
-            if (!isInt(args[1])) return message.channel.send("Please type a valid pokemon ID.");
+            if (!isInt(args[1])) return message.channel.send("Please type a valid pokémon ID.");
 
             auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
-                if (!auction) return message.channel.send("No pokemon exists with that ID.");
+                if (!auction) return message.channel.send("No pokémon exists with that ID.");
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == auction.PokemonId)[0];
 
@@ -200,7 +200,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (args[0] == "bid" && args.length == 3 && isInt(args[2])) {
             auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
+                    return message.channel.send("We couldn't find any pokémon associted with that auction ID.");
                 }
                 else if (auction.UserID == message.author.id) return message.channel.send("You can't bid on your own pokemon.");
                 else if (auction.BidUser == message.author.id) return message.channel.send("You already have a bid on this pokemon.");
@@ -245,13 +245,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     user.PokeCredits += auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0);
 
                     user.save().then(() => {
-                        message.channel.send(`Successfully claimed ${auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0)} credits from auction ID ${auction.AuctionID}. ${tax_price.length > 0 ? `As your pokemon was auctioned for over ${tax_price[0]}, ${tax_price[1]}% tax was taken and you received ${auction.BidPrice - tax_price[2]}.` : ""}`);
+                        message.channel.send(`Successfully claimed ${auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0)} credits from auction ID ${auction.AuctionID}. ${tax_price.length > 0 ? `As your pokémon was auctioned for over ${tax_price[0]}, ${tax_price[1]}% tax was taken and you received ${auction.BidPrice - tax_price[2]}.` : ""}`);
                     });
 
                 }
                 // Pokemon claim not auctioned by anyone.
                 else if (auction.UserID == message.author.id && auction.BidPrice == undefined) {
-                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim your pokemon or credits once the auction time has ended.")
+                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim your pokémon or credits once the auction time has ended.")
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
@@ -270,7 +270,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 // Pokemon claim by bid user.
                 else if (auction.UserID != message.author.id && auction.BidUser == message.author.id && auction.BidPrice != undefined && auction.UserClaimed == undefined) {
-                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim any pokemon if the auction time has ended.")
+                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim any pokémon if the auction time has ended.")
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
@@ -286,7 +286,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     else auction.save();
 
                     getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
-                        message.channel.send(`Successfully claimed your pokemon from auction ID ${auction.AuctionID}`);
+                        message.channel.send(`Successfully claimed your pokémon from auction ID ${auction.AuctionID}`);
                     });
                 }
                 else return message.channel.send("You can't claim this pokemon.");
@@ -342,7 +342,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
                         embeds[i] = new Discord.MessageEmbed();
-                        embeds[i].setTitle("PokeFort Auction:");
+                        embeds[i].setTitle("PokéFort Auction:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
                         for (j = 0; j < split_chunks[i].length; j++) {
@@ -477,7 +477,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
                                 embeds[i] = new Discord.MessageEmbed();
-                                embeds[i].setTitle("PokeFort Auction:");
+                                embeds[i].setTitle("PokéFort Auction:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
                                 for (j = 0; j < split_chunks[i].length; j++) {

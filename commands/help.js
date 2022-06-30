@@ -5,7 +5,7 @@ module.exports.run = async (bot, message, args, prefix) => {
     if (args.length == 0) {
         message.channel.send("We have sent the instructions to you. Check your DMs!");
         var embed = new Discord.MessageEmbed();
-        embed.setTitle("PokeFort Commands");
+        embed.setTitle("PokéFort Commands");
         var description = ""
             + `**Page 1 | Getting Started!**\n`
             + `How to get started on the bot and dex commands. \`\`${prefix}help 1\`\`\n\n`
@@ -59,7 +59,7 @@ module.exports.run = async (bot, message, args, prefix) => {
         var embed = new Discord.MessageEmbed();
         embed.setTitle("Basic Commands!");
         var description = "The main commands for the bot and pokemon commands.\n\n"
-            + `**${prefix}daily** | Allows you to vote for the Pokefort server on the Discord Bots site. You get 100 - 1000 credit for doing this every 12 hours.\n\n`
+            + `**${prefix}daily** | Allows you to vote for the Pokéfort server on the Discord Bots site. You get 100 - 1000 credit for doing this every 12 hours.\n\n`
             + `**${prefix}silence** | Toggles your level up messages.\n\n`
             + `**${prefix}dm** | Toggles your duel instruction messages.\n\n`
             + `**${prefix}redeem** <Pokemon Name> | If you have a redeem available, you will receive a Pokemon of the name you entered.\n\n`

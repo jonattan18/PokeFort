@@ -32,17 +32,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
                 if (!isInt(args[2])) return message.channel.send("When listing on a market, you must specify a price.");
-                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokemon ? Minimum price is 1.");
-                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokemon ? Maximum price is 1,000,000,000.");
+                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokémon ? Minimum price is 1.");
+                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.");
 
                 // If arguments is latest or l
                 if (args[1].toLowerCase() == "l" || args[1].toLowerCase() == "latest") var selected_pokemon = user_pokemons[user_pokemons.length - 1];
                 // If arguments is number
                 else if (isInt(args[1])) {
                     if (typeof user_pokemons[args[1] - 1] != 'undefined') var selected_pokemon = user_pokemons[args[1] - 1];
-                    else return message.channel.send("No pokemon exists with that number.");
+                    else return message.channel.send("No pokémon exists with that number.");
                 }
-                else return message.channel.send("Please type a valid pokemon number.");
+                else return message.channel.send("Please type a valid pokémon number.");
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
 
@@ -69,7 +69,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     else if (args[2] > 1000000) tax_price = ["1,000,000", 6, percentCalculation(args[2], 6).toFixed(0)];
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]} Credits?${tax_price.length > 0 ? ` _As your pokemon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${args[2] - tax_price[2]} credits._\n` : ""} Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]} Credits?${tax_price.length > 0 ? ` _As your pokémon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${args[2] - tax_price[2]} credits._\n` : ""} Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
                     });
                 });
             });
@@ -77,10 +77,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // For view or info pokemon command  
         else if ((args[0] == "view" || args[0] == "info" || args[0] == "i") && args.length == 2) {
-            if (!isInt(args[1])) return message.channel.send("Please type a valid pokemon ID.");
+            if (!isInt(args[1])) return message.channel.send("Please type a valid pokémon ID.");
 
             market_model.findOne({ "MarketID": args[1] }, (err, market) => {
-                if (!market) return message.channel.send("No pokemon exists with that ID.");
+                if (!market) return message.channel.send("No pokémon exists with that ID.");
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == market.PokemonId)[0];
 
@@ -159,7 +159,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (args[0] == "buy" && args.length == 2 && isInt(args[1])) {
             market_model.findOne({ "MarketID": args[1] }, (err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
+                    return message.channel.send("We couldn't find any pokémon associted with that market ID.");
                 }
                 else if (market.UserID == message.author.id) return message.channel.send("You can't buy your own pokemon.");
                 else {
@@ -185,7 +185,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if ((args[0] == "remove" || args[0] == "rem") && args.length == 2 && isInt(args[1])) {
             market_model.findOne({ $and: [{ "UserID": message.author.id }, { "MarketID": args[1] }] }, (err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokemon associted with that market ID.");
+                    return message.channel.send("We couldn't find any pokémon associted with that market ID.");
                 }
                 else {
                     var update_data = new prompt_model({
@@ -254,7 +254,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
                         embeds[i] = new Discord.MessageEmbed();
-                        embeds[i].setTitle("PokeFort Market:");
+                        embeds[i].setTitle("PokéFort Market:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
                         for (j = 0; j < split_chunks[i].length; j++) {
@@ -379,7 +379,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
                                 embeds[i] = new Discord.MessageEmbed();
-                                embeds[i].setTitle("PokeFort Market:");
+                                embeds[i].setTitle("PokéFort Market:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
                                 for (j = 0; j < split_chunks[i].length; j++) {

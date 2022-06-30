@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             // Adding to market or auction.
             getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
-                if (user_pokemons.length < 2) return message.channel.send('You should have more than 1 pokemon to list in the market.');
+                if (user_pokemons.length < 2) return message.channel.send('You should have more than 1 pokémon to list in the market.');
                 var selected_pokemon = user_pokemons.filter(it => it._id == prompt.List.PokemonUID)[0];
 
                 if (selected_pokemon == undefined) return message.channel.send("Can't find that pokemon. Try again !");
@@ -91,7 +91,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             user.Selected = new_pokemon._id;
                                             user.PokeCredits -= 125 + (parseInt(prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)) * 25);
                                             user.save().then(() => {
-                                                message.channel.send(`You have added your seleted pokemon to auction list. Auto Selecting first pokemon.`);
+                                                message.channel.send(`You have added your seleted pokémon to auction list. Auto Selecting first pokemon.`);
                                             });
                                         }
                                         message.channel.send(`You successfully auctioned your level ${level} ${pokemon_name} for ${prompt.List.BidTime.replace("h", "")} hours with a buyout of ${prompt.List.Price} credits.`);
@@ -139,7 +139,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             var new_pokemon = user_pokemons.filter(it => it._id !== selected_pokemon._id)[0];
                                             user.Selected = new_pokemon._id;
                                             user.save().then(() => {
-                                                message.channel.send(`You have added your seleted pokemon to market list. Auto Selecting first pokemon.`);
+                                                message.channel.send(`You have added your seleted pokémon to market list. Auto Selecting first pokemon.`);
                                             });
                                         }
                                         message.channel.send(`You have listed your level ${level} ${pokemon_name} on the market for ${prompt.List.Price} credits!`);

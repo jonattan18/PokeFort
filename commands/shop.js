@@ -40,7 +40,7 @@ function shop_forms(message, args, balance, prefix) {
         var embed = new Discord.MessageEmbed()
         embed.setTitle(`:moneybag: Balance: ${balance}\n\n${args[1].capitalize()}'s Forms`);
         embed.setColor(message.guild.me.displayHexColor);
-        embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All ${args[1].capitalize()} forms cost 1,000 credits.**`)
+        embed.setDescription(`Some pokémon have different forms, you can buy items here to allow them to transform.\n\n**All ${args[1].capitalize()} forms cost 1,000 credits.**`)
         embed.addField(`Normal ${args[1].capitalize()} Form`, '``' + prefix + 'buy form normal ' + args[1].toLocaleLowerCase() + '``', true)
         for (i = 0; i < forms_config.available_forms[args[1].toLowerCase()].forms.length; i++) {
             if (forms_config.available_forms[args[1].toLowerCase()].forms[i] == "null") continue;
@@ -50,7 +50,7 @@ function shop_forms(message, args, balance, prefix) {
         }
         embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
         message.channel.send(embed);
-    } else return message.channel.send("This pokemon name don't have any forms to buy!");
+    } else return message.channel.send("This pokémon name don't have any forms to buy!");
 }
 
 // Page 1 XP Boosters & Rare Candies
@@ -63,7 +63,7 @@ function page_1(message, balance, prefix) {
     embed.addField('1 Hour - 2X Multiplier | Cost: 50 Credits', '``' + prefix + 'buy 2``', false)
     embed.addField('2 Hour - 2X Multiplier | Cost: 75 Credits', '``' + prefix + 'buy 3``', false)
     embed.addField('4 Hour - 1.5X Multiplier | Cost: 90 Credits', '``' + prefix + 'buy 4``', false)
-    embed.addField('Rare Candy | Cost: 70 Credits', 'Rare candies level up your selected pokemon by one level for each candy you feed it.\n``' + prefix + 'buy candy <amount>``', false)
+    embed.addField('Rare Candy | Cost: 70 Credits', 'Rare candies level up your selected pokémon by one level for each candy you feed it.\n``' + prefix + 'buy candy <amount>``', false)
     embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
     message.channel.send(embed)
 }
@@ -137,9 +137,9 @@ function page_4(message, balance, prefix) {
     var embed = new Discord.MessageEmbed()
     embed.setTitle(`:moneybag: Balance: ${balance}\n\nHeld Items`)
     embed.setColor(message.guild.me.displayHexColor)
-    embed.setDescription("Buy items for your pokemon to hold using ``" + prefix + "buy item <item name>``.\n\n**All these held items cost 75 credits.**")
-    embed.addField('Everstone', 'Prevents your pokemon from evolving.', false)
-    embed.addField('XP Blocker', 'Prevents your pokemon from gaining XP.', false)
+    embed.setDescription("Buy items for your pokémon to hold using ``" + prefix + "buy item <item name>``.\n\n**All these held items cost 75 credits.**")
+    embed.addField('Everstone', 'Prevents your pokémon from evolving.', false)
+    embed.addField('XP Blocker', 'Prevents your pokémon from gaining XP.', false)
     embed.addField('Deep Sea Scale', 'Trade Evolution Item', true)
     embed.addField('Deep Sea Tooth', 'Trade Evolution Item', true)
     embed.addField('Dragon Scale', 'Trade Evolution Item', true)
@@ -176,7 +176,7 @@ function page_6(message, balance, prefix) {
     var embed = new Discord.MessageEmbed()
     embed.setTitle(`:moneybag: Balance: ${balance}\n\nForms`)
     embed.setColor(message.guild.me.displayHexColor)
-    embed.setDescription(`Some pokemon have different forms, you can buy items here to allow them to transform.\n\n**All form items cost 1000 credits.**`)
+    embed.setDescription(`Some pokémon have different forms, you can buy items here to allow them to transform.\n\n**All form items cost 1000 credits.**`)
     for (i = 0; i < forms_config.available_pokemons.length; i++) {
         embed.addField(forms_config.available_pokemons[i], '``' + prefix + 'shop forms ' + forms_config.available_pokemons[i].toLocaleLowerCase() + '``', true)
     }

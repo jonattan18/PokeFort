@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
         if (err) return console.log(err);
-        if (_trade) return message.channel.send("You can't duel pokemon while you are in a trade!");
+        if (_trade) return message.channel.send("You can't duel pokémon while you are in a trade!");
 
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }

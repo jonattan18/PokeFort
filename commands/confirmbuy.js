@@ -18,7 +18,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             market_model.findOne({ $and: [{ "MarketID": prompt.List.MarketID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, market) => {
                 if (err) return console.log(err);
-                if (!market) return message.channel.send('Sorry, the pokemon you are trying to buy is not found.');
+                if (!market) return message.channel.send('Sorry, the pokémon you are trying to buy is not found.');
 
                 if (user.PokeCredits < market.Price) return message.channel.send("You have insufficient balance to buy this pokemon.");
 
@@ -50,8 +50,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     user1.PokeCredits += (market.Price - (tax_price.length > 0 ? tax_price[2] : 0));
                                     user1.save().then(() => {
                                         var embed = new Discord.MessageEmbed();
-                                        embed.setTitle(`Congratulations! Your Pokemon was sold!`);
-                                        embed.setDescription(`${tax_price.length > 0 ? ` _As your pokemon sold for over ${tax_price[0]} credits, ${tax_price[1]}% has been taken as tax and you have received ${args[2] - tax_price[2]} credits._\n` : ""}Your ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has sold and you have received ${market.Price} Credits.`);
+                                        embed.setTitle(`Congratulations! Your Pokémon was sold!`);
+                                        embed.setDescription(`${tax_price.length > 0 ? ` _As your pokémon sold for over ${tax_price[0]} credits, ${tax_price[1]}% has been taken as tax and you have received ${args[2] - tax_price[2]} credits._\n` : ""}Your ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has sold and you have received ${market.Price} Credits.`);
 
                                         // Send Message
                                         bot.users.cache.get(market.UserID).send(embed);

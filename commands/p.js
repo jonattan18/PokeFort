@@ -739,7 +739,7 @@ function pokemon_filter(message, args, user_pokemons, pokemons) {
         var filtered_pokemons = [];
         if (args.length == 2) {
             var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-            if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
+            if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokémon name."] }
             filtered_pokemons.push(found_pokemon["Pokemon Id"]);
 
             if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {

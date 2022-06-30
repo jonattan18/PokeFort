@@ -42,14 +42,14 @@ function buyitem(message, args) {
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
             var _id = selected_pokemon._id;
 
-            if (selected_pokemon.Held != undefined && selected_pokemon.Held != null) return message.channel.send("Your selected pokemon already has an item!");
+            if (selected_pokemon.Held != undefined && selected_pokemon.Held != null) return message.channel.send("Your selected pokémon already has an item!");
 
             user.PokeCredits -= 75;
             // Update database
             pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Held": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                 if (err) return console.log(err);
                 user.save();
-                message.channel.send(`You pokemon is holding ${given_item}!`);
+                message.channel.send(`You pokémon is holding ${given_item}!`);
             });
 
         });
@@ -74,47 +74,47 @@ function buyevolveitems(message, args, pokemons) {
             var pokemon_id = selected_pokemon.PokemonId;
             var update_pokemon_id = null;
 
-            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokemon with held item!");
+            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokémon with held item!");
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
             if (pokemon_db.Evolution != "NULL") {
                 if (message.channel.name == "day") {
                     if (_.isArray(pokemon_db.Evolution)) {
                         var evo = pokemon_db.Evolution.filter(it => it.Time == "Day" && it.Reason == given_item)[0];
-                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo == undefined) return message.channel.send("Your pokémon neglected this item!");
                         var evo_id = evo.Id;
                     }
                     else {
                         var evo_id = pokemon_db.Evolution.Time == "Day" ? pokemon_db.Evolution.Id : undefined;
-                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo_id == undefined) return message.channel.send("Your pokémon neglected this item!");
                     }
                     evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
                 }
                 else if (message.channel.name == "night") {
                     if (_.isArray(pokemon_db.Evolution)) {
                         var evo = pokemon_db.Evolution.filter(it => it.Time == "Night" && it.Reason == given_item)[0];
-                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo == undefined) return message.channel.send("Your pokémon neglected this item!");
                         var evo_id = evo.Id;
                     }
                     else {
                         var evo_id = pokemon_db.Evolution.Time == "Night" ? pokemon_db.Evolution.Id : undefined;
-                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo_id == undefined) return message.channel.send("Your pokémon neglected this item!");
                     }
                     evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
                 }
                 else {
                     if (_.isArray(pokemon_db.Evolution)) {
                         var evo = pokemon_db.Evolution.filter(it => it.Time == undefined && it.Reason == given_item)[0];
-                        if (evo == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo == undefined) return message.channel.send("Your pokémon neglected this item!");
                         var evo_id = evo.Id;
                     }
                     else {
                         var evo_id = pokemon_db.Evolution.Time == undefined ? pokemon_db.Evolution.Id : undefined;
-                        if (evo_id == undefined) return message.channel.send("Your pokemon neglected this item!");
+                        if (evo_id == undefined) return message.channel.send("Your pokémon neglected this item!");
                     }
                     evolve_pokemon(pokemon_db["Pokemon Id"], evo_id, selected_pokemon.Shiny);
                 }
-            } else return message.channel.send("Your pokemon doesn't suit for this item!");
+            } else return message.channel.send("Your pokémon doesn't suit for this item!");
 
             function evolve_pokemon(old_pokemon_id, new_pokemon_id, shiny) {
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(old_pokemon_id, pokemons, shiny);
@@ -148,15 +148,15 @@ function buystone(message, args, pokemons) {
             var pokemon_id = selected_pokemon.PokemonId;
             var update_pokemon_id = null;
 
-            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokemon with held item!");
+            if (selected_pokemon.Held == "Everstone") return message.channel.send("You can't evolve this pokémon with held item!");
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
             if (pokemon_db["Evolution Stone"] != undefined) {
                 if (pokemon_db["Evolution Stone"].some(it => it.includes(`${args[1].capitalize()} Stone`))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(`${args[1].capitalize()} Stone`))[1];
-                if (update_pokemon_id == null) return message.channel.send("This pokemon can't evolve with this stone!");
+                if (update_pokemon_id == null) return message.channel.send("This pokémon can't evolve with this stone!");
                 if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == `${args[1].capitalize()} Stone`) {
                     if (pokemon_db["Evolution Stone"][2] != undefined) {
-                        if (message.channel.name != pokemon_db["Evolution Stone"][2].toLowerCase()) return message.channel.send("Your pokemon neglected this stone!");
+                        if (message.channel.name != pokemon_db["Evolution Stone"][2].toLowerCase()) return message.channel.send("Your pokémon neglected this stone!");
                     }
                     update_pokemon_id = pokemon_db["Evolution Stone"][1];
                 }
@@ -170,7 +170,7 @@ function buystone(message, args, pokemons) {
                     user.save();
                     message.channel.send(`Your ${old_pokemon_name} evolved into ${new_pokemon_name}!`);
                 });
-            } else return message.channel.send("This pokemon is not eligible for this stone!");
+            } else return message.channel.send("This pokémon is not eligible for this stone!");
         });
     });
 }
@@ -191,24 +191,24 @@ function buymega(message, args, pokemons) {
 
             if (args.length == 1) {
                 mega_type = "Mega";
-                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega") return message.channel.send("Your selected pokemon is already Mega!");
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega") return message.channel.send("Your selected pokémon is already Mega!");
                 var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                 var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && (it["Alternate Form Name"] == "Mega" || it["Alternate Form Name"] == "Primal"))[0];
             }
             else if (args.length == 2 && args[1].toLowerCase() == "x") {
                 mega_type = "Mega X";
-                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega X") return message.channel.send("Your selected pokemon is already Mega!");
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega X") return message.channel.send("Your selected pokémon is already Mega!");
                 var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                 var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega X")[0];
             }
             else if (args.length == 2 && args[1].toLowerCase() == "y") {
                 mega_type = "Mega Y";
-                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega Y") return message.channel.send("Your selected pokemon is already Mega!");
+                if (selected_pokemon.Mega != undefined && selected_pokemon.Mega == "Mega Y") return message.channel.send("Your selected pokémon is already Mega!");
                 var temp_pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
                 var pokemon_db = pokemons.filter(it => it["Pokedex Number"] == temp_pokemon_db["Pokedex Number"] && it["Alternate Form Name"] == "Mega Y")[0];
             }
             else return message.channel.send("Please specify a valid mega form to buy!");
-            if (pokemon_db == undefined || pokemon_db == null) return message.channel.send("You can't buy this form because selected pokemon is not suitable!");
+            if (pokemon_db == undefined || pokemon_db == null) return message.channel.send("You can't buy this form because selected pokémon is not suitable!");
             else {
                 user.PokeCredits -= 1000;
                 // Update database
@@ -241,10 +241,10 @@ function buyforms(message, args, pokemons) {
                 var _id = selected_pokemon._id;
                 var pokemon_id = selected_pokemon.PokemonId;
 
-                if (pokemon_id == pokemon_data["Pokemon Id"]) return message.channel.send("Your selected pokemon is already in this form!");
+                if (pokemon_id == pokemon_data["Pokemon Id"]) return message.channel.send("Your selected pokémon is already in this form!");
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
-                    if (pokemon_db["Pokedex Number"] != pokemon_data["Pokedex Number"]) return message.channel.send("You can't buy this form because selected pokemon is not suitable!");
+                    if (pokemon_db["Pokedex Number"] != pokemon_data["Pokedex Number"]) return message.channel.send("You can't buy this form because selected pokémon is not suitable!");
                     else {
                         user.PokeCredits -= 1000;
                         // Update database
@@ -276,7 +276,7 @@ function buynature(message, args, pokemons) {
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
                 var _id = selected_pokemon._id;
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
-                if (available_nature[selected_pokemon.Nature - 1] == args[1].toLowerCase()) return message.channel.send("This pokemon already has this nature!");
+                if (available_nature[selected_pokemon.Nature - 1] == args[1].toLowerCase()) return message.channel.send("This pokémon already has this nature!");
 
                 // Update database
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nature": available_nature.indexOf(args[1]) + 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
@@ -340,13 +340,13 @@ function buycandy(message, args, pokemons) {
             //#endregion
             else {
                 if (pokemon_level == 100 || pokemon_level > 100) {
-                    return message.channel.send("This pokemon reached max level!");
+                    return message.channel.send("This pokémon reached max level!");
                 }
 
                 if (pokemon_level + purchased_candy > 100) {
                     level_to_updated = 100 - pokemon_level;
                     purchased_candy = level_to_updated;
-                    message.channel.send(`Your Pokemon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
+                    message.channel.send(`Your Pokémon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
                 }
 
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);

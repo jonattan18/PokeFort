@@ -14,16 +14,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't release pokemon while you are in a duel!");
+        if (_duel) return message.channel.send("You can't release pokémon while you are in a duel!");
 
         prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
             if (err) return console.log(err);
-            if (_trade) return message.channel.send("You can't release pokemon while you are in a trade!");
+            if (_trade) return message.channel.send("You can't release pokémon while you are in a trade!");
 
             raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
                 if (err) { console.log(err); return; }
                 if (raid) {
-                    if (raid.Started) return message.channel.send("You can't release pokemon while you are in a raid!");
+                    if (raid.Started) return message.channel.send("You can't release pokémon while you are in a raid!");
                 } else {
                     //Get user data.
                     user_model.findOne({ UserID: message.author.id }, (err, user) => {
@@ -33,7 +33,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                             // If no arguments
                             if (args.length == 0) {
-                                return message.channel.send("Please mention pokemon number or ``latest`` to release latest pokemon.");
+                                return message.channel.send("Please mention pokémon number or ``latest`` to release latest pokémon.");
                             }
 
                             // If arguments is latest or l
@@ -433,7 +433,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 var filtered_pokemons = [];
                                 if (args.length == 2) {
                                     var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
-                                    if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokemon name."] }
+                                    if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokémon name."] }
                                     filtered_pokemons.push(found_pokemon["Pokemon Id"]);
 
                                     if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
