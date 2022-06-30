@@ -87,7 +87,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 mail_attachment_string += `Use \`${prefix}mail claim ${args[1]}\` to claim these attachments.\n`;
             }
 
-            embed.setDescription(`${mail_message}${mail_attachment_string}‎`);
+            embed.setDescription(`${mail_message}${mail_attachment_string}${user.Mails[args[1] - 1].ImageURL == undefined ? "‎" : ""}`);
 
             if (user.Mails[args[1] - 1].ImageURL != undefined && user.Mails[args[1] - 1].ImageURL != "") {
                 embed.setImage(user.Mails[args[1] - 1].ImageURL);
