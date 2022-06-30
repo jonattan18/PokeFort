@@ -461,6 +461,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 var received_data = chunk.split('\n');
                                 if (received_data.includes("|start")) {
                                     raid.Stream = _battleStream.battle.inputLog.join('\n');
+                                    raid.UserStreamPokemons = JSON.stringify(_battleStream.battle.sides[0].pokemon);
                                     raid.save().then(() => {
                                         // Get image url of raid boss.
                                         var raid_boss_image_data = raid.RaidPokemon.Image;
@@ -491,8 +492,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             var embed = new Discord.MessageEmbed();
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                             embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
-                                            embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "")} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
+                                            embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
+                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "").slice(0, -2)} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
                                             embed.attachFiles(image_file)
                                             embed.setImage('attachment://img.jpeg');
@@ -549,7 +550,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                 var type = [pokemon_db["Primary Type"], pokemon_db["Secondary Type"]];
 
                 var data_to_add = {
-                    name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false) + "_r",
+                    name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false) + "_r_" + (i + 1),
                     species: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
                     gender: "",
                     shiny: pokemon_from_db.Shiny,

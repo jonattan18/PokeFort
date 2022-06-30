@@ -404,25 +404,19 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         if (raid_data.ChangeOnFainted) {
             if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
             raid_data.ChangeOnFainted = false;
-            var choosed_pokemon = args[0];
-            if (args[0] == 1) {
-                choosed_pokemon = raid_data.CurrentPokemon + 1;
-            }
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
-            if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && !switch_pokemon.fainted && switch_pokemon.fainted != undefined) {
+            var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
+            if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}`;
             } else return message.channel.send("Please enter a valid pokemon to switch.");
         }
         else {
             if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
-            var choosed_pokemon = args[0];
-            if (args[0] == 1) {
-                choosed_pokemon = raid_data.CurrentPokemon + 1;
-            }
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
-            if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && !switch_pokemon.fainted && switch_pokemon.fainted != undefined) {
+            var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
+            if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
             } else return message.channel.send("Please enter a valid pokemon to switch.");
         }
@@ -476,10 +470,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             else {
                 var received_data = chunk;
                 received_data = received_data.split('\n');
-                if ((received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
+                if ((received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false && received_data[received_data.length - 1] != "|win") return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
                 else {
                     var show_str = [];
                     var next_turn = 0;
+
                     for (const { args, kwArgs } of Protocol.parse(chunk)) {
                         var formatted = formatter.formatText(args, kwArgs);
 
@@ -502,7 +497,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         formatted = formatted.replaceAll("*", "");
                         // Remove brackets.
                         formatted = formatted.replaceAll("(", "").replaceAll(")", "");
-                        // Remove _r name.
+                        // Remove _r_<index> name.
+                        if (formatted.includes("_r_")) formatted = formatted = formatted.substring(0 , formatted.indexOf("_r_")) + formatted.substring(formatted.indexOf("_r_") + 4);
+                        // Remove _r.
                         formatted = formatted.replaceAll("_r", "");
 
                         if (formatted) show_str.push(formatted);
@@ -653,7 +650,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             var embed = new Discord.MessageEmbed();
                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                             embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain + "**")}`);
-                            embed.addField(`${message.author.username}'s Pokémon`, `${_battlestream.battle.sides[0].pokemon[0].name.replaceAll("_r", "")} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
+                            embed.addField(`${message.author.username}'s Pokémon`, `${_battlestream.battle.sides[0].pokemon[0].name.replaceAll("_r", "").slice(0, -2)} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
                             embed.addField(`Raid Boss`, `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, true);
                             embed.setColor(message.guild.me.displayHexColor);
                             embed.attachFiles(image_file)
@@ -675,7 +672,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             raid_data.markModified('TrainersTeam');
 
                             var fainted_embed = new Discord.MessageEmbed();
-                            fainted_embed.setTitle(`${message.author.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "")} fainted.`);
+                            fainted_embed.setTitle(`${message.author.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "").slice(0, -2)} fainted.`);
                             fainted_embed.setDescription(`${message.author.username}, please do ${prefix}switch <number> to switch your selected pokemon.`);
                             message.channel.send(fainted_embed);
                         } else {
@@ -700,7 +697,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                             statusState: a.pokemon[0].statusState,
                                             volatiles: a.pokemon[0].volatiles,
                                             boosts: a.pokemon[0].boosts,
-                                            hp: a.pokemon[0].hp,
+                                            hp: a.pokemon[0].hp
                                         }]
                                 }
                                 raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
@@ -729,6 +726,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     // Raid Boss won.
                     function raid_boss_won() {
                         raid_data.remove().then(() => {
+                            message.channel.send("Raid Boss has won the raid! Raid is not completed.");
                             for (var i = 0; i < raid_data.Trainers.length; i++) {
                                 if (raid_data.Trainers[i]) {
                                     if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
@@ -741,6 +739,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                         // Raid save state.
                         raid_data.Stream = _battlestream.battle.inputLog.join('\n');
+                        raid_data.UserStreamPokemons = JSON.stringify(_battlestream.battle.sides[0].pokemon);
 
                         // Save to database.
                         raid_data.RaidPokemon.markModified();
