@@ -472,17 +472,19 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             else {
                 var received_data = chunk;
                 received_data = received_data.split('\n');
-                console.log(received_data)
-                // get turn directly from stream and add it here.
-                if ((received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn + 1 : 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
+                if ((received_data[received_data.length - 1] == `|turn|${raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
                 else {
                     var show_str = [];
+                    var next_turn = 0;
                     for (const { args, kwArgs } of Protocol.parse(chunk)) {
                         var formatted = formatter.formatText(args, kwArgs);
 
                         // Execption
                         if (formatted == "\n") continue;
-                        if (formatted.startsWith("\n== Turn")) continue;
+                        if (formatted.startsWith("\n== Turn")) {
+                            next_turn = parseInt(formatted.replace("\n== Turn ", ""));
+                            continue;
+                        }
                         if (formatted.startsWith("\nGo!")) continue;
                         if (formatted.startsWith("Go!")) continue;
                         if (formatted.startsWith("\n$Player2 sent out")) continue;
@@ -502,11 +504,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         if (formatted) show_str.push(formatted);
                     }
 
-                    console.log(show_str);
-
                     // Get message text to show user.
                     if (raid_data.OldStreamText) show_str.splice(0, raid_data.OldStreamText);
-                    if (received_data[received_data.length - 1] != "|upkeep") raid_data.CurrentTurn = raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn + 1 : 1;
+                    raid_data.CurrentTurn = raid_data.CurrentTurn != undefined ? next_turn : 1;
                     raid_data.OldStreamText = raid_data.OldStreamText != undefined ? raid_data.OldStreamText + show_str.length : show_str.length;
 
                     var _user_pokemon_fainted = false;
