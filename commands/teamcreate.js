@@ -6,8 +6,7 @@ const getPokemons = require('../utils/getPokemon');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { message.channel.send(`You should atleast specifiy a team name to create a team!`); return; }
-    if (args.length > 7) { message.channel.send(`You can only create a team with 6 pokemon!`); return; }
+    if (args.length == 0) { message.channel.send(`Invalid syntax!`); return; }
 
     // Definitions
     var team_name = args[0];

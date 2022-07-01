@@ -9,7 +9,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
     // Raid check
-    var raid_cmds = ["spawn", "start", "join", "leave", "l", "kick", "ban", "info", "duel", "mute", "unmute", "i", "view"];
+    var raid_cmds = ["spawn", "start", "join", "leave", "l", "kick", "ban", "info", "duel", "mute", "unmute", "i", "view", "profile", "pf"];
     if (raid_cmds.includes(args[0].toLowerCase())) {
         const commandfile = bot.commands.get("raid") || client.commands.get(client.aliases.get("raid"));
         if (!commandfile) return message.channel.send(`Invalid Command.`);

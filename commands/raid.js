@@ -36,7 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_model.findOne({ UserID: message.author.id }, (err, user) => {
                     if (err) { console.log(err); return; }
                     if (user) {
-                        var last_raid_time = user.RaidSpawn;
+                        var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
                         // Remove me last ride cooldown.
                         if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (new Date().getTime() - last_raid_time) < 10800000) {
@@ -143,12 +143,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 },
                                 Trainers: [message.author.id],
                                 TrainersTag: [message.author.tag],
-                                MutedTrainers: user.RaidMuted != undefined && user.RaidMuted != false ? [message.author.id] : [],
+                                MutedTrainers: user.Raids.Muted != undefined && user.Raids.Muted != false ? [message.author.id] : [],
                             });
 
                             // Save user data.
-                            user.RaidsSpawned = user.RaidsSpawned != undefined ? user.RaidsSpawned + 1 : 1;
-                            user.RaidSpawn = Date.now();
+                            user.Raids.Spawned[raid_type] = user.Raids.Spawned[raid_type] ? user.Raids.Spawned[raid_type] + 1 : 1;
+                            user.Raids.SpawnTimestamp = Date.now();
                             raid_data.save().then(() => {
                                 user.save().then(() => {
                                     message.channel.send(embed);
@@ -219,7 +219,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         user_model.findOne({ UserID: message.author.id }, (err, user) => {
                                             if (err) { console.log(err); return; }
                                             if (user) {
-                                                user.RaidsJoined = user.RaidsJoined != undefined ? user.RaidsJoined + 1 : 1;
+                                                user.Raids.Joined = user.Raids.Joined != undefined ? user.Raids.Joined + 1 : 1;
                                                 raid_data.Trainers.push(message.author.id);
                                                 raid_data.TrainersTag.push(message.author.tag);
                                                 if (user.RaidMuted != undefined && user.RaidMuted != false) raid_data.MutedTrainers.push(message.author.id);
@@ -351,7 +351,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_model.findOne({ UserID: message.author.id }, (err, user) => {
                     if (err) { console.log(err); return; }
                     if (user) {
-                        user.RaidsLeft = user.RaidsLeft != undefined ? user.RaidsLeft + 1 : 1;
+                        user.Raids.Left = user.Raids.Left != undefined ? user.Raids.Left + 1 : 1;
                         var remove_index = raid.Trainers.indexOf(message.author.id);
                         raid.Trainers.splice(remove_index, 1);
                         raid.TrainersTag.splice(remove_index, 1);
@@ -499,6 +499,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             embed.setImage('attachment://img.jpeg');
                                             embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokémon has available to them!`);
                                             message.channel.send(embed);
+
+
+                                            // Get user data.
+                                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                                if (err) return;
+                                                if (user) {
+                                                    user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
+                                                }
+                                            });
                                         });
                                     });
                                 } else {
@@ -510,6 +519,48 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
             }
             else return message.channel.send(`You are not in a raid.`);
+        });
+    }
+    else if (args.length == 1 && args[0].toLowerCase() == "profile" || args[0].toLowerCase() == "pf") {
+
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) return;
+            if (!user) return;
+
+            var footer_string = "";
+            var last_raid_time = user.Raids.SpawnTimestamp;
+
+            if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
+                footer_string = `Use ${prefix}raid spawn to spawn a raid.`;
+            } else {
+                // Get time left until next raid spawn in hh:mm:ss format.
+                var time_left = new Date(last_raid_time + 10800000 - Date.now());
+                footer_string = "Time left to be able to spawn a raid: " + time_left.getUTCHours() + ":" + time_left.getUTCMinutes() + ":" + time_left.getUTCSeconds();
+            }
+
+            var user_raid = user.Raids;
+            var easy = user_raid.Completed.Easy ? user_raid.Completed.Easy : 0;
+            var normal = user_raid.Completed.Normal ? user_raid.Completed.Normal : 0;
+            var hard = user_raid.Completed.Hard ? user_raid.Completed.Hard : 0;
+            var challenge = user_raid.Completed.Challenge ? user_raid.Completed.Challenge : 0;
+            var intense = user_raid.Completed.Intense ? user_raid.Completed.Intense : 0;
+            var gmax = user_raid.Completed.Gigantamax ? user_raid.Completed.Gigantamax : 0;
+            var total_raids_completed = easy + normal + hard + challenge + intense + gmax;
+
+            var embed = new Discord.MessageEmbed();
+            embed.setTitle(`${message.author.username}'s Raid Profile`);
+            embed.setColor(message.author.displayHexColor);
+            embed.setThumbnail(message.author.avatarURL());
+            embed.setDescription(`**Total Raids Completed:** ${total_raids_completed}`
+                + `\n**Easy Raids Completed:** ${easy}`
+                + `\n**Normal Raids Completed:** ${normal}`
+                + `\n**Hard Raids Completed:** ${hard}`
+                + `\n**Challenge Raids Completed:** ${challenge}`
+                + `\n**Intense Raids Completed:** ${intense}`
+                + `\n**Gigantamax Raids Completed:** ${gmax}`
+                + `\n**Total Damage Dealt To Raid Bosses:** ${user_raid.TotalDamage ? user_raid.TotalDamage : 0}`);
+            embed.setFooter(footer_string);
+            message.channel.send(embed);
         });
     }
     else return message.channel.send("Invalid syntax.");

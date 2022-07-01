@@ -498,7 +498,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         // Remove brackets.
                         formatted = formatted.replaceAll("(", "").replaceAll(")", "");
                         // Remove _r_<index> name.
-                        if (formatted.includes("_r_")) formatted = formatted = formatted.substring(0 , formatted.indexOf("_r_")) + formatted.substring(formatted.indexOf("_r_") + 4);
+                        if (formatted.includes("_r_")) formatted = formatted = formatted.substring(0, formatted.indexOf("_r_")) + formatted.substring(formatted.indexOf("_r_") + 4);
                         // Remove _r.
                         formatted = formatted.replaceAll("_r", "");
 
@@ -727,11 +727,27 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     function raid_boss_won() {
                         raid_data.remove().then(() => {
                             message.channel.send("Raid Boss has won the raid! Raid is not completed.");
+
+                            // Send Dm message to all users.
                             for (var i = 0; i < raid_data.Trainers.length; i++) {
                                 if (raid_data.Trainers[i]) {
                                     if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
                                 }
                             }
+
+                            for (var i = 0; i < raid_data.Trainers.length; i++) {
+                                // Get user data.
+                                user_model.findOne({ UserID: raid_data.Trainers[i] }, (err, user) => {
+                                    if (err) return;
+                                    if (user) {
+                                        var difficulty_string = getDifficultyString(raid_data.RaidType);
+                                        user.Raids.RaidsCompleted[difficulty_string] = user.Raids.RaidsCompleted[difficulty_string] ? user.Raids.RaidsCompleted[difficulty_string] + 1 : 1;
+                                        user.markModified('Raids');
+                                        user.save();
+                                    }
+                                });
+                            }
+
                         });
                     }
 
@@ -768,6 +784,22 @@ function move_thinker(available_moves, foe_type1, foe_type2) {
         if (move_list_filtered.length == 0) return non_sorted[0][0];
         var move_name = move_list_filtered[randomNumber(0, move_list_filtered.length - 1)][0];
         return move_name;
+    }
+}
+
+// Function to convert difficulty to string.
+function getDifficultyString(difficulty) {
+    switch (difficulty) {
+        case 0:
+            return "Easy";
+        case 1:
+            return "Normal";
+        case 2:
+            return "Hard";
+        case 3:
+            return "Challenge";
+        case 4:
+            return "Intense";
     }
 }
 

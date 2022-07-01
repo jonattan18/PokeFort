@@ -11,12 +11,32 @@ const UserSchema = new mongoose.Schema({
     Redeems: Number,
     Shards: Number,
     DailyStreak: Number,
-    RaidsSpawned: Number,
-    RaidsCompleted: Number,
-    RaidsLeft: Number,
-    RaidSpawn: Number,
-    RaidsJoined: Number,
-    RaidMuted: Boolean,
+    Raids: {
+        SpawnTimestamp: Number,
+        TotalDuels: Number,
+        Completed : {
+            Easy: Number,
+            Normal: Number,
+            Hard: Number,
+            Challenge: Number,
+            Intense: Number,
+            Gigantamax: Number
+        },
+        Spawned: {
+            Easy: Number,
+            Normal: Number,
+            Hard: Number,
+            Challenge: Number,
+            Intense: Number,
+            Gigantamax: Number
+        },
+        Left: Number,
+        Joined: Number,
+        Muted: Boolean,
+        TotalDamage: Number,
+        RaidDex: [],
+        EventDex: []
+    },
     WishingPieces: Number,
     Badges: Array,
     Admin: Number,
