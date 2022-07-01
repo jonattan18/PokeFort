@@ -222,7 +222,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                                 user.Raids.Joined = user.Raids.Joined != undefined ? user.Raids.Joined + 1 : 1;
                                                 raid_data.Trainers.push(message.author.id);
                                                 raid_data.TrainersTag.push(message.author.tag);
-                                                if (user.RaidMuted != undefined && user.RaidMuted != false) raid_data.MutedTrainers.push(message.author.id);
+                                                if (user.Raids.Muted != undefined && user.Raids.Muted != false) raid_data.MutedTrainers.push(message.author.id);
                                                 raid_data.save().then(() => {
                                                     user.save().then(() => {
                                                         // Stats String
@@ -372,8 +372,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) { console.log(err); return; }
             if (user) {
-                if (user.RaidMuted) return message.channel.send(`You already muted the raid messages.`);
-                user.RaidMuted = true;
+                if (user.Raids.Muted) return message.channel.send(`You already muted the raid messages.`);
+                user.Raids.Muted = true;
                 user.save().then(() => {
                     message.channel.send(`You have muted the raid messages.`);
                 });
@@ -385,8 +385,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) { console.log(err); return; }
             if (user) {
-                if (!user.RaidMuted) return message.channel.send(`You are not muted the raid messages.`);
-                user.RaidMuted = false;
+                if (!user.Raids.Muted) return message.channel.send(`You are not muted the raid messages.`);
+                user.Raids.Muted = false;
                 user.save().then(() => {
                     message.channel.send(`You have unmuted the raid messages.`);
                 });

@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
     Raids: {
         SpawnTimestamp: Number,
         TotalDuels: Number,
-        Completed : {
+        Completed: {
             Easy: Number,
             Normal: Number,
             Hard: Number,
@@ -34,8 +34,14 @@ const UserSchema = new mongoose.Schema({
         Joined: Number,
         Muted: Boolean,
         TotalDamage: Number,
-        RaidDex: [],
-        EventDex: []
+        RaidDex: [{
+            PokemonId: Number,
+            Completed: Array
+        }],
+        EventDex: [{
+            PokemonId: Number,
+            Completed: Array
+        }]
     },
     WishingPieces: Number,
     Badges: Array,

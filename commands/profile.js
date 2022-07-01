@@ -34,6 +34,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems
                 + '\n**Shards:** ' + shards
+                + '\n**Wishing Pieces:** ' + user.WishingPieces
                 + '\n**Total Pokémon Caught:** ' + total_pokemons_catched
                 + '\n**Total Shiny Pokémon Caught:** ' + total_pokemons_shiny
                 + '\n**Total Pokémon:** ' + total_pokemons
