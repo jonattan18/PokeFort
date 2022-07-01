@@ -558,7 +558,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + `\n**Challenge Raids Completed:** ${challenge}`
                 + `\n**Intense Raids Completed:** ${intense}`
                 + `\n**Gigantamax Raids Completed:** ${gmax}`
-                + `\n**Total Damage Dealt To Raid Bosses:** ${user_raid.TotalDamage ? user_raid.TotalDamage : 0}`);
+                + `\n**Total Damage Dealt To Raid Bosses:** ${user_raid.TotalDamage ? user_raid.TotalDamage.toLocaleString() : 0}`);
             embed.setFooter(footer_string);
             message.channel.send(embed);
         });

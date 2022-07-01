@@ -16,6 +16,7 @@ const RaidSchema = new mongoose.Schema({
         IV: Array,
         Health: Number,
         MaxHealth: Number,
+        PreviousHealth: Number,
         Attack: Number,
         Defense: Number,
         SpAttack: Number,

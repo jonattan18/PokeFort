@@ -757,7 +757,32 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         raid_data.Stream = _battlestream.battle.inputLog.join('\n');
                         raid_data.UserStreamPokemons = JSON.stringify(_battlestream.battle.sides[0].pokemon);
 
+                        // Raid Health and damage
+                        var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
+                        if (current_damage > 0) {
+                            var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == message.author.id)[0];
+                            if (raid_usr_damage_data) {
+                                var index = raid_data.Damages.indexOf(raid_usr_damage_data);
+                                raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
+                            } else {
+                                raid_data.Damages.push({
+                                    UserID: message.author.id,
+                                    Damage: current_damage
+                                });
+                            }
+
+                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                if (err) return;
+                                if (user) {
+                                    user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
+                                }
+                                user.save();
+                            });
+                            raid_data.markModified('Damages');
+                        }
+
                         // Save to database.
+                        raid_data.RaidPokemon.PreviousHealth = _battlestream.battle.sides[1].pokemon[0].hp;
                         raid_data.RaidPokemon.markModified();
                         raid_data.save();
                     }
