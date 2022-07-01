@@ -705,7 +705,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                 raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
                                 raid_data.markModified('RaidPokemon');
 
-                                message.channel.send(`${message.author.username} unable to complete the raid. Team members can duel now.`);
+                                var unable_embed = new Discord.MessageEmbed();
+                                unable_embed.setTitle(`Raid Incomplete!`);
+                                unable_embed.setDescription(`${message.author.username}, you have no more pokémon to battle. Your duel has ended!`);
+                                message.channel.send(unable_embed);
                             }
                             else {
                                 _raid_boss_won = true;
