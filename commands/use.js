@@ -449,7 +449,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         }
 
         // Raid Boss status changes.
-        var raidside = JSON.parse(raid_data.RaidPokemon.RaidStream.raidside);
+        var raidside = JSON.parse(raid_data.RaidPokemon.RaidStream.raidside).pokemon[0];
 
         // Hp changes.
         _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
@@ -698,7 +698,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                             statusState: a.pokemon[0].statusState,
                                             volatiles: a.pokemon[0].volatiles,
                                             boosts: a.pokemon[0].boosts,
-                                            hp: a.pokemon[0].hp
+                                            hp: a.pokemon[0].hp,
+                                            maxhp: a.pokemon[0].maxhp
                                         }]
                                 }
                                 raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
@@ -721,16 +722,16 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             channel_embed.setDescription(`You have defeated the raid boss. Your rewards are sent to your DM.`);
                             channel_embed.setColor(message.guild.me.displayHexColor);
                             message.channel.send(channel_embed);
-                            for (var i = 0; i < raid_data.Trainers.length; i++) {
+                            function raid_boss_faint_loop(i = 0) {
                                 if (raid_data.Trainers[i]) {
                                     // Get user data.
                                     var user_id = raid_data.Trainers[i];
                                     user_model.findOne({ UserID: user_id }, (err, user) => {
-                                        if (err) return;
+                                        if (err) raid_boss_faint_loop(i++);
                                         if (user) {
                                             var credits, redeems, wishing_piece, raid_boss_reward;
                                             credits = Math.floor(_.random(180, 220) * ((raid_data.RaidType + 1) ** 2));
-                                            user.PokeCredits = user.PokeCredits ? PokeCredits + credits : credits;
+                                            user.PokeCredits = user.PokeCredits ? user.PokeCredits + credits : credits;
 
                                             // Reward for winning the raid calculation.
                                             switch (raid_data.RaidType) {
@@ -787,10 +788,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                                             rewards_string += "\n";
 
-                                            var overview = "";
-                                            var sorted_damages = _.sortBy(raid_data.Damages, 'Damage');
+                                            var overview = "**Overview:**";
+                                            var sorted_damages = raid_data.Damages.sort((a, b) => Number(b.Damage) - Number(a.Damage));
                                             for (var j = 0; j < sorted_damages.length; j++) {
-                                                overview += `**Overview:**\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)]} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
+                                                overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
                                                 if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
                                             }
 
@@ -798,6 +799,20 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                                             var difficulty_string = getDifficultyString(raid_data.RaidType);
                                             user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
+
+                                            // Add data to raid dex.
+                                            var raid_dex = user.Raids.RaidDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
+                                            if (raid_dex[0]) {
+                                                raid_dex[0].Completed[difficulty_string] = raid_dex[0].Completed[difficulty_string] ? raid_dex[0].Completed[difficulty_string] + 1 : 1;
+                                            } else {
+                                                var new_dex = {
+                                                    PokemonId: raid_data.RaidPokemon.ID,
+                                                    Completed: {}
+                                                }
+                                                new_dex.Completed[difficulty_string] = 1;
+                                                user.Raids.RaidDex.push(new_dex);
+                                            }
+
                                             user.markModified('Raids');
                                             user.save().then(() => {
 
@@ -808,12 +823,13 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                                     embed.setDescription(description);
                                                     var user_s = bot.users.cache.get(user_id)
                                                     if (user_s) user_s.send(embed);
-                                                }
+                                                    if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1);
+                                                } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
                                             });
                                         }
                                     });
-                                }
-                            }
+                                } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
+                            } raid_boss_faint_loop();
                         });
                     }
 
@@ -826,11 +842,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             channel_embed.setColor(message.guild.me.displayHexColor);
                             message.channel.send(channel_embed);
                             // Send Dm message to all users.
-                             for (var i = 0; i < raid_data.Trainers.length; i++) {
-                                  if (raid_data.Trainers[i]) {
-                                     if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
-                                 }
-                             }
+                            for (var i = 0; i < raid_data.Trainers.length; i++) {
+                                if (raid_data.Trainers[i]) {
+                                    if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
+                                }
+                            }
                         });
                     }
 
@@ -865,6 +881,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         }
 
                         // Save to database.
+                        raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
                         raid_data.RaidPokemon.PreviousHealth = _battlestream.battle.sides[1].pokemon[0].hp;
                         raid_data.RaidPokemon.markModified();
                         raid_data.save();

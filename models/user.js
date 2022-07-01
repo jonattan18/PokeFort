@@ -36,11 +36,23 @@ const UserSchema = new mongoose.Schema({
         TotalDamage: Number,
         RaidDex: [{
             PokemonId: Number,
-            Completed: Array
+            Completed: {
+                Easy: Number,
+                Normal: Number,
+                Hard: Number,
+                Challenge: Number,
+                Intense: Number
+            }
         }],
         EventDex: [{
             PokemonId: Number,
-            Completed: Array
+            Completed: {
+                Easy: Number,
+                Normal: Number,
+                Hard: Number,
+                Challenge: Number,
+                Intense: Number
+            }
         }]
     },
     WishingPieces: Number,
