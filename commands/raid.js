@@ -12,6 +12,7 @@ const raid_model = require('../models/raids');
 const getPokemons = require('../utils/getPokemon');
 const { floor } = require('lodash');
 const movesparser = require('../utils/moveparser');
+const pagination = require('../utils/pagination');
 
 // Raid Sim
 const { BattleStreams, Teams, Streams } = require('@pkmn/sim');
@@ -563,7 +564,71 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             message.channel.send(embed);
         });
     }
+    else if (args[0].toLowerCase() == "dex") {
+        // Remove dex from args.
+        args.shift();
+
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) return;
+            if (!user) return;
+
+            var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+            for (var i = 0; i < raid_pokemons.length; i++) {
+                var dex_data = user.Raids.RaidDex.filter(it => it.PokemonId == raid_pokemons[i]["Pokemon Id"]);
+                raid_pokemons[i].fullname = getPokemons.get_pokemon_name_from_id(raid_pokemons[i]["Pokemon Id"], pokemons);
+
+                dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
+                raid_pokemons[i].easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
+                raid_pokemons[i].normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
+                raid_pokemons[i].hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
+                raid_pokemons[i].challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
+                raid_pokemons[i].intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
+                raid_pokemons[i].totaldefeated = raid_pokemons[i].easy + raid_pokemons[i].normal + raid_pokemons[i].hard + raid_pokemons[i].challenge + raid_pokemons[i].intense
+            }
+
+            // Filter by user.
+            if (args.length == 0) {
+                return create_pagination(message, 0, raid_pokemons);
+            }
+
+        });
+    }
     else return message.channel.send("Invalid syntax.");
+}
+
+// Function to create pagination for dex.
+function create_pagination(message, page = 0, raid_pokemons) {
+    if (raid_pokemons == undefined || raid_pokemons == null || !raid_pokemons || raid_pokemons.length == 0) return message.channel.send("No data found.");
+
+    var total_defeated_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+    var description =  `You have defeated ${total_defeated_pokemons.length}/${raid_pokemons.length} raid bosses!`;
+
+    var temp_counter = 0;
+    var tot_len = raid_pokemons.length;
+    var split_chunks = spliceIntoChunks(raid_pokemons, 20);
+    var embeds = [];
+    var current_index = 0;
+    for (i = 0; i < split_chunks.length; i++) {
+        embeds[i] = new Discord.MessageEmbed();
+        embeds[i].setTitle("Your uncompleted raids");
+        temp_counter += split_chunks[i].length;
+        for (j = 0; j < split_chunks[i].length; j++) {
+            current_index = temp_counter - split_chunks[i].length + 1;
+            var raid_field_data = `Total time beaten: ${split_chunks[i][j].totaldefeated}`
+                + `\nEasy: ${split_chunks[i][j].easy}`
+                + `\nNormal: ${split_chunks[i][j].normal}`
+                + `\nHard: ${split_chunks[i][j].hard}`
+                + `\nChallenge: ${split_chunks[i][j].challenge}`
+                + `\nIntense: ${split_chunks[i][j].intense}`;
+            embeds[i].addField(split_chunks[i][j].fullname, raid_field_data);
+        }
+        embeds[i].setDescription(description);
+        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+    }
+    message.channel.send(embeds[page]).then(msg => {
+        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+        else return;
+    });
 }
 
 // Transfer team data to trainers data.
@@ -778,6 +843,16 @@ function nature_of(int) {
 // Percentage calculation.
 function percentage(percent, total) {
     return parseInt(((percent / 100) * total).toFixed(0));
+}
+
+// Function to chunk given data.
+function spliceIntoChunks(arr, chunkSize) {
+    const res = [];
+    while (arr.length > 0) {
+        const chunk = arr.splice(0, chunkSize);
+        res.push(chunk);
+    }
+    return res;
 }
 
 // Check if value is int.
