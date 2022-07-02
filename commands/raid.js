@@ -564,15 +564,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             message.channel.send(embed);
         });
     }
-    else if (args[0].toLowerCase() == "dex") {
-        // Remove dex from args.
-        args.shift();
+    else if (args[0].toLowerCase() == "dex" || args[0].toLowerCase() == "eventdex") {
 
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) return;
             if (!user) return;
 
-            var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+            if (args[0].toLowerCase() == "dex") var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+            else if (args[0].toLowerCase() == "eventdex") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
+
+            // Remove dex or eventdex from args.
+            args.shift();
+
             for (var i = 0; i < raid_pokemons.length; i++) {
                 var dex_data = user.Raids.RaidDex.filter(it => it.PokemonId == raid_pokemons[i]["Pokemon Id"]);
                 raid_pokemons[i].fullname = getPokemons.get_pokemon_name_from_id(raid_pokemons[i]["Pokemon Id"], pokemons);
