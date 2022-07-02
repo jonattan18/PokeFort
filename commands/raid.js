@@ -587,9 +587,23 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // Filter by user.
-            if (args.length == 0) {
-                return create_pagination(message, 0, raid_pokemons);
+            if (args.length == 0) return create_pagination(message, "Your raid dex", 0, raid_pokemons);
+            else if (args.length == 1 && args[0] == "--uncompleted") {
+                raid_pokemons = raid_pokemons.filter(it => it.totaldefeated == 0);
+                return create_pagination(message, "Your uncompleted raids", 0, raid_pokemons);
             }
+            else if (args.length == 1 && args[0] == "--completed") {
+                raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+                return create_pagination(message, "Your completed raids", 0, raid_pokemons);
+            }
+            else if (args.length > 1 && (args[0] == "--n" || args[0] == "--name")) {
+                args.shift();
+                var name = args.join(" ");
+                raid_pokemons = raid_pokemons.filter(it => it.fullname.toLowerCase().replace(":", "").includes(name.toLowerCase().replace(":", " ")));
+                if (raid_pokemons.length == 0) return message.channel.send("Unable to find any raid pokemon with that name.");
+                return create_pagination(message, "Your raids", 0, raid_pokemons);
+            }
+            else return message.channel.send("Invalid arguments.");
 
         });
     }
@@ -597,11 +611,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function to create pagination for dex.
-function create_pagination(message, page = 0, raid_pokemons) {
+function create_pagination(message, title = "Raid Dex", page = 0, raid_pokemons) {
     if (raid_pokemons == undefined || raid_pokemons == null || !raid_pokemons || raid_pokemons.length == 0) return message.channel.send("No data found.");
 
     var total_defeated_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
-    var description =  `You have defeated ${total_defeated_pokemons.length}/${raid_pokemons.length} raid bosses!`;
+    var description = `You have defeated ${total_defeated_pokemons.length}/${raid_pokemons.length} raid bosses!`;
 
     var temp_counter = 0;
     var tot_len = raid_pokemons.length;
@@ -610,7 +624,7 @@ function create_pagination(message, page = 0, raid_pokemons) {
     var current_index = 0;
     for (i = 0; i < split_chunks.length; i++) {
         embeds[i] = new Discord.MessageEmbed();
-        embeds[i].setTitle("Your uncompleted raids");
+        embeds[i].setTitle(title);
         temp_counter += split_chunks[i].length;
         for (j = 0; j < split_chunks[i].length; j++) {
             current_index = temp_counter - split_chunks[i].length + 1;
