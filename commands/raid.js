@@ -37,10 +37,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user_model.findOne({ UserID: message.author.id }, (err, user) => {
                     if (err) { console.log(err); return; }
                     if (user) {
+                        if (user.RaidAlphaAgree == undefined || user.RaidAlphaAgree == false) {
+                            return message.channel.send(`You have not agreed to the raid agreement. "The raid is under alpha testing stage, and users will more likely encounter flaws. If you encounter any issues, please report them in **bug-report** channel. Thanks for understanding. Use ${prefix}raid agree to agree to the agreement.`);
+                        }
+
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
                         // Remove me last ride cooldown.
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (new Date().getTime() - last_raid_time) < 10800000) {
+                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
 
                             // Decide raid boss based on random.
                             const raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
@@ -521,6 +525,24 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
             else return message.channel.send(`You are not in a raid.`);
         });
+    }
+    // Remove me
+    else if (args.length == 1 && args[0].toLowerCase() == "agree") {
+
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) return;
+            if (!user) return;
+
+            if (user.RaidAlphaAgree == true) return message.channel.send(`You have already agreed to the raid terms.`);
+            else {
+                user.RaidAlphaAgree = true;
+                user.save().then(() => {
+                    return message.channel.send(`You have agreed to the raid terms. Have fun exploring raid features.`);
+                });
+            }
+
+        });
+
     }
     else if (args.length == 1 && args[0].toLowerCase() == "profile" || args[0].toLowerCase() == "pf") {
 

@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
     Redeems: Number,
     Shards: Number,
     DailyStreak: Number,
+    RaidAlphaAgree: Boolean,
     Raids: {
         SpawnTimestamp: Number,
         TotalDuels: Number,
