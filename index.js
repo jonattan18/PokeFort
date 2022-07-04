@@ -189,7 +189,7 @@ client.on('message', async (message) => {
                 user.MailNotice = false;
             }
 
-            user.save();
+            if (user_available) user.save();
             if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
             cmd = redirect_command(cmd, prefix).slice(prefix.length);
             if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return;

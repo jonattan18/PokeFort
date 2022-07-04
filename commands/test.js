@@ -17,7 +17,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         _id: new mongoose.Types.ObjectId(),
         "From": "PokéFort",
         "Subject": "Final major update for beta users.",
-        "Message": "You have done a great job 🥰, participating in our **Beta** program and contributing a lot to it. We really appreciate your work, So as the bot corrected from each mistakes and sculptured to a **Marveleous** piece before the eyes of you 🎀.\n\nIt's time to show the world the bot we tweaked to the world. The bot will be on public within several days. As an art of gratitude, you will receive presents 🎁 in your mails. \n\nHence we conclude that you won't receive any further major updates as the part of beta program. But we keep on fixing bugs the bugs and release them as minor updates. We have introduced some new features in this update. So please look into your announcement channel for the list of the features. - Pokéfort Team ",
+        "Message": "You have done a great job 🥰, participating in our **Beta** program and contributing a lot to it. We really appreciate your work, So as the bot corrected from each mistakes and sculptured to a **Marveleous** piece before your eyes🎀.\n\nIt's time to show the world, the bot we tweaked to the world. The bot will be on public within few weeks. As an art of gratitude, you will receive presents 🎁 in your mails. \n\nHence we conclude that you won't receive any further major updates as the part of beta program. But we keep on fixing flaws and release them as minor updates. We have introduced some new features in this update. So please look into your announcement channel for the list of the features. - Pokéfort Team",
         "Timestamp": Date.now()
     }
 
