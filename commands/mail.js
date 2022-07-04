@@ -78,7 +78,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (mail_attachment != undefined) {
                 mail_attachment_string = "\n\n_This mails contains following attachments:_\n\n";
                 if (mail_claimed) mail_attachment_string += "~~";
-                if (mail_attachment.PokeCredits != undefined && mail_attachment.PokeCredits > 0) mail_attachment_string += "⁍ **PokeCredits**: " + mail_attachment.PokeCredits + "\n";
+                if (mail_attachment.PokeCredits != undefined && mail_attachment.PokeCredits > 0) mail_attachment_string += "⁍ **PokeCredits**: " + mail_attachment.PokeCredits.toLocaleString() + "\n";
                 if (mail_attachment.Redeems != undefined && mail_attachment.Redeems > 0) mail_attachment_string += "⁍ **Redeems**: " + mail_attachment.Redeems + "\n";
                 if (mail_attachment.Shards != undefined && mail_attachment.Shards > 0) mail_attachment_string += "⁍ **Shards**: " + mail_attachment.Shards + "\n";
                 if (mail_attachment.WishingPieces != undefined && mail_attachment.WishingPieces > 0) mail_attachment_string += "⁍ **Wishing Pieces**: " + mail_attachment.WishingPieces + "\n";
@@ -114,7 +114,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             else {
                 if (mail_attachment.PokeCredits != undefined && mail_attachment.PokeCredits > 0) {
                     user.PokeCredits += mail_attachment.PokeCredits;
-                    claimed_message += `**${mail_attachment.PokeCredits}** PokeCredits!\n`;
+                    claimed_message += `**${mail_attachment.PokeCredits.toLocaleString()}** PokeCredits!\n`;
                 }
                 if (mail_attachment.Redeems != undefined && mail_attachment.Redeems > 0) {
                     user.Redeems += mail_attachment.Redeems;
