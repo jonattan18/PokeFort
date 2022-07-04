@@ -3,31 +3,57 @@ const config = require("../config/config.json");
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const _ = require('lodash');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length == 0) { message.channel.send(`Invalid syntax!`); return; }
 
+    // Convert all to lowercase.
+    args = args.map(element => {
+        return element.toLowerCase();
+    });
+
+    if (!args.includes("--name")) return message.channel.send(`You can't create a team without a name!`);
+
     // Definitions
-    var team_name = args[0];
+    var team_name = "";
+    var arg_ids = [];
     var team_pokemons = [];
     var team_selected = false;
 
-    args.shift();
+    var total_args = args.join(" ").replace(/--/g, ",--").split(",");
+    total_args = _.without(total_args, "", " ");
 
-    // Int Check
-    for (let i = 0; i < args.length; i++) {
-        if (!isInt(args[i])) {
-            return message.channel.send(`_${args[i]}_ is not a valid pokémon id!`);
+    for (j = 0; j < total_args.length; j++) {
+        new_args = total_args[j].split(" ").filter(it => it != "");
+
+        if (new_args[0] == "--name") {
+            new_args.shift();
+            team_name = new_args.join(" ");
+            if (team_name.length > 30) { message.channel.send(`Team name is too long!`); return; }
+            if (team_name.length < 1) { message.channel.send(`Team name is too short!`); return; }
         }
+
+        else if (new_args[0] == "--ids") {
+            new_args.shift();
+            // Int Check
+            for (let i = 0; i < new_args.length; i++) {
+                arg_ids.push(new_args[i]);
+                if (!isInt(new_args[i])) {
+                    return message.channel.send(`_${new_args[i]}_ is not a valid pokémon id!`);
+                }
+            }
+        }
+
     }
 
     // Get Pokemon
     getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
-        for (let i = 0; i < args.length; i++) {
-            if (pokemons_from_database[args[i] - 1] != undefined) {
-                team_pokemons.push(pokemons_from_database[args[i] - 1]._id.toString());
-            } else return message.channel.send(`_${args[i]}_ is not a valid pokémon id!`);
+        for (let i = 0; i < arg_ids.length; i++) {
+            if (pokemons_from_database[arg_ids[i] - 1] != undefined) {
+                team_pokemons.push(pokemons_from_database[arg_ids[i] - 1]._id.toString());
+            } else return message.channel.send(`_${arg_ids[i]}_ is not a valid pokémon id!`);
         }
 
         // Create Team.
