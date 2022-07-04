@@ -24,7 +24,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             for (i = 0; i < chunks.length; i++) {
                 embeds[i] = new Discord.MessageEmbed()
                     .setTitle(`${message.author.username}'s inbox:`);
-                embeds[i].setColor(message.author.displayHexColor);
+                embeds[i].setColor("#1ec5ee");
                 var description = `You have ${no_of_unread} unread mail(s). Use \`${prefix}mail read index\` to read the mail.\n\n`
                 for (j = 0; j < chunks[i].length; j++) {
                     var mail_subject = chunks[i][j].Subject;
@@ -71,7 +71,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             var embed = new Discord.MessageEmbed()
             embed.setTitle(mail_subject);
-            embed.setColor(message.author.displayHexColor);
+            embed.setColor("#1ec5ee");
             embed.setFooter(`From ${mail_from} at ${sent_time}`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
 
             var mail_attachment_string = "";
@@ -157,7 +157,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 user.save().then(() => {
                     var embed = new Discord.MessageEmbed();
                     embed.setTitle("You have claimed the following attachments:");
-                    embed.setColor(message.author.displayHexColor);
+                    embed.setColor("#1ec5ee");
                     embed.setDescription(claimed_message);
                     message.channel.send(embed);
                 });
