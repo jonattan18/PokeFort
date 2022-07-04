@@ -20,6 +20,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var current_week_monday = new Date();
             var days = ((current_week_monday.getDay() + 7) - 1) % 7;
             current_week_monday.setDate(current_week_monday.getDate() - days);
+            current_week_monday.setHours(0, 0, 0, 0);
             if (new Date(leaderboard.Timestamp).getTime() < current_week_monday.getTime()) {
                 leaderboard.Timestamp = current_week_monday;
                 leaderboard.Users = [];
