@@ -21,6 +21,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var daily_streak = user.DailyStreak == undefined ? 0 : user.DailyStreak;
         var badges = user.Badges.length == 0 ? "None" : user.Badges.join(', ');
         var shards = user.Shards == undefined ? 0 : user.Shards;
+        var wishing_pieces = user.WishingPieces == undefined ? 0 : user.WishingPieces;
 
         getPokemons.getallpokemon(message.author.id).then(result => {
             var total_pokemons = result.length;
@@ -34,7 +35,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems
                 + '\n**Shards:** ' + shards
-                + '\n**Wishing Pieces:** ' + user.WishingPieces
+                + '\n**Wishing Pieces:** ' + wishing_pieces
                 + '\n**Total Pokémon Caught:** ' + total_pokemons_catched
                 + '\n**Total Shiny Pokémon Caught:** ' + total_pokemons_shiny
                 + '\n**Total Pokémon:** ' + total_pokemons

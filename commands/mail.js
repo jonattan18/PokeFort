@@ -131,7 +131,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     claimed_message += `**${mail_attachment.Shards}** Shards!\n`;
                 }
                 if (mail_attachment.WishingPieces != undefined && mail_attachment.WishingPieces > 0) {
-                    user.WishingPieces += mail_attachment.WishingPieces;
+                    user.WishingPieces = user.WishingPieces != undefined ? user.WishingPieces + mail_attachment.WishingPieces : mail_attachment.WishingPieces;
                     claimed_message += `**${mail_attachment.WishingPieces}** Wishing Pieces!\n`;
                 }
                 if (mail_attachment.Badges != undefined && mail_attachment.Badges.length > 0) {
