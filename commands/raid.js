@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
+                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) < 10800000) {
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
@@ -506,13 +506,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                             embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "").slice(0, -2)} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
+                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
                                             embed.attachFiles(image_file)
                                             embed.setImage('attachment://img.jpeg');
-                                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokémon has available to them!`);
+                                            embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
                                             message.channel.send(embed);
-
 
                                             // Get user data.
                                             user_model.findOne({ UserID: message.author.id }, (err, user) => {

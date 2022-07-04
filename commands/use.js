@@ -455,7 +455,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
 
         // Status changes.
-        _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
+        if (raidside.status != "") _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
 
     }
 
@@ -656,7 +656,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             embed.setColor(message.guild.me.displayHexColor);
                             embed.attachFiles(image_file)
                             embed.setImage('attachment://img.jpeg');
-                            embed.setFooter(`Use ${prefix}teaminfo to see the current state of your team as well as what moves your pokémon has available to them!`);
+                            embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
                             message.channel.send(embed);
 
                             raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
