@@ -24,7 +24,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     // return message.channel.send("Invalid Command!")
 
-    if (args.length == 1 && args[0].toLowerCase() == "spawn") {
+    if ((args.length == 1 && args[0].toLowerCase() == "spawn") || (args.length == 2 && args[0].toLowerCase() == "spawn" && args[1].toLowerCase() == "--g")) {
         // User check if raid scheme has trainer included.
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
@@ -41,13 +41,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             return message.channel.send(`You have not agreed to the raid agreement. "The raid is under alpha testing stage, and users will more likely encounter flaws. If you encounter any issues, please report them in **bug-report** channel. Thanks for understanding. Use ${prefix}raid agree to agree to the agreement.`);
                         }
 
+                        if (args[1] != undefined && args[1] == "--g") {
+                            if (user.WishingPieces != undefined && user.WishingPieces > 0) {
+                                user.WishingPieces--;
+                                message.channel.send(`You have used a wishing piece to spawn a raid.`);
+                            } else return message.channel.send(`You do not have any wishing pieces to spawn this raid.`);
+                        }
+
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        // Remove me last ride cooldown.
                         if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
 
                             // Decide raid boss based on random.
-                            const raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+                            if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
+                            else var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
                             var raid_boss = raid_pokemons[Math.floor(Math.random() * raid_pokemons.length)];
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
 
@@ -127,6 +134,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             raid_data = new raid_model({
                                 RaidID: unique,
                                 RaidType: difficulty,
+                                Gigantamax: args[1] != undefined && args[1] == "--g" ? true : undefined,
                                 Started: false,
                                 Timestamp: future_timeout,
                                 RaidPokemon: {

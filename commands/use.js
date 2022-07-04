@@ -803,8 +803,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                             var difficulty_string = getDifficultyString(raid_data.RaidType);
                                             user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
 
-                                            // Add data to raid dex.
-                                            var raid_dex = user.Raids.RaidDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
+                                            // Add data to raid dex if raid is normal
+                                            if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) var raid_dex = user.Raids.EventDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
+                                            else var raid_dex = user.Raids.RaidDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
                                             if (raid_dex[0]) {
                                                 raid_dex[0].Completed[difficulty_string] = raid_dex[0].Completed[difficulty_string] ? raid_dex[0].Completed[difficulty_string] + 1 : 1;
                                             } else {
@@ -813,7 +814,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                                     Completed: {}
                                                 }
                                                 new_dex.Completed[difficulty_string] = 1;
-                                                user.Raids.RaidDex.push(new_dex);
+                                                if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.EventDex.push(new_dex);
+                                                else user.Raids.RaidDex.push(new_dex);
                                             }
 
                                             user.markModified('Raids');

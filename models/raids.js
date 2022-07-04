@@ -5,6 +5,7 @@ const RaidSchema = new mongoose.Schema({
     RaidID: Number,
     RaidType: Number,
     Started: Boolean,
+    Gigantamax: Boolean,
     Timestamp: Number,
     Ban: [String],
     RaidPokemon: {
