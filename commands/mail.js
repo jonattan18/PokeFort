@@ -81,6 +81,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (mail_attachment.PokeCredits != undefined && mail_attachment.PokeCredits > 0) mail_attachment_string += "⁍ **PokeCredits**: " + mail_attachment.PokeCredits + "\n";
                 if (mail_attachment.Redeems != undefined && mail_attachment.Redeems > 0) mail_attachment_string += "⁍ **Redeems**: " + mail_attachment.Redeems + "\n";
                 if (mail_attachment.Shards != undefined && mail_attachment.Shards > 0) mail_attachment_string += "⁍ **Shards**: " + mail_attachment.Shards + "\n";
+                if (mail_attachment.WishingPieces != undefined && mail_attachment.WishingPieces > 0) mail_attachment_string += "⁍ **Wishing Pieces**: " + mail_attachment.WishingPieces + "\n";
                 if (mail_attachment.Pokemons != undefined && mail_attachment.Pokemons.length > 0) mail_attachment_string += "⁍ **Pokemons**: " + mail_attachment.Pokemons.length + "\n";
                 if (mail_attachment.Badges != undefined && mail_attachment.Badges.length > 0) mail_attachment_string += "⁍ **Badges**: " + mail_attachment.Badges.length + "\n";
                 if (mail_claimed) mail_attachment_string += "~~";
@@ -122,6 +123,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (mail_attachment.Shards != undefined && mail_attachment.Shards > 0) {
                     user.Shards += mail_attachment.Shards;
                     claimed_message += `**${mail_attachment.Shards}** Shards!\n`;
+                }
+                if (mail_attachment.WishingPieces != undefined && mail_attachment.WishingPieces > 0) {
+                    user.WishingPieces += mail_attachment.WishingPieces;
+                    claimed_message += `**${mail_attachment.WishingPieces}** Wishing Pieces!\n`;
                 }
                 if (mail_attachment.Badges != undefined && mail_attachment.Badges.length > 0) {
                     user.Badges.push(...mail_attachment.Badges);

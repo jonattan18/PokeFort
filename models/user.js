@@ -87,6 +87,7 @@ const UserSchema = new mongoose.Schema({
             PokeCredits: Number,
             Shards: Number,
             Redeems: Number,
+            WishingPieces: Number,
             Pokemons: [{
                 PokemonId: Number,
                 Experience: Number,
