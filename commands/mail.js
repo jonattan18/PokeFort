@@ -13,6 +13,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         // If no mail found.
         if (user.Mails == undefined || user.Mails.length == 0) return message.channel.send(`You don't have any mail!`);
+        
+        // Mail sort based on date.
+        user.Mails.sort((a, b) => {
+            return b.Timestamp - a.Timestamp;
+        });
+
 
         // If only mail was typed.
         if (args.length == 0) {
