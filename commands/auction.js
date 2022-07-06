@@ -52,7 +52,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (_data) return message.channel.send("You can't add auction listing now!");
 
                     var listing_fee = 125;
-                    if (args[3][args[3].length - 1] == "h") listing_fee = 125 + (parseInt(args[3].replace("h", "")) * 25);
+                    if (args[3][args[3].length - 1] == "h") listing_fee = 125 + (parseInt(args[3]) * 25);
 
                     var update_data = new prompt_model({
                         ChannelID: message.channel.id,
@@ -132,19 +132,32 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     let spe_iv = auction.IV[5];
                     let nature = auction.NatureValue;
                     let shiny = auction.Shiny;
-                    let ev = 0;
+
+                    // Evs
+                    var ev_available = false;
+                    var EV = [0, 0, 0, 0, 0, 0];
+                    if (auction.EV != undefined && auction.EV.length > 0) {
+                        ev_available = true;
+                        let hp_ev = auction.EV[0];
+                        let atk_ev = auction.EV[1];
+                        let def_ev = auction.EV[2];
+                        let spa_ev = auction.EV[3];
+                        let spd_ev = auction.EV[4];
+                        let spe_ev = auction.EV[5];
+                        EV = [hp_ev, atk_ev, def_ev, spa_ev, spd_ev, spe_ev];
+                    }
 
                     let description = `${exp}/${exp_to_level(level)}XP`;
                     var type = "";
                     if (pokemon_db["Secondary Type"] != "NULL") { type = pokemon_db["Primary Type"] + " | " + pokemon_db["Secondary Type"] }
                     else { type = pokemon_db["Primary Type"]; }
                     let nature_name = nature_of(nature)[0];
-                    let hp = floor(0.01 * (2 * pokemon_db["Health Stat"] + hp_iv + floor(0.25 * ev)) * level) + level + 10;
-                    let atk = (floor(0.01 * (2 * pokemon_db["Attack Stat"] + atk_iv + floor(0.25 * ev)) * level) + 5);
-                    let def = (floor(0.01 * (2 * pokemon_db["Defense Stat"] + def_iv + floor(0.25 * ev)) * level) + 5);
-                    let spa = (floor(0.01 * (2 * pokemon_db["Special Attack Stat"] + spa_iv + floor(0.25 * ev)) * level) + 5);
-                    let spd = (floor(0.01 * (2 * pokemon_db["Special Defense Stat"] + spd_iv + floor(0.25 * ev)) * level) + 5);
-                    let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * ev)) * level) + 5);
+                    let hp = floor(0.01 * (2 * pokemon_db["Health Stat"] + hp_iv + floor(0.25 * EV[0])) * level) + level + 10;
+                    let atk = (floor(0.01 * (2 * pokemon_db["Attack Stat"] + atk_iv + floor(0.25 * EV[1])) * level) + 5);
+                    let def = (floor(0.01 * (2 * pokemon_db["Defense Stat"] + def_iv + floor(0.25 * EV[2])) * level) + 5);
+                    let spa = (floor(0.01 * (2 * pokemon_db["Special Attack Stat"] + spa_iv + floor(0.25 * EV[3])) * level) + 5);
+                    let spd = (floor(0.01 * (2 * pokemon_db["Special Defense Stat"] + spd_iv + floor(0.25 * EV[4])) * level) + 5);
+                    let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * EV[5])) * level) + 5);
                     let total_iv = ((hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv) / 186 * 100).toFixed(2);
 
                     // Nature Change
@@ -181,12 +194,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
                         `\n**Nature**: ${nature_name}` +
-                        `\n**HP**: ${hp} - IV ${hp_iv}/31` +
-                        `\n**Attack**: ${atk} - IV ${atk_iv}/31` +
-                        `\n**Defense**: ${def} - IV ${def_iv}/31` +
-                        `\n**Sp. Atk**: ${spa} - IV ${spa_iv}/31` +
-                        `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
-                        `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
+                        `\n**HP**: ${hp} - IV ${hp_iv}/31 ${ev_available ? "- EV: " + EV[0] : ""}` +
+                        `\n**Attack**: ${atk} - IV ${atk_iv}/31 ${ev_available ? "- EV: " + EV[1] : ""}` +
+                        `\n**Defense**: ${def} - IV ${def_iv}/31 ${ev_available ? "- EV: " + EV[2] : ""}` +
+                        `\n**Sp. Atk**: ${spa} - IV ${spa_iv}/31 ${ev_available ? "- EV: " + EV[3] : ""}` +
+                        `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31 ${ev_available ? "- EV: " + EV[4] : ""}` +
+                        `\n**Speed**: ${spe} - IV ${spe_iv}/31 ${ev_available ? "- EV: " + EV[5] : ""}` +
                         `\n**Total IV**: ${total_iv}%` +
                         `\nCurrent Bid: ${auction.BidPrice == undefined ? "None" : auction.BidPrice} - ${time_left_string}` +
                         `\n**Buyout: ${auction.BuyOut} Credits**`);
@@ -255,6 +268,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
+                        EV: auction.EV,
                         PokemonId: auction.PokemonId,
                         Experience: auction.Experience,
                         Level: auction.Level,
@@ -274,6 +288,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
+                        EV: auction.EV,
                         PokemonId: auction.PokemonId,
                         Experience: auction.Experience,
                         Level: auction.Level,

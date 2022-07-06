@@ -72,6 +72,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             TmMoves: selected_pokemon.TmMoves,
                             IVPercentage: total_iv,
                             IV: [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv],
+                            EV: selected_pokemon.EV,
                             Shiny: shiny,
                             Held: selected_pokemon.Held,
                             BuyOut: prompt.List.Price,
@@ -86,15 +87,24 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             auction.save().then(() => {
                                 prompt.remove().then(() => {
                                     getPokemons.deletepokemon(selected_pokemon._id).then(() => {
+
+                                        var listing_fee = 125;
+                                        if (prompt.List.BidTime[prompt.List.BidTime.length - 1] == "h") listing_fee = 125 + (parseInt(prompt.List.BidTime) * 25);
+                                        user.PokeCredits -= listing_fee;
+
+                                        var did_selected_pokemon = false;
                                         if (selected_pokemon._id == user.Selected) {
                                             var new_pokemon = user_pokemons.filter(it => it._id !== selected_pokemon._id)[0];
                                             user.Selected = new_pokemon._id;
-                                            user.PokeCredits -= 125 + (parseInt(prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)) * 25);
-                                            user.save().then(() => {
-                                                message.channel.send(`You have added your seleted pokémon to auction list. Auto Selecting first pokemon.`);
-                                            });
+                                            did_selected_pokemon = true;
                                         }
-                                        message.channel.send(`You successfully auctioned your level ${level} ${pokemon_name} for ${prompt.List.BidTime.replace("h", "")} hours with a buyout of ${prompt.List.Price} credits.`);
+
+                                        user.save().then(() => {
+                                            if(did_selected_pokemon) message.channel.send(`You have added your seleted pokémon to auction list. Auto Selecting first pokemon.`);
+                                        });
+
+                                        var time_string = prompt.List.BidTime[0, prompt.List.BidTime.length - 1] == "h" ? "hours" : "minutes";
+                                        message.channel.send(`You successfully auctioned your level ${level} ${pokemon_name} for ${prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)} ${time_string} with a buyout of ${prompt.List.Price} credits.`);
                                     });
                                 });
                             });
@@ -121,6 +131,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             TmMoves: selected_pokemon.TmMoves,
                             IVPercentage: total_iv,
                             IV: [hp_iv, atk_iv, def_iv, spa_iv, spd_iv, spe_iv],
+                            EV: selected_pokemon.EV,
                             Shiny: shiny,
                             Held: selected_pokemon.Held,
                             Price: prompt.List.Price,

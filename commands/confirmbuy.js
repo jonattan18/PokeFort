@@ -25,6 +25,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 let pokemon_data = {
                     CatchedOn: market.CatchedOn,
                     IV: market.IV,
+                    EV: market.EV,
                     PokemonId: market.PokemonId,
                     Experience: market.Experience,
                     Level: market.Level,

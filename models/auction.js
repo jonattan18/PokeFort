@@ -18,6 +18,7 @@ const AuctionSchema = new mongoose.Schema({
     TmMoves: Array,
     IVPercentage: Number,
     IV: [Number, Number, Number, Number, Number, Number],
+    EV: [Number, Number, Number, Number, Number, Number],
     Shiny: Boolean,
     Held: String,
     BuyOut: Number,

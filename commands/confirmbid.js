@@ -53,12 +53,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             let pokemon_data = {
                                 CatchedOn: auction.CatchedOn,
                                 IV: auction.IV,
+                                EV: auction.EV,
                                 PokemonId: auction.PokemonId,
                                 Experience: auction.Experience,
                                 Level: auction.Level,
                                 Nature: auction.NatureValue,
                                 Shiny: auction.Shiny,
-                                Reason: "Market"
+                                Reason: "Auction"
                             }
 
                             getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
