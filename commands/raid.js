@@ -504,7 +504,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             // Sending duel message.
                                             var embed = new Discord.MessageEmbed();
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain + "**")}`);
+                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("Terrain", "") + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
                                             embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
