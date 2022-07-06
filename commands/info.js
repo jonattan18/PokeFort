@@ -67,7 +67,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             let spe_iv = selected_pokemon.IV[5];
             let nature = selected_pokemon.Nature;
             let shiny = selected_pokemon.Shiny;
-            let ev = 0;
+
+            // Evs
+            var ev_available = false;
+            var EV = [0, 0, 0, 0, 0, 0];
+            if (selected_pokemon.EV != undefined && selected_pokemon.EV.length > 0) {
+                ev_available = true;
+                let hp_ev = selected_pokemon.EV[0];
+                let atk_ev = selected_pokemon.EV[1];
+                let def_ev = selected_pokemon.EV[2];
+                let spa_ev = selected_pokemon.EV[3];
+                let spd_ev = selected_pokemon.EV[4];
+                let spe_ev = selected_pokemon.EV[5];
+                EV = [hp_ev, atk_ev, def_ev, spa_ev, spd_ev, spe_ev];
+            }
 
             if (shiny) { var title = `:star: Level ${level} ${name}`; }
             else { var title = `Level ${level} ${name}`; }
@@ -77,12 +90,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             if (pokemon_db["Secondary Type"] != "NULL") { type = pokemon_db["Primary Type"] + " | " + pokemon_db["Secondary Type"] }
             else { type = pokemon_db["Primary Type"]; }
             let nature_name = nature_of(nature)[0];
-            let hp = floor(0.01 * (2 * pokemon_db["Health Stat"] + hp_iv + floor(0.25 * ev)) * level) + level + 10;
-            let atk = (floor(0.01 * (2 * pokemon_db["Attack Stat"] + atk_iv + floor(0.25 * ev)) * level) + 5);
-            let def = (floor(0.01 * (2 * pokemon_db["Defense Stat"] + def_iv + floor(0.25 * ev)) * level) + 5);
-            let spa = (floor(0.01 * (2 * pokemon_db["Special Attack Stat"] + spa_iv + floor(0.25 * ev)) * level) + 5);
-            let spd = (floor(0.01 * (2 * pokemon_db["Special Defense Stat"] + spd_iv + floor(0.25 * ev)) * level) + 5);
-            let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * ev)) * level) + 5);
+            let hp = floor(0.01 * (2 * pokemon_db["Health Stat"] + hp_iv + floor(0.25 * EV[0])) * level) + level + 10;
+            let atk = (floor(0.01 * (2 * pokemon_db["Attack Stat"] + atk_iv + floor(0.25 * EV[1])) * level) + 5);
+            let def = (floor(0.01 * (2 * pokemon_db["Defense Stat"] + def_iv + floor(0.25 * EV[2])) * level) + 5);
+            let spa = (floor(0.01 * (2 * pokemon_db["Special Attack Stat"] + spa_iv + floor(0.25 * EV[3])) * level) + 5);
+            let spd = (floor(0.01 * (2 * pokemon_db["Special Defense Stat"] + spd_iv + floor(0.25 * EV[4])) * level) + 5);
+            let spe = (floor(0.01 * (2 * pokemon_db["Speed Stat"] + spe_iv + floor(0.25 * EV[5])) * level) + 5);
             let total_iv = ((hp_iv + atk_iv + def_iv + spa_iv + spd_iv + spe_iv) / 186 * 100).toFixed(2);
 
             // Nature Change
@@ -116,12 +129,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             embed.setDescription(description +
                 `\n**Type**: ${type}` + held_item +
                 `\n**Nature**: ${nature_name}` +
-                `\n**HP**: ${hp} - IV ${hp_iv}/31` +
-                `\n**Attack**: ${atk} - IV ${atk_iv}/31` +
-                `\n**Defense**: ${def} - IV ${def_iv}/31` +
-                `\n**Sp. Atk**: ${spa} - IV ${spa_iv}/31` +
-                `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31` +
-                `\n**Speed**: ${spe} - IV ${spe_iv}/31` +
+                `\n**HP**: ${hp} - IV ${hp_iv}/31 ${ev_available ? "- EV: " + EV[0] : ""}` +
+                `\n**Attack**: ${atk} - IV ${atk_iv}/31 ${ev_available ? "- EV: " + EV[1] : ""}` +
+                `\n**Defense**: ${def} - IV ${def_iv}/31 ${ev_available ? "- EV: " + EV[2] : ""}` +
+                `\n**Sp. Atk**: ${spa} - IV ${spa_iv}/31 ${ev_available ? "- EV: " + EV[3] : ""}` +
+                `\n**Sp. Def**: ${spd} - IV ${spd_iv}/31 ${ev_available ? "- EV: " + EV[4] : ""}` +
+                `\n**Speed**: ${spe} - IV ${spe_iv}/31 ${ev_available ? "- EV: " + EV[5] : ""}` +
                 `\n**Total IV**: ${total_iv}%`);
             embed.setColor(message.member.displayHexColor);
             embed.setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
