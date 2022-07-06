@@ -710,6 +710,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_from_db.PokemonId)[0];
                 var hp = pokemon_db["Health Stat"];
                 var type = [pokemon_db["Primary Type"], pokemon_db["Secondary Type"]];
+                var EV = pokemon_from_db.EV != undefined && pokemon_from_db.EV.length > 1 ? pokemon_from_db.EV : [0, 0, 0, 0, 0, 0];
 
                 var data_to_add = {
                     name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false) + "_r_" + (i + 1),
@@ -721,12 +722,12 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
                     ivs: { hp: pokemon_from_db.IV[0], atk: pokemon_from_db.IV[1], def: pokemon_from_db.IV[2], spa: pokemon_from_db.IV[3], spd: pokemon_from_db.IV[4], spe: pokemon_from_db.IV[5] },
                     Image: image,
                     ability: "",
-                    evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+                    evs: { hp: EV[0], atk: EV[1], def: EV[2], spa: EV[3], spd: EV[4], spe: EV[5] },
                     nature: nature_name,
                     moves: move_data,
                     fainted: false,
                     selected: false,
-                    max_hp: floor(0.01 * (2 * hp + pokemon_from_db.IV[0] + floor(0.25 * 0)) * pokemon_from_db.Level) + pokemon_from_db.Level + 10,
+                    max_hp: floor(0.01 * (2 * hp + pokemon_from_db.IV[0] + floor(0.25 * EV[0])) * pokemon_from_db.Level) + pokemon_from_db.Level + 10,
                     type: type
                 }
                 trainersteam.push(data_to_add);
