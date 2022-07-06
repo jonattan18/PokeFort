@@ -197,18 +197,20 @@ function change_trade(message, trade_prompt, pokemons) {
                                 user_pokemon_to_add.Reason = "Traded";
 
                                 // Trade Evolution Verify.
-                                if (user_pokemon_to_add.Held == undefined) {
-                                    user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
-                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
-                                    if (pokemon_db["Evolution Trade"] != undefined) {
-                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.Held))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.Held))[1];
-                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase()) {
-                                            user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
-                                            var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
-                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
-                                            user_pokemon_to_add.Held = undefined;
-                                            user_1_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
-                                        }
+                                user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
+                                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
+                                if (pokemon_db["Evolution Trade"] != undefined) {
+                                    var all_evolutions = pokemon_db["Evolution Trade"];
+                                    var get_current_evolution = [];
+                                    if (all_evolutions[0][0].length > 1) get_current_evolution = all_evolutions.filter(it => it[0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase());
+                                    else get_current_evolution = [all_evolutions];
+                                    if (get_current_evolution.length > 0) {
+                                        var current_evolution = get_current_evolution[0];
+                                        user_pokemon_to_add.PokemonId = current_evolution[1];
+                                        var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
+                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
+                                        user_pokemon_to_add.Held = undefined;
+                                        user_1_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
                                     }
                                 }
 
@@ -243,24 +245,26 @@ function change_trade(message, trade_prompt, pokemons) {
                                 user_pokemon_to_add.Reason = "Traded";
 
                                 // Trade Evolution Verify.
-                                if (user_pokemon_to_add.Held == undefined) {
-                                    user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
-                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
-                                    if (pokemon_db["Evolution Trade"] != undefined) {
-                                        if (pokemon_db["Evolution Trade"].some(it => it.includes(user_pokemon_to_add.Held))) user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"].find(it => it.includes(user_pokemon_to_add.Held))[1];
-                                        if (user_pokemon_to_add.PokemonId.length == 1 && pokemon_db["Evolution Trade"][0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase()) {
-                                            user_pokemon_to_add.PokemonId = pokemon_db["Evolution Trade"][1];
-                                            var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
-                                            var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
-                                            user_pokemon_to_add.Held = undefined;
-                                            user_2_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
-                                        }
+                                user_pokemon_to_add.Held = user_pokemon_to_add.Held == undefined ? "NULL" : user_pokemon_to_add.Held;
+                                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemon_to_add.PokemonId)[0];
+                                if (pokemon_db["Evolution Trade"] != undefined) {
+                                    var all_evolutions = pokemon_db["Evolution Trade"];
+                                    var get_current_evolution = [];
+                                    if (all_evolutions[0][0].length > 1) get_current_evolution = all_evolutions.filter(it => it[0].toLowerCase() == user_pokemon_to_add.Held.toLowerCase());
+                                    else get_current_evolution = [all_evolutions];
+                                    if (get_current_evolution.length > 0) {
+                                        var current_evolution = get_current_evolution[0];
+                                        user_pokemon_to_add.PokemonId = current_evolution[1];
+                                        var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_db["Pokemon Id"], pokemons, user_pokemon_to_add.Shiny);
+                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(user_pokemon_to_add.PokemonId, pokemons, user_pokemon_to_add.Shiny);
+                                        user_pokemon_to_add.Held = undefined;
+                                        user_2_trade_evolutions.push([old_pokemon_name, new_pokemon_name]);
                                     }
                                 }
-
-                                pokemons_to_delete.push(user_pokemon_to_add._id);
-                                pokemons_to_add.push(user_pokemon_to_add);
                             }
+
+                            pokemons_to_delete.push(user_pokemon_to_add._id);
+                            pokemons_to_add.push(user_pokemon_to_add);
                         }
 
                         var selected_pokemon = pokemons_to_delete.filter(it => it._id == user2.Selected)[0];
@@ -368,7 +372,6 @@ function recycle(message, user_prompt, load_pokemons) {
 
                         if (selected_pokemon.Held != "Everstone") {
 
-                            // Get pokemon evolution.
                             // Get pokemon evolution.
                             var pokemon_data = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
                             //Exections for Tyrogue
