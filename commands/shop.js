@@ -191,12 +191,12 @@ function page_7(message, balance, prefix) {
     embed.setTitle(`Evs`);
     embed.setColor(message.guild.me.displayHexColor)
     embed.setDescription(`Wings cost 20c each, Berries cost 50c each and Vitamins cost 150c each. Do ${prefix}buy vitamin/berry/wing <type> to buy the item!`)
-    embed.addField('Health Wings', `Increases the hp EV of your selected pokemon by 1, Do \`${prefix}buy wings health\` to buy this item!`, true)
-    embed.addField('Muscle Wings', `Increases the attack EV of your selected pokemon by 1, Do \`${prefix}buy wings muscle\` to buy this item!`, true)
-    embed.addField('Resist Wings', `Increases the defense EV of your selected pokemon by 1, Do \`${prefix}buy wings resist\` to buy this item!`, true)
-    embed.addField('Genius Wings', `Increases the special attack EV of your selected pokemon by 1, Do \`${prefix}buy wings genius\` to buy this item!`, true)
-    embed.addField('Clever Wings', `Increases the special defense EV of your selected pokemon by 1, Do \`${prefix}buy wings clever\` to buy this item!`, true)
-    embed.addField('Swift Wings', `Increases the speed EV of your selected pokemon by 1 Do \`${prefix}buy wings swift\` to buy this item!`, true)
+    embed.addField('Health Wing', `Increases the hp EV of your selected pokemon by 1, Do \`${prefix}buy wing health\` to buy this item!`, true)
+    embed.addField('Muscle Wing', `Increases the attack EV of your selected pokemon by 1, Do \`${prefix}buy wing muscle\` to buy this item!`, true)
+    embed.addField('Resist Wing', `Increases the defense EV of your selected pokemon by 1, Do \`${prefix}buy wing resist\` to buy this item!`, true)
+    embed.addField('Genius Wing', `Increases the special attack EV of your selected pokemon by 1, Do \`${prefix}buy wing genius\` to buy this item!`, true)
+    embed.addField('Clever Wing', `Increases the special defense EV of your selected pokemon by 1, Do \`${prefix}buy wing clever\` to buy this item!`, true)
+    embed.addField('Swift Wing', `Increases the speed EV of your selected pokemon by 1 Do \`${prefix}buy wing swift\` to buy this item!`, true)
     embed.addField('Hp-Up', `Increases the hp EV of your selected pokemon by 10 Do \`${prefix}buy vitamin hp-up\` to buy this item!`, true)
     embed.addField('Protein', `Increases the attack EV of your selected pokemon by 10 Do \`${prefix}buy vitamin protein\` to buy this item!`, true)
     embed.addField('Iron', `Increases the defense EV of your selected pokemon by 10 Do \`${prefix}buy vitamin iron\` to buy this item!`, true)
@@ -208,7 +208,7 @@ function page_7(message, balance, prefix) {
     embed.addField('Qualot Berry', `Increases the defense EV of your selected pokemon by 10 Do \`${prefix}buy berry qualot\` to buy this item!`, true)
     embed.addField('Hondew Berry', `Increases the special attack EV of your selected pokemon by 10 Do \`${prefix}buy berry hondew\` to buy this item!`, true)
     embed.addField('Grepa Berry', `Increases the special defense EV of your selected pokemon by 10 Do \`${prefix}buy berry grepa\` to buy this item!`, true)
-    embed.addField('Tomato Berry', `Increases the speed EV of your selected pokemon by 10 Do \`${prefix}buy berry tamoto\` to buy this item!`, true)
+    embed.addField('Tamato Berry', `Increases the speed EV of your selected pokemon by 10 Do \`${prefix}buy berry tamato\` to buy this item!`, true)
     message.channel.send(embed)
 }
 
