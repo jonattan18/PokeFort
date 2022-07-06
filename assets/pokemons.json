@@ -21180,6 +21180,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": "NULL",
         "Evolution Details": "NULL",
+        "Evolution Stone": [
+            "Thunder Stone",
+            "726"
+        ],
         "dr_name": "Nasgnet",
         "fr_name": "Tarinor",
         "jp_name": [

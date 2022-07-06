@@ -494,11 +494,15 @@ function buyboosters(message, args) {
 }
 
 // Function to buy Wings.
-function buywing(message, args, pokemons) {
-    if (args.length < 2 || args.length > 2) return message.channel.send("Please specify a valid wing to buy!");
+function buywing(message, args, pokemons, amount = 1) {
+    if (args.length < 2 || args.length > 3) return message.channel.send("Please specify a valid wing to buy!");
+
+    if (args.length == 3 && isInt(args[2])) {
+        amount = parseInt(args[2]);
+    }
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user.PokeCredits < 20) { return message.channel.send("You don't have enough PokeCredits to buy this wing!"); }
+        if (user.PokeCredits < (20 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this wing!"); }
 
         var available_wings = ["health", "muscle", "resist", "genius", "clever", "swift"];
         if (available_wings.includes(args[1].toLowerCase())) {
@@ -525,57 +529,44 @@ function buywing(message, args, pokemons) {
 
                 // Health Ev
                 if (args[1].toLowerCase() == "health") {
-                    if (hp_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Health", hp_ev];
-                        hp_ev += 1;
-                        ev_changes.push(hp_ev);
-                    }
+                    ev_changes = ["Health", hp_ev];
+                    hp_ev += 1 * amount;
+                    ev_changes.push(hp_ev);
                 }
                 // Defense Ev
                 else if (args[1].toLowerCase() == "muscle") {
-                    if (attack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Attack", attack_ev];
-                        attack_ev += 1;
-                        ev_changes.push(attack_ev);
-                    }
+                    ev_changes = ["Attack", attack_ev];
+                    attack_ev += 1 * amount;
+                    ev_changes.push(attack_ev);
                 }
                 // Attack Ev
                 else if (args[1].toLowerCase() == "resist") {
-                    if (defense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Defense", defense_ev];
-                        defense_ev += 1;
-                        ev_changes.push(defense_ev);
-                    }
+                    ev_changes = ["Defense", defense_ev];
+                    defense_ev += 1 * amount;
+                    ev_changes.push(defense_ev);
                 }
                 // SpAttack Ev
                 else if (args[1].toLowerCase() == "genius") {
-                    if (spattack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Attack", spattack_ev];
-                        spattack_ev += 1;
-                        ev_changes.push(spattack_ev);
-                    }
+                    ev_changes = ["Special Attack", spattack_ev];
+                    spattack_ev += 1 * amount;
+                    ev_changes.push(spattack_ev);
                 }
                 // SpDefense Ev
                 else if (args[1].toLowerCase() == "clever") {
-                    if (spdefense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Defense", spdefense_ev];
-                        spdefense_ev += 1;
-                        ev_changes.push(spdefense_ev);
-                    }
+                    ev_changes = ["Special Defense", spdefense_ev];
+                    spdefense_ev += 1 * amount;
+                    ev_changes.push(spdefense_ev);
                 }
                 // Speed Ev
                 else if (args[1].toLowerCase() == "swift") {
-                    if (speed_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Speed", speed_ev];
-                        speed_ev += 1;
-                        ev_changes.push(speed_ev);
-                    }
+                    ev_changes = ["Speed", speed_ev];
+                    speed_ev += 1 * amount;
+                    ev_changes.push(speed_ev);
+                }
+
+                // Individual EV check.
+                for (var i = 0; i < ev_changes.length; i++) {
+                    if (ev_changes[i] > 252) return message.channel.send("This pokémon can't get higher than maximum stat!");
                 }
 
                 // Ev total check.
@@ -588,7 +579,7 @@ function buywing(message, args, pokemons) {
                     message.channel.send(`You increased your ${pokemon_name}'s ${ev_changes[0]} EV stat from ${ev_changes[1]} to ${ev_changes[2]}.`);
                 });
 
-                user.PokeCredits -= 20;
+                user.PokeCredits -= 20 * amount;
                 user.save();
             });
         }
@@ -597,11 +588,15 @@ function buywing(message, args, pokemons) {
 }
 
 // Function to buy vitamins.
-function buyvitamin(message, args, pokemons) {
-    if (args.length < 2 || args.length > 2) return message.channel.send("Please specify a valid vitamin to buy!");
+function buyvitamin(message, args, pokemons, amount = 1) {
+    if (args.length < 2 || args.length > 3) return message.channel.send("Please specify a valid vitamin to buy!");
+
+    if (args.length == 3 && isInt(args[2])) {
+        amount = parseInt(args[2]);
+    }
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user.PokeCredits < 150) { return message.channel.send("You don't have enough PokeCredits to buy this vitamin!"); }
+        if (user.PokeCredits < (150 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this vitamin!"); }
 
         var available_vitamin = ["hp-up", "protein", "iron", "calcium", "zinc", "carbos"];
         if (available_vitamin.includes(args[1].toLowerCase())) {
@@ -628,58 +623,49 @@ function buyvitamin(message, args, pokemons) {
 
                 // Health Ev
                 if (args[1].toLowerCase() == "hp-up") {
-                    if (hp_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Health", hp_ev];
-                        hp_ev += 10;
-                        ev_changes.push(hp_ev);
-                    }
+                    ev_changes = ["Health", hp_ev];
+                    hp_ev += 10 * amount;
+                    ev_changes.push(hp_ev);
                 }
                 // Defense Ev
                 else if (args[1].toLowerCase() == "protein") {
-                    if (attack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Attack", attack_ev];
-                        attack_ev += 10;
-                        ev_changes.push(attack_ev);
-                    }
+                    ev_changes = ["Attack", attack_ev];
+                    attack_ev += 10 * amount;
+                    ev_changes.push(attack_ev);
                 }
                 // Attack Ev
                 else if (args[1].toLowerCase() == "iron") {
-                    if (defense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Defense", defense_ev];
-                        defense_ev += 10;
-                        ev_changes.push(defense_ev);
-                    }
+                    ev_changes = ["Defense", defense_ev];
+                    defense_ev += 10 * amount;
+                    ev_changes.push(defense_ev);
                 }
                 // SpAttack Ev
                 else if (args[1].toLowerCase() == "calcium") {
-                    if (spattack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Attack", spattack_ev];
-                        spattack_ev += 10;
-                        ev_changes.push(spattack_ev);
-                    }
+                    ev_changes = ["Special Attack", spattack_ev];
+                    spattack_ev += 10 * amount;
+                    ev_changes.push(spattack_ev);
                 }
                 // SpDefense Ev
                 else if (args[1].toLowerCase() == "zinc") {
-                    if (spdefense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Defense", spdefense_ev];
-                        spdefense_ev += 10;
-                        ev_changes.push(spdefense_ev);
-                    }
+                    ev_changes = ["Special Defense", spdefense_ev];
+                    spdefense_ev += 10 * amount;
+                    ev_changes.push(spdefense_ev);
                 }
                 // Speed Ev
                 else if (args[1].toLowerCase() == "carbos") {
-                    if (speed_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Speed", speed_ev];
-                        speed_ev += 10;
-                        ev_changes.push(speed_ev);
-                    }
+                    ev_changes = ["Speed", speed_ev];
+                    speed_ev += 10 * amount;
+                    ev_changes.push(speed_ev);
                 }
+
+                // Individual EV check.
+                for (var i = 0; i < ev_changes.length; i++) {
+                    if (ev_changes[i] > 252) return message.channel.send("This pokémon can't get higher than maximum stat!");
+                }
+
+                // Ev total check.
+                var changed_total_ev = hp_ev + attack_ev + defense_ev + spattack_ev + spdefense_ev + speed_ev;
+                if (changed_total_ev > 510) return message.channel.send("Unable to add EV to this pokémon! It exceeds the maximum amount of EVs!");
 
                 // Update database
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].EV": [hp_ev, attack_ev, defense_ev, spattack_ev, spdefense_ev, speed_ev] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
@@ -687,7 +673,7 @@ function buyvitamin(message, args, pokemons) {
                     message.channel.send(`You increased your ${pokemon_name}'s ${ev_changes[0]} EV stat from ${ev_changes[1]} to ${ev_changes[2]}.`);
                 });
 
-                user.PokeCredits -= 150;
+                user.PokeCredits -= 150 * amount;
                 user.save();
             });
         }
@@ -696,11 +682,15 @@ function buyvitamin(message, args, pokemons) {
 }
 
 // Function to buy berry.
-function buyberry(message, args, pokemons) {
-    if (args.length < 2 || args.length > 2) return message.channel.send("Please specify a valid berry to buy!");
+function buyberry(message, args, pokemons, amount = 1) {
+    if (args.length < 2 || args.length > 3) return message.channel.send("Please specify a valid berry to buy!");
+
+    if (args.length == 3 && isInt(args[2])) {
+        amount = parseInt(args[2]);
+    }
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user.PokeCredits < 50) { return message.channel.send("You don't have enough PokeCredits to buy this berry!"); }
+        if (user.PokeCredits < (50 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this berry!"); }
 
         var available_berry = ["pomeg", "kelpsy", "qualot", "hondew", "grepa", "tamato"];
         if (available_berry.includes(args[1].toLowerCase())) {
@@ -727,58 +717,49 @@ function buyberry(message, args, pokemons) {
 
                 // Health Ev
                 if (args[1].toLowerCase() == "pomeg") {
-                    if (hp_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Health", hp_ev];
-                        hp_ev += 10;
-                        ev_changes.push(hp_ev);
-                    }
+                    ev_changes = ["Health", hp_ev];
+                    hp_ev += 10 * amount;
+                    ev_changes.push(hp_ev);
                 }
                 // Defense Ev
                 else if (args[1].toLowerCase() == "kelpsy") {
-                    if (attack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Attack", attack_ev];
-                        attack_ev += 10;
-                        ev_changes.push(attack_ev);
-                    }
+                    ev_changes = ["Attack", attack_ev];
+                    attack_ev += 10 * amount;
+                    ev_changes.push(attack_ev);
                 }
                 // Attack Ev
                 else if (args[1].toLowerCase() == "qualot") {
-                    if (defense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Defense", defense_ev];
-                        defense_ev += 10;
-                        ev_changes.push(defense_ev);
-                    }
+                    ev_changes = ["Defense", defense_ev];
+                    defense_ev += 10 * amount;
+                    ev_changes.push(defense_ev);
                 }
                 // SpAttack Ev
                 else if (args[1].toLowerCase() == "hondew") {
-                    if (spattack_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Attack", spattack_ev];
-                        spattack_ev += 10;
-                        ev_changes.push(spattack_ev);
-                    }
+                    ev_changes = ["Special Attack", spattack_ev];
+                    spattack_ev += 10 * amount;
+                    ev_changes.push(spattack_ev);
                 }
                 // SpDefense Ev
                 else if (args[1].toLowerCase() == "grepa") {
-                    if (spdefense_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Special Defense", spdefense_ev];
-                        spdefense_ev += 10;
-                        ev_changes.push(spdefense_ev);
-                    }
+                    ev_changes = ["Special Defense", spdefense_ev];
+                    spdefense_ev += 10 * amount;
+                    ev_changes.push(spdefense_ev);
                 }
                 // Speed Ev
                 else if (args[1].toLowerCase() == "tamato") {
-                    if (speed_ev >= 252) return message.channel.send("This pokémon already has the maximum amount of EVs for this stat!");
-                    else {
-                        ev_changes = ["Speed", speed_ev];
-                        speed_ev += 10;
-                        ev_changes.push(speed_ev);
-                    }
+                    ev_changes = ["Speed", speed_ev];
+                    speed_ev += 10 * amount;
+                    ev_changes.push(speed_ev);
                 }
+
+                // Individual EV check.
+                for (var i = 0; i < ev_changes.length; i++) {
+                    if (ev_changes[i] > 252) return message.channel.send("This pokémon can't get higher than maximum stat!");
+                }
+
+                // Ev total check.
+                var changed_total_ev = hp_ev + attack_ev + defense_ev + spattack_ev + spdefense_ev + speed_ev;
+                if (changed_total_ev > 510) return message.channel.send("Unable to add EV to this pokémon! It exceeds the maximum amount of EVs!");
 
                 // Update database
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].EV": [hp_ev, attack_ev, defense_ev, spattack_ev, spdefense_ev, speed_ev] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
@@ -786,7 +767,7 @@ function buyberry(message, args, pokemons) {
                     message.channel.send(`You increased your ${pokemon_name}'s ${ev_changes[0]} EV stat from ${ev_changes[1]} to ${ev_changes[2]}.`);
                 });
 
-                user.PokeCredits -= 50;
+                user.PokeCredits -= 50 * amount;
                 user.save();
             });
         }
