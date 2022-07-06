@@ -650,7 +650,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             // Sending duel message.
                             var embed = new Discord.MessageEmbed();
                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                            embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("Terrain", "") + "**")}`);
+                            embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);
                             embed.addField(`${message.author.username}'s Pokémon`, `${_battlestream.battle.sides[0].pokemon[0].name.replaceAll("_r", "").slice(0, -2)} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
                             embed.addField(`Raid Boss`, `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, true);
                             embed.setColor(message.guild.me.displayHexColor);

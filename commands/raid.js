@@ -38,7 +38,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (err) { console.log(err); return; }
                     if (user) {
                         if (user.RaidAlphaAgree == undefined || user.RaidAlphaAgree == false) {
-                            return message.channel.send(`You have not agreed to the raid agreement. "The raid is under alpha testing stage, and users will more likely encounter flaws. If you encounter any issues, please report them in **bug-report** channel. Thanks for understanding. Use ${prefix}raid agree to agree to the agreement.`);
+                            return message.channel.send(`You have not agreed to the raid agreement. "The raid is under alpha testing stage, and users will more likely encounter flaws. If you encounter any issues, please report them in **bug-report** channel. Thanks for understanding. Use \`${prefix}raid agree\` to agree to the agreement.`);
                         }
 
                         if (args[1] != undefined && args[1] == "--g") {
@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
+                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) < 10800000) {
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
@@ -504,7 +504,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             // Sending duel message.
                                             var embed = new Discord.MessageEmbed();
                                             embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("Terrain", "") + "**")}`);
+                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("terrain", "") + "**")}`);
                                             embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
                                             embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
                                             embed.setColor(message.guild.me.displayHexColor);
