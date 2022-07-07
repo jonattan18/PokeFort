@@ -1,1 +1,1 @@
-worker: node index.js
+worker: forever start ./forever.json
