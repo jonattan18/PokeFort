@@ -209,11 +209,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             // For pk --name command.
             function name(args) {
+                args.shift();
                 var filtered_pokemons = [];
                 for (i = 0; i < user_pokemons.length; i++) {
-                    var user_name = args.slice(1).join(" ").toLowerCase();
-                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
-                    if (pokemon_db["Pokemon Name"].toLowerCase() == user_name) {
+                    var user_found_pokemon = getPokemons.getPokemonData(args, pokemons);
+                    if (user_found_pokemon != null && user_found_pokemon["Pokemon Id"] == user_pokemons[i].PokemonId) {
                         filtered_pokemons.push(user_pokemons[i]);
                     }
                 }

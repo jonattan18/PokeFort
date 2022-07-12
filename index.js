@@ -5,6 +5,9 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 const mongoose = require('mongoose');
 const fs = require('fs');
 const _ = require('lodash');
+var express = require('express');
+var app = express();
+app.use(express.json());
 
 // Models
 const guild_model = require('./models/guild')
@@ -15,10 +18,11 @@ const market_model = require('./models/market');
 const auction_model = require('./models/auction');
 const raid_model = require('./models/raids');
 
-//Utils
+// Utils
 const { loadCommands } = require('./utils/loadCommands');
 const getPokemons = require('./utils/getPokemon');
 const admin = require('./utils/admin');
+const { default: axios } = require('axios');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -45,6 +49,20 @@ mongoose.connect(config.MONGO_URI, {
 });
 
 // Discord Client Login
+var my_slot = 0;
+var i_indentified_as = null;
+// Node js boot arguements
+const myArgs = process.argv.slice(2);
+if (myArgs.length > 1) {
+    console.log("Invalid arguements.");
+    process.exit();
+}
+else if (myArgs.length == 1) {
+    my_slot = parseInt(myArgs[0]);
+    i_indentified_as = config.WORKERS[my_slot - 1];
+}
+
+
 client.login(config.BOT_TOKEN);
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
@@ -76,6 +94,71 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
     }
 });
 
+// Prevent crash and send err logs to console
+process.on('uncaughtException', function (err) {
+    // Error handler
+});
+
+var global_worker = config.WORKERS.slice(0);
+var total_incomming = 0;
+var ready_to_go = false;
+
+// Send report to all other workers
+client.once("ready", () => {
+
+    // Load Balancer
+    if (config.LOAD_BALANCER) {
+        app.post('/handshake', function (req, res) {
+            var ms = req.body.sync - Date.now();
+            setTimeout(() => {
+                console.log("Handshake timed out.");
+                if (!global_worker.includes(req.body.iam)) {
+                    global_worker.push(req.body.iam);
+                }
+                total_incomming = 0;
+                global_worker.sort((a, b) => config.WORKERS.indexOf(a) - config.WORKERS.indexOf(b));
+            }, ms);
+            res.sendStatus(200);
+        })
+
+        app.listen(1000 + my_slot);
+
+        // Send handshake to all workers
+        var worker_index = 0;
+
+        // Add 2 min to current time
+        var time = new Date();
+        time.setUTCSeconds(time.getUTCSeconds() + 20);
+
+        function axios_loop() {
+            if (config.WORKERS[worker_index] == i_indentified_as) {
+                worker_index++;
+                if (worker_index < config.WORKERS.length) axios_loop();
+                else {
+                    var ms = time.getTime() - new Date().getTime();
+                    setTimeout(() => { console.log("Dropped IN"); ready_to_go = true; }, ms);
+                }
+            }
+            else {
+                axios.post(`${config.WORKERS[worker_index]}/handshake`, { iam: i_indentified_as, sync: time.getTime() }).then(function (response) {
+                    console.log(`Handshake ${config.WORKERS[worker_index]} successful!`);
+                }).catch(function (error) {
+                    global_worker.splice(global_worker.indexOf(config.WORKERS[worker_index]), 1);
+                }).finally(function () {
+                    worker_index++;
+                    if (worker_index < config.WORKERS.length) axios_loop();
+                    else {
+                        var ms = time.getTime() - new Date().getTime();
+                        console.log(`Load Balancer is ready! ${ms}ms`);
+                        setTimeout(() => { console.log("Dropped IN"); ready_to_go = true; }, ms);
+                    }
+                });
+            }
+        } axios_loop();
+    }
+});
+
+// This will be called on message received from discord
 client.on('message', async (message) => {
     if (message.author.bot) return;
 
@@ -83,6 +166,21 @@ client.on('message', async (message) => {
     if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
 
     if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
+
+    // Load Balancing.
+    if (config.LOAD_BALANCER) {
+        if (!ready_to_go) return;
+        console.log(i_indentified_as + ": " + total_incomming);
+        if (global_worker[total_incomming] != i_indentified_as) {
+            if (global_worker.length != (total_incomming + 1)) total_incomming++;
+            else total_incomming = 0;
+            return;
+        } else {
+            console.log(global_worker)
+            if (global_worker.length != (total_incomming + 1)) total_incomming++;
+            else total_incomming = 0;
+        }
+    }
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
