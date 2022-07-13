@@ -923,7 +923,7 @@ function move_thinker(available_moves, foe_type1, foe_type2) {
         move_list.push([available_moves[i][0], effectiveness]);
         non_sorted.push([available_moves[i][0], effectiveness]);
     }
-    move_list.sort((a, b) => b[1] - a[1]);
+    if (randomNumber(0, 10) > 4) move_list.sort((a, b) => b[1] - a[1]);
     if (move_list.length == 0) return 1;
     else {
         // Filter the elements which has highest effectiveness.

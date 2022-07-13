@@ -518,6 +518,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                                 if (err) return;
                                                 if (user) {
                                                     user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
+                                                    user.save();
                                                 }
                                             });
                                         });
