@@ -964,7 +964,7 @@ exports.Moves = {
                 }
                 if (this.checkMoveMakesContact(move, source, target)) {
                     source.trySetStatus('psn', target);
-                }
+                } else source.trySetStatus('psn', target);
                 return this.NOT_FAIL;
             },
             onHit(target, source, move) {
@@ -2267,7 +2267,7 @@ exports.Moves = {
         },
         isZ: "kommoniumz",
         secondary: {
-        // Sheer Force negates the selfBoost even though it is not secondary
+            // Sheer Force negates the selfBoost even though it is not secondary
         },
         target: "allAdjacentFoes",
         type: "Dragon",
@@ -3288,7 +3288,7 @@ exports.Moves = {
             },
         },
         secondary: {
-        // Sheer Force negates the self even though it is not secondary
+            // Sheer Force negates the self even though it is not secondary
         },
         target: "allAdjacentFoes",
         type: "Rock",

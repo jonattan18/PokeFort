@@ -51,6 +51,7 @@ mongoose.connect(config.MONGO_URI, {
 // Discord Client Login
 var my_slot = 0;
 var i_indentified_as = null;
+
 // Node js boot arguements
 const myArgs = process.argv.slice(2);
 if (myArgs.length > 1) {
@@ -97,6 +98,7 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 // Prevent crash and send err logs to console
 process.on('uncaughtException', function (err) {
     // Error handler
+    console.log(err);
 });
 
 var global_worker = config.WORKERS.slice(0);
@@ -162,11 +164,6 @@ client.once("ready", () => {
 client.on('message', async (message) => {
     if (message.author.bot) return;
 
-    // Remove this
-    if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
-
-    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
-
     // Load Balancing.
     if (config.LOAD_BALANCER) {
         if (!ready_to_go) return;
@@ -181,6 +178,10 @@ client.on('message', async (message) => {
             else total_incomming = 0;
         }
     }
+
+    // Remove this
+    if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
+    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());

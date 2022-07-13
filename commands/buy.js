@@ -52,7 +52,7 @@ function buyitem(message, args) {
             pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Held": given_item.capitalize() } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                 if (err) return console.log(err);
                 user.save();
-                message.channel.send(`You pokémon is holding ${given_item}!`);
+                message.channel.send(`Your pokémon is holding ${given_item}!`);
             });
 
         });
@@ -254,7 +254,7 @@ function buyforms(message, args, pokemons) {
                         pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].PokemonId": pokemon_data["Pokemon Id"] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                             if (err) return console.log(err);
                             user.save();
-                            message.channel.send(`You pokemon's form changed to ${pokemon_data.fullname}!`);
+                            message.channel.send(`Your pokemon's form changed to ${pokemon_data.fullname}!`);
                         });
                     }
                 }

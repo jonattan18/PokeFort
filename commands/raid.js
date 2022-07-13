@@ -714,7 +714,7 @@ function transferTeamData(team_data, user_pokemons, pokemons) {
 
                 var data_to_add = {
                     name: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false) + "_r_" + (i + 1),
-                    species: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false),
+                    species: getPokemons.get_pokemon_name_from_id(pokemon_from_db["PokemonId"], pokemons, false, false, true),
                     gender: "",
                     shiny: pokemon_from_db.Shiny,
                     gigantamax: false,

@@ -154,7 +154,7 @@ function imagefromid(pokemonid, pokemons, shiny, need_name = false) {
 }
 
 // Get pokemon name from pokemon ID.
-function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false) {
+function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false, raid_species = false) {
 
     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemonID)[0];
 
@@ -167,9 +167,12 @@ function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false
         if (pokemon_db["Alternate Form Name"] == "Alola") { temp_name = "Alolan " + pokemon_db["Pokemon Name"]; }
         else if (pokemon_db["Alternate Form Name"] == "Galar") { temp_name = "Galarian " + pokemon_db["Pokemon Name"]; }
         else if (pokemon_db["Alternate Form Name"] != "NULL") {
-            if (pokemon_db["Dex Search"] == "Front") temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
-            else if (pokemon_db["Dex Search"] == "Back") temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
-            else temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
+            if (!raid_species) {
+                if (pokemon_db["Dex Search"] == "Front") temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
+                else if (pokemon_db["Dex Search"] == "Back") temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
+                else temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
+            }
+            else temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
         }
         else { temp_name = pokemon_db["Pokemon Name"]; }
         var pokemon_name = temp_name;
