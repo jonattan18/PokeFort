@@ -7,7 +7,7 @@ const Discord = require('discord.js');
 module.exports.run = async (bot, message, args, prefix, user_available) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     return;
-    
+
     if (args.length == 0) {
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (user) {
@@ -50,7 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
                     embed.setThumbnail(message.author.avatarURL());
 
                     var description = `**What have you done?**\n\n`;
-                    description += `⎆ Joined Official Server: ${is_there}!\n`;
+                   // description += `⎆ Joined Official Server: ${is_there}!\n`;
                     description += `⎆ Caught **${total_pokemons_caught}** Pokemon!\n`;
                     description += `⎆ Participated in **${participated_in_raids}** Raids!\n`;
                     description += `⎆ Dueled **${total_duels}** times!\n`;
@@ -83,7 +83,11 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
         });
     }
     else if (args.length == 1 && args[0].toLowerCase() == "kits") {
+        var embed = new Discord.MessageEmbed();
+        embed.setTitle(`Available Beta Kits`);
+        embed.setColor("#FFD700");
 
+        var description = "";
     }
 
 }

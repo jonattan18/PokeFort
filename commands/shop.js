@@ -86,6 +86,8 @@ function page_2(message, balance, prefix) {
     embed.addField('Thunder Stone', '``' + prefix + 'buy stone thunder``', true)
     embed.addField('Water Stone', '``' + prefix + 'buy stone water``', true)
     embed.addField('Oval Stone', '``' + prefix + 'buy stone oval``', true)
+    embed.addField('Black Augurite Stone', '``' + prefix + 'buy stone black augurite``', true)
+    embed.addField('Peat Block Stone', '``' + prefix + 'buy stone peat block``', true)
     embed.addField('Sweet apple', '``' + prefix + 'buy sweet apple``', true)
     embed.addField('Tart apple', '``' + prefix + 'buy tart apple``', true)
     embed.addField('Cracked pot', '``' + prefix + 'buy cracked pot``', true)

@@ -137,9 +137,10 @@ function buyevolveitems(message, args, pokemons) {
 
 // Function to buy stones.
 function buystone(message, args, pokemons) {
-    if (args.length > 2) return message.channel.send("Please specify a valid stone to buy!");
-    var stones = ["dawn", "dusk", "fire", "ice", "leaf", "moon", "shiny", "sun", "thunder", "water", "oval"];
-    if (!stones.includes(args[1].toLowerCase())) return message.channel.send("Please specify a valid stone to buy!");
+    var stones = ["dawn", "dusk", "fire", "ice", "leaf", "moon", "shiny", "sun", "thunder", "water", "oval", "black augurite", "peat block"];
+    args.shift();
+    var stone_name = args.join(" ").toLowerCase();
+    if (!stones.includes(stone_name.toLowerCase())) return message.channel.send("Please specify a valid stone to buy!");
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < 150) { return message.channel.send("You don't have enough PokeCredits to buy this form!"); }
 
@@ -155,9 +156,9 @@ function buystone(message, args, pokemons) {
 
             var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
             if (pokemon_db["Evolution Stone"] != undefined) {
-                if (pokemon_db["Evolution Stone"].some(it => it.includes(`${args[1].capitalize()} Stone`))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(`${args[1].capitalize()} Stone`))[1];
+                if (pokemon_db["Evolution Stone"].some(it => it.includes(`${stone_name.capitalize()} Stone`))) update_pokemon_id = pokemon_db["Evolution Stone"].find(it => it.includes(`${stone_name.capitalize()} Stone`))[1];
                 if (update_pokemon_id == null) return message.channel.send("This pokémon can't evolve with this stone!");
-                if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == `${args[1].capitalize()} Stone`) {
+                if (update_pokemon_id.length == 1 && pokemon_db["Evolution Stone"][0] == `${stone_name.capitalize()} Stone`) {
                     if (pokemon_db["Evolution Stone"][2] != undefined) {
                         if (message.channel.name != pokemon_db["Evolution Stone"][2].toLowerCase()) return message.channel.send("Your pokémon neglected this stone!");
                     }

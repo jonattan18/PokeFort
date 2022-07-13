@@ -9688,6 +9688,10 @@
             "Metal coat",
             "336"
         ],
+        "Evolution Stone": [
+            "Black augurite Stone",
+            "1624"
+        ],
         "dr_name": "Sichlor",
         "fr_name": "Insécateur",
         "jp_name": [
@@ -15922,6 +15926,10 @@
         "Egg Cycle Count": 20,
         "Pre-Evolution Pokemon Id": 340,
         "Evolution Details": "Level 30",
+        "Evolution Stone": [
+            "Peat block Stone",
+            "1625"
+        ],
         "dr_name": "Ursaring",
         "fr_name": "Ursaring",
         "jp_name": [
@@ -37401,7 +37409,11 @@
         "Pokemon Id": "885",
         "Pokedex Number": 550,
         "Pokemon Name": "Basculin",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "1626",
+            "Reason": "Level",
+            "Level": "55"
+        },
         "Classication": "Hostile Pokemon",
         "Alternate Form Name": "NULL",
         "Legendary Type": "NULL",
@@ -61064,7 +61076,11 @@
         "Pokemon Id": "1612",
         "Pokedex Number": 211,
         "Pokemon Name": "Qwilfish",
-        "Evolution": "NULL",
+        "Evolution": {
+            "Id": "1628",
+            "Reason": "Level",
+            "Level": "15"
+        },
         "Classication": "Balloon Pokemon",
         "Alternate Form Name": "Hisuian",
         "Legendary Type": "NULL",
