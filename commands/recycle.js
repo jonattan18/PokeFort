@@ -26,9 +26,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
             raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
                 if (err) { console.log(err); return; }
-                if (raid) {
-                    if (raid.Started) return message.channel.send("You can't recycle pokémon while you are in a raid!");
-                } else {
+                if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't recycle pokémon while you are in a raid!");
+                else {
                     //Get user data.
                     user_model.findOne({ UserID: message.author.id }, (err, user) => {
                         if (!user) return;
@@ -160,8 +159,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                              // For pk --hisuian command.
-                              function hisuian(args) {
+                            // For pk --hisuian command.
+                            function hisuian(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
                                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];

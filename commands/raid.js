@@ -411,123 +411,127 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
             if (raid) {
-                user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                    var team = user.Teams.filter(team => team.Selected == true)[0];
-                    if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
-                    if (!raid.Started) return message.channel.send("This raid has not started yet!");
-                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
-                    if (raid.CompletedDuel.includes(message.author.id)) return message.channel.send("You have already completed this raid duel!");
-                    if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
-                    if (team.Pokemons.isNull()) return message.channel.send("Your team should not be empty.");
+                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
+                    if (err) return console.log(err);
+                    if (_duel) return message.channel.send("You can't raid pokémon while you are in a duel!");
+                    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                        var team = user.Teams.filter(team => team.Selected == true)[0];
+                        if (team == undefined) return message.channel.send(`You should select a team or create a team to enter a raid duel!`);
+                        if (!raid.Started) return message.channel.send("This raid has not started yet!");
+                        if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You are already in duel with this raid boss!");
+                        if (raid.CompletedDuel.includes(message.author.id)) return message.channel.send("You have already completed this raid duel!");
+                        if (raid.CurrentDuel != undefined) return message.channel.send("A user is already dueling this raid boss!");
+                        if (team.Pokemons.isNull()) return message.channel.send("Your team should not be empty.");
 
-                    // Get pokemons details
-                    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+                        // Get pokemons details
+                        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                        // Transfer team pokemons to trainers data.
-                        var trainer_data = transferTeamData(team, user_pokemons, pokemons);
+                            // Transfer team pokemons to trainers data.
+                            var trainer_data = transferTeamData(team, user_pokemons, pokemons);
 
-                        var raid_moveset = movesparser.get_raid_moves_from_id(raid.RaidPokemon.ID, pokemons);
-                        var raidmoves_to_stream = [];
-                        for (i = 0; i < raid_moveset.length; i++) {
-                            raidmoves_to_stream.push(raid_moveset[i][0]);
-                        }
+                            var raid_moveset = movesparser.get_raid_moves_from_id(raid.RaidPokemon.ID, pokemons);
+                            var raidmoves_to_stream = [];
+                            for (i = 0; i < raid_moveset.length; i++) {
+                                raidmoves_to_stream.push(raid_moveset[i][0]);
+                            }
 
-                        // Team Packing
-                        var packed_team_1 = Teams.pack(trainer_data);
-                        var packed_team_2 = Teams.pack([{
-                            name: raid.RaidPokemon.Name + "_r",
-                            species: raid.RaidPokemon.Name,
-                            level: raid.RaidPokemon.Level,
-                            gender: '',
-                            shiny: false,
-                            gigantamax: false,
-                            moves: raidmoves_to_stream,
-                            ability: "",
-                            evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-                            ivs: { hp: raid.RaidPokemon.IV[0], atk: raid.RaidPokemon.IV[1], def: raid.RaidPokemon.IV[2], spa: raid.RaidPokemon.IV[3], spd: raid.RaidPokemon.IV[4], spe: raid.RaidPokemon.IV[5] },
-                        }]);
+                            // Team Packing
+                            var packed_team_1 = Teams.pack(trainer_data);
+                            var packed_team_2 = Teams.pack([{
+                                name: raid.RaidPokemon.Name + "_r",
+                                species: raid.RaidPokemon.Name,
+                                level: raid.RaidPokemon.Level,
+                                gender: '',
+                                shiny: false,
+                                gigantamax: false,
+                                moves: raidmoves_to_stream,
+                                ability: "",
+                                evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+                                ivs: { hp: raid.RaidPokemon.IV[0], atk: raid.RaidPokemon.IV[1], def: raid.RaidPokemon.IV[2], spa: raid.RaidPokemon.IV[3], spd: raid.RaidPokemon.IV[4], spe: raid.RaidPokemon.IV[5] },
+                            }]);
 
-                        // Get image url of user team pokemon.
-                        var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null)[0];
-                        var user_image_data = user_pokemon_data.Image;
-                        var current_pokemon = trainer_data.indexOf(user_pokemon_data);
+                            // Get image url of user team pokemon.
+                            var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null)[0];
+                            var user_image_data = user_pokemon_data.Image;
+                            var current_pokemon = trainer_data.indexOf(user_pokemon_data);
 
-                        var _battleStream = new BattleStreams.BattleStream();
-                        const streams = BattleStreams.getPlayerStreams(_battleStream);
-                        const spec = { formatid: 'customgame' };
+                            var _battleStream = new BattleStreams.BattleStream();
+                            const streams = BattleStreams.getPlayerStreams(_battleStream);
+                            const spec = { formatid: 'customgame' };
 
-                        const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
-                        const p2spec = { name: '$Player2', team: packed_team_2 };
+                            const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
+                            const p2spec = { name: '$Player2', team: packed_team_2 };
 
-                        // Packing raid data.
-                        raid.CurrentDuel = message.author.id;
-                        raid.TrainersTeam = trainer_data;
-                        raid.CurrentPokemon = current_pokemon;
-                        raid.CurrentTurn = 0;
+                            // Packing raid data.
+                            raid.CurrentDuel = message.author.id;
+                            raid.TrainersTeam = trainer_data;
+                            raid.CurrentPokemon = current_pokemon;
+                            raid.CurrentTurn = 0;
 
-                        // Start raid duel.
-                        var write_data = `>start ${JSON.stringify(spec)}\n>player p1 ${JSON.stringify(p1spec)}\n>player p2 ${JSON.stringify(p2spec)}\n>p1 team 123\n>p2 team 1`;
-                        void streams.omniscient.write(write_data);
+                            // Start raid duel.
+                            var write_data = `>start ${JSON.stringify(spec)}\n>player p1 ${JSON.stringify(p1spec)}\n>player p2 ${JSON.stringify(p2spec)}\n>p1 team 123\n>p2 team 1`;
+                            void streams.omniscient.write(write_data);
 
-                        void (async () => {
-                            for await (var chunk of streams.omniscient) {
-                                var received_data = chunk.split('\n');
-                                if (received_data.includes("|start")) {
-                                    raid.Stream = _battleStream.battle.inputLog.join('\n');
-                                    raid.UserStreamPokemons = JSON.stringify(_battleStream.battle.sides[0].pokemon);
-                                    raid.save().then(() => {
-                                        // Get image url of raid boss.
-                                        var raid_boss_image_data = raid.RaidPokemon.Image;
+                            void (async () => {
+                                for await (var chunk of streams.omniscient) {
+                                    var received_data = chunk.split('\n');
+                                    if (received_data.includes("|start")) {
+                                        raid.Stream = _battleStream.battle.inputLog.join('\n');
+                                        raid.UserStreamPokemons = JSON.stringify(_battleStream.battle.sides[0].pokemon);
+                                        raid.save().then(() => {
+                                            // Get image url of raid boss.
+                                            var raid_boss_image_data = raid.RaidPokemon.Image;
 
-                                        var raidside = null;
-                                        if (raid.RaidPokemon.RaidStream != undefined && raid.RaidPokemon.RaidStream.raidside != undefined) {
-                                            _battleStream.battle.field = JSON.parse(raid.RaidPokemon.RaidStream.field);
-                                            raidside = JSON.parse(raid.RaidPokemon.RaidStream.raidside);
-                                        } else raidside = _battleStream.battle.sides[1];
+                                            var raidside = null;
+                                            if (raid.RaidPokemon.RaidStream != undefined && raid.RaidPokemon.RaidStream.raidside != undefined) {
+                                                _battleStream.battle.field = JSON.parse(raid.RaidPokemon.RaidStream.field);
+                                                raidside = JSON.parse(raid.RaidPokemon.RaidStream.raidside);
+                                            } else raidside = _battleStream.battle.sides[1];
 
-                                        // Background image url.
-                                        var image_url = "./assets/raid_images/background.jpeg";
-                                        if (_battleStream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
-                                        else if (_battleStream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
-                                        else if (_battleStream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
-                                        else if (_battleStream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
+                                            // Background image url.
+                                            var image_url = "./assets/raid_images/background.jpeg";
+                                            if (_battleStream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
+                                            else if (_battleStream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
+                                            else if (_battleStream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
+                                            else if (_battleStream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
 
-                                        // Creating Image for embed.
-                                        mergeImages([image_url,
-                                            { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
-                                            Canvas: Canvas
-                                        }).then(b64 => {
-                                            const img_data = b64.split(',')[1];
-                                            const img_buffer = new Buffer.from(img_data, 'base64');
-                                            const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                                            // Creating Image for embed.
+                                            mergeImages([image_url,
+                                                { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
+                                                Canvas: Canvas
+                                            }).then(b64 => {
+                                                const img_data = b64.split(',')[1];
+                                                const img_buffer = new Buffer.from(img_data, 'base64');
+                                                const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
 
-                                            // Sending duel message.
-                                            var embed = new Discord.MessageEmbed();
-                                            embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("terrain", "") + "**")}`);
-                                            embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
-                                            embed.setColor(message.guild.me.displayHexColor);
-                                            embed.attachFiles(image_file)
-                                            embed.setImage('attachment://img.jpeg');
-                                            embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
-                                            message.channel.send(embed);
+                                                // Sending duel message.
+                                                var embed = new Discord.MessageEmbed();
+                                                embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                                embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("terrain", "") + "**")}`);
+                                                embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
+                                                embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
+                                                embed.setColor(message.guild.me.displayHexColor);
+                                                embed.attachFiles(image_file)
+                                                embed.setImage('attachment://img.jpeg');
+                                                embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
+                                                message.channel.send(embed);
 
-                                            // Get user data.
-                                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                                                if (err) return;
-                                                if (user) {
-                                                    user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
-                                                    user.save();
-                                                }
+                                                // Get user data.
+                                                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                                    if (err) return;
+                                                    if (user) {
+                                                        user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
+                                                        user.save();
+                                                    }
+                                                });
                                             });
                                         });
-                                    });
-                                } else {
-                                    return message.channel.send(`Something went wrong, we could not start the raid duel.`);
+                                    } else {
+                                        return message.channel.send(`Something went wrong, we could not start the raid duel.`);
+                                    }
                                 }
-                            }
-                        })();
+                            })();
+                        });
                     });
                 });
             }

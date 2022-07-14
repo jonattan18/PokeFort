@@ -23,9 +23,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
-            if (raid) {
-                if (raid.Started) return message.channel.send("You can't do this while you are in a raid!");
-            } else {
+            if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't do this while you are in a raid!");
+            else {
 
                 // If user prompt is for release
                 if (prompt.PromptType == "Release") {

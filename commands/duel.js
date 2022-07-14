@@ -18,9 +18,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
-            if (raid) {
-                if (raid.Started) return message.channel.send("You can't duel while you are in a raid!");
-            } else {
+            if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't duel while you are in a raid!");
+            else {
                 //Check if user2 is in the database.
                 user_model.findOne({ UserID: user2id }, (err, user2) => {
                     if (!user2) return message.channel.send(`Mentioned user is ineligible for duel!`);

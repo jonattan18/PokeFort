@@ -418,7 +418,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     // If over looping
     if (loop > 0) {
-        if (loop > 5) return;
+        if (loop > 5) return message.channel.send("That move didn't work. Please try another move.");
 
         if (loop > 3) {
             // Get any random move.
@@ -543,12 +543,14 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             show_str.splice(0, i);
                             const is_faint_p1 = show_str.find(element => {
                                 if (element.includes("fainted!:p1a:")) {
+                                    show_str.splice(show_str.indexOf(element), 1);
                                     return true;
                                 }
                             });
                             if (is_faint_p1) _user_pokemon_fainted = true;
                             const is_faint_p2 = show_str.find(element => {
                                 if (element.includes("fainted!:p2a:")) {
+                                    show_str.splice(show_str.indexOf(element), 1);
                                     return true;
                                 }
                             });
@@ -574,12 +576,14 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             show_str.splice(0, i);
                             const is_faint_p1 = show_str.find(element => {
                                 if (element.includes("fainted!:p1a:")) {
+                                    show_str.splice(show_str.indexOf(element), 1);
                                     return true;
                                 }
                             });
                             if (is_faint_p1) _user_pokemon_fainted = true;
                             const is_faint_p2 = show_str.find(element => {
                                 if (element.includes("fainted!:p2a:")) {
+                                    show_str.splice(show_str.indexOf(element), 1);
                                     return true;
                                 }
                             });
@@ -636,8 +640,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         message.channel.send(raid_embed);
 
                         // Check if user pokemon fainted.
-                        if (_user_pokemon_fainted && _raid_boss_fainted == false) user_pokemon_fainted();
-                        else if (_raid_pokemon_fainted) {
+                        if (_user_pokemon_fainted == true && _raid_pokemon_fainted == true) {
+                            _raid_boss_fainted = true;
+                            raid_boss_fainted();
+                        }
+                        else if (_user_pokemon_fainted == true && _raid_boss_fainted == false) user_pokemon_fainted();
+                        else if (_raid_pokemon_fainted == true) {
                             _raid_boss_fainted = true;
                             raid_boss_fainted();
                         }
