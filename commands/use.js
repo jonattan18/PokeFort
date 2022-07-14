@@ -370,14 +370,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
     }
     var move_index = raidmoves_to_stream.indexOf(raid_move) + 1;
 
-    // If over looping
-    if (loop > 0) {
-        if (loop > 5) return;
-        // Get any random move.
-        var random_move = raid_moveset[randomNumber(0, raid_moveset.length > 24 ? 24 : raid_moveset.length)];
-        move_index = raidmoves_to_stream.indexOf(random_move[0]) + 1;
-    }
-
     //Preparation move for player.
     if (raid_data.PreparationMove != undefined) {
         if (args[0] != raid_data.PreparationMove && raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted != true) return message.channel.send("You can't use that move now.");
@@ -422,6 +414,21 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             } else return message.channel.send("Please enter a valid pokémon to switch.");
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
+
+
+    // If over looping
+    if (loop > 0) {
+        if (loop > 5) return;
+
+        if (loop > 3) {
+            // Get any random move.
+            var random_move = raid_moveset[randomNumber(0, raid_moveset.length > 24 ? 24 : raid_moveset.length)];
+            move_index = raidmoves_to_stream.indexOf(random_move[0]) + 1;
+            var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
+        } else {
+            var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 default`;
+        }
+    }
 
     // Parse stream data.
     var first_five = true;

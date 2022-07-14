@@ -19,6 +19,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             embed.addField('Page 4 |', 'Held Items')
             embed.addField('Page 5 |', 'Mega Evolutions')
             embed.addField('Page 6 |', 'Forms')
+            embed.addField('Page 7 |', 'Evs')
             embed.setFooter("Need more credits ? Win duels or vote for the bot using the " + prefix + "daily command!")
             message.channel.send(embed)
         }
