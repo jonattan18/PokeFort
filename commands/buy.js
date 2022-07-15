@@ -781,8 +781,10 @@ function buytm(message, args, pokemons) {
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
         if (user.PokeCredits < 500) return message.channel.send("You don't have enough PokeCredits to buy this TM!");
+        console.log("1");
         if (args[0].length != 5 || args[0].substring(0, 2).toLowerCase() != "tm" || !isInt(args[0].substring(2, 5))) return message.channel.send("Unable to find this TM move.")
         getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
+            console.log("2");
             var user_pokemons = pokemons_from_database;
             var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
             var pokemon_moveset = movesparser.get_pokemon_move_from_id(selected_pokemon.PokemonId, pokemons, true);
@@ -797,9 +799,12 @@ function buytm(message, args, pokemons) {
             selected_pokemon.TmMoves.push(move_data.num);
             user.PokeCredits -= 500;
 
+            console.log("3");
             user.save().then(() => {
+                console.log("4");
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
+                    console.log("5");
                     message.channel.send(`Your level ${selected_pokemon.Level} ${getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons)} can now learn ${move_data.name}`);
                 });
             });
