@@ -627,17 +627,22 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p2a:"));
                         }
 
-                        // Create user pokemon message.
-                        var usr_embed = new Discord.MessageEmbed();
-                        usr_embed.setTitle(first_user_message[0]);
-                        usr_embed.setDescription(first_user_message.slice(1).join(""));
-                        message.channel.send(usr_embed);
+                        // Filter system message $player
+                        if (!first_user_message[0].startsWith("$Player")) {
+                            // Create user pokemon message.
+                            var usr_embed = new Discord.MessageEmbed();
+                            usr_embed.setTitle(first_user_message[0]);
+                            usr_embed.setDescription(first_user_message.slice(1).join(""));
+                            message.channel.send(usr_embed);
+                        }
 
-                        // Create raid boss message.
-                        var raid_embed = new Discord.MessageEmbed();
-                        raid_embed.setTitle(`${second_user_message[0]}`);
-                        raid_embed.setDescription(second_user_message.slice(1).join(""));
-                        message.channel.send(raid_embed);
+                        if (!second_user_message[0].startsWith("$Player")) {
+                            // Create raid boss message.
+                            var raid_embed = new Discord.MessageEmbed();
+                            raid_embed.setTitle(`${second_user_message[0]}`);
+                            raid_embed.setDescription(second_user_message.slice(1).join(""));
+                            message.channel.send(raid_embed);
+                        }
 
                         // Check if user pokemon fainted.
                         if (_user_pokemon_fainted == true && _raid_pokemon_fainted == true) {

@@ -71,7 +71,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 embed.addField("Available TMs", tm_moves, true);
             }
-            embed.setFooter(`You have ${pokemon_moveset.length} moves to learn and use in battle!`);
+            embed.setFooter(`You have ${pokemon_moveset.length} moves to learn and use in battle! The moves with :lock: can only be used in raids.`);
         }
         else {
             var title = "";
