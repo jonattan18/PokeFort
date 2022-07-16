@@ -69,6 +69,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--hisuian"))) { hisuian(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--mega"))) { mega(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
                                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
                                 else if (new_args.length >= 1 && (_.isEqual(new_args[0], "--n") || _.isEqual(new_args[0], "--name"))) { name(new_args); }
@@ -173,6 +174,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 for (i = 0; i < user_pokemons.length; i++) {
                                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
                                     if (pokemon_db["Alternate Form Name"] === "Galar") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For pk --mega command.
+                            function mega(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Alternate Form Name"] === "Mega" || pokemon_db["Alternate Form Name"] === "Mega X" || pokemon_db["Alternate Form Name"] === "Mega Y") {
                                         filtered_pokemons.push(user_pokemons[i]);
                                     }
                                 }
@@ -431,28 +444,42 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             // For pk --evolution command.
                             function evolution(args) {
                                 var filtered_pokemons = [];
+                                var dex_numbers = [];
                                 if (args.length == 2) {
                                     var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
                                     if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokémon name."] }
-                                    filtered_pokemons.push(found_pokemon["Pokemon Id"]);
+
+                                    // Push Pokemon Id Of all dex number of the found pokemon to the filtered_pokemons array.
+                                    dex_numbers.push(found_pokemon["Pokedex Number"]);
 
                                     if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
-                                        filtered_pokemons.push(found_pokemon.Evolution.Id);
+                                        var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
+                                        dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         var double_found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
                                         if (double_found_pokemon.Evolution != undefined && double_found_pokemon.Evolution.Reason == "Level") {
-                                            filtered_pokemons.push(double_found_pokemon.Evolution.Id);
+                                            var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == double_found_pokemon.Evolution.Id)[0];
+                                            dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         }
                                     }
 
                                     var pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == found_pokemon["Pokemon Id"])[0];
                                     if (pre_found_pokemon != undefined && pre_found_pokemon.Evolution.Reason == "Level") {
-                                        filtered_pokemons.push(pre_found_pokemon["Pokemon Id"]);
+                                        var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == pre_found_pokemon["Pokemon Id"])[0];
+                                        dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         var double_pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == pre_found_pokemon["Pokemon Id"])[0];
                                         if (double_pre_found_pokemon != undefined && double_pre_found_pokemon.Evolution.Reason == "Level") {
-                                            filtered_pokemons.push(double_pre_found_pokemon["Pokemon Id"]);
+                                            var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == double_pre_found_pokemon["Pokemon Id"])[0];
+                                            dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         }
                                     }
 
+                                    // Get Ids for all the dex numbers.
+                                    dex_numbers.forEach(dex_number => {
+                                        var found_pokemon = pokemons.filter(pokemon => pokemon["Pokedex Number"] == dex_number);
+                                        found_pokemon.forEach(pokemon => {
+                                            filtered_pokemons.push(pokemon["Pokemon Id"]);
+                                        });
+                                    });
                                     user_pokemons = user_pokemons.filter(pokemon => filtered_pokemons.includes(pokemon["PokemonId"]));
                                 }
                                 else { return error[1] = [false, "Invalid argument syntax."] }

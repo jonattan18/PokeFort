@@ -556,7 +556,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         });
 
     }
-    else if (args.length == 1 && args[0].toLowerCase() == "profile" || args[0].toLowerCase() == "pf") {
+    else if (args.length == 1 && (args[0].toLowerCase() == "profile" || args[0].toLowerCase() == "pf")) {
 
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) return;

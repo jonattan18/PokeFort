@@ -797,7 +797,6 @@ function buytm(message, args, pokemons) {
             selected_pokemon.TmMoves.push(move_data.num);
             user.PokeCredits -= 500;
 
-            console.log("3");
             user.save().then(() => {
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': selected_pokemon._id }, { $set: { "Pokemons.$[elem].TmMoves": selected_pokemon.TmMoves } }, { arrayFilters: [{ 'elem._id': selected_pokemon._id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);

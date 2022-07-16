@@ -429,6 +429,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--hisuian"))) { hisuian(new_args); }
             else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+            else if (new_args.length == 1 && (_.isEqual(new_args[0], "--mega"))) { mega(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--lvl") || _.isEqual(new_args[0], "--level"))) { level(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--iv"))) { iv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--hpiv"))) { hpiv(new_args); }
@@ -600,6 +601,16 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 galarian_list.push(galarians[i]["Pokemon Id"]);
             }
             request_query.push({ "PokemonId": { $in: galarian_list } });
+        }
+
+        // For auction --mega command.
+        function mega() {
+            var megas = pokemons.filter(it => it["Alternate Form Name"] === "Mega" || it["Alternate Form Name"] === "Mega X" || it["Alternate Form Name"] === "Mega Y");
+            var mega_list = [];
+            for (var i = 0; i < megas.length; i++) {
+                mega_list.push(megas[i]["Pokemon Id"]);
+            }
+            request_query.push({ "PokemonId": { $in: mega_list } });
         }
 
         // For auction --level command.

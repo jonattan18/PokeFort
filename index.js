@@ -97,7 +97,12 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 
 // Prevent crash and send err logs to console
 process.on('uncaughtException', function (err) {
+
     // Error handler
+
+    // Remove error for "Missing Permissions"
+    if ((err != undefined || err != null) && err.split('\n')[0].includes("DiscordAPIError: Missing Permissions")) return;
+
     console.log(err);
 });
 
@@ -179,9 +184,10 @@ client.on('message', async (message) => {
         }
     }
 
+    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
+
     // Remove this
     if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
-    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
