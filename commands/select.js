@@ -39,6 +39,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 else return message.channel.send("Invalid argument.");
 
+                if (user.Selected != undefined && user.Selected == selected_pokemon._id) return message.channel.send("You already have selected this pokémon.");
+
                 user.Selected = selected_pokemon._id;
                 user.save();
 

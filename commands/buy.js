@@ -502,6 +502,8 @@ function buywing(message, args, pokemons, amount = 1) {
         amount = parseInt(args[2]);
     }
 
+    if (amount < 1 || amount > 260) return message.channel.send("Please specify a valid amount of wings to buy!");
+
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < (20 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this wing!"); }
 
@@ -596,6 +598,8 @@ function buyvitamin(message, args, pokemons, amount = 1) {
         amount = parseInt(args[2]);
     }
 
+    if (amount < 1 || amount > 100) return message.channel.send("Please specify a valid amount of vitamins to buy!");
+
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < (150 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this vitamin!"); }
 
@@ -689,6 +693,8 @@ function buyberry(message, args, pokemons, amount = 1) {
     if (args.length == 3 && isInt(args[2])) {
         amount = parseInt(args[2]);
     }
+
+    if (amount < 1 || amount > 100) return message.channel.send("Please specify a valid amount of berrys to buy!");
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (user.PokeCredits < (50 * amount)) { return message.channel.send("You don't have enough PokeCredits to buy this berry!"); }

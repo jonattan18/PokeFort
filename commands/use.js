@@ -603,6 +603,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                     if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
 
+                        // Remove duplicate from first_user_message.
+                        first_user_message = [...new Set(first_user_message)];
+
+                        // Remove duplicate from second_user_message.
+                        second_user_message = [...new Set(second_user_message)];
+
                         // Remove words after fainted!:p1a: in first_user_message
                         if (_user_pokemon_fainted) {
                             // Find index of fainted!:p1a:
