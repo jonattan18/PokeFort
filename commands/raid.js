@@ -445,11 +445,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var packed_team_1 = Teams.pack(trainer_data);
                             var packed_team_2 = Teams.pack([{
                                 name: raid.RaidPokemon.Name + "_r",
-                                species: raid.RaidPokemon.Name,
+                                species: raid.RaidPokemon.Name.includes("Gigantamax") ? raid.RaidPokemon.Name.replace("Gigantamax", "") + "gmax" : raid.RaidPokemon.Name,
                                 level: raid.RaidPokemon.Level,
                                 gender: '',
                                 shiny: false,
-                                gigantamax: false,
+                                gigantamax: raid.RaidPokemon.Name.includes("Gigantamax") ? true : false,
                                 moves: raidmoves_to_stream,
                                 ability: "",
                                 evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },

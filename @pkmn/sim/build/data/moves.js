@@ -1562,17 +1562,17 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1, gravity: 1, distance: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         condition: {
             duration: 2,
             onInvulnerability(target, source, move) {
@@ -2171,10 +2171,19 @@ exports.Moves = {
         basePower: 60,
         category: "Physical",
         name: "Circle Throw",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 10,
         priority: -6,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        forceSwitch: true,
+        forceSwitch: false,
         target: "normal",
         type: "Fighting",
         contestType: "Cool",
@@ -2972,6 +2981,7 @@ exports.Moves = {
             }
         },
         onTryHit(target, source, move) {
+            return false;
             if (!source.hasType('Ghost')) {
                 delete move.volatileStatus;
                 delete move.onHit;
@@ -2982,6 +2992,7 @@ exports.Moves = {
             }
         },
         onHit(target, source) {
+            return false;
             this.directDamage(source.maxhp / 2, source, source);
         },
         condition: {
@@ -3196,6 +3207,9 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { bypasssub: 1 },
+        onTryHit() {
+            return false;
+        },
         volatileStatus: 'destinybond',
         onPrepareHit(pokemon) {
             return !pokemon.removeVolatile('destinybond');
@@ -3303,17 +3317,17 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1, nonsky: 1 },
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        },*/
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              this.add('-prepare', attacker, move.name);
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          },*/
         condition: {
             duration: 2,
             onImmunity(type, pokemon) {
@@ -3446,21 +3460,21 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1, nonsky: 1, allyanim: 1 },
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            if (attacker.hasAbility('gulpmissile') && attacker.species.name === 'Cramorant' && !attacker.transformed) {
-                const forme = attacker.hp <= attacker.maxhp / 2 ? 'cramorantgorging' : 'cramorantgulping';
-                attacker.formeChange(forme, move);
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        },*/
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              if (attacker.hasAbility('gulpmissile') && attacker.species.name === 'Cramorant' && !attacker.transformed) {
+                  const forme = attacker.hp <= attacker.maxhp / 2 ? 'cramorantgorging' : 'cramorantgulping';
+                  attacker.formeChange(forme, move);
+              }
+              this.add('-prepare', attacker, move.name);
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          },*/
         condition: {
             duration: 2,
             onImmunity(type, pokemon) {
@@ -5069,6 +5083,15 @@ exports.Moves = {
         basePower: 0,
         category: "Physical",
         name: "Fissure",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 5,
         priority: 0,
         flags: { protect: 1, mirror: 1, nonsky: 1 },
@@ -5453,27 +5476,27 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1, gravity: 1, distance: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            // In SwSh, Fly's animation leaks the initial target through a camera focus
-            // The animation leak target itself isn't "accurate"; the target it reveals is as if Fly weren't a charge movee
-            // (Fly, like all other charge moves, will actually target slots on its charging turn, relevant for things like Follow Me)
-            // We use a generic single-target move to represent this
-            if (this.gameType === 'doubles' || this.gameType === 'multi') {
-                const animatedTarget = attacker.getMoveTargets(this.dex.getActiveMove('aerialace'), defender).targets[0];
-                if (animatedTarget) {
-                    this.hint(`${move.name}'s animation targeted ${animatedTarget.name}`);
-                }
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        },*/
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             // In SwSh, Fly's animation leaks the initial target through a camera focus
+             // The animation leak target itself isn't "accurate"; the target it reveals is as if Fly weren't a charge movee
+             // (Fly, like all other charge moves, will actually target slots on its charging turn, relevant for things like Follow Me)
+             // We use a generic single-target move to represent this
+             if (this.gameType === 'doubles' || this.gameType === 'multi') {
+                 const animatedTarget = attacker.getMoveTargets(this.dex.getActiveMove('aerialace'), defender).targets[0];
+                 if (animatedTarget) {
+                     this.hint(`${move.name}'s animation targeted ${animatedTarget.name}`);
+                 }
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         },*/
         condition: {
             duration: 2,
             onInvulnerability(target, source, move) {
@@ -5759,17 +5782,17 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         secondary: {
             chance: 30,
             status: 'par',
@@ -6117,17 +6140,17 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { charge: 1, nonsky: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         boosts: {
             spa: 2,
             spd: 2,
@@ -7612,6 +7635,15 @@ exports.Moves = {
         basePower: 0,
         category: "Physical",
         name: "Guillotine",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 5,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
@@ -8570,6 +8602,15 @@ exports.Moves = {
         basePower: 0,
         category: "Physical",
         name: "Horn Drill",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 5,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
@@ -8879,17 +8920,17 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         secondary: {
             chance: 30,
             status: 'brn',
@@ -11157,18 +11198,18 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1 },
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            this.boost({ spa: 1 }, attacker, attacker, move);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              this.add('-prepare', attacker, move.name);
+              this.boost({ spa: 1 }, attacker, attacker, move);
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          }, */
         secondary: null,
         target: "normal",
         type: "Rock",
@@ -12584,6 +12625,15 @@ exports.Moves = {
         basePower: 0,
         category: "Status",
         name: "Perish Song",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 5,
         priority: 0,
         flags: { sound: 1, distance: 1, bypasssub: 1 },
@@ -12674,17 +12724,17 @@ exports.Moves = {
         priority: 0,
         flags: { contact: 1, charge: 1, mirror: 1 },
         breaksProtect: true,
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              this.add('-prepare', attacker, move.name);
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          }, */
         condition: {
             duration: 2,
             onInvulnerability: false,
@@ -14371,17 +14421,17 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1 },
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              this.add('-prepare', attacker, move.name);
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          }, */
         critRatio: 2,
         secondary: null,
         target: "allAdjacentFoes",
@@ -14732,10 +14782,19 @@ exports.Moves = {
         basePower: 0,
         category: "Status",
         name: "Roar",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 20,
         priority: -6,
         flags: { reflectable: 1, mirror: 1, sound: 1, bypasssub: 1, allyanim: 1 },
-        forceSwitch: true,
+        forceSwitch: false,
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -15607,17 +15666,17 @@ exports.Moves = {
         priority: 0,
         flags: { contact: 1, charge: 1, mirror: 1 },
         breaksProtect: true,
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         condition: {
             duration: 2,
             onInvulnerability: false,
@@ -16125,18 +16184,18 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            this.boost({ def: 1 }, attacker, attacker, move);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             this.boost({ def: 1 }, attacker, attacker, move);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -16152,17 +16211,17 @@ exports.Moves = {
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1, distance: 1 },
         critRatio: 2,
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         secondary: {
             chance: 30,
             volatileStatus: 'flinch',
@@ -16181,107 +16240,107 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1, gravity: 1, distance: 1 },
-       /* onModifyMove(move, source) {
-            if (!source.volatiles['skydrop']) {
-                move.accuracy = true;
-                move.flags.contact = 0;
-            }
-        },
-        onMoveFail(target, source) {
-            if (source.volatiles['twoturnmove'] && source.volatiles['twoturnmove'].duration === 1) {
-                source.removeVolatile('skydrop');
-                source.removeVolatile('twoturnmove');
-                if (target === this.effectState.target) {
-                    this.add('-end', target, 'Sky Drop', '[interrupt]');
-                }
-            }
-        },
-        onTry(source, target) {
-            return !target.fainted;
-        },
-        onTryHit(target, source, move) {
-            if (source.removeVolatile(move.id)) {
-                if (target !== source.volatiles['twoturnmove'].source)
-                    return false;
-                if (target.hasType('Flying')) {
-                    this.add('-immune', target);
-                    return null;
-                }
-            }
-            else {
-                if (target.volatiles['substitute'] || target.isAlly(source)) {
-                    return false;
-                }
-                if (target.getWeight() >= 2000) {
-                    this.add('-fail', target, 'move: Sky Drop', '[heavy]');
-                    return null;
-                }
-                this.add('-prepare', source, move.name, target);
-                source.addVolatile('twoturnmove', target);
-                return null;
-            }
-        },
-        onHit(target, source) {
-            if (target.hp)
-                this.add('-end', target, 'Sky Drop');
-        },
-        condition: {
-            duration: 2,
-            onAnyDragOut(pokemon) {
-                if (pokemon === this.effectState.target || pokemon === this.effectState.source)
-                    return false;
-            },
-            onFoeTrapPokemonPriority: -15,
-            onFoeTrapPokemon(defender) {
-                if (defender !== this.effectState.source)
-                    return;
-                defender.trapped = true;
-            },
-            onFoeBeforeMovePriority: 12,
-            onFoeBeforeMove(attacker, defender, move) {
-                if (attacker === this.effectState.source) {
-                    attacker.activeMoveActions--;
-                    this.debug('Sky drop nullifying.');
-                    return null;
-                }
-            },
-            onRedirectTargetPriority: 99,
-            onRedirectTarget(target, source, source2) {
-                if (source !== this.effectState.target)
-                    return;
-                if (this.effectState.source.fainted)
-                    return;
-                return this.effectState.source;
-            },
-            onAnyInvulnerability(target, source, move) {
-                if (target !== this.effectState.target && target !== this.effectState.source) {
-                    return;
-                }
-                if (source === this.effectState.target && target === this.effectState.source) {
-                    return;
-                }
-                if (['gust', 'twister', 'skyuppercut', 'thunder', 'hurricane', 'smackdown', 'thousandarrows'].includes(move.id)) {
-                    return;
-                }
-                return false;
-            },
-            onAnyBasePower(basePower, target, source, move) {
-                if (target !== this.effectState.target && target !== this.effectState.source) {
-                    return;
-                }
-                if (source === this.effectState.target && target === this.effectState.source) {
-                    return;
-                }
-                if (move.id === 'gust' || move.id === 'twister') {
-                    return this.chainModify(2);
-                }
-            },
-            onFaint(target) {
-                if (target.volatiles['skydrop'] && target.volatiles['twoturnmove'].source) {
-                    this.add('-end', target.volatiles['twoturnmove'].source, 'Sky Drop', '[interrupt]');
-                }
-            },
-        }, */
+        /* onModifyMove(move, source) {
+             if (!source.volatiles['skydrop']) {
+                 move.accuracy = true;
+                 move.flags.contact = 0;
+             }
+         },
+         onMoveFail(target, source) {
+             if (source.volatiles['twoturnmove'] && source.volatiles['twoturnmove'].duration === 1) {
+                 source.removeVolatile('skydrop');
+                 source.removeVolatile('twoturnmove');
+                 if (target === this.effectState.target) {
+                     this.add('-end', target, 'Sky Drop', '[interrupt]');
+                 }
+             }
+         },
+         onTry(source, target) {
+             return !target.fainted;
+         },
+         onTryHit(target, source, move) {
+             if (source.removeVolatile(move.id)) {
+                 if (target !== source.volatiles['twoturnmove'].source)
+                     return false;
+                 if (target.hasType('Flying')) {
+                     this.add('-immune', target);
+                     return null;
+                 }
+             }
+             else {
+                 if (target.volatiles['substitute'] || target.isAlly(source)) {
+                     return false;
+                 }
+                 if (target.getWeight() >= 2000) {
+                     this.add('-fail', target, 'move: Sky Drop', '[heavy]');
+                     return null;
+                 }
+                 this.add('-prepare', source, move.name, target);
+                 source.addVolatile('twoturnmove', target);
+                 return null;
+             }
+         },
+         onHit(target, source) {
+             if (target.hp)
+                 this.add('-end', target, 'Sky Drop');
+         },
+         condition: {
+             duration: 2,
+             onAnyDragOut(pokemon) {
+                 if (pokemon === this.effectState.target || pokemon === this.effectState.source)
+                     return false;
+             },
+             onFoeTrapPokemonPriority: -15,
+             onFoeTrapPokemon(defender) {
+                 if (defender !== this.effectState.source)
+                     return;
+                 defender.trapped = true;
+             },
+             onFoeBeforeMovePriority: 12,
+             onFoeBeforeMove(attacker, defender, move) {
+                 if (attacker === this.effectState.source) {
+                     attacker.activeMoveActions--;
+                     this.debug('Sky drop nullifying.');
+                     return null;
+                 }
+             },
+             onRedirectTargetPriority: 99,
+             onRedirectTarget(target, source, source2) {
+                 if (source !== this.effectState.target)
+                     return;
+                 if (this.effectState.source.fainted)
+                     return;
+                 return this.effectState.source;
+             },
+             onAnyInvulnerability(target, source, move) {
+                 if (target !== this.effectState.target && target !== this.effectState.source) {
+                     return;
+                 }
+                 if (source === this.effectState.target && target === this.effectState.source) {
+                     return;
+                 }
+                 if (['gust', 'twister', 'skyuppercut', 'thunder', 'hurricane', 'smackdown', 'thousandarrows'].includes(move.id)) {
+                     return;
+                 }
+                 return false;
+             },
+             onAnyBasePower(basePower, target, source, move) {
+                 if (target !== this.effectState.target && target !== this.effectState.source) {
+                     return;
+                 }
+                 if (source === this.effectState.target && target === this.effectState.source) {
+                     return;
+                 }
+                 if (move.id === 'gust' || move.id === 'twister') {
+                     return this.chainModify(2);
+                 }
+             },
+             onFaint(target) {
+                 if (target.volatiles['skydrop'] && target.volatiles['twoturnmove'].source) {
+                     this.add('-end', target.volatiles['twoturnmove'].source, 'Sky Drop', '[interrupt]');
+                 }
+             },
+         }, */
         secondary: null,
         target: "any",
         type: "Flying",
@@ -16734,22 +16793,22 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { charge: 1, protect: 1, mirror: 1 },
-       /* onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (['sunnyday', 'desolateland'].includes(attacker.effectiveWeather())) {
-                this.attrLastMove('[still]');
-                this.addMove('-anim', attacker, move.name, defender);
-                return;
-            }
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /* onTryMove(attacker, defender, move) {
+             if (attacker.removeVolatile(move.id)) {
+                 return;
+             }
+             this.add('-prepare', attacker, move.name);
+             if (['sunnyday', 'desolateland'].includes(attacker.effectiveWeather())) {
+                 this.attrLastMove('[still]');
+                 this.addMove('-anim', attacker, move.name, defender);
+                 return;
+             }
+             if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                 return;
+             }
+             attacker.addVolatile('twoturnmove', defender);
+             return null;
+         }, */
         onBasePower(basePower, pokemon, target) {
             if (['raindance', 'primordialsea', 'sandstorm', 'hail'].includes(pokemon.effectiveWeather())) {
                 this.debug('weakened by weather');
@@ -16770,22 +16829,22 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { contact: 1, charge: 1, protect: 1, mirror: 1 },
-      /*  onTryMove(attacker, defender, move) {
-            if (attacker.removeVolatile(move.id)) {
-                return;
-            }
-            this.add('-prepare', attacker, move.name);
-            if (['sunnyday', 'desolateland'].includes(attacker.effectiveWeather())) {
-                this.attrLastMove('[still]');
-                this.addMove('-anim', attacker, move.name, defender);
-                return;
-            }
-            if (!this.runEvent('ChargeMove', attacker, defender, move)) {
-                return;
-            }
-            attacker.addVolatile('twoturnmove', defender);
-            return null;
-        }, */
+        /*  onTryMove(attacker, defender, move) {
+              if (attacker.removeVolatile(move.id)) {
+                  return;
+              }
+              this.add('-prepare', attacker, move.name);
+              if (['sunnyday', 'desolateland'].includes(attacker.effectiveWeather())) {
+                  this.attrLastMove('[still]');
+                  this.addMove('-anim', attacker, move.name, defender);
+                  return;
+              }
+              if (!this.runEvent('ChargeMove', attacker, defender, move)) {
+                  return;
+              }
+              attacker.addVolatile('twoturnmove', defender);
+              return null;
+          }, */
         onBasePower(basePower, pokemon, target) {
             if (['raindance', 'primordialsea', 'sandstorm', 'hail'].includes(pokemon.effectiveWeather())) {
                 this.debug('weakened by weather');
@@ -19968,6 +20027,15 @@ exports.Moves = {
         basePower: 0,
         category: "Status",
         name: "Whirlwind",
+        onTryHit() {
+            return false;
+        },
+        onHit() {
+            return false;
+        },
+        onTry() {
+            return false;
+        },
         pp: 20,
         priority: -6,
         flags: { reflectable: 1, mirror: 1, bypasssub: 1, allyanim: 1 },

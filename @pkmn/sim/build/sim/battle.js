@@ -1239,6 +1239,8 @@ class Battle {
                     moveSlot.disabledSource = '';
                 }
                 this.runEvent('DisableMove', pokemon);
+
+                // Disable moves.
                 //  if (!pokemon.ateBerry)
                 //      pokemon.disableMove('belch');
                 //  if (!pokemon.getItem().isBerry)

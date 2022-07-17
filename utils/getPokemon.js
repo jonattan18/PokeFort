@@ -172,6 +172,7 @@ function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false
                 else if (pokemon_db["Dex Search"] == "Back") temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
                 else temp_name = pokemon_db["Alternate Form Name"] + " " + pokemon_db["Pokemon Name"];
             }
+            else if (raid_species  == true && pokemon_db["Alternate Form Name"] == "Gigantamax") temp_name = pokemon_db["Pokemon Name"] + " " + "gmax";
             else temp_name = pokemon_db["Pokemon Name"] + " " + pokemon_db["Alternate Form Name"];
         }
         else { temp_name = pokemon_db["Pokemon Name"]; }
