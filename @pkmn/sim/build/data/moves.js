@@ -4374,6 +4374,9 @@ exports.Moves = {
         num: 283,
         accuracy: 100,
         basePower: 0,
+        onTryHit(target, source) {
+            return false;
+        },
         damageCallback(pokemon, target) {
             return target.getUndynamaxedHP() - pokemon.hp;
         },
