@@ -760,8 +760,36 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         }
                     }
 
+                    // Funcitont to add damage data
+                    function damage_addition() {
+                        // Raid Health and damage
+                        var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
+                        if (current_damage > 0) {
+                            var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == message.author.id)[0];
+                            if (raid_usr_damage_data) {
+                                var index = raid_data.Damages.indexOf(raid_usr_damage_data);
+                                raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
+                            } else {
+                                raid_data.Damages.push({
+                                    UserID: message.author.id,
+                                    Damage: current_damage
+                                });
+                            }
+
+                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                if (err) return;
+                                if (user) {
+                                    user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
+                                }
+                                user.save();
+                            });
+                            raid_data.markModified('Damages');
+                        }
+                    }
+
                     // Raid Boss fainted.
                     function raid_boss_fainted() {
+                        damage_addition();
                         raid_data.remove().then(() => {
                             var channel_embed = new Discord.MessageEmbed();
                             channel_embed.setTitle(`Congtarulations!`);
@@ -837,14 +865,17 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                             var overview = "**Overview:**";
                                             var sorted_damages = raid_data.Damages.sort((a, b) => Number(b.Damage) - Number(a.Damage));
                                             for (var j = 0; j < sorted_damages.length; j++) {
-                                                overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
-                                                if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
+                                                if (raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)] != undefined) {
+                                                    overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
+                                                    if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
+                                                }
                                             }
 
-                                        //    for (var j = 0; j < raid_data.Trainers.length; j++) {
-                                       //         overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers[j]].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
-                                       //         if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
-                                        //    }
+                                            var zero_damage_users = raid_data.Trainers.filter(x => raid_data.Damages.findIndex(y => y.UserID == x) == -1);
+                                            for (var j = 0; j < zero_damage_users.length; j++) {
+                                                overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == zero_damage_users[j])].slice(0, -5)} -> Damage: 0`;
+                                                if (raid_data.Trainers.findIndex(x => x == zero_damage_users[j]) == 0) overview += " :crown:";
+                                            }
 
                                             var description = rewards_string + "\n" + overview;
 
@@ -905,33 +936,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                     if (_raid_boss_fainted == false && _raid_boss_won == false) {
 
+                        // Raid Health and damage
+                        damage_addition();
+
                         // Raid save state.
                         raid_data.Stream = _battlestream.battle.inputLog.join('\n');
                         raid_data.UserStreamPokemons = JSON.stringify(_battlestream.battle.sides[0].pokemon);
-
-                        // Raid Health and damage
-                        var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
-                        if (current_damage > 0) {
-                            var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == message.author.id)[0];
-                            if (raid_usr_damage_data) {
-                                var index = raid_data.Damages.indexOf(raid_usr_damage_data);
-                                raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
-                            } else {
-                                raid_data.Damages.push({
-                                    UserID: message.author.id,
-                                    Damage: current_damage
-                                });
-                            }
-
-                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                                if (err) return;
-                                if (user) {
-                                    user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
-                                }
-                                user.save();
-                            });
-                            raid_data.markModified('Damages');
-                        }
 
                         // Save to database.
                         raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;

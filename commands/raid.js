@@ -51,7 +51,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
                         // remove mo id here.. Remove me.. Remove me... Final release...
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || message.author.id == "597841481168060446") {
+                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || message.author.id == "597841481168060446") {
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
@@ -369,7 +369,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         var remove_index = raid.Trainers.indexOf(message.author.id);
                         raid.Trainers.splice(remove_index, 1);
                         raid.TrainersTag.splice(remove_index, 1);
-                        raid.CurrentDuel = undefined;
+
+                        if (raid.CurrentDuel == message.author.id) {
+                            raid.CurrentDuel = undefined;
+                            raid.ChangeOnFainted = undefined;
+                            raid.OldStreamText = undefined;
+                        }
                         raid.save().then(() => {
                             user.save().then(() => {
                                 message.channel.send(`You have left the raid.`);

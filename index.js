@@ -101,7 +101,7 @@ process.on('uncaughtException', function (err) {
     // Error handler
 
     // Remove error for "Missing Permissions"
-    if ((err != undefined || err != null) && err.split('\n')[0].includes("DiscordAPIError: Missing Permissions")) return;
+    if ((err != undefined || err != null) && err.message.split('\n')[0].includes("DiscordAPIError: Missing Permissions")) return;
 
     console.log(err);
 });
