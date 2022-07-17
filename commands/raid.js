@@ -50,7 +50,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3)) {
+                        // remove mo id here.. Remove me.. Remove me... Final release...
+                        if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || message.author.id == "597841481168060446") {
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");

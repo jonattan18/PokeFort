@@ -841,6 +841,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                                 if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
                                             }
 
+                                        //    for (var j = 0; j < raid_data.Trainers.length; j++) {
+                                       //         overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers[j]].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
+                                       //         if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
+                                        //    }
+
                                             var description = rewards_string + "\n" + overview;
 
                                             var difficulty_string = getDifficultyString(raid_data.RaidType);
