@@ -18,7 +18,8 @@
     "TRADE_POKEMON_MAX_LIMIT": 200,
     "MAX_TEAMS_PER_USER": 30,
     "LEADERBOARD_MAX_LIMIT": 1000,
-    "RAID_EXCEPTIONAL_MOVES": ["Self-Destruct", "Explosion", "Final Gambit", "Misty Explosion"],
+    "MOVES_CANT_BE_LEARNT": ["Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
+    "RAID_EXCEPTIONAL_MOVES": ["Self-Destruct", "Explosion", "Final Gambit", "Misty Explosion", "Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
     "RAID_EXCEPTIONAL_POKEMON": [ ["Cosmog", "NULL"], ["Cosmoem", "NULL"] ],
     "RAID_INCLUDE_POKEMON": [ [ "Name", "Alternate Form Name" ] ],
     "ALLOWED_GUILDS" : ["672022278590169118", "980822800581406792", "924169333662441492", "924169531776204871", "925788851442692176", "614856074054598678"]

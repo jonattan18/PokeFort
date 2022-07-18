@@ -484,7 +484,7 @@
     "leechseed": {
         "start": "  [POKEMON] was seeded!",
         "end": "  [POKEMON] was freed from Leech Seed!",
-        "damage": "  [POKEMON]'s health is sapped by Leech Seed!"
+        "damage": "  [POKEMON]'s lost [DAMAGE] HP due to Leech Seed!"
     },
     "lightscreen": {
         "startGen1": "  [POKEMON]'s protected against special attacks!",

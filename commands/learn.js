@@ -1,6 +1,8 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const user_model = require('../models/user.js');
-const fs = require('fs'); // To read json file.
+
+// Misc
+const config = require("../config/config.json");
 
 // Models
 const prompt_model = require('../models/prompt');
@@ -29,7 +31,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
-                var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
 
                 //Get Pokemon Name from Pokemon ID.
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, false);
@@ -51,10 +52,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 if (available_tm_moves.some(x => x.toLowerCase() == args.join(" ").toLowerCase())) {
                     current_move = available_tm_moves.filter(it => it.toLowerCase() == args.join(" ").toLowerCase())[0];
+                    if (config.MOVES_CANT_BE_LEARNT.includes(movesparser.movedataname(current_move).name)) return message.channel.send(`This move can't be learned as it is not usable in duel or raid.`);
                     user.MoveReplace = [selected_pokemon._id.toString(), 'TmMove', movesparser.movedataname(current_move).num];
                 }
                 else if (available_moves.some(x => x.toLowerCase() == args.join(" ").toLowerCase())) {
                     current_move = available_moves.filter(it => it.toLowerCase() == args.join(" ").toLowerCase())[0];
+                    if (config.MOVES_CANT_BE_LEARNT.includes(movesparser.movedataname(current_move).name)) return message.channel.send(`This move can't be learned as it is not usable in duel or raid.`);
                     user.MoveReplace = [selected_pokemon._id.toString(), 'Move', movesparser.movedataname(current_move).num];
                 }
                 else return message.channel.send(`Your pokémon cannot learn that move.`);

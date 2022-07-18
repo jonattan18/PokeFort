@@ -633,6 +633,16 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p2a:"));
                         }
 
+                        // Remove _ from first_user_message
+                        for (var r = 0; r < first_user_message.length; r++) {
+                            first_user_message[r] = first_user_message[r].replace("_", " ");
+                        }
+
+                        // Remove _ from second_user_message
+                        for (var r = 0; r < second_user_message.length; r++) {
+                            second_user_message[r] = second_user_message[r].replace("_", " ");
+                        }
+
                         // Filter system message $player
                         if (!first_user_message[0].startsWith("$Player")) {
                             // Create user pokemon message.
@@ -880,7 +890,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                             var description = rewards_string + "\n" + overview;
 
                                             var difficulty_string = getDifficultyString(raid_data.RaidType);
-                                            user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
+                                            if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Gigantamax ? user.Raids.Gigantamax + 1 : 1;
+                                            else user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
 
                                             // Add data to raid dex if raid is normal
                                             if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) var raid_dex = user.Raids.EventDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);

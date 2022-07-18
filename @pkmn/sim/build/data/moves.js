@@ -9741,7 +9741,15 @@ exports.Moves = {
                     this.debug('Nothing to leech into');
                     return;
                 }
-                const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, target);
+
+                //const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, target);
+                var mydamage = Math.floor(pokemon.baseMaxhp / 8);
+                if (pokemon.level >= 200 && pokemon.level <= 300) mydamage = Math.floor(pokemon.baseMaxhp / 70);
+                else if (pokemon.level >= 600 && pokemon.level <= 800) mydamage = Math.floor(pokemon.baseMaxhp / 120);
+                else if (pokemon.level >= 1600 && pokemon.level <= 1800) mydamage = Math.floor(pokemon.baseMaxhp / 220);
+                else if (pokemon.level >= 2600 && pokemon.level <= 2800) mydamage = Math.floor(pokemon.baseMaxhp / 340);
+                else if (pokemon.level >= 3400 && pokemon.level <= 3500) mydamage = Math.floor(pokemon.baseMaxhp / 460);
+                const damage = this.damage(mydamage, pokemon, target);
                 if (damage) {
                     this.heal(damage, target, pokemon);
                 }

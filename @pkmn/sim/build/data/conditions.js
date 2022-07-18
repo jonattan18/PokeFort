@@ -161,7 +161,8 @@ exports.Conditions = {
         },
         onResidualOrder: 9,
         onResidual(pokemon) {
-            if (this.effectState.stage < 15) {
+            // if (this.effectState.stage < 15) {
+            if (this.effectState.stage < 2) {
                 this.effectState.stage++;
             }
             this.damage(this.clampIntRange(pokemon.baseMaxhp / 16, 1) * this.effectState.stage);
