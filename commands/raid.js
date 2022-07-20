@@ -50,8 +50,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        // remove mo id here.. Remove me.. Remove me... Final release...
-                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || message.author.id == "597841481168060446") {
+                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3)) {
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
@@ -114,7 +113,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             var raid_time_left_string = "";
                             var future_timeout = raid_time_left;
                             raid_time_left = new Date(new Date(raid_time_left).getTime() - new Date().getTime());
-                            raid_time_left_string = `${raid_time_left.getUTCHours()}:${raid_time_left.getUTCMinutes()}:${raid_time_left.getUTCSeconds()}`;
+                            raid_time_left_string = `${raid_time_left.getUTCHours().toString().padStart(2, "0")}:${raid_time_left.getUTCMinutes().toString().padStart(2, "0")}:${raid_time_left.getUTCSeconds().toString().padStart(2, "0")}`;
 
                             var embed = new Discord.MessageEmbed();
                             embed.attachFiles(raid_boss_image[1]);
@@ -172,7 +171,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         else {
                             // Get time left until next raid spawn in hh:mm:ss format.
                             var time_left = new Date(last_raid_time + 10800000 - Date.now());
-                            var time_left_string = time_left.getUTCHours() + ":" + time_left.getUTCMinutes() + ":" + time_left.getUTCSeconds();
+                            var time_left_string = time_left.getUTCHours().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
                             return message.channel.send(`Time left to be able to spawn a raid: ${time_left_string}`);
                         }
                     }
@@ -246,7 +245,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                                         // Time String
                                                         var raid_time_left_string = "";
                                                         raid_time_left = new Date(new Date(raid_data.Timestamp).getTime() - new Date().getTime());
-                                                        raid_time_left_string = `${raid_time_left.getUTCHours()}:${raid_time_left.getUTCMinutes()}:${raid_time_left.getUTCSeconds()}`;
+                                                        raid_time_left_string = `${raid_time_left.getUTCHours().toString().padStart(2, "0")}:${raid_time_left.getUTCMinutes().toString().padStart(2, "0")}:${raid_time_left.getUTCSeconds().toString().padStart(2, "0")}`;
 
                                                         var embed = new Discord.MessageEmbed();
                                                         embed.attachFiles(raid_boss_image[1]);
@@ -291,7 +290,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 // Time String
                 var raid_time_left_string = "";
                 raid_time_left = new Date(new Date(raid_data.Timestamp).getTime() - new Date().getTime());
-                raid_time_left_string = `${raid_time_left.getUTCHours()}:${raid_time_left.getUTCMinutes()}:${raid_time_left.getUTCSeconds()}`;
+                raid_time_left_string = `${raid_time_left.getUTCHours().toString().padStart(2, "0")}:${raid_time_left.getUTCMinutes().toString().padStart(2, "0")}:${raid_time_left.getUTCSeconds().toString().padStart(2, "0")}`;
 
                 var embed = new Discord.MessageEmbed();
                 embed.attachFiles(raid_boss_image[1]);
@@ -579,7 +578,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             } else {
                 // Get time left until next raid spawn in hh:mm:ss format.
                 var time_left = new Date(last_raid_time + 10800000 - Date.now());
-                footer_string = "Time left to be able to spawn a raid: " + time_left.getUTCHours() + ":" + time_left.getUTCMinutes() + ":" + time_left.getUTCSeconds();
+                footer_string = "Time left to be able to spawn a raid: " + time_left.getUTCHours().toString().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
             }
 
             var user_raid = user.Raids;
