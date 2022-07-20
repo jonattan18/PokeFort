@@ -652,7 +652,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             message.channel.send(usr_embed);
                         }
 
-                        if (!second_user_message[0].startsWith("$Player")) {
+                        if (!second_user_message[0].startsWith("$Player") && !second_user_message[0].startsWith("It did")) {
                             // Create raid boss message.
                             var raid_embed = new Discord.MessageEmbed();
                             raid_embed.setTitle(`${second_user_message[0]}`);

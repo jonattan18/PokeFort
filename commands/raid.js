@@ -457,7 +457,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             }]);
 
                             // Get image url of user team pokemon.
-                            var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null)[0];
+                            var user_pokemon_data = trainer_data.filter(pokemon => pokemon != null && !_.isEmpty(pokemon))[0];
                             var user_image_data = user_pokemon_data.Image;
                             var current_pokemon = trainer_data.indexOf(user_pokemon_data);
 
@@ -465,7 +465,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             const streams = BattleStreams.getPlayerStreams(_battleStream);
                             const spec = { formatid: 'customgame' };
 
-                            const p1spec = { name: '$Player1', team: packed_team_1.replaceAll("]undefined|||-||||||||", "") };
+                            // Team null avoider.
+                            packed_team_1 = packed_team_1.replaceAll("undefined|||-||||||||]", "").replaceAll("]undefined|||-||||||||", "");
+
+                            const p1spec = { name: '$Player1', team: packed_team_1 };
                             const p2spec = { name: '$Player2', team: packed_team_2 };
 
                             // Packing raid data.

@@ -1,12 +1,12 @@
-const channel_model = require('../models/channel');
-const user_model = require('../models/user');
+const channel_model = require('../../models/channel');
+const user_model = require('../../models/user');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (!message.isadmin) return; // Admin check
 
     user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (user.Admin != 1) return;
+        if (user.Admin < 2) return;
         message.channel.send("Admin Access Granted!");
         channel_model.findOne({ ChannelID: message.channel.id }, (err, channel_data) => {
             if (channel_data.PokemonID == 0) { message.channel.send("No pokémon currently seen on wild."); return; }
