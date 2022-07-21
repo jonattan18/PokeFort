@@ -50,7 +50,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3)) {
+                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true)) {
+
+                            // Remove me on release...
+                            if (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true) {
+                                user_model.updateOne({ UserID: message.author.id }, { $set: { NoCooldownRaid: undefined } }, (err, user) => {
+                                    if (err) { console.log(err); return; }
+                                });
+                            }
 
                             // Decide raid boss based on random.
                             if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");

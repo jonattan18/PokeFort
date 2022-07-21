@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
     Shards: Number,
     DailyStreak: Number,
     RaidAlphaAgree: Boolean,
+    NoCooldownRaid: Boolean,
     Raids: {
         SpawnTimestamp: Number,
         TotalDuels: Number,

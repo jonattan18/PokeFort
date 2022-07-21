@@ -415,10 +415,41 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
 
+    // Remove me in release.
+    function raid_bugged() {
+        // Reporting in report channel if not already reported.
+        const reports_model = require('../models/reports');
+        reports_model.findOne({
+            UserID: raid_data.RaidID.toString()
+        }).then(function (report) {
+            if (report == null) {
+                message.channel.send("``⚠️ System warning: Flaw in raid system. Successfully reported to developer. Removed cooldown for next raid.``");
+                message.channel.send("``🤖 System auto-reply: This flaw will be fixed soon.``");
+
+                raid_data.Stream = _battlestream.battle.inputLog.join('\n');
+                const reports_model = require('../models/reports');
+                let new_report = new reports_model({
+                    UserID: raid_data.RaidID.toString(),
+                    Reason: JSON.stringify(raid_data)
+                });
+                new_report.save();
+            }
+        });
+
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) return console.log(err);
+            if (user == null) return;
+            user.NoCooldownRaid = true;
+            user.save();
+        });
+    }
 
     // If over looping
     if (loop > 0) {
-        if (loop > 5) return message.channel.send("That move didn't work. Please try another move.");
+        if (loop > 5) {
+            raid_bugged();
+            return message.channel.send("That move didn't work. Please try another move.");
+        }
 
         if (loop > 3) {
             // Get any random move.
@@ -676,7 +707,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     // Undefined Notification if switch is off.
                     if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
                         if (_default == 0) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop, 1);
-                        else if (_default == 1) return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
+                        else if (_default == 1) {
+                            raid_bugged();
+                            return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
+                        }
                     }
 
                     if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
