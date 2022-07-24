@@ -256,12 +256,12 @@ class BattleActions {
             if (lockedMove === true)
                 lockedMove = false;
             if (!lockedMove) {
-                if (!pokemon.deductPP(baseMove, null, target) && (move.id !== 'struggle')) {
-                    this.battle.add('cant', pokemon, 'nopp', move);
-                    this.battle.clearActiveMove(true);
-                    pokemon.moveThisTurnResult = false;
-                    return;
-                }
+                /*  if (!pokemon.deductPP(baseMove, null, target) && (move.id !== 'struggle')) {
+                      this.battle.add('cant', pokemon, 'nopp', move);
+                      this.battle.clearActiveMove(true);
+                      pokemon.moveThisTurnResult = false;
+                      return;
+                  } */
             }
             else {
                 sourceEffect = this.dex.conditions.get('lockedmove');

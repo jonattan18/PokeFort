@@ -381,10 +381,10 @@ exports.Moves = {
         flags: { contact: 1, protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
-            onHit(target, source, move) {
-                if (source.isActive)
-                    target.addVolatile('trapped', source, move, 'trapper');
-            },
+          //  onHit(target, source, move) {
+           //     if (source.isActive)
+          //          target.addVolatile('trapped', source, move, 'trapper');
+         //   },
         },
         target: "normal",
         type: "Steel",
@@ -1273,7 +1273,7 @@ exports.Moves = {
         pp: 20,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -1378,9 +1378,9 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { reflectable: 1, mirror: 1 },
-        onHit(target, source, move) {
-            return target.addVolatile('trapped', source, move, 'trapper');
-        },
+        //onHit(target, source, move) {
+        //    return target.addVolatile('trapped', source, move, 'trapper');
+       // },
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -2199,7 +2199,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Water",
@@ -4664,9 +4664,9 @@ exports.Moves = {
             onFieldStart(target) {
                 this.add('-fieldactivate', 'move: Fairy Lock');
             },
-            onTrapPokemon(pokemon) {
-                pokemon.tryTrap();
-            },
+            //  onTrapPokemon(pokemon) {
+            //      pokemon.tryTrap();
+            //  },
         },
         secondary: null,
         target: "all",
@@ -5032,7 +5032,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Fire",
@@ -6363,11 +6363,11 @@ exports.Moves = {
         flags: {},
         isMax: "Centiskorch",
         self: {
-            onHit(source) {
-                for (const pokemon of source.foes()) {
-                    pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Centiferno'));
-                }
-            },
+         //   onHit(source) {
+         //       for (const pokemon of source.foes()) {
+          //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Centiferno'));
+         //       }
+         //   },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -6752,11 +6752,11 @@ exports.Moves = {
         flags: {},
         isMax: "Sandaconda",
         self: {
-            onHit(source) {
-                for (const pokemon of source.foes()) {
-                    pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Sandblast'));
-                }
-            },
+          //  onHit(source) {
+          //      for (const pokemon of source.foes()) {
+          //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Sandblast'));
+         //       }
+         //   },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -6966,11 +6966,11 @@ exports.Moves = {
         flags: {},
         isMax: "Gengar",
         self: {
-            onHit(source) {
-                for (const pokemon of source.foes()) {
-                    pokemon.addVolatile('trapped', source, null, 'trapper');
-                }
-            },
+           // onHit(source) {
+           //     for (const pokemon of source.foes()) {
+           //         pokemon.addVolatile('trapped', source, null, 'trapper');
+           //     }
+          //  },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -9171,7 +9171,7 @@ exports.Moves = {
         pp: 20,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Bug",
@@ -9195,9 +9195,9 @@ exports.Moves = {
             onResidual(pokemon) {
                 this.heal(pokemon.baseMaxhp / 16);
             },
-            onTrapPokemon(pokemon) {
-                pokemon.tryTrap();
-            },
+            // onTrapPokemon(pokemon) {
+            //     pokemon.tryTrap();
+            //  },
             // groundedness implemented in battle.engine.js:BattlePokemon#isGrounded
             onDragOut(pokemon) {
                 this.add('-activate', pokemon, 'move: Ingrain');
@@ -9336,10 +9336,10 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { bite: 1, contact: 1, protect: 1, mirror: 1 },
-        onHit(target, source, move) {
-            source.addVolatile('trapped', target, move, 'trapper');
-            target.addVolatile('trapped', source, move, 'trapper');
-        },
+       // onHit(target, source, move) {
+        //    source.addVolatile('trapped', target, move, 'trapper');
+        //    target.addVolatile('trapped', source, move, 'trapper');
+        //},
         secondary: null,
         target: "normal",
         type: "Dark",
@@ -9608,20 +9608,20 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        onTry(source) {
-            if (source.moveSlots.length < 2)
-                return false; // Last Resort fails unless the user knows at least 2 moves
-            let hasLastResort = false; // User must actually have Last Resort for it to succeed
-            for (const moveSlot of source.moveSlots) {
-                if (moveSlot.id === 'lastresort') {
-                    hasLastResort = true;
-                    continue;
-                }
-                if (!moveSlot.used)
-                    return false;
-            }
-            return hasLastResort;
-        },
+         /*  onTry(source) {
+              if (source.moveSlots.length < 2)
+                  return false; // Last Resort fails unless the user knows at least 2 moves
+              let hasLastResort = false; // User must actually have Last Resort for it to succeed
+              for (const moveSlot of source.moveSlots) {
+                  if (moveSlot.id === 'lastresort') {
+                      hasLastResort = true;
+                      continue;
+                  }
+                  if (!moveSlot.used)
+                      return false;
+              }
+              return hasLastResort;
+          }, */
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -10290,7 +10290,7 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Fire",
@@ -10952,9 +10952,9 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { reflectable: 1, mirror: 1 },
-        onHit(target, source, move) {
-            return target.addVolatile('trapped', source, move, 'trapper');
-        },
+      //  onHit(target, source, move) {
+      //      return target.addVolatile('trapped', source, move, 'trapper');
+       // },
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -12209,9 +12209,9 @@ exports.Moves = {
             onStart(pokemon) {
                 this.add('-start', pokemon, 'move: No Retreat');
             },
-            onTrapPokemon(pokemon) {
-                pokemon.tryTrap();
-            },
+            // onTrapPokemon(pokemon) {
+            //     pokemon.tryTrap();
+            // },
         },
         boosts: {
             atk: 1,
@@ -12372,15 +12372,15 @@ exports.Moves = {
                 const source = this.effectState.source;
                 if (source && (!source.isActive || source.hp <= 0 || !source.activeTurns)) {
                     delete pokemon.volatiles['octolock'];
-                    this.add('-end', pokemon, 'Octolock', '[partiallytrapped]', '[silent]');
+                //    this.add('-end', pokemon, 'Octolock', '[partiallytrapped]', '[silent]');
                     return;
                 }
                 this.boost({ def: -1, spd: -1 }, pokemon, source, this.dex.getActiveMove('octolock'));
             },
-            onTrapPokemon(pokemon) {
-                if (this.effectState.source && this.effectState.source.isActive)
-                    pokemon.tryTrap();
-            },
+            // onTrapPokemon(pokemon) {
+            //     if (this.effectState.source && this.effectState.source.isActive)
+            //          pokemon.tryTrap();
+            //  },
         },
         secondary: null,
         target: "normal",
@@ -15307,7 +15307,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Ground",
@@ -16665,7 +16665,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Grass",
@@ -17036,9 +17036,9 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1, reflectable: 1, mirror: 1 },
-        onHit(target, source, move) {
-            return target.addVolatile('trapped', source, move, 'trapper');
-        },
+       // onHit(target, source, move) {
+      //      return target.addVolatile('trapped', source, move, 'trapper');
+      //  },
         secondary: null,
         target: "normal",
         type: "Bug",
@@ -17187,10 +17187,10 @@ exports.Moves = {
         flags: { protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
-            onHit(target, source, move) {
-                if (source.isActive)
-                    target.addVolatile('trapped', source, move, 'trapper');
-            },
+           // onHit(target, source, move) {
+           //     if (source.isActive)
+           //         target.addVolatile('trapped', source, move, 'trapper');
+           // },
         },
         target: "normal",
         type: "Ghost",
@@ -18794,10 +18794,10 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1, mirror: 1, nonsky: 1 },
-        onHit(target, source, move) {
-            if (source.isActive)
-                target.addVolatile('trapped', source, move, 'trapper');
-        },
+       // onHit(target, source, move) {
+       //     if (source.isActive)
+       //         target.addVolatile('trapped', source, move, 'trapper');
+       // },
         secondary: null,
         target: "allAdjacentFoes",
         type: "Ground",
@@ -18929,7 +18929,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Electric",
@@ -20033,7 +20033,7 @@ exports.Moves = {
         pp: 15,
         priority: 0,
         flags: { protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Water",
@@ -20351,7 +20351,7 @@ exports.Moves = {
         pp: 20,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-        volatileStatus: 'partiallytrapped',
+        // volatileStatus: 'partiallytrapped',
         secondary: null,
         target: "normal",
         type: "Normal",
