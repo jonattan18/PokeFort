@@ -1,7 +1,6 @@
 const Discord = require('discord.js'); // For Embedded Message.
 const _ = require('lodash');
-const mergeImages = require('merge-images-v2');
-const Canvas = require('canvas');
+const sharp = require('sharp');
 
 // Models
 const prompt_model = require('../models/prompt');
@@ -181,54 +180,58 @@ function duel(bot, message, prefix, prompt, pokemons) {
                     var image1_url = getPokemons.imagefromid(user1pokemon.PokemonId, pokemons, user1pokemon.Shiny);
                     var image2_url = getPokemons.imagefromid(user2pokemon.PokemonId, pokemons, user2pokemon.Shiny);
 
-                    mergeImages(["./assets/duel_images/background.jpg",
-                        { src: pokemon1_speed >= pokemon2_speed ? image1_url : image2_url, x: 40, y: 20, width: 350, height: 350 }, { src: pokemon1_speed <= pokemon2_speed ? image1_url : image2_url, x: 550, y: 20, width: 350, height: 350 }], {
-                        Canvas: Canvas
-                    }).then(b64 => {
-                        const img_data = b64.split(',')[1];
-                        prompt.Duel.ImageCache = img_data;
-                        const img_buffer = new Buffer.from(img_data, 'base64');
-                        const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                    // Image 1
+                    sharp(pokemon1_speed >= pokemon2_speed ? image1_url : image2_url).resize({ width: 350, height: 350 }).toBuffer().then(function (one) {
+                        // Image 2
+                        sharp(pokemon1_speed <= pokemon2_speed ? image1_url : image2_url).resize({ width: 350, height: 350 }).toBuffer().then(function (two) {
+                            sharp("./assets/duel_images/background.jpg")
+                                .composite([{ input: one, top: 20, left: 40 }, { input: two, top: 20, left: 550 }])
+                                .jpeg({ quality: 100 })
+                                .toBuffer("jpeg").then((image_buffer) => {
 
-                        prompt.Duel.Accepted = true;
-                        prompt.save().then(() => {
-                            embed = new Discord.MessageEmbed();
-                            embed.setColor(message.guild.me.displayHexColor);
-                            embed.attachFiles(image_file)
-                            embed.setImage('attachment://img.jpeg')
-                            embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
+                                    prompt.Duel.ImageCache = image_buffer.toString('base64');
+                                    const image_file = new Discord.MessageAttachment(image_buffer, 'img.jpeg');
 
-                            if (pokemon1_speed >= pokemon2_speed) {
-                                embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
-                                embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
-                            } else {
-                                embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
-                                embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
-                            }
+                                    prompt.Duel.Accepted = true;
+                                    prompt.save().then(() => {
+                                        embed = new Discord.MessageEmbed();
+                                        embed.setColor(message.guild.me.displayHexColor);
+                                        embed.attachFiles(image_file)
+                                        embed.setImage('attachment://img.jpeg')
+                                        embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
 
-                            embed.setFooter(`Use ${prefix}dm to mute the duel instructions.`);
-                            message.channel.send(embed);
+                                        if (pokemon1_speed >= pokemon2_speed) {
+                                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                                        } else {
+                                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                                        }
 
-                            if (user1.DuelDM != undefined && user1.DuelDM != true) {
-                                var usr_embed = new Discord.MessageEmbed();
-                                usr_embed.setColor(message.guild.me.displayHexColor);
-                                usr_embed.setTitle(`Battle VS ${user2name}`);
-                                var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
-                                description += "\n\n";
-                                description += "Available moves:\n\n"
-                                description += `${user1pokemon_moves[0]} ${prefix}use 1\n\n`;
-                                description += `${user1pokemon_moves[1]} ${prefix}use 2\n\n`;
-                                description += `${user1pokemon_moves[2]} ${prefix}use 3\n\n`;
-                                description += `${user1pokemon_moves[3]} ${prefix}use 4\n\n`;
-                                usr_embed.setDescription(description);
+                                        embed.setFooter(`Use ${prefix}dm to mute the duel instructions.`);
+                                        message.channel.send(embed);
 
-                                // Send Message
-                                if (user1.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
+                                        if (user1.DuelDM != undefined && user1.DuelDM != true) {
+                                            var usr_embed = new Discord.MessageEmbed();
+                                            usr_embed.setColor(message.guild.me.displayHexColor);
+                                            usr_embed.setTitle(`Battle VS ${user2name}`);
+                                            var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
+                                            description += "\n\n";
+                                            description += "Available moves:\n\n"
+                                            description += `${user1pokemon_moves[0]} ${prefix}use 1\n\n`;
+                                            description += `${user1pokemon_moves[1]} ${prefix}use 2\n\n`;
+                                            description += `${user1pokemon_moves[2]} ${prefix}use 3\n\n`;
+                                            description += `${user1pokemon_moves[3]} ${prefix}use 4\n\n`;
+                                            usr_embed.setDescription(description);
 
-                            }
+                                            // Send Message
+                                            if (user1.DuelDM != true) bot.users.cache.get(user1.UserID).send(usr_embed);
+
+                                        }
+                                    });
+                                });
                         });
                     });
-
                 });
             });
         });

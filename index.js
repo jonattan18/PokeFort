@@ -5,6 +5,7 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 const mongoose = require('mongoose');
 const fs = require('fs');
 const _ = require('lodash');
+const sharp = require('sharp'); // Declaring to avoid crashing app silently
 var express = require('express');
 var app = express();
 app.use(express.json());

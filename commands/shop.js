@@ -206,12 +206,12 @@ function page_7(message, balance, prefix) {
     embed.addField('Calcium', `Increases the special attack EV of your selected pokemon by 10 Do \`${prefix}buy vitamin calcium\` to buy this item!`, true)
     embed.addField('Zinc', `Increases the special defense EV of your selected pokemon by 10 Do \`${prefix}buy vitamin zinc\` to buy this item!`, true)
     embed.addField('Carbos', `Increases the speed EV of your selected pokemon by 10 Do \`${prefix}buy vitamin carbos\` to buy this item!`, true)
-    embed.addField('Pomeg Berry', `Increases the hp EV of your selected pokemon by 10 Do \`${prefix}buy berry pomeg\` to buy this item!`, true)
-    embed.addField('Kelpsy Berry', `Increases the attack EV of your selected pokemon by 10 Do \`${prefix}buy berry kelpsy\` to buy this item!`, true)
-    embed.addField('Qualot Berry', `Increases the defense EV of your selected pokemon by 10 Do \`${prefix}buy berry qualot\` to buy this item!`, true)
-    embed.addField('Hondew Berry', `Increases the special attack EV of your selected pokemon by 10 Do \`${prefix}buy berry hondew\` to buy this item!`, true)
-    embed.addField('Grepa Berry', `Increases the special defense EV of your selected pokemon by 10 Do \`${prefix}buy berry grepa\` to buy this item!`, true)
-    embed.addField('Tamato Berry', `Increases the speed EV of your selected pokemon by 10 Do \`${prefix}buy berry tamato\` to buy this item!`, true)
+    embed.addField('Pomeg Berry', `Decreases the hp EV of your selected pokemon by 10 Do \`${prefix}buy berry pomeg\` to buy this item!`, true)
+    embed.addField('Kelpsy Berry', `Decreases the attack EV of your selected pokemon by 10 Do \`${prefix}buy berry kelpsy\` to buy this item!`, true)
+    embed.addField('Qualot Berry', `Decreases the defense EV of your selected pokemon by 10 Do \`${prefix}buy berry qualot\` to buy this item!`, true)
+    embed.addField('Hondew Berry', `Decreases the special attack EV of your selected pokemon by 10 Do \`${prefix}buy berry hondew\` to buy this item!`, true)
+    embed.addField('Grepa Berry', `Decreases the special defense EV of your selected pokemon by 10 Do \`${prefix}buy berry grepa\` to buy this item!`, true)
+    embed.addField('Tamato Berry', `Decreases the speed EV of your selected pokemon by 10 Do \`${prefix}buy berry tamato\` to buy this item!`, true)
     message.channel.send(embed)
 }
 

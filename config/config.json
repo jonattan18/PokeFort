@@ -1,7 +1,7 @@
 {
     "BOT_NAME": "PokéFort",
-    "BOT_TOKEN": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
-    "BOT_TOKEN_TEST": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
+    "BOT_TOKEN_TEST": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
+    "BOT_TOKEN": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
     "MONGO_URI": "mongodb://jonattan:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "LOAD_BALANCER": false,
     "WORKERS" : [ "http://192.168.29.69:1001", "http://192.168.29.69:1002", "http://192.168.29.69:1003"],
@@ -18,7 +18,7 @@
     "TRADE_POKEMON_MAX_LIMIT": 200,
     "MAX_TEAMS_PER_USER": 30,
     "LEADERBOARD_MAX_LIMIT": 1000,
-    "MOVES_CANT_BE_LEARNT": ["Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
+    "MOVES_CANT_BE_LEARNT": ["Super Fang", "Endeavor", "Nature's Madness", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
     "RAID_EXCEPTIONAL_MOVES": ["Self-Destruct", "Explosion", "Final Gambit", "Misty Explosion", "Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
     "RAID_EXCEPTIONAL_POKEMON": [ ["Cosmog", "NULL"], ["Cosmoem", "NULL"] ],
     "RAID_INCLUDE_POKEMON": [ [ "Name", "Alternate Form Name" ] ],

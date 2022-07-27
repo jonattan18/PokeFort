@@ -333,10 +333,12 @@ exports.Moves = {
         priority: 2,
         flags: {},
         onTryHit(source) {
-            if (source.side.active.length === 1)
-                return false;
-            if (source.side.active.length === 3 && source.position === 1)
-                return false;
+            return false;
+            /* if (source.side.active.length === 1)
+                 return false;
+             if (source.side.active.length === 3 && source.position === 1)
+                 return false;
+                 */
         },
         onHit(pokemon) {
             const newPosition = (pokemon.position === 0 ? pokemon.side.active.length - 1 : 0);
@@ -381,10 +383,10 @@ exports.Moves = {
         flags: { contact: 1, protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
-          //  onHit(target, source, move) {
-           //     if (source.isActive)
-          //          target.addVolatile('trapped', source, move, 'trapper');
-         //   },
+            //  onHit(target, source, move) {
+            //     if (source.isActive)
+            //          target.addVolatile('trapped', source, move, 'trapper');
+            //   },
         },
         target: "normal",
         type: "Steel",
@@ -1380,7 +1382,7 @@ exports.Moves = {
         flags: { reflectable: 1, mirror: 1 },
         //onHit(target, source, move) {
         //    return target.addVolatile('trapped', source, move, 'trapper');
-       // },
+        // },
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -4392,9 +4394,9 @@ exports.Moves = {
         onTryHit(target, source) {
             return false;
         },
-        damageCallback(pokemon, target) {
-            return target.getUndynamaxedHP() - pokemon.hp;
-        },
+        //  damageCallback(pokemon, target) {
+        //      return target.getUndynamaxedHP() - pokemon.hp;
+        // },
         category: "Physical",
         name: "Endeavor",
         pp: 5,
@@ -6363,11 +6365,11 @@ exports.Moves = {
         flags: {},
         isMax: "Centiskorch",
         self: {
-         //   onHit(source) {
-         //       for (const pokemon of source.foes()) {
-          //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Centiferno'));
-         //       }
-         //   },
+            //   onHit(source) {
+            //       for (const pokemon of source.foes()) {
+            //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Centiferno'));
+            //       }
+            //   },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -6752,11 +6754,11 @@ exports.Moves = {
         flags: {},
         isMax: "Sandaconda",
         self: {
-          //  onHit(source) {
-          //      for (const pokemon of source.foes()) {
-          //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Sandblast'));
-         //       }
-         //   },
+            //  onHit(source) {
+            //      for (const pokemon of source.foes()) {
+            //          pokemon.addVolatile('partiallytrapped', source, this.dex.getActiveMove('G-Max Sandblast'));
+            //       }
+            //   },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -6966,11 +6968,11 @@ exports.Moves = {
         flags: {},
         isMax: "Gengar",
         self: {
-           // onHit(source) {
-           //     for (const pokemon of source.foes()) {
-           //         pokemon.addVolatile('trapped', source, null, 'trapper');
-           //     }
-          //  },
+            // onHit(source) {
+            //     for (const pokemon of source.foes()) {
+            //         pokemon.addVolatile('trapped', source, null, 'trapper');
+            //     }
+            //  },
         },
         secondary: null,
         target: "adjacentFoe",
@@ -9336,7 +9338,7 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { bite: 1, contact: 1, protect: 1, mirror: 1 },
-       // onHit(target, source, move) {
+        // onHit(target, source, move) {
         //    source.addVolatile('trapped', target, move, 'trapper');
         //    target.addVolatile('trapped', source, move, 'trapper');
         //},
@@ -9608,20 +9610,20 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { contact: 1, protect: 1, mirror: 1 },
-         /*  onTry(source) {
-              if (source.moveSlots.length < 2)
-                  return false; // Last Resort fails unless the user knows at least 2 moves
-              let hasLastResort = false; // User must actually have Last Resort for it to succeed
-              for (const moveSlot of source.moveSlots) {
-                  if (moveSlot.id === 'lastresort') {
-                      hasLastResort = true;
-                      continue;
-                  }
-                  if (!moveSlot.used)
-                      return false;
-              }
-              return hasLastResort;
-          }, */
+        /*  onTry(source) {
+             if (source.moveSlots.length < 2)
+                 return false; // Last Resort fails unless the user knows at least 2 moves
+             let hasLastResort = false; // User must actually have Last Resort for it to succeed
+             for (const moveSlot of source.moveSlots) {
+                 if (moveSlot.id === 'lastresort') {
+                     hasLastResort = true;
+                     continue;
+                 }
+                 if (!moveSlot.used)
+                     return false;
+             }
+             return hasLastResort;
+         }, */
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -10952,9 +10954,9 @@ exports.Moves = {
         pp: 5,
         priority: 0,
         flags: { reflectable: 1, mirror: 1 },
-      //  onHit(target, source, move) {
-      //      return target.addVolatile('trapped', source, move, 'trapper');
-       // },
+        //  onHit(target, source, move) {
+        //      return target.addVolatile('trapped', source, move, 'trapper');
+        // },
         secondary: null,
         target: "normal",
         type: "Normal",
@@ -12043,9 +12045,12 @@ exports.Moves = {
         num: 717,
         accuracy: 90,
         basePower: 0,
-        damageCallback(pokemon, target) {
-            return this.clampIntRange(Math.floor(target.getUndynamaxedHP() / 2), 1);
+        onTryHit(target, source) {
+            return false;
         },
+        //  damageCallback(pokemon, target) {
+        //      return this.clampIntRange(Math.floor(target.getUndynamaxedHP() / 2), 1);
+        //  },
         category: "Special",
         name: "Nature's Madness",
         pp: 10,
@@ -12372,7 +12377,7 @@ exports.Moves = {
                 const source = this.effectState.source;
                 if (source && (!source.isActive || source.hp <= 0 || !source.activeTurns)) {
                     delete pokemon.volatiles['octolock'];
-                //    this.add('-end', pokemon, 'Octolock', '[partiallytrapped]', '[silent]');
+                    //    this.add('-end', pokemon, 'Octolock', '[partiallytrapped]', '[silent]');
                     return;
                 }
                 this.boost({ def: -1, spd: -1 }, pokemon, source, this.dex.getActiveMove('octolock'));
@@ -17036,9 +17041,9 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1, reflectable: 1, mirror: 1 },
-       // onHit(target, source, move) {
-      //      return target.addVolatile('trapped', source, move, 'trapper');
-      //  },
+        // onHit(target, source, move) {
+        //      return target.addVolatile('trapped', source, move, 'trapper');
+        //  },
         secondary: null,
         target: "normal",
         type: "Bug",
@@ -17187,10 +17192,10 @@ exports.Moves = {
         flags: { protect: 1, mirror: 1 },
         secondary: {
             chance: 100,
-           // onHit(target, source, move) {
-           //     if (source.isActive)
-           //         target.addVolatile('trapped', source, move, 'trapper');
-           // },
+            // onHit(target, source, move) {
+            //     if (source.isActive)
+            //         target.addVolatile('trapped', source, move, 'trapper');
+            // },
         },
         target: "normal",
         type: "Ghost",
@@ -18794,10 +18799,10 @@ exports.Moves = {
         pp: 10,
         priority: 0,
         flags: { protect: 1, mirror: 1, nonsky: 1 },
-       // onHit(target, source, move) {
-       //     if (source.isActive)
-       //         target.addVolatile('trapped', source, move, 'trapper');
-       // },
+        // onHit(target, source, move) {
+        //     if (source.isActive)
+        //         target.addVolatile('trapped', source, move, 'trapper');
+        // },
         secondary: null,
         target: "allAdjacentFoes",
         type: "Ground",

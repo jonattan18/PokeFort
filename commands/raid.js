@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const _ = require('lodash');
-const mergeImages = require('merge-images-v2');
-const Canvas = require('canvas');
+const sharp = require('sharp');
 
 // Models
 const user_model = require('../models/user');
@@ -511,33 +510,38 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             else if (_battleStream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
 
                                             // Creating Image for embed.
-                                            mergeImages([image_url,
-                                                { src: user_image_data[1], x: 80, y: 180, width: 200, height: 200 }, { src: raid_boss_image_data[1], x: 430, y: 20, width: 360, height: 360 }], {
-                                                Canvas: Canvas
-                                            }).then(b64 => {
-                                                const img_data = b64.split(',')[1];
-                                                const img_buffer = new Buffer.from(img_data, 'base64');
-                                                const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                                            // Image 1
+                                            sharp(user_image_data[1]).resize({ width: 200, height: 200 }).toBuffer().then(function (one) {
+                                                // Image 2
+                                                sharp(raid_boss_image_data[1]).resize({ width: 360, height: 360 }).toBuffer().then(function (two) {
+                                                    sharp(image_url)
+                                                        .composite([{ input: one, top: 180, left: 80 }, { input: two, top: 20, left: 430 }])
+                                                        .jpeg({ quality: 100 })
+                                                        .toBuffer("jpeg").then((image_buffer) => {
 
-                                                // Sending duel message.
-                                                var embed = new Discord.MessageEmbed();
-                                                embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
-                                                embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("terrain", "") + "**")}`);
-                                                embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
-                                                embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
-                                                embed.setColor(message.guild.me.displayHexColor);
-                                                embed.attachFiles(image_file)
-                                                embed.setImage('attachment://img.jpeg');
-                                                embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
-                                                message.channel.send(embed);
+                                                            const image_file = new Discord.MessageAttachment(image_buffer, 'img.jpeg');
 
-                                                // Get user data.
-                                                user_model.findOne({ UserID: message.author.id }, (err, user) => {
-                                                    if (err) return;
-                                                    if (user) {
-                                                        user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
-                                                        user.save();
-                                                    }
+                                                            // Sending duel message.
+                                                            var embed = new Discord.MessageEmbed();
+                                                            embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                                            embed.setDescription(`**Weather: ${_battleStream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battleStream.battle.field.weather)}**${_battleStream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battleStream.battle.field.terrain.replace("terrain", "") + "**")}`);
+                                                            embed.addField(`${message.author.username}'s Pokémon`, `${user_pokemon_data.name.replaceAll("_r", "").slice(0, -2)} | ${user_pokemon_data.max_hp}/${user_pokemon_data.max_hp}HP`, true);
+                                                            embed.addField(`Raid Boss`, `${raid.RaidPokemon.Name.replaceAll("_r", "")} | ${raidside.pokemon[0].hp}/${raidside.pokemon[0].maxhp}HP`, true);
+                                                            embed.setColor(message.guild.me.displayHexColor);
+                                                            embed.attachFiles(image_file)
+                                                            embed.setImage('attachment://img.jpeg');
+                                                            embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
+                                                            message.channel.send(embed);
+
+                                                            // Get user data.
+                                                            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                                                                if (err) return;
+                                                                if (user) {
+                                                                    user.Raids.TotalDuels = user.Raids.TotalDuels ? user.Raids.TotalDuels + 1 : 1;
+                                                                    user.save();
+                                                                }
+                                                            });
+                                                        });
                                                 });
                                             });
                                         });

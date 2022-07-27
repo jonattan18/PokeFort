@@ -725,53 +725,55 @@ function buyberry(message, args, pokemons, amount = 1) {
                 // Health Ev
                 if (args[1].toLowerCase() == "pomeg") {
                     ev_changes = ["Health", hp_ev];
-                    hp_ev += 10 * amount;
+                    hp_ev -= 10 * amount;
                     ev_changes.push(hp_ev);
                 }
                 // Defense Ev
                 else if (args[1].toLowerCase() == "kelpsy") {
                     ev_changes = ["Attack", attack_ev];
-                    attack_ev += 10 * amount;
+                    attack_ev -= 10 * amount;
                     ev_changes.push(attack_ev);
                 }
                 // Attack Ev
                 else if (args[1].toLowerCase() == "qualot") {
                     ev_changes = ["Defense", defense_ev];
-                    defense_ev += 10 * amount;
+                    defense_ev -= 10 * amount;
                     ev_changes.push(defense_ev);
                 }
                 // SpAttack Ev
                 else if (args[1].toLowerCase() == "hondew") {
                     ev_changes = ["Special Attack", spattack_ev];
-                    spattack_ev += 10 * amount;
+                    spattack_ev -= 10 * amount;
                     ev_changes.push(spattack_ev);
                 }
                 // SpDefense Ev
                 else if (args[1].toLowerCase() == "grepa") {
                     ev_changes = ["Special Defense", spdefense_ev];
-                    spdefense_ev += 10 * amount;
+                    spdefense_ev -= 10 * amount;
                     ev_changes.push(spdefense_ev);
                 }
                 // Speed Ev
                 else if (args[1].toLowerCase() == "tamato") {
                     ev_changes = ["Speed", speed_ev];
-                    speed_ev += 10 * amount;
+                    speed_ev -= 10 * amount;
                     ev_changes.push(speed_ev);
                 }
 
                 // Individual EV check.
                 for (var i = 0; i < ev_changes.length; i++) {
+                    if (ev_changes[i] < 0) return message.channel.send("This pokémon can't get lower than minimum stat!");
                     if (ev_changes[i] > 252) return message.channel.send("This pokémon can't get higher than maximum stat!");
                 }
 
                 // Ev total check.
                 var changed_total_ev = hp_ev + attack_ev + defense_ev + spattack_ev + spdefense_ev + speed_ev;
                 if (changed_total_ev > 510) return message.channel.send("Unable to add EV to this pokémon! It exceeds the maximum amount of EVs!");
+                if (changed_total_ev < 0) return message.channel.send("Evs can't be in negative!");
 
                 // Update database
                 pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].EV": [hp_ev, attack_ev, defense_ev, spattack_ev, spdefense_ev, speed_ev] } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
-                    message.channel.send(`You increased your ${pokemon_name}'s ${ev_changes[0]} EV stat from ${ev_changes[1]} to ${ev_changes[2]}.`);
+                    message.channel.send(`You decreased your ${pokemon_name}'s ${ev_changes[0]} EV stat from ${ev_changes[1]} to ${ev_changes[2]}.`);
                 });
 
                 user.PokeCredits -= 50 * amount;

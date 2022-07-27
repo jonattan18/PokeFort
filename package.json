@@ -19,22 +19,15 @@
     "@pkmn/view": "file:@pkmn/view",
     "axios": "^0.27.2",
     "body-parser": "^1.20.0",
-    "canvas": "^2.9.0",
     "cloc": "^2.9.0",
-    "discord-cross-hosting": "^2.2.6",
-    "discord-hybrid-sharding": "^1.6.5",
     "discord.js": "^12.3.1",
     "express": "^4.18.1",
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
-    "merge-images-v2": "^2.0.1",
     "mongodb": "^4.3.0",
     "mongoose": "^5.13.14",
-    "newrelic": "^8.15.0",
-    "ngrok": "^4.3.1",
-    "readdirp": "^3.6.0"
+    "readdirp": "^3.6.0",
+    "sharp": "^0.30.7"
   },
-  "devDependencies": {
-    "wrangler": "^2.0.16"
-  }
+  "devDependencies": {}
 }
