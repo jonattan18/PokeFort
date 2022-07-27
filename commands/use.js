@@ -552,8 +552,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 if (formatted) show_str.push(formatted);
             }
 
-            fs.writeFileSync('./out.txt', formatted);
-
             // Get message text to show user.
             var old_stream_no = raid_data.OldStreamText;
             raid_data.OldStreamText = show_str.length;
