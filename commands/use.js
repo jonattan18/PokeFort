@@ -552,6 +552,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 if (formatted) show_str.push(formatted);
             }
 
+            // Faint check.
+            if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
+            if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+
             // Get message text to show user.
             var old_stream_no = raid_data.OldStreamText;
             raid_data.OldStreamText = show_str.length;
