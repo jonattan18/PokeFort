@@ -353,6 +353,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 
 function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0, _default = 0) {
+
+    return message.channel.send("Raid is currently disabled for 1 day.");
+
     if (args.length != 1 || !isInt(args[0]) || (_switch && (args[0] > 6 || args[0] < 1)) || (!_switch && (args[0] > 4 || args[0] < 1))) return message.channel.send("Please enter a valid move.");
 
     //#region Module Pre Processing

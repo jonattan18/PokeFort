@@ -11,6 +11,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     // Raid check
     var raid_cmds = ["spawn", "start", "join", "leave", "l", "kick", "ban", "info", "duel", "mute", "unmute", "i", "view", "profile", "pf", "dex", "eventdex"];
     if (raid_cmds.includes(args[0].toLowerCase())) {
+        return message.channel.send("Raid is currently disabled for 1 day.");
         const commandfile = bot.commands.get("raid") || client.commands.get(client.aliases.get("raid"));
         if (!commandfile) return message.channel.send(`Invalid Command.`);
         return commandfile.run(bot, message, args, prefix, user_available, pokemons);
