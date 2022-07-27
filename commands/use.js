@@ -655,7 +655,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 second_user_message = [...new Set(second_user_message)];
 
                 // Remove words after fainted!:p1a: in first_user_message
-                if (_user_pokemon_fainted) {
+                if (_user_pokemon_fainted || _raid_pokemon_fainted) {
                     // Find index of fainted!:p1a:
                     var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p1a:"));
                     // Remove every string after fainted!:p1a: in that index.
@@ -667,7 +667,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 }
 
                 // Remove words after fainted!:p2a: in second_user_message
-                if (_raid_pokemon_fainted) {
+                if (_user_pokemon_fainted || _raid_pokemon_fainted) {
                     // Find index of fainted!:p1a:
                     var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p1a:"));
                     // Remove every string after fainted!:p1a: in that index.
