@@ -1,7 +1,7 @@
 {
     "BOT_NAME": "PokéFort",
-    "BOT_TOKEN": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
-    "BOT_TOKEN_TEST": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
+    "BOT_TOKEN_TEST": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
+    "BOT_TOKEN": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
     "MONGO_URI": "mongodb://jonattan:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "LOAD_BALANCER": false,
     "WORKERS" : [ "http://192.168.29.69:1001", "http://192.168.29.69:1002", "http://192.168.29.69:1003"],
