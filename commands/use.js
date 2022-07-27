@@ -584,20 +584,20 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-                    /* const is_faint_p1 = show_str.find(element => {
-                         if (element.includes("fainted!:p1a:")) {
-                             show_str.splice(show_str.indexOf(element), 1);
-                             return true;
-                         }
-                     });
-                     if (is_faint_p1) _user_pokemon_fainted = true;
-                     const is_faint_p2 = show_str.find(element => {
-                         if (element.includes("fainted!:p2a:")) {
-                             show_str.splice(show_str.indexOf(element), 1);
-                             return true;
-                         }
-                     });
-                     if (is_faint_p2) _raid_pokemon_fainted = true;*/
+                    const is_faint_p1 = show_str.find(element => {
+                        if (element.includes("fainted!:p1a:")) {
+                            show_str.splice(show_str.indexOf(element), 1);
+                            return true;
+                        }
+                    });
+                    if (is_faint_p1) _user_pokemon_fainted = true;
+                    const is_faint_p2 = show_str.find(element => {
+                        if (element.includes("fainted!:p2a:")) {
+                            show_str.splice(show_str.indexOf(element), 1);
+                            return true;
+                        }
+                    });
+                    if (is_faint_p2) _raid_pokemon_fainted = true;
                     break;
                 }
             }
@@ -619,20 +619,20 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-                    /*  const is_faint_p1 = show_str.find(element => {
-                          if (element.includes("fainted!:p1a:")) {
-                              show_str.splice(show_str.indexOf(element), 1);
-                              return true;
-                          }
-                      });
-                      if (is_faint_p1) _user_pokemon_fainted = true;
-                      const is_faint_p2 = show_str.find(element => {
-                          if (element.includes("fainted!:p2a:")) {
-                              show_str.splice(show_str.indexOf(element), 1);
-                              return true;
-                          }
-                      });
-                      if (is_faint_p2) _raid_pokemon_fainted = true; */
+                    const is_faint_p1 = show_str.find(element => {
+                        if (element.includes("fainted!:p1a:")) {
+                            show_str.splice(show_str.indexOf(element), 1);
+                            return true;
+                        }
+                    });
+                    if (is_faint_p1) _user_pokemon_fainted = true;
+                    const is_faint_p2 = show_str.find(element => {
+                        if (element.includes("fainted!:p2a:")) {
+                            show_str.splice(show_str.indexOf(element), 1);
+                            return true;
+                        }
+                    });
+                    if (is_faint_p2) _raid_pokemon_fainted = true;
                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
                         i++;
