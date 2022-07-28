@@ -7,14 +7,14 @@ const _ = require('lodash');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { message.channel.send(`Invalid syntax!`); return; }
+    if (args.length == 0) { message.channel.send(`Invalid syntax! Use \`${prefix}teamcreate --name <name> --id <id>\``); return; }
 
     // Convert all to lowercase.
     args = args.map(element => {
         return element.toLowerCase();
     });
 
-    if (!args.includes("--name")) return message.channel.send(`You can't create a team without a name!`);
+    if (!args.includes("--name") && !args.includes("--n")) return message.channel.send(`You can't create a team without a name\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
 
     // Definitions
     var team_name = "";
@@ -28,20 +28,20 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
     for (j = 0; j < total_args.length; j++) {
         new_args = total_args[j].split(" ").filter(it => it != "");
 
-        if (new_args[0] == "--name") {
+        if (new_args[0] == "--name" || new_args[0] == "--n") {
             new_args.shift();
             team_name = new_args.join(" ");
             if (team_name.length > 30) { message.channel.send(`Team name is too long!`); return; }
             if (team_name.length < 1) { message.channel.send(`Team name is too short!`); return; }
         }
 
-        else if (new_args[0] == "--ids") {
+        else if (new_args[0] == "--ids" || new_args[0] == "--i" || new_args[0] == "--id") {
             new_args.shift();
             // Int Check
             for (let i = 0; i < new_args.length; i++) {
                 arg_ids.push(new_args[i]);
                 if (!isInt(new_args[i])) {
-                    return message.channel.send(`_${new_args[i]}_ is not a valid pokémon id!`);
+                    return message.channel.send(`Invalid syntax!\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
                 }
             }
         }
@@ -53,7 +53,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         for (let i = 0; i < arg_ids.length; i++) {
             if (pokemons_from_database[arg_ids[i] - 1] != undefined) {
                 team_pokemons.push(pokemons_from_database[arg_ids[i] - 1]._id.toString());
-            } else return message.channel.send(`_${arg_ids[i]}_ is not a valid pokémon id!`);
+            } else return message.channel.send(`Couldn't find that ID!\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
         }
 
         // Create Team.
