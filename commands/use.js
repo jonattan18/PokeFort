@@ -351,8 +351,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 }
 
+function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, _default = false, raid_function_health = 5) {
 
-function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop = 0, _default = 0) {
+    // loop protection
+    raid_function_health--;
+    if (raid_function_health <= 0) { return; }
 
     if (args.length != 1 || !isInt(args[0]) || (_switch && (args[0] > 6 || args[0] < 1)) || (!_switch && (args[0] > 4 || args[0] < 1))) return message.channel.send("Please enter a valid move.");
 
@@ -413,10 +416,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
-                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
+                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default ? "default" : "move " + move_index}`;
             } else return message.channel.send("Please enter a valid pokémon to switch.");
         }
-    } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
+    } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default ? "default" : "move " + move_index}`;
 
     //#region Module Bug Notification
     // Remove me in release.
@@ -452,20 +455,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
     //#endregion
 
     // If over looping
-    if (loop > 0) {
-        if (loop > 5) {
-            raid_bugged();
-            return message.channel.send("That move didn't work. Please try another move.");
-        }
-
-        if (loop > 3) {
-            // Get any random move.
-            var random_move = raid_moveset[randomNumber(0, raid_moveset.length > 24 ? 24 : raid_moveset.length)];
-            move_index = raidmoves_to_stream.indexOf(random_move[0]) + 1;
-            var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default == 1 ? "default" : "move " + move_index}`;
-        } else {
-            var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 default`;
-        }
+    if (_default) {
+        var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 default`;
+    } else if (_switch == false && _default == false) {
+        var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 move ${move_index}`;
     }
 
     // Parse stream data.
@@ -515,7 +508,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     void (async () => {
         var received_data = _battlestream.battle.log;
-        if ((_battlestream.battle.turn == `|turn|${raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1}` && received_data[received_data.length - 1] != "|upkeep") && _switch == false && received_data[received_data.length - 1] != "|win" && received_data[received_data.length - 2] != "|win") return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop + 1);
+        if ((_battlestream.battle.turn == (raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1) && received_data[received_data.length - 1] != "|upkeep") && _switch == false && !received_data[received_data.length - 1].startsWith("|win") && !received_data[received_data.length - 2].startsWith("|win")) {
+            if (_default == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, true, raid_function_health);
+            else {
+                return raid_bugged();
+            }
+        }
         else {
             var show_str = [];
             // var next_turn = 0;
@@ -526,10 +524,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 // Execption
                 if (formatted == "\n") continue;
                 if (formatted.startsWith("\n== Turn") || formatted.startsWith("== Turn")) continue;
-                /*   if (formatted.startsWith("\n== Turn") || formatted.startsWith("== Turn")) {
-                       next_turn = parseInt(formatted.replace("\n== Turn ", ""));
-                       continue;
-                   } */
                 if (formatted.startsWith("\nGo!") || formatted.startsWith("Go!")) continue;
                 if (formatted.startsWith("Go!")) continue;
                 if (formatted.startsWith("\n$Player2 sent out") || formatted.startsWith("$Player2 sent out")) continue;
@@ -694,13 +688,9 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 }
 
                 // Undefined Notification if switch is off.
-                if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
-                    if (_default == 0) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, loop, 1);
-                    else if (_default == 1) {
-                        raid_bugged();
-                        return message.channel.send("Your last move is not acceptable. Please use different move or try again.");
-                    }
-                }
+                //    if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
+                //        if (_default == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, true);
+                //    }
 
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
