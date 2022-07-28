@@ -1676,6 +1676,14 @@ class Battle {
                 else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 7);
             }
 
+            // Added by PokeFort
+            // Used to make target damage by 2 if its higher than target maxhp.
+            // Used to prevent one hit knockout at first attack
+            // Added to prevent leech seed from not working.
+            if (target.level <= 100 && targetDamage > target.maxhp) {
+                targetDamage = Math.floor(targetDamage / 2);
+            }
+
             if (this.gen <= 1) {
                 if (this.dex.currentMod === 'gen1stadium' ||
                     !['recoil', 'drain'].includes(effect.id) && effect.effectType !== 'Status') {

@@ -944,6 +944,7 @@ exports.Moves = {
             },
             onTryHitPriority: 3,
             onTryHit(target, source, move) {
+                source.trySetStatus('psn', target); // Added in pokefort
                 if (!move.flags['protect']) {
                     if (['gmaxoneblow', 'gmaxrapidflow'].includes(move.id))
                         return;
@@ -964,16 +965,16 @@ exports.Moves = {
                         delete source.volatiles['lockedmove'];
                     }
                 }
-                if (this.checkMoveMakesContact(move, source, target)) {
-                    source.trySetStatus('psn', target);
-                } else source.trySetStatus('psn', target);
+                //  if (this.checkMoveMakesContact(move, source, target)) {
+                //     source.trySetStatus('psn', target);
+                // } else source.trySetStatus('psn', target);
                 return this.NOT_FAIL;
             },
-            onHit(target, source, move) {
-                if (move.isZOrMaxPowered && this.checkMoveMakesContact(move, source, target)) {
-                    source.trySetStatus('psn', target);
-                }
-            },
+            /* onHit(target, source, move) {
+                 if (move.isZOrMaxPowered && this.checkMoveMakesContact(move, source, target)) {
+                     source.trySetStatus('psn', target);
+                 }
+             }, */
         },
         secondary: null,
         target: "self",
@@ -1052,7 +1053,8 @@ exports.Moves = {
         isNonstandard: "Past",
         name: "Beak Blast",
         pp: 15,
-        priority: -3,
+        priority: 3,
+        status: 'brn', // Added in PokeFort
         flags: { bullet: 1, protect: 1 },
         priorityChargeCallback(pokemon) {
             pokemon.addVolatile('beakblast');
@@ -1062,11 +1064,12 @@ exports.Moves = {
             onStart(pokemon) {
                 this.add('-singleturn', pokemon, 'move: Beak Blast');
             },
-            onHit(target, source, move) {
-                if (this.checkMoveMakesContact(move, source, target)) {
-                    source.trySetStatus('brn', target);
-                }
-            },
+            /*   onHit(target, source, move) {
+                   console.log("Burn")
+                   // if (this.checkMoveMakesContact(move, source, target)) {
+                   source.trySetStatus('brn', target);
+                   //  }
+               }, */
         },
         // FIXME: onMoveAborted(pokemon) {pokemon.removeVolatile('beakblast')},
         onAfterMove(pokemon) {
@@ -2734,6 +2737,7 @@ exports.Moves = {
         priority: 0,
         flags: { mirror: 1 },
         onHitField(target, source) {
+            return false; // Added in PokeFort
             const sideConditions = [
                 'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire',
             ];
@@ -4664,6 +4668,7 @@ exports.Moves = {
         condition: {
             duration: 2,
             onFieldStart(target) {
+                return false; // Added in PokeFort
                 this.add('-fieldactivate', 'move: Fairy Lock');
             },
             //  onTrapPokemon(pokemon) {

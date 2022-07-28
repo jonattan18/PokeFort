@@ -583,20 +583,21 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-                    const is_faint_p1 = show_str.find(element => {
-                        if (element.includes("fainted!:p1a:")) {
-                            show_str.splice(show_str.indexOf(element), 1);
-                            return true;
-                        }
-                    });
-                    if (is_faint_p1) _user_pokemon_fainted = true;
-                    const is_faint_p2 = show_str.find(element => {
-                        if (element.includes("fainted!:p2a:")) {
-                            show_str.splice(show_str.indexOf(element), 1);
-                            return true;
-                        }
-                    });
-                    if (is_faint_p2) _raid_pokemon_fainted = true;
+
+                    /* const is_faint_p1 = show_str.find(element => {
+                         if (element.includes("fainted!:p1a:")) {
+                             show_str.splice(show_str.indexOf(element), 1);
+                             return true;
+                         }
+                     });
+                     if (is_faint_p1) _user_pokemon_fainted = true;
+                     const is_faint_p2 = show_str.find(element => {
+                         if (element.includes("fainted!:p2a:")) {
+                             show_str.splice(show_str.indexOf(element), 1);
+                             return true;
+                         }
+                     });
+                     if (is_faint_p2) _raid_pokemon_fainted = true; */
                     break;
                 }
             }
@@ -618,20 +619,22 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-                    const is_faint_p1 = show_str.find(element => {
-                        if (element.includes("fainted!:p1a:")) {
-                            show_str.splice(show_str.indexOf(element), 1);
-                            return true;
-                        }
-                    });
-                    if (is_faint_p1) _user_pokemon_fainted = true;
-                    const is_faint_p2 = show_str.find(element => {
-                        if (element.includes("fainted!:p2a:")) {
-                            show_str.splice(show_str.indexOf(element), 1);
-                            return true;
-                        }
-                    });
-                    if (is_faint_p2) _raid_pokemon_fainted = true;
+
+                    /*  const is_faint_p1 = show_str.find(element => {
+                          if (element.includes("fainted!:p1a:")) {
+                              show_str.splice(show_str.indexOf(element), 1);
+                              return true;
+                          }
+                      });
+                      if (is_faint_p1) _user_pokemon_fainted = true;
+                      const is_faint_p2 = show_str.find(element => {
+                          if (element.includes("fainted!:p2a:")) {
+                              show_str.splice(show_str.indexOf(element), 1);
+                              return true;
+                          }
+                      });
+                      if (is_faint_p2) _raid_pokemon_fainted = true; */
+
                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
                         i++;
@@ -747,10 +750,16 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                             .toBuffer("jpeg").then((image_buffer) => {
                                 const image_file = new Discord.MessageAttachment(image_buffer, 'img.jpeg');
                                 // Sending duel message.
+
+                                // Remove words after _r in forms and normal pokemons
+                                var battle_stream_pokemon_name = _battlestream.battle.sides[0].pokemon[0].name;
+                                var index_of_r = battle_stream_pokemon_name.indexOf("_r");
+                                if (index_of_r != -1) battle_stream_pokemon_name = battle_stream_pokemon_name.substring(0, index_of_r);
+                                
                                 var embed = new Discord.MessageEmbed();
                                 embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                 embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);
-                                embed.addField(`${message.author.username}'s Pokémon`, `${_battlestream.battle.sides[0].pokemon[0].name.replaceAll("_r", "").slice(0, -2)} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
+                                embed.addField(`${message.author.username}'s Pokémon`, `${battle_stream_pokemon_name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
                                 embed.addField(`Raid Boss`, `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, true);
                                 embed.setColor(message.guild.me.displayHexColor);
                                 embed.attachFiles(image_file)
@@ -851,7 +860,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 damage_addition();
                 raid_data.remove().then(() => {
                     var channel_embed = new Discord.MessageEmbed();
-                    channel_embed.setTitle(`Congtarulations!`);
+                    channel_embed.setTitle(`Congratulations!`);
                     channel_embed.setDescription(`You have defeated the raid boss. Your rewards are sent to your DM.`);
                     channel_embed.setColor(message.guild.me.displayHexColor);
                     message.channel.send(channel_embed);
@@ -923,16 +932,18 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                                     var overview = "**Overview:**";
                                     var sorted_damages = raid_data.Damages.sort((a, b) => Number(b.Damage) - Number(a.Damage));
+                                    var final_index_number = 0;
                                     for (var j = 0; j < sorted_damages.length; j++) {
                                         if (raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)] != undefined) {
                                             overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
                                             if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
+                                            final_index_number = j + 1;
                                         }
                                     }
 
                                     var zero_damage_users = raid_data.Trainers.filter(x => raid_data.Damages.findIndex(y => y.UserID == x) == -1);
                                     for (var j = 0; j < zero_damage_users.length; j++) {
-                                        overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == zero_damage_users[j])].slice(0, -5)} -> Damage: 0`;
+                                        overview += `\n#${final_index_number + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == zero_damage_users[j])].slice(0, -5)} -> Damage: 0`;
                                         if (raid_data.Trainers.findIndex(x => x == zero_damage_users[j]) == 0) overview += " :crown:";
                                     }
 
