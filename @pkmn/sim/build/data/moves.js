@@ -1053,7 +1053,7 @@ exports.Moves = {
         isNonstandard: "Past",
         name: "Beak Blast",
         pp: 15,
-        priority: 3,
+        priority: -3,
         status: 'brn', // Added in PokeFort
         flags: { bullet: 1, protect: 1 },
         priorityChargeCallback(pokemon) {
