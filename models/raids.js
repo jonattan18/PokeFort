@@ -41,7 +41,7 @@ const RaidSchema = new mongoose.Schema({
     OldStreamText: Number,
     ChangeOnFainted: Boolean,
     MutedTrainers: Array,
-    UserStreamPokemons: String,
+    UserStreamPokemons: Array,
     Damages: [{
         UserID: String,
         Damage: Number

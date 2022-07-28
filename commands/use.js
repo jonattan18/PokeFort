@@ -405,7 +405,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             raid_data.ChangeOnFainted = false;
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
-            var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
+            var choosed_pokemon = raid_data.UserStreamPokemons.indexOf(switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}`;
             } else return message.channel.send("Please enter a valid pokémon to switch.");
@@ -414,7 +414,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
-            var choosed_pokemon = JSON.parse(raid_data.UserStreamPokemons).findIndex(it => it.set.name == switch_pokemon.name) + 1;
+            var choosed_pokemon = raid_data.UserStreamPokemons.indexOf(switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default ? "default" : "move " + move_index}`;
             } else return message.channel.send("Please enter a valid pokémon to switch.");
@@ -1012,7 +1012,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                 // Raid save state.
                 raid_data.Stream = _battlestream.battle.inputLog.join('\n');
-                raid_data.UserStreamPokemons = JSON.stringify(_battlestream.battle.sides[0].pokemon);
+
+                // Add only names in UserStreamPokemons
+                // Get all name using filter undefined.
+                raid_data.UserStreamPokemons = _battlestream.battle.sides[0].pokemon.filter(x => x.set.name != undefined).map(x => x.set.name);
 
                 // Save to database.
                 raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
