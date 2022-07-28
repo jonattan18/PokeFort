@@ -1681,14 +1681,17 @@ class Battle {
             // Used to prevent one hit knockout at first attack
             // Added to prevent leech seed from not working.
             if (target.level <= 100 && targetDamage > target.maxhp) {
-                if (targetDamage <= 600) targetDamage = Math.floor(targetDamage / 2);
-                else if (targetDamage > 600 && targetDamage <= 1000) targetDamage = Math.floor(targetDamage / 3);
-                else if (targetDamage > 1000) {
-                    var first_two_digit = (targetDamage / 100) + 10;
-                    targetDamage = Math.floor(targetDamage / first_two_digit);
-                }
+                targetDamage = Math.floor(targetDamage / 2)
             }
-            
+            /*  if (target.level <= 100 && targetDamage > target.maxhp) {
+                  if (targetDamage <= 600) targetDamage = Math.floor(targetDamage / 2);
+                  else if (targetDamage > 600 && targetDamage <= 1000) targetDamage = Math.floor(targetDamage / 3);
+                  else if (targetDamage > 1000) {
+                      var first_two_digit = (targetDamage / 100) + 10;
+                      targetDamage = Math.floor(targetDamage / first_two_digit);
+                  }
+              } */
+
             if (this.gen <= 1) {
                 if (this.dex.currentMod === 'gen1stadium' ||
                     !['recoil', 'drain'].includes(effect.id) && effect.effectType !== 'Status') {
