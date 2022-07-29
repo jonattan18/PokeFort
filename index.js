@@ -296,7 +296,7 @@ client.on('message', async (message) => {
             if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
             cmd = redirect_command(cmd, prefix).slice(prefix.length);
             if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return;
-            if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; }
+            if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; message.AdminServer = config.ADMIN_COMMAND_SERVER; }
             const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
             if (!commandfile) return;
             commandfile.run(client, message, args, prefix, user_available, load_pokemons);

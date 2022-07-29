@@ -5,12 +5,18 @@ const Discord = require('discord.js');
 const admin = require('../../utils/admin');
 
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-     if (message.isadmin) { message.author = message.mentions.users.first() || message.author; args.shift() } // Admin check
-     else return;
+     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+     if (message.AdminServer != message.guild.id) return; // Admin channel check
+     if (!message.isadmin) return; // Admin check
 
-     user_model.findOne({ UserID: message.author.id }, (err, user) => {
+     var user_id = message.author.id;
+     if (args.length == 1) user_id = args[0];
+     else if (args.length > 1) return message.channel.send('Wrong Syntax!');
+
+     user_model.findOne({ UserID: user_id }, (err, user) => {
           if (err) { console.log(err); return; }
-          if(!user.Admin) return message.channel.send('Mentioned user is not a admin.');
+          if (!user) return message.channel.send('That user does not exists in database.')
+          if (!user.Admin) return message.channel.send('Mentioned user is not a admin.');
 
           var level = admin.getlevel(user.Admin);
           var position = admin.getposition(user.Admin);
@@ -18,17 +24,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
           var role = admin.getrole(user.Admin);
           var footdate = getDateTime();
 
-          // Create embed for user profile
-          const embed = new Discord.MessageEmbed()
-          embed.setTitle(`${message.author.username}'s Admin Profile`)
-          embed.setColor(message.member.displayHexColor)
-          embed.setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
-          embed.setDescription('**Admin level:** ' + level
-               + '\n**Position:** ' + position
-               + '\n**Role:** ' + role
-               + '\n**Description:** ' + description)
-          embed.setFooter(`System Time : ${footdate}`)
-          message.channel.send(embed);
+          // Fetch given user's avatar, username
+          bot.users.fetch(user_id).then(user => {
+               // Create embed for user profile
+               const embed = new Discord.MessageEmbed()
+               embed.setTitle(`${user.username}'s Admin Profile`)
+               embed.setColor(message.member.displayHexColor)
+               embed.setThumbnail(user.displayAvatarURL({ dynamic: true }))
+               embed.setDescription('**Admin level:** ' + level
+                    + '\n**Position:** ' + position
+                    + '\n**Role:** ' + role
+                    + '\n**Description:** ' + description)
+               embed.setFooter(`System Time : ${footdate}`)
+               message.channel.send(embed);
+          }).catch(err => {
+               return message.channel.send('We could not find that user.');
+          });
      });
 }
 

@@ -1,5 +1,5 @@
 // Utils to control admin message structure.
-var moderator = ["ahelp", "profile", "balance", "playerid", "pokemon", "dex", "report", "listreport", "remreport", "favourite", "info", "apf", "channelid", "serverid"];
+var moderator = ["ahelp", "profile", "balance", "pokemon", "dex", "report", "listreport", "remreport", "info", "apf"];
 var LoAdmin = moderator.concat(["ahint", "complaint", "suspend", "looksuspend", "remsuspend", "warn", "listwarn", "remwarn"]);
 var HiAdmin = LoAdmin.concat(["listcomplaint", "remcomplaint", "ban", "spawn", "unban", "promote", "demote", "unspawn"]);
 var System = HiAdmin.concat(["sysstat", "dbstat"]);
@@ -54,19 +54,15 @@ function gethelp(level) {
     else if (level > 3) return HiAdmin_help;
 }
 
-var moderator_help = "``Profile <user>`` - Will show the profile information of other players.\n"
-                    + "``Balance <user>`` - Will show the balance of other players.\n"
-                    + "``PlayerID <user>`` - Will show the player ID of other players.\n"
-                    + "``Pokemon <user>`` - Will show the pokemon owned by other players.\n"
-                    + "``Dex <user>`` - Will show the dex report by other players.\n"
-                    + "``Report <user>`` - Will report the user to higher admins.\n"
-                    + "``ListReport <user>`` - List reports given to a user.\n"
-                    + "``RemReport <user>`` - Remove a report given to a user.\n"
-                    + "``Favourite <user>`` - Will show the favourite pokemon of other players.\n"
-                    + "``Info <user>`` - Will show the pokemon info of other players.\n"
-                    + "``APF <user>`` - Will show the profile of your admin.\n"
-                    + "``ChannelID`` - Will show the channel ID of the current channel.\n"
-                    + "``ServerID`` - Will show the server ID of the current Server.\n";
+var moderator_help = "``Profile <userid>`` - Will show the profile information of other players.\n"
+                    + "``Balance <userid>`` - Will show the balance of other players.\n"
+                    + "``Pokemon <userid>`` - Will show the pokemon owned by other players.\n"
+                    + "``Dex <userid>`` - Will show the dex report by other players.\n"
+                    + "``Report <userid>`` - Will report the user to higher admins.\n"
+                    + "``ListReport <userid>`` - List reports given to a user.\n"
+                    + "``RemReport <userid>`` - Remove a report given to a user.\n"
+                    + "``Info <userid>`` - Will show the pokemon info of other players.\n"
+                    + "``APF <userid>`` - Will show the profile of your admin.\n";
 
 var LoAdmin_help = moderator_help
                     + "``Ahint <user>`` - Will show the hint of other players.\n"
