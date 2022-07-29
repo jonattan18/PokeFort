@@ -1,6 +1,34 @@
 const Discord = require('discord.js'); // Import Discord
 
+// Help data
+const help_data = require("../config/help.json");
+
 module.exports.run = async (bot, message, args, prefix) => {
+
+    /*
+    var json_data = null;
+
+    // Main page
+    if (args.length == 0) {
+        var data = help_data.filter(x => x.type == "main_page")[0];
+        if (data == undefined) return;
+        else json_data = data;
+    } else {
+        
+    }
+
+    // Processing data.
+    var embed = new Discord.MessageEmbed();
+    embed.setTitle(json_data.title);
+    embed.setDescription(json_data.description.join(""));
+    embed.setFooter(json_data.footer);
+    
+    if (json_data.send_dm == true) {
+        message.channel.send("We have sent the instructions to you. Check your DMs!");
+        message.author.send(embed);
+    } else {
+        message.channel.send(embed);
+    }*/
 
     if (args.length == 0) {
         message.channel.send("We have sent the instructions to you. Check your DMs!");

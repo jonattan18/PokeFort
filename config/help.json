@@ -1,0 +1,58 @@
+[
+    {
+        "type": "main_page",
+        "title": "PokéFort Commands",
+        "description": [
+            "**Page 1 | Getting Started!**\n",
+            "How to get started on the bot and dex commands. `p!help 1`\n\n",
+            "**Page 2 | Basic Commands!**\n",
+            "The main commands for the bot and pokemon commands. `p!help 2`\n\n",
+            "**Page 3 | Trading!**\n",
+            "How to trade pokémon, redeems and credits on the bot. `p!help 3`\n\n",
+            "**Page 4 | Market!**\n",
+            "How to buy and sell pokémon using the market. `p!help 4`\n\n",
+            "**Page 5 | Search Options!**\n",
+            "Search options for market searching. `p!help 5`\n\n",
+            "**Page 6 | Shop and Others!**\n",
+            "Shop commands and some misc commands. `p!help 6`\n\n",
+            "**Page 7 | Duelling**\n",
+            "How to duel with your pokémon. `p!help 7`\n\n",
+            "**Page 8 | Bot and Server commands!**\n",
+            "Bot commands and server commands. `p!help 8`\n\n"
+
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    },
+    {
+        "aliases": [
+            1,
+            "one",
+            "getting started",
+            "page 1"
+        ],
+        "title": "Getting Started!",
+        "description": [
+            "How to get started on the bot and dex commands.",
+            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon."
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    },
+    {
+        "aliases": [
+            2,
+            "two",
+            "basic commands",
+            "basic command",
+            "page 2"
+        ],
+        "title": "Basic Commands",
+        "description": [
+            "The main commands for the bot and pokemon commands.",
+            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon."
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    }
+]

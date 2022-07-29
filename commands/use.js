@@ -416,7 +416,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             var choosed_pokemon = raid_data.UserStreamPokemons.indexOf(switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
-                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 ${_default ? "default" : "move " + move_index}`;
+                var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 default`;
             } else return message.channel.send("Please enter a valid pokémon to switch.");
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default ? "default" : "move " + move_index}`;
@@ -567,37 +567,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             show_str.splice(0, 1);
             for (var i = 0; i < show_str.length; i++) {
                 if (show_str[i].startsWith("  ")) {
-
-                    /* if (show_str[i].endsWith(":prepare|p1a")) {
-                         show_str[i] = show_str[i].replace(":prepare|p1a", "");
-                         raid_data.PreparationMove = args[0];
-                     }
-                     else if (show_str[i].endsWith(":prepare|p2a")) {
-                         show_str[i] = show_str[i].replace(":prepare|p2a", "");
-                         raid_data.RaidPokemon.PreparationMove = move_index;
-                     } */
-
                     first_user_message.push(show_str[i]);
                 }
                 else {
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-
-                    /* const is_faint_p1 = show_str.find(element => {
-                         if (element.includes("fainted!:p1a:")) {
-                             show_str.splice(show_str.indexOf(element), 1);
-                             return true;
-                         }
-                     });
-                     if (is_faint_p1) _user_pokemon_fainted = true;
-                     const is_faint_p2 = show_str.find(element => {
-                         if (element.includes("fainted!:p2a:")) {
-                             show_str.splice(show_str.indexOf(element), 1);
-                             return true;
-                         }
-                     });
-                     if (is_faint_p2) _raid_pokemon_fainted = true; */
                     break;
                 }
             }
@@ -606,35 +581,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             show_str.splice(0, 1);
             for (var i = 0; i < show_str.length; i++) {
                 if (show_str[i].startsWith("  ")) {
-                    /* if (show_str[i].endsWith(":prepare|p1a")) {
-                         show_str[i] = show_str[i].replace(":prepare|p1a", "");
-                         raid_data.PreparationMove = args[0];
-                     } else if (show_str[i].endsWith(":prepare|p2a")) {
-                         show_str[i] = show_str[i].replace(":prepare|p2a", "");
-                         raid_data.RaidPokemon.PreparationMove = move_index;
-                     } */
                     second_user_message.push(show_str[i]);
                 }
                 else {
                     show_str.splice(0, i);
                     if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
                     if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-
-                    /*  const is_faint_p1 = show_str.find(element => {
-                          if (element.includes("fainted!:p1a:")) {
-                              show_str.splice(show_str.indexOf(element), 1);
-                              return true;
-                          }
-                      });
-                      if (is_faint_p1) _user_pokemon_fainted = true;
-                      const is_faint_p2 = show_str.find(element => {
-                          if (element.includes("fainted!:p2a:")) {
-                              show_str.splice(show_str.indexOf(element), 1);
-                              return true;
-                          }
-                      });
-                      if (is_faint_p2) _raid_pokemon_fainted = true; */
-
                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
                         i++;
@@ -689,11 +641,6 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 for (var r = 0; r < second_user_message.length; r++) {
                     second_user_message[r] = second_user_message[r].replace("_", " ");
                 }
-
-                // Undefined Notification if switch is off.
-                //    if (_switch == false && (first_user_message[0] == undefined || second_user_message[0] == undefined)) {
-                //        if (_default == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, true);
-                //    }
 
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {

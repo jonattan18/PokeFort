@@ -49,7 +49,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000 || (user.Admin != undefined && user.Admin > 3) || (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true)) {
+                        if ((args[1] != undefined && args[1] == "--g") || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 1800000 || (user.Admin != undefined && user.Admin > 3) || (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true)) {
 
                             // Remove me on release...
                             if (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true) {
@@ -176,7 +176,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                         else {
                             // Get time left until next raid spawn in hh:mm:ss format.
-                            var time_left = new Date(last_raid_time + 10800000 - Date.now());
+                            var time_left = new Date(last_raid_time + 1800000 - Date.now());
                             var time_left_string = time_left.getUTCHours().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
                             return message.channel.send(`Time left to be able to spawn a raid: ${time_left_string}`);
                         }
@@ -584,11 +584,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var footer_string = "";
             var last_raid_time = user.Raids.SpawnTimestamp;
 
-            if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 10800000) {
+            if (last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 1800000) {
                 footer_string = `Use ${prefix}raid spawn to spawn a raid.`;
             } else {
                 // Get time left until next raid spawn in hh:mm:ss format.
-                var time_left = new Date(last_raid_time + 10800000 - Date.now());
+                var time_left = new Date(last_raid_time + 1800000 - Date.now());
                 footer_string = "Time left to be able to spawn a raid: " + time_left.getUTCHours().toString().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
             }
 
