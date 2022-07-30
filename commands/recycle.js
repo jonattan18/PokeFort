@@ -73,6 +73,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--hisuian"))) { hisuian(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+                                else if (new_args.length == 1 && (_.isEqual(new_args[0], "--gmax") || _.isEqual(new_args[0], "--gigantamax"))) { gigantamax(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--mega"))) { mega(new_args); }
                                 else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
                                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
@@ -105,12 +106,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 if (j == total_args.length - 1) { recycle(message, pokemons, user_pokemons, prefix, user); }
                             }
 
-                            // For pk --shiny command.
+                            // For r --shiny command.
                             function shiny(args) {
                                 user_pokemons = user_pokemons.filter(pokemon => pokemon.Shiny);
                             }
 
-                            // For pk --legendary command.
+                            // For r --legendary command.
                             function legendary(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -122,7 +123,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --mythical command.
+                            // For r --mythical command.
                             function mythical(args) {
                                 if (args.length == 1 && args[0] == '--mythical' || args[0] == "--m") {
                                     var filtered_pokemons = [];
@@ -136,7 +137,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 }
                             }
 
-                            // For pk --ultrabeast command.
+                            // For r --ultrabeast command.
                             function ultrabeast(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -148,7 +149,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --alolan command.
+                            // For r --alolan command.
                             function alolan(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -160,7 +161,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --hisuian command.
+                            // For r --hisuian command.
                             function hisuian(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -172,7 +173,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --galarian command.
+                            // For r --galarian command.
                             function galarian(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -184,7 +185,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --mega command.
+                            // For r --gigantamax command.
+                            function gigantamax(args) {
+                                var filtered_pokemons = [];
+                                for (i = 0; i < user_pokemons.length; i++) {
+                                    var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                                    if (pokemon_db["Alternate Form Name"] === "Gigantamax") {
+                                        filtered_pokemons.push(user_pokemons[i]);
+                                    }
+                                }
+                                user_pokemons = filtered_pokemons;
+                            }
+
+                            // For r --mega command.
                             function mega(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -196,12 +209,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --favourite command.
+                            // For r --favourite command.
                             function favourite(args) {
                                 user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite === true)
                             }
 
-                            // For pk --type command.
+                            // For r --type command.
                             function type(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -213,7 +226,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --name command.
+                            // For r --name command.
                             function name(args) {
                                 var filtered_pokemons = [];
                                 for (i = 0; i < user_pokemons.length; i++) {
@@ -226,7 +239,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 user_pokemons = filtered_pokemons;
                             }
 
-                            // For pk --nickname command.
+                            // For r --nickname command.
                             function nickname(args) {
                                 if (args.length == 1) {
                                     user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
@@ -236,7 +249,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 }
                             }
 
-                            // For pk --level command.
+                            // For r --level command.
                             function level(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -257,7 +270,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --iv command.
+                            // For r --iv command.
                             function iv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -278,7 +291,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --hpiv command.
+                            // For r --hpiv command.
                             function hpiv() {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -299,7 +312,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --atkiv command.
+                            // For r --atkiv command.
                             function atkiv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -320,7 +333,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --defiv command.
+                            // For r --defiv command.
                             function defiv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -341,7 +354,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --spatkiv command.
+                            // For r --spatkiv command.
                             function spatkiv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -362,7 +375,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --spdefiv command.
+                            // For r --spdefiv command.
                             function spdefiv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -383,7 +396,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --speediv command.
+                            // For r --speediv command.
                             function spdiv(args) {
                                 var filtered_pokemons = [];
                                 if (args.length == 1) {
@@ -404,7 +417,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --limit command.
+                            // For r --limit command.
                             function limit(args) {
                                 if (args.length == 1) {
                                     return error[1] = [false, "Please specify a value."]
@@ -415,7 +428,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --triple command.
+                            // For r --triple command.
                             function triple(args) {
                                 if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                                     var filtered_pokemons = [];
@@ -425,7 +438,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --quadra command.
+                            // For r --quadra command.
                             function quadra(args) {
                                 if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                                     var filtered_pokemons = [];
@@ -435,7 +448,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --penta command.
+                            // For r --penta command.
                             function penta(args) {
                                 if (parseInt(args[1]) == 31 || parseInt(args[1]) == 0) {
                                     var filtered_pokemons = [];
@@ -445,17 +458,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else { return error[1] = [false, "Invalid argument syntax."] }
                             }
 
-                            // For pk --evolution command.
+                            // For r --evolution command.
                             function evolution(args) {
                                 var filtered_pokemons = [];
                                 var dex_numbers = [];
                                 if (args.length == 2) {
                                     var found_pokemon = pokemons.filter(pokemon => pokemon["Pokemon Name"].toLowerCase() == args[1].toLowerCase())[0];
                                     if (found_pokemon == undefined) { return error[1] = [false, "Invalid pokémon name."] }
-                
+
                                     // Push Pokemon Id Of all dex number of the found pokemon to the filtered_pokemons array.
                                     dex_numbers.push(found_pokemon["Pokedex Number"]);
-                
+
                                     if (found_pokemon.Evolution != undefined && found_pokemon.Evolution.Reason == "Level") {
                                         var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == found_pokemon.Evolution.Id)[0];
                                         dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
@@ -465,7 +478,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         }
                                     }
-                
+
                                     var pre_found_pokemon = pokemons.filter(pokemon => pokemon.Evolution.Id == found_pokemon["Pokemon Id"])[0];
                                     if (pre_found_pokemon != undefined && pre_found_pokemon.Evolution.Reason == "Level") {
                                         var found_pokemon_dex_number = pokemons.filter(pokemon => pokemon["Pokemon Id"] == pre_found_pokemon["Pokemon Id"])[0];
@@ -476,7 +489,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             dex_numbers.push(found_pokemon_dex_number["Pokedex Number"]);
                                         }
                                     }
-                
+
                                     // Get Ids for all the dex numbers.
                                     dex_numbers.forEach(dex_number => {
                                         var found_pokemon = pokemons.filter(pokemon => pokemon["Pokedex Number"] == dex_number);

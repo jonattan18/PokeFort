@@ -4,6 +4,7 @@
     "BOT_TOKEN_TEST": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
     "MONGO_URI": "mongodb://jonattan:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
     "ADMIN_COMMAND_SERVER": "925788851442692176",
+    "ERROR_FILE_SAVE_LOCATION": "./error.json",
     "LOAD_BALANCER": false,
     "WORKERS" : [ "http://192.168.29.69:1001", "http://192.168.29.69:1002", "http://192.168.29.69:1003"],
     "DEFAULT_PREFIX": "p!",

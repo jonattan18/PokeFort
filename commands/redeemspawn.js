@@ -71,7 +71,12 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, user) {
 
     // Pokemon Nature
     let random_nature = getRandomInt(1, 26);
-    let pokemon_shiny = getRandomInt(1, 1000) > 950 ? true : false;
+    var pokemon_shiny = false;
+    if (getRandomInt(1, 2000) > 1990) {
+        if (getRandomInt(0, 1000) > 990) {
+            pokemon_shiny = true;
+        }
+    }
 
     // IV creation
     var IV = [];

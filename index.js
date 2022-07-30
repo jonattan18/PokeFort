@@ -98,10 +98,19 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 
 // Prevent crash and send err logs to console
 process.on('uncaughtException', function (err) {
-
-    // Error handler
+    // Ignore discord permission error.
+    if (err.name.toString().startsWith("DiscordAPIError") && err.message.toString().startsWith("Missing Permission")) return;
     console.log(err);
-    
+    var error_json = {
+        time: new Date().toLocaleString(),
+        timestamp: new Date().getTime(),
+        name: err.name.toString(),
+        message: err.message.toString(),
+        stack: err.stack.toString()
+    }
+    fs.writeFile(config.ERROR_FILE_SAVE_LOCATION, JSON.stringify(error_json), { flag: 'a+' }, function (err) {
+        if (err) return;
+    });
 });
 
 var global_worker = config.WORKERS.slice(0);

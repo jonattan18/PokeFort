@@ -15,10 +15,14 @@
             "Search options for market searching. `p!help 5`\n\n",
             "**Page 6 | Shop and Others!**\n",
             "Shop commands and some misc commands. `p!help 6`\n\n",
-            "**Page 7 | Duelling**\n",
+            "**Page 7 | Duelling!**\n",
             "How to duel with your pokémon. `p!help 7`\n\n",
-            "**Page 8 | Bot and Server commands!**\n",
-            "Bot commands and server commands. `p!help 8`\n\n"
+            "**Page 8 | Raid!**\n",
+            "Create your own powerful teams and beat the raid boss along with your friends. `p!help 8`\n\n",
+            "**Page 9 | Auction!**\n",
+            "How to join the global auction, buy and sell special pokémons. `p!help 9`\n\n",
+            "**Page 10 | Bot commands!**\n",
+            "Bot commands and server commands. `p!help 10`\n\n"
 
         ],
         "footer": "Need more help? Join the official server by using the p!server command!",
@@ -33,8 +37,25 @@
         ],
         "title": "Getting Started!",
         "description": [
-            "How to get started on the bot and dex commands.",
-            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon."
+            "How to get started on the bot and dex commands.\n\n",
+            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon.\n\n",
+            "**p!pick** | Once you've done the start command. You can pick from any of the starters across all of the generations.\n\n",
+            "**p!catch** <Pokemon Name> | When a wild Pokemon spawns, you will use this command and the correct name to catch it.\n\n",
+            "**p!hint** | Will display a hint to the currently spawned Pokemon.\n\n",
+            "**p!select** <Pokemon Number> | Selects which Pokemon will receive XP from chatting and which will battle.\n\n",
+            "**p!select latest** | Selects your most recently caught or redeemed Pokemon.\n\n",
+            "**p!nickname** <nickname> | Gives a nickname to your selected Pokemon.\n\n",
+            "**p!info** | Displays the information of your SELECTED Pokemon.\n\n",
+            "**p!info latest** | Displays the information of the LATEST Pokemon you've caught.\n\n",
+            "**p!info** <Pokemon Number> | Displays the information of the Pokemon attached to this number.\n\n",
+            "**p!dex** <Pokemon Name> | Display a Pokemon with its base stats.\n\n",
+            "**p!dex shiny** <Pokemon Name> | Displays a shiny version of a Pokemon with its base stats.\n\n",
+            "**p!dex** | Displays your Pokedex.\n\n",
+            "**p!dex --caught** | Displays the caught Pokemon.\n\n",
+            "**p!dex --uncaught** | Displays the uncaught Pokemon.\n\n",
+            "**p!dex --rewards** | Displays all your dex rewards.\n\n",
+            "**p!dex claim** <Reward Name> | Collects the specified reward.\n\n",
+            "**p!dex claim all** | Collects all your dex rewards.\n\n"
         ],
         "footer": "Need more help? Join the official server by using the p!server command!",
         "send_dm": true
@@ -50,7 +71,88 @@
         "title": "Basic Commands",
         "description": [
             "The main commands for the bot and pokemon commands.",
-            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon."
+            "**p!daily** | Allows you to vote for the Pokéfort server on the Discord Bots site. You get 100 - 1000 credit for doing this every 12 hours.\n\n",
+            "**p!silence** | Toggles your level up messages.\n\n",
+            "**p!dm** | "
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    },
+    {
+        "aliases": [
+            3,
+            "three",
+            "trading",
+            "trading!",
+            "page 3"
+        ],
+        "title": "Trading!",
+        "description": [
+            "How to trade Pokémon, redeems and credits on the bot.\n\n",
+            "**p!trade @User** | Begins a trade with someone. They will then have to do p!accept to do the trade or p!deny to reject it.\n\n",
+            "**p!p add** <Pokemon numbers, seperated by spaces> | Add one or multiple Pokemon to your trade offer.\n\n",
+            "**p!p remove** <Pokemon numbers, seperated by spaces> | Remove one or multiple Pokemon from your trade offer.\n\n",
+            "**p!c add** <Amount> | Add credits to your trade offer.\n\n",
+            "**p!c remove** <Amount> | Remove credits from your trade offer.\n\n",
+            "**p!r add** <Amount> | Add a redeem to your trade offer.\n\n",
+            "**p!r remove** <Amount> | Remove a redeem from your trade offer.\n\n",
+            "**p!confirm** | Confirm the trade, both users must confirm for the trade to go through.\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    },
+    {
+        "aliases": [
+            4,
+            "four",
+            "market",
+            "market!",
+            "page 4"
+        ],
+        "title": "Market!",
+        "description": [
+            "How to buy and sell pokémon using the market.\n\n",
+            "**p!market search** <Page number> | Show the requested page of the market.\n\n",
+            "**p!market search** <Page number> <Search Options> <Order Option> | Search the market.\n\n",
+            "**p!market view** <Pokemon ID> | View detailed information for a Pokemon on the market.\n\n",
+            "**p!market info** <Pokemon ID> | Alternative to view.\n\n",
+            "**p!market list** <Pokemon Number> <Price> | List a pokémon on the market.\n\n",
+            "**p!market buy** <Pokemon ID> | Buy a Pokemon from the market. You will need to confirm your purchase with p!confirmbuy or cancel it with p!cancel.\n\n`",
+            "**p!market remove** <Pokemon ID> | Remove one of your Pokemon from the market.\n\n",
+            "**p!market listings** <Page number> | Display the Pokemon you have listed on the market.\n\n",
+            "**Order Options**\n\n",
+            "--order id ascending/descending | Order results by Pokemon ID.\n\n",
+            "--order lvl ascending/descending | Order results by Pokemon level.\n\n",
+            "--order price ascending/descending | Order results by price.\n\n",
+            "--order iv ascending/descending | Order by the sum of the Pokemon's IVs.\n\n",
+            "--order name ascending/descending | Order results by name.\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the p!server command!",
+        "send_dm": true
+    },
+    {
+        "aliases": [
+            5,
+            "five",
+            "search options",
+            "search options!",
+            "page 5"
+        ],
+        "title": "Search Options!",
+        "description": [
+            "Search options for market searching.\n\n",
+            "**--name** <name> | Search for Pokemon by name\n\n",
+            "**--level** <level> or < / > <level> | Search for Pokemon by level.\n\n",
+            "**--holding** <holding> | Search for Pokemon by the item they are holding.\n\n",
+            "**--type** <type> | Search for Pokemon by type.\n\n",
+            "**--price** <price> or < / > <price>  | Search for Pokemon with a specific price.\n\n",
+            "**--hpiv** <IV> or < / > <IVl> | Search for Pokemon by their HP IV.\n\n",
+            "**--atkiv** <IV> or < / > <IV> | Search for Pokemon by their Attack IV.\n\n",
+            "**--defiv** <IV> or < / > <IV> | Search for Pokemon by their Defense IV.\n\n",
+            "**--spatkiv** <IV> or < / > <IV> | Search for Pokemon by their Special Attack IV.\n\n",
+            "**--spdefiv** <IV>or < / > <IV> | Search for Pokemon by their Special Defense IV.\n\n",
+            "**--speediv** <IV> or < / > <IV> | Search for Pokemon by their Speed IV.\n\n",
+            "**--shiny** | Search for shiny Pokemon. \n\n"
         ],
         "footer": "Need more help? Join the official server by using the p!server command!",
         "send_dm": true

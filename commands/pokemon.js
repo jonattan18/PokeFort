@@ -93,6 +93,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     else if (new_args.length == 1 && (_.isEqual(new_args[0], "--a") || _.isEqual(new_args[0], "--alolan"))) { alolan(new_args); }
                     else if (new_args.length == 1 && (_.isEqual(new_args[0], "--h") || _.isEqual(new_args[0], "--hisuian"))) { hisuian(new_args); }
                     else if (new_args.length == 1 && (_.isEqual(new_args[0], "--g") || _.isEqual(new_args[0], "--galarian"))) { galarian(new_args); }
+                    else if (new_args.length == 1 && (_.isEqual(new_args[0], "--gmax") || _.isEqual(new_args[0], "--gigantamax"))) { gigantamax(new_args); }
                     else if (new_args.length == 1 && (_.isEqual(new_args[0], "--mega"))) { mega(new_args); }
                     else if (new_args.length == 1 && (_.isEqual(new_args[0], "--fav") || _.isEqual(new_args[0], "--favourite"))) { favourite(new_args); }
                     else if (new_args.length == 2 && (_.isEqual(new_args[0], "--t") || _.isEqual(new_args[0], "--type"))) { type(new_args); }
@@ -199,6 +200,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     for (i = 0; i < user_pokemons.length; i++) {
                         var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
                         if (pokemon_db["Alternate Form Name"] === "Galar") {
+                            filtered_pokemons.push(user_pokemons[i]);
+                        }
+                    }
+                    user_pokemons = filtered_pokemons;
+                }
+
+                // For pk --gigantamax command.
+                function gigantamax(args) {
+                    var filtered_pokemons = [];
+                    for (i = 0; i < user_pokemons.length; i++) {
+                        var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == user_pokemons[i].PokemonId)[0];
+                        if (pokemon_db["Alternate Form Name"] === "Gigantamax") {
                             filtered_pokemons.push(user_pokemons[i]);
                         }
                     }

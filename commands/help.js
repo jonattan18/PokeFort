@@ -5,7 +5,7 @@ const help_data = require("../config/help.json");
 
 module.exports.run = async (bot, message, args, prefix) => {
 
-    /*
+    
     var json_data = null;
     // Main page
     if (args.length == 0) {
@@ -27,7 +27,9 @@ module.exports.run = async (bot, message, args, prefix) => {
         message.author.send(embed);
     } else {
         message.channel.send(embed);
-    }*/
+    }
+
+    /*
 
     if (args.length == 0) {
         message.channel.send("We have sent the instructions to you. Check your DMs!");
@@ -226,7 +228,7 @@ module.exports.run = async (bot, message, args, prefix) => {
         embed.setDescription(description);
         embed.setFooter(`Need more help? Join the official server by using the ${prefix}server command!`);
         message.author.send(embed);
-    }
+    } */
 }
 
 // Check if its int
