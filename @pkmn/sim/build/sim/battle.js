@@ -1676,6 +1676,8 @@ class Battle {
                 else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 7);
             }
 
+            targetDamage = targetDamage * 3;
+
             // Added by PokeFort
             // Used to make target damage by 2 if its higher than target maxhp.
             // Used to prevent one hit knockout at first attack
@@ -1932,12 +1934,12 @@ class Battle {
         for (statName in modStats) {
             const stat = baseStats[statName];
             if (set.level > 100 && statName === 'spe') modStats[statName] = 0;
-            else if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
+          /*  else if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
             else if (set.level >= 600 && set.level <= 800) modStats[statName] = tr(tr((0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 2.22) / 2.12);
             else if (set.level >= 1600 && set.level <= 1800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 3.2 / 3.2) + 20);
             else if (set.level >= 2600 && set.level <= 2800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 4) / 3.3);
             else if (set.level >= 3400 && set.level <= 3500) modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 5.2) / 3) + set.ivs[statName]);
-            else modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 5.2) / 3) + set.ivs[statName]);
+           */ else modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level > 100 ? 100 : set.level) / 5.2) / 3) + set.ivs[statName]);
         }
         if ('hp' in baseStats) {
             const stat = baseStats['hp'];
@@ -1977,7 +1979,7 @@ class Battle {
         if (pokemon == undefined) return tr(tr(baseDamage * (100 - this.random(16))) / 100)
         else {
             if (pokemon.level < 101) {
-                return tr(tr(baseDamage * (100 - this.random(16))) / 5);
+                return tr(tr(baseDamage * (100 - this.random(16))) / 100);
             } else {
                 return tr(tr(baseDamage * (100 - this.random(16))) / 1800);
             }
