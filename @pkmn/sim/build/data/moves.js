@@ -6006,13 +6006,14 @@ exports.Moves = {
     futuresight: {
         num: 248,
         accuracy: 100,
-        basePower: 120,
+        basePower: 60, //Added by PokeFort
         category: "Special",
         name: "Future Sight",
         pp: 10,
         priority: 0,
         flags: {},
-        ignoreImmunity: true,
+        //Added by PokeFort
+        /* ignoreImmunity: true,
         isFutureMove: true,
         onTry(source, target) {
             if (!target.side.addSlotCondition(target, 'futuremove'))
@@ -6037,7 +6038,7 @@ exports.Moves = {
             });
             this.add('-start', source, 'move: Future Sight');
             return this.NOT_FAIL;
-        },
+        },*/
         secondary: null,
         target: "normal",
         type: "Psychic",
@@ -9757,11 +9758,11 @@ exports.Moves = {
 
                 //const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, target);
                 var mydamage = Math.floor(pokemon.baseMaxhp / 8);
-                if (pokemon.level >= 200 && pokemon.level <= 300) mydamage = Math.floor(pokemon.baseMaxhp / 70);
-                else if (pokemon.level >= 600 && pokemon.level <= 800) mydamage = Math.floor(pokemon.baseMaxhp / 120);
-                else if (pokemon.level >= 1600 && pokemon.level <= 1800) mydamage = Math.floor(pokemon.baseMaxhp / 220);
-                else if (pokemon.level >= 2600 && pokemon.level <= 2800) mydamage = Math.floor(pokemon.baseMaxhp / 340);
-                else if (pokemon.level >= 3400 && pokemon.level <= 3500) mydamage = Math.floor(pokemon.baseMaxhp / 460);
+                if (pokemon.level >= 200 && pokemon.level <= 300) mydamage = Math.floor(pokemon.baseMaxhp / 200);
+                else if (pokemon.level >= 600 && pokemon.level <= 800) mydamage = Math.floor(pokemon.baseMaxhp / 600);
+                else if (pokemon.level >= 1600 && pokemon.level <= 1800) mydamage = Math.floor(pokemon.baseMaxhp / 1000);
+                else if (pokemon.level >= 2600 && pokemon.level <= 2800) mydamage = Math.floor(pokemon.baseMaxhp / 1500);
+                else if (pokemon.level >= 3400 && pokemon.level <= 3500) mydamage = Math.floor(pokemon.baseMaxhp / 2000);
                 const damage = this.damage(mydamage, pokemon, target);
                 if (damage) {
                     this.heal(damage, target, pokemon);

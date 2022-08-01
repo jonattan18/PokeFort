@@ -369,7 +369,7 @@
         "end": "  [POKEMON] can use items again!"
     },
     "encore": {
-        "start": "  [POKEMON] must do same move!",
+        "start": "  [POKEMON] must do same move for next 3 turns!",
         "end": "  [POKEMON]'s encore ended!"
     },
     "endure": {
@@ -532,7 +532,7 @@
     "naturepower": { "move": "  Nature Power turned into [MOVE]!" },
     "nightmare": {
         "start": "  [POKEMON] began having a nightmare!",
-        "damage": "  [POKEMON] is locked in a nightmare!"
+        "damage": "  [POKEMON] was dealt [DAMAGE] due to nightmare!"
     },
     "noretreat": {
         "start": "  [POKEMON] can no longer escape because it used No Retreat!"

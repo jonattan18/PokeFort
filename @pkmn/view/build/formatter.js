@@ -1,18 +1,18 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
+        desc = { enumerable: true, get: function () { return m[k]; } };
     }
     Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
+}) : (function (o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : function (o, v) {
     o["default"] = v;
 });
 var __importStar = (this && this.__importStar) || function (mod) {
@@ -837,12 +837,16 @@ class Handler {
     '|-weather|'(args, kwArgs) {
         const [, weather] = args;
         let from = kwArgs.from;
-        if (!weather || weather === 'none') {
+        if (!weather || weather.startsWith('none:') || weather === 'none') {
             from = WEATHERS[this.tracker.currentWeather()];
-            const template = this.parser.template('end', from, 'NODEFAULT');
+            let template = this.parser.template('end', from, 'NODEFAULT');
             if (!template) {
-                return (this.parser.template('endFieldEffect')
-                    .replace('[EFFECT]', this.parser.effect(weather)));
+                from = weather.replace('none:', '');
+                template = this.parser.template('end', from, 'NODEFAULT');
+                if (!template) {
+                    return (this.parser.template('endFieldEffect')
+                        .replace('[EFFECT]', this.parser.effect(weather.replace('none:'))));
+                }
             }
             return template;
         }
@@ -974,8 +978,8 @@ class Handler {
 
         if (template)
             return line1 + template
-            .replace('[POKEMON]', this.parser.pokemon(pokemon))
-            .replace('[DAMAGE]', damage);
+                .replace('[POKEMON]', this.parser.pokemon(pokemon))
+                .replace('[DAMAGE]', damage);
         if (!kwArgs.from) {
             template = this.parser.template(percentage ? 'damagePercentage' : 'damagePercentage');
             return (line1 + template

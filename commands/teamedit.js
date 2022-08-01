@@ -6,6 +6,7 @@ const getPokemons = require('../utils/getPokemon');
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (!args.length == 2) { message.channel.send(`You should specifiy slot number and pokémon ID to edit a team!`); return; }
+    if (args.length == 0) { message.channel.send(`You should specifiy slot number and pokémon ID to edit a team!`); return; }
 
     // Int Check
     if (!isInt(args[0]) || args[0] > 6 || args[0] < 1) {

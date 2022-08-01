@@ -63,7 +63,7 @@ exports.Conditions = {
                 this.add('-status', target, 'slp');
             }
             // 1-3 turns
-            this.effectState.startTime = this.random(2, 5);
+            this.effectState.startTime = this.random(4, 5); // Added by pokefort
             this.effectState.time = this.effectState.startTime;
         },
         onBeforeMovePriority: 10,
@@ -507,7 +507,7 @@ exports.Conditions = {
             this.eachEvent('Weather');
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:RainDance');
         },
     },
     primordialsea: {
@@ -540,7 +540,7 @@ exports.Conditions = {
             this.eachEvent('Weather');
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:PrimordialSea');
         },
     },
     sunnyday: {
@@ -587,7 +587,7 @@ exports.Conditions = {
             this.eachEvent('Weather');
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:SunnyDay');
         },
     },
     desolateland: {
@@ -626,7 +626,7 @@ exports.Conditions = {
             this.eachEvent('Weather');
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:DesolateLand');
         },
     },
     sandstorm: {
@@ -667,7 +667,7 @@ exports.Conditions = {
             this.damage(target.baseMaxhp / 16);
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:Sandstorm');
         },
     },
     hail: {
@@ -700,7 +700,7 @@ exports.Conditions = {
             this.damage(target.baseMaxhp / 16);
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:Hail');
         },
     },
     deltastream: {
@@ -723,7 +723,7 @@ exports.Conditions = {
             this.eachEvent('Weather');
         },
         onFieldEnd() {
-            this.add('-weather', 'none');
+            this.add('-weather', 'none:DeltaStream');
         },
     },
     dynamax: {

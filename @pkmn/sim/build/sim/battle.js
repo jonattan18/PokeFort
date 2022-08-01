@@ -1669,20 +1669,22 @@ class Battle {
 
             // Custom Weather and status modifier.
             if (effect.effectType != 'Move') {
-                if (target.level >= 200 && target.level <= 300) targetDamage = Math.floor(targetDamage / 4);
-                else if (target.level >= 600 && target.level <= 800) targetDamage = Math.floor(targetDamage / 5);
-                else if (target.level >= 1600 && target.level <= 1800) targetDamage = Math.floor(targetDamage / 6);
-                else if (target.level >= 2600 && target.level <= 2800) targetDamage = Math.floor(targetDamage / 6);
-                else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 7);
+                if (target.level >= 200 && target.level <= 300) targetDamage = Math.floor(targetDamage / 6);
+                else if (target.level >= 600 && target.level <= 800) targetDamage = Math.floor(targetDamage / 8);
+                else if (target.level >= 1600 && target.level <= 1800) targetDamage = Math.floor(targetDamage / 12);
+                else if (target.level >= 2600 && target.level <= 2800) targetDamage = Math.floor(targetDamage / 14);
+                else if (target.level >= 3400 && target.level <= 3500) targetDamage = Math.floor(targetDamage / 14);
             }
+
+            targetDamage = targetDamage * 3;
 
             // Added by PokeFort
             // Used to make target damage by 2 if its higher than target maxhp.
             // Used to prevent one hit knockout at first attack
             // Added to prevent leech seed from not working.
-            if (target.level <= 100 && targetDamage > target.maxhp) {
-                targetDamage = Math.floor(targetDamage / 2)
-            }
+            // if (target.level <= 100 && targetDamage > target.maxhp) {
+            //    targetDamage = Math.floor(targetDamage / 2)
+            // }
             /*  if (target.level <= 100 && targetDamage > target.maxhp) {
                   if (targetDamage <= 600) targetDamage = Math.floor(targetDamage / 2);
                   else if (targetDamage > 600 && targetDamage <= 1000) targetDamage = Math.floor(targetDamage / 3);
@@ -1932,12 +1934,13 @@ class Battle {
         for (statName in modStats) {
             const stat = baseStats[statName];
             if (set.level > 100 && statName === 'spe') modStats[statName] = 0;
-            else if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
-            else if (set.level >= 600 && set.level <= 800) modStats[statName] = tr(tr((0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 2.22) / 2.12);
-            else if (set.level >= 1600 && set.level <= 1800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 3.2 / 3.2) + 20);
-            else if (set.level >= 2600 && set.level <= 2800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 4) / 3.3);
-            else if (set.level >= 3400 && set.level <= 3500) modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 5.2) / 3) + set.ivs[statName]);
-            else modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 5.2) / 3) + set.ivs[statName]);
+            /*  else if (set.level >= 200 && set.level <= 300) modStats[statName] = tr(tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 1.81);
+              else if (set.level >= 600 && set.level <= 800) modStats[statName] = tr(tr((0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 2.22) / 2.12);
+              else if (set.level >= 1600 && set.level <= 1800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 3.2 / 3.2) + 20);
+              else if (set.level >= 2600 && set.level <= 2800) modStats[statName] = tr((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 4) / 3.3);
+              else if (set.level >= 3400 && set.level <= 3500) modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level) / 5.2) / 3) + set.ivs[statName]);
+              else */
+            else modStats[statName] = tr(((tr(0.01 * (2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level > 100 ? 100 : set.level) / 5.2) / 3) + set.ivs[statName]);
         }
         if ('hp' in baseStats) {
             const stat = baseStats['hp'];
@@ -1976,10 +1979,14 @@ class Battle {
         const tr = this.trunc;
         if (pokemon == undefined) return tr(tr(baseDamage * (100 - this.random(16))) / 100)
         else {
-            if (pokemon.level < 101) {
-                return tr(tr(baseDamage * (100 - this.random(16))) / 5);
-            } else {
-                return tr(tr(baseDamage * (100 - this.random(16))) / 1800);
+            if (pokemon == undefined) return tr(tr(baseDamage * (100 - this.random(16))) / 100)
+            else {
+                if (pokemon.level < 101) return tr(tr(baseDamage * (100 - this.random(16))) / 100);
+                else if (pokemon.level >= 200 && pokemon.level <= 300) return tr(tr(baseDamage * (100 - this.random(16))) / 500);
+                else if (pokemon.level >= 600 && pokemon.level <= 800) return tr(tr(baseDamage * (100 - this.random(16))) / 1000);
+                else if (pokemon.level >= 1600 && pokemon.level <= 1800) return tr(tr(baseDamage * (100 - this.random(16))) / 1500);
+                else if (pokemon.level >= 2600 && pokemon.level <= 2800) return tr(tr(baseDamage * (100 - this.random(16))) / 2000);
+                else if (pokemon.level >= 3400 && pokemon.level <= 3500) return tr(tr(baseDamage * (100 - this.random(16))) / 3000);
             }
         }
     }

@@ -472,30 +472,35 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
     if (raid_data.RaidPokemon.RaidStream != undefined && raid_data.RaidPokemon.RaidStream.raidside != undefined) {
 
         // Field changes.
-        var field = JSON.parse(raid_data.RaidPokemon.RaidStream.field);
+        if (raid_data.RaidPokemon.RaidStream.field != undefined) {
+            var field = JSON.parse(raid_data.RaidPokemon.RaidStream.field);
 
-        // Weather changes.
-        if (field.weather != "") {
-            var weather = Dex.conditions.dex.conditions.get(field.weather);
-            weather.duration = field.weatherState.duration;
-            _battlestream.battle.field.setWeather(weather, _battlestream.battle.sides[0].pokemon[0]);
+            // Weather changes.
+            if (field.weather != "") {
+                var weather = Dex.conditions.dex.conditions.get(field.weather);
+                weather.duration = field.weatherState.duration;
+                _battlestream.battle.field.setWeather(weather, _battlestream.battle.sides[0].pokemon[0]);
+            }
+
+            // Terrain changes.
+            if (field.terrain != "") {
+                var terrain = Dex.conditions.dex.conditions.get(field.terrain);
+                _battlestream.battle.field.setTerrain(terrain, _battlestream.battle.sides[0].pokemon[0]);
+            }
         }
 
-        // Terrain changes.
-        if (field.terrain != "") {
-            var terrain = Dex.conditions.dex.conditions.get(field.terrain);
-            _battlestream.battle.field.setTerrain(terrain, _battlestream.battle.sides[0].pokemon[0]);
+        if (raid_data.RaidPokemon.RaidStream.raidside != undefined) {
+
+            // Raid Boss status changes.
+            var raidside = JSON.parse(raid_data.RaidPokemon.RaidStream.raidside).pokemon[0];
+
+            // Hp changes.
+            _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
+
+            // Status changes.
+            if (raidside.status != "") _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
+
         }
-
-        // Raid Boss status changes.
-        var raidside = JSON.parse(raid_data.RaidPokemon.RaidStream.raidside).pokemon[0];
-
-        // Hp changes.
-        _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
-
-        // Status changes.
-        if (raidside.status != "") _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
-
     }
 
     //#endregion
@@ -702,7 +707,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                 var battle_stream_pokemon_name = _battlestream.battle.sides[0].pokemon[0].name;
                                 var index_of_r = battle_stream_pokemon_name.indexOf("_r");
                                 if (index_of_r != -1) battle_stream_pokemon_name = battle_stream_pokemon_name.substring(0, index_of_r);
-                                
+
                                 var embed = new Discord.MessageEmbed();
                                 embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
                                 embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);

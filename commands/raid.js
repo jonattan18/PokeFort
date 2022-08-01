@@ -59,7 +59,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             }
 
                             // Decide raid boss based on random.
-                            if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
+                            if (args[1] != undefined && args[1] == "--g") var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax" && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
                             else var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
                             var raid_boss = raid_pokemons[Math.floor(Math.random() * raid_pokemons.length)];
                             var raid_boss_name = getPokemons.get_pokemon_name_from_id(raid_boss["Pokemon Id"], pokemons, false);
@@ -379,12 +379,89 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             raid.CurrentDuel = undefined;
                             raid.ChangeOnFainted = undefined;
                             raid.OldStreamText = undefined;
+
+                            // Save HP
+                            var save_data_raid_stream = {
+                                pokemon: [
+                                    {
+                                        hp: raid.RaidPokemon.Health,
+                                        maxhp: raid.RaidPokemon.MaxHealth
+                                    }]
+                            }
+                            raid.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
                         }
+
                         raid.save().then(() => {
                             user.save().then(() => {
                                 message.channel.send(`You have left the raid.`);
                             });
                         });
+                    }
+                });
+            }
+            else return message.channel.send("You are not in a raid.");
+        });
+    }
+    else if (args.length == 1 && args[0].toLowerCase() == "cancel") {
+        // User check if raid scheme has trainer included.
+        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            if (err) { console.log(err); return; }
+            if (raid) {
+                // Get user data.
+                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                    if (err) { console.log(err); return; }
+                    if (user) {
+                        if (raid.CurrentDuel == message.author.id) {
+                            // Check if other user exists.
+                            raid.CompletedDuel.push(message.author.id);
+
+                            // Find a user which has not completed duel.
+                            var non_battled_user = raid.Trainers.filter(x => !raid.CompletedDuel.includes(x) && x != null);
+                            if (non_battled_user.length > 0) {
+                                raid.CurrentDuel = undefined;
+                                raid.TrainersTeam = undefined;
+                                raid.OldStreamText = 0;
+                                raid.CurrentTurn = 0;
+                                raid.markModified('TrainersTeam');
+
+                                // Save HP
+                                var save_data_raid_stream = {
+                                    pokemon: [
+                                        {
+                                            hp: raid.RaidPokemon.Health,
+                                            maxhp: raid.RaidPokemon.MaxHealth
+                                        }]
+                                }
+                                raid.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
+                                raid_data.markModified('RaidPokemon');
+
+
+                                raid.CurrentDuel = undefined;
+                                raid.ChangeOnFainted = undefined;
+                                raid.OldStreamText = undefined;
+
+                                raid.save().then(() => {
+                                    user.save().then(() => {
+                                        message.channel.send(`You have cancelled the raid duel.`);
+                                    });
+                                });
+                            }
+                            else {
+                                raid.remove().then(() => {
+                                    var channel_embed = new Discord.MessageEmbed();
+                                    channel_embed.setTitle(`Raid Boss Won!`);
+                                    channel_embed.setDescription(`Since there was no one to battle, the raid boss has won the raid.`);
+                                    channel_embed.setColor(message.guild.me.displayHexColor);
+                                    message.channel.send(channel_embed);
+                                    // Send Dm message to all users.
+                                    for (var i = 0; i < raid.Trainers.length; i++) {
+                                        if (raid.Trainers[i]) {
+                                            if (!raid.MutedTrainers.includes(raid.Trainers[i])) bot.users.cache.get(raid.Trainers[i]).send(`The ${raid.RaidPokemon.Name} raid was not completed. Try better next time!`);
+                                        }
+                                    }
+                                });
+                            }
+                        } else return message.channel.send(`You are not in a raid duel.`);
                     }
                 });
             }
@@ -491,15 +568,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     var received_data = chunk.split('\n');
                                     if (received_data.includes("|start")) {
                                         raid.Stream = _battleStream.battle.inputLog.join('\n');
-                                        raid.UserStreamPokemons = JSON.stringify(_battleStream.battle.sides[0].pokemon);
+                                        raid.UserStreamPokemons = _battleStream.battle.sides[0].pokemon.filter(x => x.set.name != undefined).map(x => x.set.name);
                                         raid.save().then(() => {
                                             // Get image url of raid boss.
                                             var raid_boss_image_data = raid.RaidPokemon.Image;
 
                                             var raidside = null;
                                             if (raid.RaidPokemon.RaidStream != undefined && raid.RaidPokemon.RaidStream.raidside != undefined) {
-                                                _battleStream.battle.field = JSON.parse(raid.RaidPokemon.RaidStream.field);
-                                                raidside = JSON.parse(raid.RaidPokemon.RaidStream.raidside);
+                                                if (raid.RaidPokemon.RaidStream.field != undefined) {
+                                                    _battleStream.battle.field = JSON.parse(raid.RaidPokemon.RaidStream.field);
+                                                }
+                                                if (raid.RaidPokemon.RaidStream.raidside != undefined) {
+                                                    raidside = JSON.parse(raid.RaidPokemon.RaidStream.raidside);
+                                                }
                                             } else raidside = _battleStream.battle.sides[1];
 
                                             // Background image url.
