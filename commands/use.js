@@ -521,9 +521,8 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
         }
         else {
             var show_str = [];
-            // var next_turn = 0;
-
-            for (const { args, kwArgs } of Protocol.parse(_battlestream.battle.log.join('\n'))) {
+            var battle_log = _battlestream.battle.log.filter(function(item, pos, arr) { return pos === 0 || item !== arr[pos-1]; }).join('\n');
+            for (const { args, kwArgs } of Protocol.parse(battle_log)) {
                 var formatted = formatter.formatText(args, kwArgs);
 
                 // Execption

@@ -343,6 +343,7 @@ function buycandy(message, args, pokemons) {
             }
             //#endregion
             else {
+                var final_message = "";
                 if (pokemon_level == 100 || pokemon_level > 100) {
                     return message.channel.send("This pokémon reached max level!");
                 }
@@ -350,7 +351,7 @@ function buycandy(message, args, pokemons) {
                 if (pokemon_level + purchased_candy > 100) {
                     level_to_updated = 100 - pokemon_level;
                     purchased_candy = level_to_updated;
-                    message.channel.send(`Your Pokémon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!`);
+                    final_message = `Your Pokémon reached max level with ${level_to_updated} candy(s).\nPurchased only ${level_to_updated} candy(s)!\n`
                 }
 
                 var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
@@ -426,8 +427,10 @@ function buycandy(message, args, pokemons) {
                 });
                 //#endregion
 
-                if (evolved) message.channel.send(`${old_pokemon_name} evolved into ${new_evolved_name}!\nYour ${new_evolved_name} is now level ${pokemon_level}!`);
-                else message.channel.send(`Your ${old_pokemon_name} is now level ${pokemon_level}!`);
+                if (evolved) final_message += `${old_pokemon_name} evolved into ${new_evolved_name}!\nYour ${new_evolved_name} is now level ${pokemon_level}!`;
+                else final_message += `Your ${old_pokemon_name} is now level ${pokemon_level}!`;
+
+                message.channel.send(final_message);
 
                 user.PokeCredits -= 70 * purchased_candy;
                 user.save()
@@ -717,9 +720,6 @@ function buyberry(message, args, pokemons, amount = 1) {
                 var spattack_ev = evs[3] != undefined ? evs[3] : 0;
                 var spdefense_ev = evs[4] != undefined ? evs[4] : 0;
                 var speed_ev = evs[5] != undefined ? evs[5] : 0;
-                var total_ev = hp_ev + attack_ev + defense_ev + spattack_ev + spdefense_ev + speed_ev;
-
-                if (total_ev >= 510) return message.channel.send("This pokémon already has the maximum amount of EVs!");
                 var ev_changes = [];
 
                 // Health Ev

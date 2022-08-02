@@ -13,7 +13,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
         if (args.length == 0) {
             var team = user.Teams.filter(team => team.Selected == true)[0];
-            if (team == undefined) {
+            if (team == undefined || team.length == 0) {
                 return message.channel.send(`You should select a team first!`);
             }
             else {

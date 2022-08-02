@@ -212,6 +212,13 @@ client.on('message', async (message) => {
     var args = messageArray.slice(1);
     args = args.filter(function (e) { return e }); // Remove empty values from args
 
+    // Adding support for — (double dash)
+    for (var i = 0; i < args.length; i++) {
+        if (args[i].includes("—")) {
+            args[i] = args[i].replace("—", "--");
+        }
+    }
+
     //Getting Prefix from database
     await guild_model.findOne({ GuildID: message.guild.id }, (err, guild) => {
         if (err) return console.log(err);
@@ -243,30 +250,32 @@ client.on('message', async (message) => {
             new_channel.save();
         }
         else {
-            // Update message count
-            // [SPAM SYSTEM]
-            //   if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
+            if (!message.content.toLowerCase().startsWith(prefix)) {
+                // Update message count
+                // [SPAM SYSTEM]
+                //   if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
 
-            //Caching last message user.
-            channel_message_cache[message.channel.id] = message.author.id;
-            channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-                let channel_id = message.channel.id;
-                var message_count = channel.MessageCount + 1;
-                var spawn_limit = channel.SpawnLimit;
-                if (spawn_limit == 0) {
-                    spawn_limit = getRandomInt(10, 20);
-                }
-                if (spawn_limit == message_count) {
-                    spawn_limit = 0;
-                    message_count = 0;
-                    spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
-                }
+                //Caching last message user.
+                channel_message_cache[message.channel.id] = message.author.id;
+                channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                    let channel_id = message.channel.id;
+                    var message_count = channel.MessageCount + 1;
+                    var spawn_limit = channel.SpawnLimit;
+                    if (spawn_limit == 0) {
+                        spawn_limit = getRandomInt(10, 20);
+                    }
+                    if (spawn_limit == message_count) {
+                        spawn_limit = 0;
+                        message_count = 0;
+                        spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
+                    }
 
-                channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
-                    if (err) { console.log(err) }
+                    channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
+                        if (err) { console.log(err) }
+                    });
                 });
-            });
-            //   }
+                //   }
+            }
         }
     });
     //#endregion

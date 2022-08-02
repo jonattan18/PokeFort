@@ -126,9 +126,11 @@ exports.Conditions = {
         },
     },
     psn: {
+        // Modified By Pokefort
         name: 'psn',
         effectType: 'Status',
         onStart(target, source, sourceEffect) {
+            this.effectState.stage = 32;
             if (sourceEffect && sourceEffect.effectType === 'Ability') {
                 this.add('-status', target, 'psn', '[from] ability: ' + sourceEffect.name, '[of] ' + source);
             }
@@ -136,9 +138,16 @@ exports.Conditions = {
                 this.add('-status', target, 'psn');
             }
         },
+        onSwitchIn() {
+            this.effectState.stage = 32;
+        },
         onResidualOrder: 9,
         onResidual(pokemon) {
-            this.damage(pokemon.baseMaxhp / 8);
+            if (this.effectState.stage > 14) {
+                this.effectState.stage--;
+            }
+            console.log(this.effectState.stage);
+            this.damage(pokemon.baseMaxhp / this.effectState.stage);
         },
     },
     tox: {

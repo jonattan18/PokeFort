@@ -10,10 +10,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     // Int Check
     if (!isInt(args[0]) || args[0] > 6 || args[0] < 1) {
-        return message.channel.send(`_${args[i]}_ is not a valid slot number!`);
+        return message.channel.send(`That was not a valid slot number!`);
     }
     if (!isInt(args[1])) {
-        return message.channel.send(`_${args[i]}_ is not a valid pokémon ID!`);
+        return message.channel.send(`That was not a valid pokémon ID!`);
     }
 
     // Edit Team.
