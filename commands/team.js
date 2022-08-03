@@ -62,5 +62,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 module.exports.config = {
     name: "team",
+    description: "Shows your team!",
     aliases: []
 }

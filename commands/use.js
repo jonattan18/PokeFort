@@ -43,7 +43,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
         else {
 
-            message.delete();
+            // message.delete();
             var duel_data = prompt.Duel;
             var user1_data = duel_data.User1Pokemon;
             var user2_data = duel_data.User2Pokemon;

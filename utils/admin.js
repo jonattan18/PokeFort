@@ -6,8 +6,8 @@ var System = HiAdmin.concat(["sysstat", "dbstat"]);
 var Cardinal = System.concat([]);
 var Architecture = Cardinal.concat([]);
 
-function iseligible(level, cmd, message) {
-    if ((message.mentions.users.first() || message.author).bot) return false;
+function iseligible(level, cmd, interaction) {
+    //if ((interaction.mentions.users.first() || interaction.author).bot) return false;
     cmd = cmd.toLowerCase();
     if (level == "0") return false;
     else if (level == "1" && moderator.includes(cmd)) return true;

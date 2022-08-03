@@ -14,7 +14,7 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
         var current_page = pages.CurrentPage;
         var total_pages = embed.length;
 
-        message.delete(); // Remove next command sent by user.
+        // message.delete(); // Remove next command sent by user.
 
         if (current_page == 0) return message.channel.send(`You are on the first page!`);
         else { current_page--; }

@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For Embedded Message.
+const Discord = require('discord.js'); // For Embedded.
 const _ = require('lodash');
 const sharp = require('sharp');
 
@@ -11,37 +11,37 @@ const raid_model = require('../models/raids');
 const getPokemons = require('../utils/getPokemon');
 const moveparser = require('../utils/moveparser');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    prompt_model.findOne({ $and: [{ "UserID.User2ID": message.author.id }, { "ChannelID": message.channel.id }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ "UserID.User2ID": interaction.user.id }, { "ChannelID": interaction.channel.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!prompt) return message.channel.send('No prompt asked for to use ``accept`` command.');
+        if (!prompt) return interaction.reply({ content: 'No prompt asked for to use ``accept`` command.', ephemeral: true });
 
         prompt_model.findOne({ $and: [{ "UserID.User1ID": prompt.UserID.User1ID }, { "Trade.Accepted": true }] }, (err, _trade) => {
             if (err) return console.log(err);
-            if (_trade) return message.channel.send('Requested User is already trading with someone!');
+            if (_trade) return interaction.reply({ content: 'Requested User is already trading with someone!', ephemeral: true });
 
             prompt_model.findOne({ $and: [{ "UserID.User1ID": prompt.UserID.User1ID }, { "Duel.Accepted": true }] }, (err, _duel) => {
                 if (err) return console.log(err);
-                if (_trade) return message.channel.send('Requested User is already dueling with someone!');
+                if (_trade) return interaction.reply({ content: 'Requested User is already dueling with someone!', ephemeral: true });
 
-                raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+                raid_model.findOne({ $and: [{ Trainers: { $in: interaction.user.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
                     if (err) { console.log(err); return; }
-                    if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't do this while you are in a raid!");
+                    if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == interaction.user.id) return interaction.reply({ content: "You can't do this while you are in a raid!", ephemeral: true });
                     else {
                         // If user prompt is for trade.
                         if (prompt.PromptType == "Trade") {
-                            if (prompt.UserID.User2ID == message.author.id && prompt.Trade.Accepted == false) {
-                                return trade(bot, message, prefix, prompt);
+                            if (prompt.UserID.User2ID == interaction.user.id && prompt.Trade.Accepted == false) {
+                                return trade(bot, interaction, prompt);
                             }
                         }
                         else if (prompt.PromptType == "Duel") {
-                            if (prompt.UserID.User2ID == message.author.id && prompt.Duel.Accepted == false) {
-                                return duel(bot, message, prefix, prompt, pokemons);
+                            if (prompt.UserID.User2ID == interaction.user.id && prompt.Duel.Accepted == false) {
+                                return duel(bot, interaction, prompt, pokemons);
                             }
                         }
-                        else return message.channel.send('No prompt asked for to use ``accept`` command.');
+                        else return interaction.reply({ content: 'No prompt asked for to use ``accept`` command.', ephemeral: true });
 
                     }
                 });
@@ -51,7 +51,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function to accept and start duel.
-function duel(bot, message, prefix, prompt, pokemons) {
+function duel(bot, interaction, prompt, pokemons) {
 
     var user1id = prompt.UserID.User1ID;
     var user2id = prompt.UserID.User2ID;
@@ -190,38 +190,35 @@ function duel(bot, message, prefix, prompt, pokemons) {
                                 .toBuffer("jpeg").then((image_buffer) => {
 
                                     prompt.Duel.ImageCache = image_buffer.toString('base64');
-                                    const image_file = new Discord.MessageAttachment(image_buffer, 'img.jpeg');
-
                                     prompt.Duel.Accepted = true;
                                     prompt.save().then(() => {
-                                        embed = new Discord.MessageEmbed();
-                                        embed.setColor(message.guild.me.displayHexColor);
-                                        embed.attachFiles(image_file)
+                                        var embed = new Discord.EmbedBuilder();
+                                        embed.setColor(interaction.guild.members.me.displayHexColor);
                                         embed.setImage('attachment://img.jpeg')
                                         embed.setTitle(`${user1name.toUpperCase()} VS ${user2name.toUpperCase()}`);
 
                                         if (pokemon1_speed >= pokemon2_speed) {
-                                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
-                                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
+                                            embed.addFields([{ name: `${user1name}'s Pokémon`, value: `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, inline: true },
+                                            { name: `${user2name}'s Pokémon`, value: `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, inline: true }]);
                                         } else {
-                                            embed.addField(`${user2name}'s Pokémon`, `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, true);
-                                            embed.addField(`${user1name}'s Pokémon`, `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, true);
+                                            embed.addFields([{ name: `${user2name}'s Pokémon`, value: `${user2pokemon_name} ${pokemon2_hp}/${pokemon2_hp}HP`, inline: true },
+                                            { name: `${user1name}'s Pokémon`, value: `${user1pokemon_name} ${pokemon1_hp}/${pokemon1_hp}HP`, inline: true }]);
                                         }
 
-                                        embed.setFooter(`Use ${prefix}dm to mute the duel instructions.`);
-                                        message.channel.send(embed);
+                                        embed.setFooter({ text: `Use /dm to mute the duel instructions.` });
+                                        interaction.reply({ embeds: [embed], files: [{ attachment: image_buffer, name: "img.jpeg" }] });
 
                                         if (user1.DuelDM != undefined && user1.DuelDM != true) {
-                                            var usr_embed = new Discord.MessageEmbed();
-                                            usr_embed.setColor(message.guild.me.displayHexColor);
+                                            var usr_embed = new Discord.EmbedBuilder();
+                                            usr_embed.setColor(interaction.guild.members.me.displayHexColor);
                                             usr_embed.setTitle(`Battle VS ${user2name}`);
                                             var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
                                             description += "\n\n";
                                             description += "Available moves:\n\n"
-                                            description += `${user1pokemon_moves[0]} ${prefix}use 1\n\n`;
-                                            description += `${user1pokemon_moves[1]} ${prefix}use 2\n\n`;
-                                            description += `${user1pokemon_moves[2]} ${prefix}use 3\n\n`;
-                                            description += `${user1pokemon_moves[3]} ${prefix}use 4\n\n`;
+                                            description += `${user1pokemon_moves[0]} /use 1\n\n`;
+                                            description += `${user1pokemon_moves[1]} /use 2\n\n`;
+                                            description += `${user1pokemon_moves[2]} /use 3\n\n`;
+                                            description += `${user1pokemon_moves[3]} /use 4\n\n`;
                                             usr_embed.setDescription(description);
 
                                             // Send Message
@@ -239,7 +236,7 @@ function duel(bot, message, prefix, prompt, pokemons) {
 }
 
 // Function to accept and start trade.
-function trade(bot, message, prefix, prompt) {
+function trade(bot, interaction, prompt) {
     var user1id = prompt.UserID.User1ID;
     var user2id = prompt.UserID.User2ID;
 
@@ -256,13 +253,13 @@ function trade(bot, message, prefix, prompt) {
             user2name = user_data.username;
             tag2 = user_data.discriminator;
 
-            var embed = new Discord.MessageEmbed();
+            var embed = new Discord.EmbedBuilder();
             embed.setTitle(`Trade between ${user1name} and ${user2name}`);
-            embed.setDescription(`For instructions on how to trade, see ${prefix}help trade.`)
-            embed.setColor(message.member.displayHexColor);
-            embed.addField(`${user1name + '#' + tag1}'s is offering`, '``` ```', false);
-            embed.addField(`${user2name + '#' + tag2}'s is offering`, '``` ```', false);
-            message.channel.send(embed).then(msg => {
+            embed.setDescription(`For instructions on how to trade, see /help trade.`)
+            embed.setColor(interaction.member.displayHexColor);
+            embed.addFields([{ name: `${user1name + '#' + tag1}'s is offering`, value: '``` ```', inline: false },
+            { name: `${user2name + '#' + tag2}'s is offering`, value: '``` ```', inline: false }]);
+            interaction.reply({ embeds: [embed] }).then(msg => {
                 prompt.Trade.Accepted = true;
                 prompt.Trade.MessageID = msg.id;
                 prompt.save();
@@ -308,5 +305,6 @@ function percentage(percent, total) {
 
 module.exports.config = {
     name: "accept",
+    description: "Accept request like trade/duel.",
     aliases: []
 }

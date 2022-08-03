@@ -1,7 +1,14 @@
 // Imports
 const Discord = require('discord.js');
 const config = require("./config/config.json");
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const client = new Discord.Client({
+    intents: [
+        Discord.GatewayIntentBits.Guilds,
+        Discord.GatewayIntentBits.GuildMessages,
+        Discord.GatewayIntentBits.GuildMessageReactions,
+        Discord.GatewayIntentBits.DirectMessages
+    ]
+});
 const mongoose = require('mongoose');
 const fs = require('fs');
 const _ = require('lodash');
@@ -49,7 +56,11 @@ mongoose.connect(config.MONGO_URI, {
     useCreateIndex: true
 });
 
-// Discord Client Login
+// Discord Login
+client.login(config.BOT_TOKEN);
+client.commands = new Discord.Collection();
+client.aliases = new Discord.Collection();
+
 var my_slot = 0;
 var i_indentified_as = null;
 
@@ -63,14 +74,6 @@ else if (myArgs.length == 1) {
     my_slot = parseInt(myArgs[0]);
     i_indentified_as = config.WORKERS[my_slot - 1];
 }
-
-
-client.login(config.BOT_TOKEN);
-client.commands = new Discord.Collection();
-client.aliases = new Discord.Collection();
-
-// Loading Commands
-loadCommands(client);
 
 // Market Initialization
 market_model.findOne({ Primary: true }, (err, market) => {
@@ -170,13 +173,14 @@ client.once("ready", () => {
             }
         } axios_loop();
     }
+
+    // Loading Commands
+    loadCommands(client);
 });
 
-// This will be called on message received from discord
-client.on('message', async (message) => {
-    if (message.author.bot) return;
 
-    // Load Balancing.
+// Make a global load balancer.
+/* // Load Balancing.
     if (config.LOAD_BALANCER) {
         if (!ready_to_go) return;
         console.log(i_indentified_as + ": " + total_incomming);
@@ -190,11 +194,21 @@ client.on('message', async (message) => {
             else total_incomming = 0;
         }
     }
+*/
 
-    if (message.guild === null) return message.author.send("This bot don't support DM at the moment.");
+
+
+
+
+
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+    if (interaction.user.bot) return;
+
+    if (interaction.guild === null) return interaction.user.send("This bot don't support DM at the moment.");
 
     // Remove this
-    if (!config.ALLOWED_GUILDS.includes(message.guild.id)) return;
+    if (!config.ALLOWED_GUILDS.includes(interaction.guild.id)) return;
 
     // Loading Pokemons Data
     var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
@@ -202,38 +216,66 @@ client.on('message', async (message) => {
     // Initialize Variables
     var prefix = config.DEFAULT_PREFIX;
     var user_available = false;
-    var global_user = null;
-    var guild_redirect_spawn = null;
     var channel_data = null;
 
-    // Message Processing
-    var messageArray = message.content.split(' ');
-    var cmd = messageArray[0].toLowerCase();
-    var args = messageArray.slice(1);
-    args = args.filter(function (e) { return e }); // Remove empty values from args
+    // Command Processing
+    var cmd = interaction.commandName.toLowerCase();
 
-    // Adding support for — (double dash)
-    for (var i = 0; i < args.length; i++) {
-        if (args[i].includes("—")) {
-            args[i] = args[i].replace("—", "--");
-        }
-    }
-
-    //Getting Prefix from database
-    await guild_model.findOne({ GuildID: message.guild.id }, (err, guild) => {
+    //Getting the data from the user model
+    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (err) return console.log(err);
-        if (!guild) {
-            let write_data = new guild_model({
-                GuildID: message.guild.id,
-                GuildName: message.guild.name
-            })
-            write_data.save();
-        }
-        else prefix = guild.Prefix.toLowerCase();
-        if (guild != null && guild["Redirect"] !== undefined) { guild_redirect_spawn = guild.Redirect; }
-    });
+        if (user) { user_available = true; }
+        global_user = user; // To access from outer fields.
+        var issuspend = false; // To check if the user is suspended
 
-    //#region Catch Sytem
+        // Suspend Protection
+        if (user != null && user.Suspend.Hours != undefined) {
+            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
+                user.Suspend = undefined;
+            }
+            else issuspend = true;
+        }
+
+        if (issuspend) return interaction.reply({ content: `You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`, ephemeral: true });
+        cmd = interaction.commandName;
+        if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return interaction.reply({ content: `Commands can't be used in this channel!`, ephemeral: true });
+
+        // Mail notice.
+        if (user != null && user.MailNotice) {
+            var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
+            var embed = new Discord.EmbedBuilder();
+            embed.setColor("#1ec5ee");
+            embed.setTitle("Mail notification !");
+            embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `" + prefix + "mails` to check your mails.");
+            embed.setFooter({ text: `App: Inbox, Mails`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
+            interaction.reply({ embeds: [embed] });
+            user.MailNotice = false;
+        }
+
+        if (user_available) user.save();
+        if (user != null && admin.iseligible(user.Admin, cmd, interaction)) { interaction.isadmin = true; interaction.Adminlvl = user.Admin; interaction.AdminServer = config.ADMIN_COMMAND_SERVER; }
+        const commandfile = client.commands.get(cmd);
+        if (!commandfile) return;
+        commandfile.run(client, interaction, user_available, load_pokemons);
+    });
+});
+
+
+
+
+
+
+
+
+
+
+// This will be called on message received from discord
+// This will be used to increase xp and level up
+client.on('message', async (message) => {
+    if (message.author.bot) return;
+    if (message.guild === null) return;
+
+    //#region Spawn Sytem
     //check if database exists
     await channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
         if (err) console.log(err);
@@ -250,32 +292,30 @@ client.on('message', async (message) => {
             new_channel.save();
         }
         else {
-            if (!message.content.toLowerCase().startsWith(prefix)) {
-                // Update message count
-                // [SPAM SYSTEM]
-                //   if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
+            // Update message count
+            // [SPAM SYSTEM]
+            //   if (channel_message_cache[message.channel.id] != message.author.id && config.SPAWN_SPAM_SYSTEM) {
 
-                //Caching last message user.
-                channel_message_cache[message.channel.id] = message.author.id;
-                channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
-                    let channel_id = message.channel.id;
-                    var message_count = channel.MessageCount + 1;
-                    var spawn_limit = channel.SpawnLimit;
-                    if (spawn_limit == 0) {
-                        spawn_limit = getRandomInt(10, 20);
-                    }
-                    if (spawn_limit == message_count) {
-                        spawn_limit = 0;
-                        message_count = 0;
-                        spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
-                    }
+            //Caching last message user.
+            channel_message_cache[message.channel.id] = message.author.id;
+            channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+                let channel_id = message.channel.id;
+                var message_count = channel.MessageCount + 1;
+                var spawn_limit = channel.SpawnLimit;
+                if (spawn_limit == 0) {
+                    spawn_limit = getRandomInt(10, 20);
+                }
+                if (spawn_limit == message_count) {
+                    spawn_limit = 0;
+                    message_count = 0;
+                    spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
+                }
 
-                    channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
-                        if (err) { console.log(err) }
-                    });
+                channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
+                    if (err) { console.log(err) }
                 });
-                //   }
-            }
+            });
+            //   }
         }
     });
     //#endregion
@@ -284,9 +324,7 @@ client.on('message', async (message) => {
     await user_model.findOne({ UserID: message.author.id }, (err, user) => {
         if (err) return console.log(err);
         if (user) { user_available = true; }
-        global_user = user; // To access from outer fields.
         var issuspend = false; // To check if the user is suspended
-
         // Suspend Protection
         if (user != null && user.Suspend.Hours != undefined) {
             if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
@@ -294,35 +332,7 @@ client.on('message', async (message) => {
             }
             else issuspend = true;
         }
-
-        // Check if the message starts with the prefix.
-        if (message.content.toLowerCase().startsWith(prefix)) {
-
-            // Mail notice.
-            if (user != null && user.MailNotice) {
-                var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
-                var embed = new Discord.MessageEmbed();
-                embed.setColor("#1ec5ee");
-                embed.setTitle("Mail notification !");
-                embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `" + prefix + "mails` to check your mails.");
-                embed.setFooter(`App: Inbox, Mails`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
-                message.channel.send(embed);
-                user.MailNotice = false;
-            }
-
-            if (user_available) user.save();
-            if (issuspend) return message.channel.send(`You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`);
-            cmd = redirect_command(cmd, prefix).slice(prefix.length);
-            if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return;
-            if (user != null && admin.iseligible(user.Admin, cmd, message)) { message.isadmin = true; message.Adminlvl = user.Admin; message.AdminServer = config.ADMIN_COMMAND_SERVER; }
-            const commandfile = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
-            if (!commandfile) return;
-            commandfile.run(client, message, args, prefix, user_available, load_pokemons);
-        }
-        else {
-            if (issuspend) return;
-            advance_xp(message, user_available, user); // Increase XP
-        }
+        if (issuspend == false) advance_xp(message, user_available, user); // Increase XP
     });
 
     //#region Xp Increase
@@ -452,6 +462,11 @@ client.on('message', async (message) => {
     }
     //#endregion
 });
+
+
+
+
+
 
 // Exp to level up.
 function exp_to_level(level) {

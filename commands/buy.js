@@ -814,11 +814,6 @@ function buytm(message, args, pokemons) {
     })
 }
 
-// Exp to level up.
-function exp_to_level(level) {
-    return 275 + (parseInt(level) * 25) - 25;
-}
-
 // Check if value is int.
 function isInt(value) {
     var x;

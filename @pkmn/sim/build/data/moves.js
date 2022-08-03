@@ -1071,7 +1071,6 @@ exports.Moves = {
                    //  }
                }, */
         },
-        // FIXME: onMoveAborted(pokemon) {pokemon.removeVolatile('beakblast')},
         onAfterMove(pokemon) {
             pokemon.removeVolatile('beakblast');
         },
@@ -3008,7 +3007,7 @@ exports.Moves = {
             },
             onResidualOrder: 12,
             onResidual(pokemon) {
-                this.damage(pokemon.baseMaxhp / 4);
+                this.damage(pokemon.baseMaxhp / 16);
             },
         },
         secondary: null,
@@ -5000,7 +4999,7 @@ exports.Moves = {
             onResidualSubOrder: 1,
             onResidual(pokemon) {
                 if (!pokemon.hasType('Fire'))
-                    this.damage(pokemon.baseMaxhp / 8, pokemon);
+                    this.damage(pokemon.baseMaxhp / 16, pokemon);
             },
             onSideResidualOrder: 26,
             onSideResidualSubOrder: 8,
@@ -12141,7 +12140,7 @@ exports.Moves = {
             },
             onResidualOrder: 11,
             onResidual(pokemon) {
-                this.damage(pokemon.baseMaxhp / 4);
+                this.damage(pokemon.baseMaxhp / 16);
             },
         },
         secondary: null,

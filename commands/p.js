@@ -863,5 +863,12 @@ function removeItemOnce(arr, value) {
 
 module.exports.config = {
     name: "p",
+    description: "Get information about a Pokémon.",
+    options: [
+        {
+            name: "cmd",
+            description: "ID / Latest / Selected",
+            type: 3
+        }],
     aliases: []
 }
