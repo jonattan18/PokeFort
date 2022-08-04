@@ -1,12 +1,14 @@
 const user_model = require('../models/user.js');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { message.channel.send(`You should ID or name to select a team!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (interaction.options.get("team") == null) return interaction.reply({ content: `You should ID or name to select a team!`, ephemeral: true });
+
+    var args = interaction.options.get("team").value.split(" ");
 
     // Select Team.
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (err) return message.channel.send(`An error occured!`);
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+        if (err) return console.log(err);
         var selected_index = 0;
         // Team select using ID
         if (args.length == 1 && isInt(args[0])) {
@@ -17,7 +19,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 user.Teams[args[0] - 1].Selected = true;
             }
-            else return message.channel.send(`This \`${args[0]}\` is not a valid team ID!`);
+            else return interaction.reply({ content: `This \`${args[0]}\` is not a valid team ID!`, ephemeral: true });
         }
         else if (!isInt(args[0])) {
             var user_required_team = user.Teams.filter(team => team.TeamName == args.join(" ").toLowerCase());
@@ -28,11 +30,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
                 selected_index = index_of_required_name;
                 user.Teams[index_of_required_name].Selected = true;
-            } else return message.channel.send(`This \`${args.join(" ")}\` is not a valid team name!`);
+            } else return interaction.reply({ content: `This \`${args.join(" ")}\` is not a valid team name!`, ephemeral: true });
         }
         // Final save team in user's model.
         user.save().then(() => {
-            message.channel.send(`Team \`${user.Teams[selected_index].TeamName}\` has been selected!`);
+            interaction.reply({ content: `Team \`${user.Teams[selected_index].TeamName}\` has been selected!` });
         });
     });
 }
@@ -49,5 +51,12 @@ function isInt(value) {
 
 module.exports.config = {
     name: "teamselect",
+    description: "Select a team to use in raid.",
+    options: [{
+        name: "team",
+        description: "The team ID or name to select.",
+        type:3,
+        required: true
+    }],
     aliases: []
 }

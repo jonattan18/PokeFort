@@ -3,25 +3,25 @@ const Discord = require('discord.js'); // For Embedded Message.
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { return message.channel.send(`You should specify a pokémon name!`); }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (interaction.options.get("name") == null) return interaction.reply({ content: `You should specify a pokémon name!`, ephemeral: true });
 
     var types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"];
-    var embed = new Discord.MessageEmbed()
+    var embed = new Discord.EmbedBuilder();
 
-    if (args.length == 1 && types.includes(args[0].capitalize())) {
-        var primary_type = args[0].capitalize();
+    if (interaction.options.get("name").value.split(" ").length == 1 && types.includes(interaction.options.get("name").value.capitalize())) {
+        var primary_type = interaction.options.get("name").value.capitalize();
         var secondary_type = "NULL";
         var weak = [];
         var neutral = [];
         var resist = [];
         var immune = [];
-        embed.setTitle(args[0].capitalize() + " (Type)");
+        embed.setTitle(primary_type + " (Type)");
     } else {
         // Get pokemon name.
-        var pokemon_info = getPokemons.getPokemonData(args, pokemons, false);
-        if (pokemon_info == null) { return message.channel.send(`Could not find the pokemon!`); }
+        var pokemon_info = getPokemons.getPokemonData(interaction.options.get("name").value.split(" "), pokemons, false);
+        if (pokemon_info == null) return interaction.reply({ content: `Could not find the pokemon!`, ephemeral: true });
 
         var pokemon_name = pokemon_info["Pokemon Name"];
         var primary_type = pokemon_info["Primary Type"];
@@ -42,13 +42,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         else if (type_effectiveness > 1 && type_effectiveness <= 4) { weak.push(types[i]); }
     }
 
-    embed.fields = [
+    embed.addFields([
         { name: "Weak", value: weak.length == 0 ? "None" : weak.join(", ") },
         { name: "Neutral", value: neutral.length == 0 ? "None" : neutral.join(", ") },
         { name: "Resists", value: resist.length == 0 ? "None" : resist.join(", ") },
         { name: "Immune", value: immune.length == 0 ? "None" : immune.join(", ") }
-    ];
-    message.channel.send(embed);
+    ]);
+    interaction.reply({ embeds: [embed] });
 
 }
 
@@ -422,5 +422,12 @@ function type_calc(att_type, def_type, sec_def_type) {
 
 module.exports.config = {
     name: "weak",
+    description: "Shows weakness of pokemon/type.",
+    options: [{
+        name: "name",
+        description: "Name of pokemon/type.",
+        type: 3,
+        required: true
+    }],
     aliases: []
 }
