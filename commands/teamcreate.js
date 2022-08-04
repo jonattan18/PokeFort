@@ -5,70 +5,51 @@ const config = require("../config/config.json");
 const getPokemons = require('../utils/getPokemon');
 const _ = require('lodash');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { message.channel.send(`Invalid syntax! Use \`${prefix}teamcreate --name <name> --id <id>\``); return; }
-
-    // Convert all to lowercase.
-    args = args.map(element => {
-        return element.toLowerCase();
-    });
-
-    if (!args.includes("--name") && !args.includes("--n")) return message.channel.send(`You can't create a team without a name\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (interaction.options.get("name") == null) return interaction.reply({ content: `You should specify a team name!`, ephemeral: true });
 
     // Definitions
-    var team_name = "";
+    var team_name = interaction.options.get("name").value.toLowerCase();
     var arg_ids = [];
     var team_pokemons = [];
     var team_selected = false;
 
-    var total_args = args.join(" ").replace(/--/g, ",--").split(",");
-    total_args = _.without(total_args, "", " ");
+    if (team_name.length > 30) return interaction.reply({ content: `Team name is too long!`, ephemeral: true });
+    if (team_name.length < 1) return interaction.reply({ content: `Team name is too short!`, ephemeral: true });
 
-    for (j = 0; j < total_args.length; j++) {
-        new_args = total_args[j].split(" ").filter(it => it != "");
+    if (interaction.options.get("id") != null) {
+        arg_ids = interaction.options.get("id").value.split(" ");
 
-        if (new_args[0] == "--name" || new_args[0] == "--n") {
-            new_args.shift();
-            team_name = new_args.join(" ");
-            if (team_name.length > 30) { message.channel.send(`Team name is too long!`); return; }
-            if (team_name.length < 1) { message.channel.send(`Team name is too short!`); return; }
-        }
-
-        else if (new_args[0] == "--ids" || new_args[0] == "--i" || new_args[0] == "--id") {
-            new_args.shift();
-            // Int Check
-            for (let i = 0; i < new_args.length; i++) {
-                arg_ids.push(new_args[i]);
-                if (!isInt(new_args[i])) {
-                    return message.channel.send(`Invalid syntax!\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
-                }
+        // Int Check
+        for (let i = 0; i < arg_ids.length; i++) {
+            if (!isInt(arg_ids[i])) {
+                return interaction.reply({ content: `One of the ID was incorrect. Please try again.`, ephemeral: true });
             }
         }
-
     }
 
     // Get Pokemon
-    getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
+    getPokemons.getallpokemon(interaction.user.id).then(pokemons_from_database => {
         for (let i = 0; i < arg_ids.length; i++) {
             if (pokemons_from_database[arg_ids[i] - 1] != undefined) {
                 team_pokemons.push(pokemons_from_database[arg_ids[i] - 1]._id.toString());
-            } else return message.channel.send(`Couldn't find that ID!\nUse \`${prefix}teamcreate --name <name> --id <id>\``);
+            } else return interaction.reply({ content: `One of the ID was incorrect. Please try again.`, ephemeral: true });
         }
 
         // Create Team.
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
-            if (err) return message.channel.send(`An error occured!`);
-            if (user.Teams.length >= config.MAX_TEAMS_PER_USER) return message.channel.send(`You can only have ${config.max_teams} teams!`);
+        user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+            if (err) return console.log(err);
+            if (user.Teams.length >= config.MAX_TEAMS_PER_USER) return interaction.reply({ content: `You can only have ${config.max_teams} teams!`, ephemeral: true })
 
             // Check if team name is already there.
             for (let i = 0; i < user.Teams.length; i++) {
                 if (user.Teams[i].TeamName == team_name) {
-                    return message.channel.send(`A team with the name \`${team_name}\` already exists!`);
+                    return interaction.reply({ content: `A team with the name \`${team_name}\` already exists!`, ephemeral: true });
                 }
             }
 
-            if (containsDuplicates(team_pokemons)) return message.channel.send(`You can't have same pokémon in your team!`);
+            if (containsDuplicates(team_pokemons)) return interaction.reply({ content: `You can't have same pokémon in your team!`, ephemeral: true });
 
             // Replace empty pokemons with null values.
             for (let i = 0; i < 6; i++) {
@@ -84,7 +65,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             });
 
             user.save().then(() => {
-                message.channel.send(`Team \`${team_name}\` has been created!`);
+                return interaction.reply({ content: `Team \`${team_name}\` has been created!` });
             });
         });
     });
@@ -110,5 +91,21 @@ function isInt(value) {
 
 module.exports.config = {
     name: "teamcreate",
+    description: "Create a team",
+    options: [{
+        name: "name",
+        description: "Name of the team",
+        required: true,
+        min_length: 1,
+        max_length: 30,
+        type: 3,
+    },
+    {
+        name: "id",
+        description: "ID of the pokemon. Use space for multiple.",
+        type: 3,
+        min_length: 1,
+        max_length: 30,
+    }],
     aliases: []
 }

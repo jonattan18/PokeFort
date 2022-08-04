@@ -1,28 +1,22 @@
 const user_model = require('../models/user.js');
 const Discord = require('discord.js');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { message.channel.send(`You should atleast specifiy one id to delete a team!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (interaction.options.get("id") == null) return interaction.reply({ content: `You should specify a team name!`, ephemeral: true });
 
-    // Int Check
-    for (let i = 0; i < args.length; i++) {
-        if (!isInt(args[i])) {
-            return message.channel.send(`_${args[i]}_ is not a valid team ID!`);
-        }
-    }
-
+    var args = interaction.options.get("id").value.split(" ");
     var deleted_team_name = [];
 
     // Delete Team.
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (err) return message.channel.send(`An error occured!`);
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+        if (err) return console.log(err);
 
         for (let i = 0; i < args.length; i++) {
             if (user.Teams[args[i] - 1] != undefined) {
                 deleted_team_name.push(user.Teams[args[i] - 1].TeamName);
                 user.Teams[args[i] - 1] = null;
-            } else return message.channel.send(`_${args[i]}_ is not a valid team ID!`);
+            } else return interaction.reply({ content: `${args[i]}_ is not a valid team ID!`, ephemeral: true });
         }
 
         // Remove nulls.
@@ -31,16 +25,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         });
 
         user.save().then(() => {
-            if (deleted_team_name.length == 1) message.channel.send(`Team \`${deleted_team_name[0]}\` has been deleted!`);
+            if (deleted_team_name.length == 1) interaction.reply({ content: `Team \`${deleted_team_name[0]}\` has been deleted!` });
             else {
-                var embed = new Discord.MessageEmbed();
+                var embed = new Discord.EmbedBuilder();
                 embed.setTitle("The following teams has been deleted:");
                 var description = "";
                 for (let i = 0; i < deleted_team_name.length; i++) {
                     description += `${deleted_team_name[i]}\n`;
                 }
                 embed.setDescription(description);
-                message.channel.send(embed);
+                interaction.reply({ embeds: [embed] });
             }
         });
     });
@@ -59,5 +53,14 @@ function isInt(value) {
 
 module.exports.config = {
     name: "teamdelete",
+    description: "Delete a team.",
+    options: [{
+        name: "id",
+        description: "Id(s) of the team to delete.",
+        required: true,
+        min_length: 1,
+        max_length: 30,
+        type: 3,
+    }],
     aliases: []
 }

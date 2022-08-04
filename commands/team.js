@@ -23,7 +23,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                     var pokemon_details = "";
                     if (team["Pokemons"][i] == null) {
                         pokemon_title = `Pokemon #${i + 1}`;
-                        pokemon_details = `You do not own the pokémon at this position! Please do /teamedit ${i + 1} <pokemon number to replace it.`;
+                        pokemon_details = `You do not own the pokémon at this position! Please do /teamedit ${i + 1} <pokemon number> to replace it.`;
                         embed.addFields({ name: pokemon_title, value: pokemon_details, inline: true });
                     }
                     else {

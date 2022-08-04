@@ -11,76 +11,69 @@ const prompt_model = require('../models/prompt');
 const getPokemons = require('../utils/getPokemon');
 const pagination = require('../utils/pagination');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
     //Get user data.
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (!user) return;
         if (err) console.log(err);
 
-        // Convert all args to lowercase.
-        args = args.map(arg => arg.toLowerCase());
-
-        // For only auction command
-        if (args.length == 0) {
-            return message.channel.send("Invalid Syntax. Use " + prefix + "help to know about auction commands.");
-        }
-
         // For auction list command
-        if (args[0] == "list" && args.length == 4) {
-            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+        if (interaction.options.getSubcommand() === "list") {
+            getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
 
-                if (args[3][args[3].length - 1] != "h" && args[3][args[3].length - 1] != "m") return message.channel.send("Invalid Syntax. Use" + prefix + "help to know about auction commands.");
-                if (!isInt(args[2])) return message.channel.send("When listing on a auction, you must specify a buyout.");
-                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokémon ? Minimum buyout is 1.");
-                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.");
+                var list_id = interaction.options.get("id").value;
+                var list_buyout = interaction.options.get("buyout").value;
+                var list_time = interaction.options.get("time").value;
 
-                // If arguments is latest or l
-                if (args[1].toLowerCase() == "l" || args[1].toLowerCase() == "latest") var selected_pokemon = user_pokemons[user_pokemons.length - 1];
-                // If arguments is number
-                else if (isInt(args[1])) {
-                    if (typeof user_pokemons[args[1] - 1] != 'undefined') var selected_pokemon = user_pokemons[args[1] - 1];
-                    else return message.channel.send("No pokémon exists with that number.");
+                if (list_time[list_time.length - 1] != "h" && list_time[list_time.length - 1] != "m") return interaction.reply({ content: "Invalid Syntax. Use /help to know about auction commands.", ephemeral: true });
+                if (!isInt(list_buyout)) return interaction.reply({ content: "When listing on a auction, you must specify a buyout.", ephemeral: true });
+                if (list_buyout < 1) return interaction.reply({ content: "Isn't that too low for a pokémon ? Minimum buyout is 1.", ephemeral: true });
+                if (list_buyout > 1000000000) return interaction.reply({ content: "Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.", ephemeral: true });
+
+                if (isInt(list_id)) {
+                    if (typeof user_pokemons[list_id - 1] != 'undefined') var selected_pokemon = user_pokemons[list_id - 1];
+                    else return interaction.reply({ content: "No pokémon exists with that number.", ephemeral: true });
                 }
-                else return message.channel.send("Please type a valid pokémon number.");
+                else return interaction.reply({ content: "Please type a valid pokémon number.", ephemeral: true });
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
 
-                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
+                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
                     if (err) return console.log(err);
-                    if (_data) return message.channel.send("You can't add auction listing now!");
+                    if (_data) return interaction.reply({ content: "You can't add auction listing now!", ephemeral: true });
 
                     var listing_fee = 125;
-                    if (args[3][args[3].length - 1] == "h") listing_fee = 125 + (parseInt(args[3]) * 25);
+                    if (list_time[list_time.length - 1] == "h") listing_fee = 125 + (parseInt(list_time) * 25);
 
                     var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
+                        ChannelID: interaction.channel.id,
                         PromptType: "ConfirmList",
                         UserID: {
-                            User1ID: message.author.id
+                            User1ID: interaction.user.id
                         },
                         List: {
                             PokemonUID: selected_pokemon._id,
-                            Price: args[2],
-                            BidTime: args[3],
+                            Price: list_buyout,
+                            BidTime: list_time,
                             ListingFees: listing_fee
                         }
                     });
 
                     update_data.save().then(result => {
-                        var time_string = args[3][args[3].length - 1] == "h" ? "hours" : "minutes";
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${args[3].substring(0, args[3].length - 1)} ${time_string} with a buyout of ${args[2]} Credits? A listing fee of ${listing_fee} credits will be deducted from your balance.\nType \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        var time_string = list_time[list_time.length - 1] == "h" ? "hours" : "minutes";
+                        return interaction.reply({ content: `Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the auction for ${list_time.substring(0, list_time.length - 1)} ${time_string} with a buyout of ${list_buyout} Credits? A listing fee of ${listing_fee} credits will be deducted from your balance.\nType \`\`/confirmlist\`\` to confirm or \`\`/cancel\`\` to cancel the listing.` });
                     });
                 });
             });
         }
 
         // For bids command
-        else if (args[0] == "bids" && args.length == 1) {
-            auction_model.find({ $and: [{ BidUser: message.author.id }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
+        else if (interaction.options.getSubcommand() === "bids") {
+            auction_model.find({ $and: [{ BidUser: interaction.user.id }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("You don't have any bids at the moment.");
+                    return interaction.reply({ content: "You don't have any bids at the moment.", ephemeral: true });
                 } else {
                     var temp_counter = 0;
                     var tot_len = auction.length;
@@ -88,7 +81,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var embeds = [];
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
-                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i] = new Discord.EmbedBuilder();
                         embeds[i].setTitle("Your Auction Bids:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
@@ -100,22 +93,22 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]} | Buyout: ${split_chunks[i][j]["BuyOut"]} Credits | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] : "None"} ${time_left.getUTCMinutes() < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                         }
                         embeds[i].setDescription(description);
-                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                        embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    message.channel.send(embeds[0]).then(msg => {
-                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
                 }
             });
         }
 
-        // For view or info pokemon command  
-        else if ((args[0] == "view" || args[0] == "info" || args[0] == "i") && args.length == 2) {
-            if (!isInt(args[1])) return message.channel.send("Please type a valid pokémon ID.");
+        // For view pokemon command
+        else if (interaction.options.getSubcommand() === "view") {
+            if (!isInt(interaction.options.get("id").value)) return interaction.reply({ content: "Please type a valid pokémon ID.", ephemeral: true });
 
-            auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
-                if (!auction) return message.channel.send("No pokémon exists with that ID.");
+            auction_model.findOne({ $and: [{ "AuctionID": interaction.options.get("id").value }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
+                if (!auction) return interaction.reply({ content: "No pokémon exists with that ID.", ephemeral: true });
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == auction.PokemonId)[0];
 
@@ -187,10 +180,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var time_left = new Date(bid_time.getTime() - new Date().getTime());
                     var time_left_string = `:hourglass_flowing_sand: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours " : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes " : ""}`;
 
-                    var embed = new Discord.MessageEmbed();
+                    var embed = new Discord.EmbedBuilder();
                     embed.attachFiles(image_url)
                     embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID}`);
-                    embed.setColor(message.member.displayHexColor);
+                    embed.setColor(interaction.member.displayHexColor);
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
                         `\n**Nature**: ${nature_name}` +
@@ -204,53 +197,56 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\nCurrent Bid: ${auction.BidPrice == undefined ? "None" : auction.BidPrice} - ${time_left_string}` +
                         `\n**Buyout: ${auction.BuyOut} Credits**`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? "by" : `of credits more than ${auction.BidPrice} by`} typing "${prefix}auction bid ${auction.AuctionID} <bid>"`);
-                    message.channel.send(embed)
+                    embed.setFooter({ text: `To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? "by" : `of credits more than ${auction.BidPrice} by`} typing "/auction bid ${auction.AuctionID} <bid>"` });
+                    interaction.reply({ embeds: [embed] })
                 }
             });
         }
+
         // For auction bid command
-        else if (args[0] == "bid" && args.length == 3 && isInt(args[2])) {
-            auction_model.findOne({ $and: [{ "AuctionID": args[1] }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
+        else if (interaction.options.getSubcommand() === "bid") {
+            auction_model.findOne({ $and: [{ "AuctionID": interaction.options.get("id").value }, { "BidTime": { $gt: new Date() } }] }, (err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("We couldn't find any pokémon associted with that auction ID.");
+                    return interaction.reply({ content: "We couldn't find any pokémon associted with that auction ID.", ephemeral: true });
                 }
-                else if (auction.UserID == message.author.id) return message.channel.send("You can't bid on your own pokemon.");
-                else if (auction.BidUser == message.author.id) return message.channel.send("You already have a bid on this pokemon.");
+                else if (auction.UserID == interaction.user.id) return interaction.reply({ content: "You can't bid on your own pokemon.", ephemeral: true });
+                else if (auction.BidUser == interaction.user.id) return interaction.reply({ content: "You already have a bid on this pokemon.", ephemeral: true });
                 else {
-                    if (args[2] > user.PokeCredits) return message.channel.send("You have insufficient balance to bid on this pokemon.");
-                    if (args[2] <= auction.BidPrice) return message.channel.send(`You must bid higher than the current bid. The current bid is ${auction.BidPrice}`);
-                    if (args[2] > auction.BuyOut) return message.channel.send(`You can't bid higher than the buyout price. The buyout price is ${auction.BuyOut}`);
+                    var bid_price = interaction.options.get("credits").value;
+                    if (bid_price > user.PokeCredits) return interaction.reply({ content: "You have insufficient balance to bid on this pokemon.", ephemeral: true });
+                    if (bid_price <= auction.BidPrice) return interaction.reply({ content: `You must bid higher than the current bid. The current bid is ${auction.BidPrice}`, ephemeral: true });
+                    if (bid_price > auction.BuyOut) return interaction.reply({ content: `You can't bid higher than the buyout price. The buyout price is ${auction.BuyOut}`, ephemeral: true });
 
                     var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
+                        ChannelID: interaction.channel.id,
                         PromptType: "ConfirmBid",
                         UserID: {
-                            User1ID: message.author.id
+                            User1ID: interaction.user.id
                         },
                         List: {
                             PokemonUID: auction.PokemonUID,
                             AuctionID: auction.AuctionID,
-                            AuctionPrice: args[2]
+                            AuctionPrice: bid_price
                         }
                     });
                     update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to bid ${args[2]} credits on this level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} ?\nType \`\`${prefix}confirmbid\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the bid.`);
+                        return interaction.reply({ content: `Are you sure you want to bid ${bid_price} credits on this level ${auction.Level} ${auction.PokemonName}${auction.Shiny == true ? " :star:" : ""} ?\nType \`\`/confirmbid\`\` to confirm or \`\`/cancel\`\` to cancel the bid.` });
                     });
                 }
             });
         }
+
         // For auction claim command
-        else if (args[0] == "claim" && args.length == 2 && isInt(args[1])) {
-            auction_model.findOne({ "AuctionID": args[1] }, (err, auction) => {
-                if (auction == undefined || auction == null || !auction || auction.length == 0) return message.channel.send("We couldn't find any pokemon associted with that auction ID.");
+        else if (interaction.options.getSubcommand() === "claim") {
+            auction_model.findOne({ "AuctionID": interaction.options.get("id").value }, (err, auction) => {
+                if (auction == undefined || auction == null || !auction || auction.length == 0) return interaction.reply({ content: "We couldn't find any pokemon associted with that auction ID.", ephemeral: true });
 
                 // Credits claim.
-                if (auction.UserID == message.author.id && auction.BidTime < new Date() && auction.BidUser != message.author.id && auction.BidPrice != undefined && auction.OwnerClaimed == undefined) {
+                if (auction.UserID == interaction.user.id && auction.BidTime < new Date() && auction.BidUser != interaction.user.id && auction.BidPrice != undefined && auction.OwnerClaimed == undefined) {
                     var tax_price = [];
-                    if (args[2] > 9999 && args[2] < 100000) tax_price = ["10,000", 1.5, percentCalculation(args[2], 1.5).toFixed(0)];
-                    else if (args[2] > 99999 && args[2] < 100000) tax_price = ["1,00,000", 3, percentCalculation(args[2], 3).toFixed(0)]
-                    else if (args[2] > 999999) tax_price = ["10,00,000", 5, percentCalculation(args[2], 5).toFixed(0)];
+                    if (auction.BidPrice > 9999 && auction.BidPrice < 100000) tax_price = ["10,000", 1.5, percentCalculation(auction.BidPrice, 1.5).toFixed(0)];
+                    else if (auction.BidPrice > 99999 && auction.BidPrice < 100000) tax_price = ["1,00,000", 3, percentCalculation(auction.BidPrice, 3).toFixed(0)]
+                    else if (auction.BidPrice > 999999) tax_price = ["10,00,000", 5, percentCalculation(auction.BidPrice, 5).toFixed(0)];
 
                     auction.OwnerClaimed = true;
                     if (auction.UserClaimed == true) auction.remove();
@@ -258,13 +254,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     user.PokeCredits += auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0);
 
                     user.save().then(() => {
-                        message.channel.send(`Successfully claimed ${auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0)} credits from auction ID ${auction.AuctionID}. ${tax_price.length > 0 ? `As your pokémon was auctioned for over ${tax_price[0]}, ${tax_price[1]}% tax was taken and you received ${auction.BidPrice - tax_price[2]}.` : ""}`);
+                        interaction.reply({ content: `Successfully claimed ${auction.BidPrice - (tax_price.length > 0 ? tax_price[2] : 0)} credits from auction ID ${auction.AuctionID}. ${tax_price.length > 0 ? `As your pokémon was auctioned for over ${tax_price[0]}, ${tax_price[1]}% tax was taken and you received ${auction.BidPrice - tax_price[2]}.` : ""}` });
                     });
 
                 }
                 // Pokemon claim not auctioned by anyone.
-                else if (auction.UserID == message.author.id && auction.BidPrice == undefined) {
-                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim your pokémon or credits once the auction time has ended.")
+                else if (auction.UserID == interaction.user.id && auction.BidPrice == undefined) {
+                    if (auction.BidTime > new Date()) return interaction.reply({ content: "You can only claim your pokémon or credits once the auction time has ended.", ephemeral: true });
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
@@ -277,14 +273,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         Reason: auction.Reason
                     }
                     auction.remove().then(() => {
-                        getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
-                            message.channel.send(`Successfully claimed your pokemon from auction ID ${auction.AuctionID}`);
+                        getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
+                            interaction.reply({ content: `Successfully claimed your pokemon from auction ID ${auction.AuctionID}` });
                         });
                     });
                 }
                 // Pokemon claim by bid user.
-                else if (auction.UserID != message.author.id && auction.BidUser == message.author.id && auction.BidPrice != undefined && auction.UserClaimed == undefined) {
-                    if (auction.BidTime > new Date()) return message.channel.send("You can only claim any pokémon if the auction time has ended.")
+                else if (auction.UserID != interaction.user.id && auction.BidUser == interaction.user.id && auction.BidPrice != undefined && auction.UserClaimed == undefined) {
+                    if (auction.BidTime > new Date()) return interaction.reply({ content: "You can only claim any pokémon if the auction time has ended.", ephemeral: true });
                     let pokemon_data = {
                         CatchedOn: auction.CatchedOn,
                         IV: auction.IV,
@@ -300,31 +296,31 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     if (auction.OwnerClaimed == true) auction.remove();
                     else auction.save();
 
-                    getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
-                        message.channel.send(`Successfully claimed your pokémon from auction ID ${auction.AuctionID}`);
+                    getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
+                        interaction.reply({ content: `Successfully claimed your pokémon from auction ID ${auction.AuctionID}` });
                     });
                 }
-                else return message.channel.send("You can't claim this pokemon.");
+                else return interaction.reply({ content: "You can't claim this pokemon.", ephemeral: true });
             });
         }
         // For auction listings command
-        else if (args[0] == "listings" || args[0] == "lis") {
-            return arg_parsing(message, args, prefix, "listings", pokemons)
+        else if (interaction.options.getSubcommand() === "listings") {
+            return arg_parsing(interaction, "listings", pokemons)
         }
         // For auction search command.
-        else if (args[0] == "search" || args[0] == "s") {
-            return arg_parsing(message, args, prefix, "search", pokemons);
+        else if (interaction.options.getSubcommand() === "search") {
+            return arg_parsing(interaction, "search", pokemons);
         }
-        else return message.channel.send("Invalid command. Type `" + prefix + "help` for a list of commands.");
+        else return interaction.reply({ content: "Invalid command. Type `/help` for a list of commands.", ephemeral: true });
     });
 }
 
 // Function for arg parsing and understanding.
-function arg_parsing(message, args, prefix, command, pokemons) {
+function arg_parsing(interaction, command, pokemons) {
     var showiv = false;
     var request_query = [];
-    args.shift(); // Remove search from args.
     var order_type = {};
+    var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
 
     var all_search_types = ["--o", "--order", "--showiv", "a", "d", "asc", "ascending", "desc", "descending", "iv", "id", "level", "lvl", "name", "n", "price", "p"];
     if (args.every(r => all_search_types.indexOf(r.toLowerCase()) >= 0)) {
@@ -348,7 +344,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
         if (command == "search") {
             auction_model.find({ $and: [{ "Primary": undefined }, { "BidTime": { $gt: new Date() } }] }).sort(order_type).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("No auction listings found.");
+                    return interaction.reply({ content: "No auction listings found.", ephemeral: true });
                 } else {
                     var temp_counter = 0;
                     var tot_len = auction.length;
@@ -356,7 +352,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var embeds = [];
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
-                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i] = new Discord.EmbedBuilder();
                         embeds[i].setTitle("PokéFort Auction:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
@@ -368,19 +364,19 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] : "None"} ${time_left.getUTCMinutes() < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                         }
                         embeds[i].setDescription(description);
-                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                        embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    message.channel.send(embeds[0]).then(msg => {
-                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
                 }
             });
         }
         else if (command == "listings") {
-            auction_model.find({ $and: [{ "UserID": message.author.id }, { "OwnerClaimed": undefined }] }).sort(order_type).exec((err, auction) => {
+            auction_model.find({ $and: [{ "UserID": interaction.user.id }, { "OwnerClaimed": undefined }] }).sort(order_type).exec((err, auction) => {
                 if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                    return message.channel.send("No auction listings found.");
+                    return interaction.reply({ content: "No auction listings found.", ephemeral: true });
                 } else {
                     var temp_counter = 0;
                     var tot_len = auction.length;
@@ -388,7 +384,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var embeds = [];
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
-                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i] = new Discord.EmbedBuilder();
                         embeds[i].setTitle("Your Auction Listings:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
@@ -400,10 +396,10 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Buyout: ${split_chunks[i][j]["BuyOut"]} Credits | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] : "None"} ${time_left.getTime() < 0 ? "| Finished" : `| ${time_left_string}`}\n`;
                         }
                         embeds[i].setDescription(description);
-                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                        embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    message.channel.send(embeds[0]).then(msg => {
-                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
                 }
@@ -440,19 +436,19 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
             else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order") || _.isEqual(new_args[0], "--o"))) { order(new_args); }
-            else { message.channel.send("Invalid command."); return; }
+            else return interaction.reply({ content: "Invalid command.", ephemeral: true });
 
             // Check if error occurred in previous loop
             if (error.length > 1) {
-                message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                interaction.reply({ content: `Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`, ephemeral: true });
                 break;
             }
             if (j == total_args.length - 1) {
                 if (command == "listings") {
-                    request_query.unshift({ "UserID": message.author.id });
+                    request_query.unshift({ "UserID": interaction.user.id });
                     auction_model.find({ $and: request_query }).sort(order_type).exec((err, auction) => {
                         if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                            return message.channel.send("No auction listings found for your search.");
+                            return interaction.reply({ content: "No auction listings found for your search.", ephemeral: true });
                         } else {
                             var temp_counter = 0;
                             var tot_len = auction.length;
@@ -460,7 +456,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var embeds = [];
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
-                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i] = new Discord.EmbedBuilder();
                                 embeds[i].setTitle("Your Auction Listings:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
@@ -472,10 +468,10 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                                     description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] + " Credits" : "None"} ${time_left.getHours() < 1 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                                 }
                                 embeds[i].setDescription(description);
-                                embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                                embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                             }
-                            message.channel.send(embeds[0]).then(msg => {
-                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });
                         }
@@ -485,7 +481,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     request_query.push({ "BidTime": { $gt: new Date() } });
                     auction_model.find({ $and: request_query }).sort(order_type).exec((err, auction) => {
                         if (auction == undefined || auction == null || !auction || auction.length == 0) {
-                            return message.channel.send("No auction listings found for your search.");
+                            return interaction.reply({ content: "No auction listings found for your search.", ephemeral: true });
                         } else {
                             var temp_counter = 0;
                             var tot_len = auction.length;
@@ -493,7 +489,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var embeds = [];
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
-                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i] = new Discord.EmbedBuilder();
                                 embeds[i].setTitle("PokéFort Auction:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
@@ -505,10 +501,10 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                                     description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["AuctionID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Bid: ${split_chunks[i][j]["BidPrice"] != undefined ? split_chunks[i][j]["BidPrice"] : "None"} ${time_left.getUTCMinutes() < 10 ? "| :hourglass_flowing_sand:" : "| " + time_left_string}\n`;
                                 }
                                 embeds[i].setDescription(description);
-                                embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                                embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                             }
-                            message.channel.send(embeds[0]).then(msg => {
-                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });
                         }
@@ -853,5 +849,94 @@ function isFloat(x) { return !!(x % 1); }
 
 module.exports.config = {
     name: "auction",
+    description: "Auction Commands",
+    options: [{
+        name: "list",
+        description: "List your pokemon in auction.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to list.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }, {
+            name: "buyout",
+            description: "Buyout price of the pokemon.",
+            type: 4,
+            required: true,
+            min_value: 1,
+            max_value: 1000000000,
+        }, {
+            name: "time",
+            description: "Time in hours/minutes to list the pokemon.",
+            type: 3,
+            required: true,
+            min_length: 2
+        }]
+    }, {
+        name: "bid",
+        description: "Bid on a pokemon in auction.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to bid on.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }, {
+            name: "credits",
+            description: "Credits to bid on the pokemon.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "listings",
+        description: "List of all your pokemon in auction.",
+        options: [{
+            name: "filter",
+            description: "Filter for the search.",
+            type: 3,
+            min_length: 1
+        }],
+        type: 1
+    }, {
+        name: "bids",
+        description: "List of all your bids on pokemon in auction.",
+        type: 1
+    }, {
+        name: "claim",
+        description: "Claim a pokemon in auction.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to claim.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "view",
+        description: "View a pokemon in auction.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to view.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "search",
+        description: "Search for a pokemon in auction.",
+        type: 1,
+        options: [{
+            name: "filter",
+            description: "Filter for the search.",
+            type: 3,
+            min_length: 1
+        }],
+    }],
     aliases: []
 }
