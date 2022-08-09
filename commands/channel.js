@@ -1,5 +1,7 @@
 const channel_model = require('../models/channel');
 
+//FIXME: Not completed
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!message.member.permissions.has('MANAGE_MESSAGES')) {
         return message.channel.send("You are not allowed to change the bot's redirect channel!");

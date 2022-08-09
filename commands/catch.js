@@ -11,6 +11,8 @@ const _ = require('lodash');
 // Config file
 const config = require("../config/config.json");
 
+//FIXME: Not completed
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
     if (args.length == 0) { message.channel.send("You have not mentioned any pokémon name. Use ``" + prefix + "catch <pokemon>`` to catch."); return; }
