@@ -1,48 +1,48 @@
 // Models
 const prompt_model = require('../models/prompt');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "ChannelID": interaction.channel.id }] }, (err, prompt) => {
         if (err) console.log(err);
-        if (!prompt) return message.channel.send("You don't have any prompt to deny.")
+        if (!prompt) return interaction.reply({ content: "You don't have any prompt to deny.", ephemeral: true });
 
-        var userid = message.author.id;
+        var userid = interaction.user.id;
 
         //Deny trade.
         if (prompt.PromptType == "Trade" && prompt.UserID.User1ID == userid && prompt.Trade.Accepted == false) {
-            message.channel.send(`You took back your trade offer!`);
+            interaction.reply({ content: `You took back your trade offer!` });
             return prompt.remove();
         }
 
         //Check if user is already trading.
         else if (prompt.PromptType == "Trade" && prompt.UserID.User2ID == userid && prompt.Trade.Accepted == false) {
-            message.channel.send(`You declined the trade offer!`);
+            interaction.reply({ content: `You declined the trade offer!` });
             return prompt.remove();
         }
 
         //Check if any other traders are in the channel.
         else if (prompt.PromptType == "Trade" && (prompt.UserID.User1ID == userid || prompt.UserID.User2ID == userid) && prompt.Trade.Accepted == true) {
-            message.channel.send(`You cancelled ongoing trade!`);
+            interaction.reply({ content: `You cancelled ongoing trade!` });
             return prompt.remove();
         }
 
         // Deny duel.
         else if (prompt.PromptType == "Duel" && prompt.UserID.User1ID == userid && prompt.Duel.Accepted == false) {
-            message.channel.send(`You took back your duel offer!`);
+            interaction.reply({ content: `You took back your duel offer!` });
             return prompt.remove();
         }
 
         //Check if user is already dueling.
         else if (prompt.PromptType == "Duel" && prompt.UserID.User2ID == userid && prompt.Duel.Accepted == false) {
-            message.channel.send(`You declined the duel offer!`);
+            interaction.reply({ content: `You declined the duel offer!` });
             return prompt.remove();
         }
 
         //Check if any other duelers are in the channel.
         else if (prompt.PromptType == "Duel" && (prompt.UserID.User1ID == userid || prompt.UserID.User2ID == userid) && prompt.Duel.Accepted == true) {
-            message.channel.send(`You cancelled ongoing duel!`);
+            interaction.reply({ content: `You cancelled ongoing duel!` });
             return prompt.remove();
         }
     });
@@ -50,5 +50,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 module.exports.config = {
     name: "deny",
+    description: "Deny a prompt.",
     aliases: []
 }
