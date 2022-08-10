@@ -1,6 +1,5 @@
 const Discord = require('discord.js'); // For message embed.
 const _ = require('lodash'); // for utils
-const mongoose = require('mongoose');
 
 // Models
 const user_model = require('../models/user');
@@ -14,36 +13,34 @@ const getPokemons = require('../utils/getPokemon');
 // Config
 const config = require('../config/config.json');
 
-//FIXME: Not completed
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "ChannelID": interaction.channel.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!prompt) return message.channel.send('No prompt asked for to use ``confirm`` command.');
+        if (!prompt) return interaction.reply({ content: 'No prompt asked for to use ``confirm`` command.', ephemeral: true });
 
-        raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+        raid_model.findOne({ $and: [{ Trainers: { $in: interaction.user.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
             if (err) { console.log(err); return; }
-            if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't do this while you are in a raid!");
+            if (raid && raid.CurrentDuel != undefined && raid.CurrentDuel == interaction.user.id) return interaction.reply({ content: "You can't do this while you are in a raid!", ephemeral: true });
             else {
 
                 // If user prompt is for release
                 if (prompt.PromptType == "Release") {
-                    return release(message, prompt);
+                    return release(interaction, prompt);
                 }
 
                 // If user prompt is for recycle
                 else if (prompt.PromptType == "Recycle") {
-                    return recycle(message, prompt, pokemons);
+                    return recycle(interaction, prompt, pokemons);
                 }
 
                 // If user prompt is for trade
                 else if (prompt.PromptType == "Trade" && prompt.Trade.Accepted == true) {
-                    return trade(message, prompt, pokemons);
+                    return trade(interaction, prompt, pokemons);
                 }
 
-                else return message.channel.send('No prompt asked for to use ``confirm`` command.');
+                else return interaction.reply({ content: 'No prompt asked for to use ``confirm`` command.', ephemeral: true });
 
             }
         });
@@ -51,9 +48,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function to trade pokemon.
-function trade(message, trade_prompt, pokemons) {
+function trade(interaction, trade_prompt, pokemons) {
     var current_user = 0;
-    if (message.author.id == trade_prompt.UserID.User1ID) {
+    if (interaction.user.id == trade_prompt.UserID.User1ID) {
         current_user = 1;
     } else {
         current_user = 2;
@@ -63,7 +60,7 @@ function trade(message, trade_prompt, pokemons) {
         if (trade_prompt.Trade.User1IConfirm == false && trade_prompt.Trade.User2IConfirm == true) {
             trade_prompt.Trade.User1IConfirm = true;
             trade_prompt.save().then(() => {
-                message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
+                interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
@@ -72,12 +69,12 @@ function trade(message, trade_prompt, pokemons) {
             });
         }
         else if (trade_prompt.Trade.User1IConfirm == true && trade_prompt.Trade.User2IConfirm == false) {
-            message.channel.send(`You have already confirmed the trade!`);
+            interaction.reply({ content: `You have already confirmed the trade!`, ephemeral: true });
         }
         else if (trade_prompt.Trade.User1IConfirm == false && trade_prompt.Trade.User2IConfirm == false) {
             trade_prompt.Trade.User1IConfirm = true;
             trade_prompt.save().then(() => {
-                message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
+                interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
@@ -89,7 +86,7 @@ function trade(message, trade_prompt, pokemons) {
         if (trade_prompt.Trade.User2IConfirm == false && trade_prompt.Trade.User1IConfirm == true) {
             trade_prompt.Trade.User2IConfirm = true;
             trade_prompt.save().then(() => {
-                message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
+                interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
@@ -99,12 +96,12 @@ function trade(message, trade_prompt, pokemons) {
             });
         }
         else if (trade_prompt.Trade.User2IConfirm == true && trade_prompt.Trade.User1IConfirm == false) {
-            message.channel.send(`You have already confirmed the trade!`);
+            interaction.reply({ content: `You have already confirmed the trade!`, ephemeral: true });
         }
         else if (trade_prompt.Trade.User2IConfirm == false && trade_prompt.Trade.User1IConfirm == false) {
             trade_prompt.Trade.User2IConfirm = true;
             trade_prompt.save().then(() => {
-                message.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
+                interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
@@ -116,7 +113,7 @@ function trade(message, trade_prompt, pokemons) {
 }
 
 // Function to change items in trade.
-function change_trade(message, trade_prompt, pokemons) {
+function change_trade(interaction, trade_prompt, pokemons) {
     (async => {
         // User 1 details
         user_model.findOne({ UserID: trade_prompt.UserID.User1ID }, (err1, user1) => {
@@ -131,14 +128,14 @@ function change_trade(message, trade_prompt, pokemons) {
 
                 // For user 1
                 if (user_1_credits > 0) {
-                    if ((user1.PokeCredits - user_1_credits) < 0) { return message.channel.send(`You don't have enough credits to complete the trade!`); }
+                    if ((user1.PokeCredits - user_1_credits) < 0) return interaction.reply({ content: `You don't have enough credits to complete the trade!`, ephemeral: true });
                     user1.PokeCredits -= user_1_credits;
                     user2.PokeCredits += user_1_credits;
                 }
 
                 // For user 2
                 if (user_2_credits > 0) {
-                    if ((user2.PokeCredits - user_2_credits) < 0) { return message.channel.send(`You don't have enough credits to complete the trade!`); }
+                    if ((user2.PokeCredits - user_2_credits) < 0) return interaction.reply({ content: `You don't have enough credits to complete the trade!`, ephemeral: true });
                     user1.PokeCredits += user_2_credits;
                     user2.PokeCredits -= user_2_credits;
                 }
@@ -150,12 +147,12 @@ function change_trade(message, trade_prompt, pokemons) {
 
                 // For user 1
                 if (user_1_redeems > 0) {
-                    if ((user1.Redeems - user_1_redeems) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
+                    if ((user1.Redeems - user_1_redeems) < 0) return interaction.reply({ content: `You don't have enough redeems to complete the trade!`, ephemeral: true });
                     user1.Redeems -= user_1_redeems;
                     user2.Redeems += user_1_redeems;
                 }
                 if (user_2_redeems > 0) {
-                    if ((user2.Redeems - user_2_redeems) < 0) { return message.channel.send(`You don't have enough redeems to complete the trade!`); }
+                    if ((user2.Redeems - user_2_redeems) < 0) return interaction.reply({ content: `You don't have enough redeems to complete the trade!`, ephemeral: true });
                     user1.Redeems += user_2_redeems;
                     user2.Redeems -= user_2_redeems;
                 }
@@ -167,14 +164,14 @@ function change_trade(message, trade_prompt, pokemons) {
 
                 // For user 1
                 if (user_1_shards > 0) {
-                    if ((user1.Shards - user_1_shards) < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
+                    if ((user1.Shards - user_1_shards) < 0) return interaction.reply({ content: `You don't have enough shards to complete the trade!`, ephemeral: true });
                     user1.Shards -= user_1_shards;
                     user2.Shards += user_1_shards;
                 }
 
                 // For user 2
                 if (user_2_shards > 0) {
-                    if ((user2.Shards - user_2_shards) < 0) { return message.channel.send(`You don't have enough shards to complete the trade!`); }
+                    if ((user2.Shards - user_2_shards) < 0) return interaction.reply({ content: `You don't have enough shards to complete the trade!`, ephemeral: true });
                     user1.Shards += user_2_shards;
                     user2.Shards -= user_2_shards;
                 }
@@ -225,7 +222,7 @@ function change_trade(message, trade_prompt, pokemons) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User1ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have traded your selected pokemon. Pokémon Number 1 selected!`);
+                                interaction.channel.send({ content: `You have traded your selected pokemon. Pokémon Number 1 selected!`, ephemeral: true });
                             })
                         }
 
@@ -273,7 +270,7 @@ function change_trade(message, trade_prompt, pokemons) {
                             var current_pokemon = _.differenceBy(user_pokemons, pokemons_to_delete, '_id')
                             user_model.findOneAndUpdate({ UserID: trade_prompt.UserID.User2ID }, { $set: { Selected: current_pokemon[0]._id } }, (err, result) => {
                                 if (err) console.log(err)
-                                message.channel.send(`You have traded your selected pokemon. Pokémon Number 1 selected!`);
+                                interaction.channel.send({ content: `You have traded your selected pokemon. Pokémon Number 1 selected!`, ephemeral: true });
                             })
                         }
 
@@ -286,7 +283,7 @@ function change_trade(message, trade_prompt, pokemons) {
                 user1.save().then(() => {
                     user2.save().then(() => {
                         trade_prompt.remove().then(() => {
-                            message.channel.send(`Trade has been confirmed.`);
+                            interaction.reply({ content: `Trade has been confirmed.`, ephemeral: true });
 
                             if (user_1_trade_evolutions.length > 0) {
                                 var evolved_pokemons = duplicate(user_1_trade_evolutions);
@@ -296,7 +293,7 @@ function change_trade(message, trade_prompt, pokemons) {
                                     var new_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[1];
                                     message_string += `${evolved_pokemons[Object.keys(evolved_pokemons)[i]]} ${old_pokemon_name} evolved into ${new_pokemon_name}\n`;
                                 }
-                                message.channel.send(message_string);
+                                interaction.reply({ content: message_string });
                             }
 
                             if (user_2_trade_evolutions.length > 0) {
@@ -307,7 +304,7 @@ function change_trade(message, trade_prompt, pokemons) {
                                     var new_pokemon_name = Object.keys(evolved_pokemons)[i].split(",")[1];
                                     message_string += `${evolved_pokemons[Object.keys(evolved_pokemons)[i]]} ${old_pokemon_name} evolved into ${new_pokemon_name}\n`;
                                 }
-                                message.channel.send(message_string);
+                                interaction.reply({ content: message_string });
                             }
 
                         });
@@ -319,10 +316,10 @@ function change_trade(message, trade_prompt, pokemons) {
 }
 
 // Function to recycle pokemon.
-function recycle(message, user_prompt, load_pokemons) {
+function recycle(interaction, user_prompt, load_pokemons) {
 
     // Get all user pokemons.
-    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+    getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
 
         var pokemon_to_recycle = user_prompt.Recycle.Pokemons;
         var recycled_exp = pokemon_to_recycle.splice(-1, 1)[0];
@@ -335,7 +332,7 @@ function recycle(message, user_prompt, load_pokemons) {
         getPokemons.deletepokemon(delete_pokemon_ids).then(() => {
             user_prompt.remove();
 
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
                 //#region Update XP
                 var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
                 var _id = selected_pokemon._id;
@@ -343,11 +340,11 @@ function recycle(message, user_prompt, load_pokemons) {
                 var pokemon_current_xp = selected_pokemon.Experience + recycled_exp;
                 var pokemon_level = selected_pokemon.Level;
                 if (pokemon_level == 100 || pokemon_level > 100) {
-                    var embed = new Discord.MessageEmbed()
+                    var embed = new Discord.EmbedBuilder()
                     embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
                     embed.setDescription(`Your Pokémon in max level!`)
                     embed.setColor(message.member.displayHexColor)
-                    message.channel.send(embed);
+                    interaction.reply({ embeds: [embed] });
                     return;
                 }
                 if (selected_pokemon.Held == "Xp blocker") pokemon_current_xp = selected_pokemon.Experience;
@@ -390,8 +387,8 @@ function recycle(message, user_prompt, load_pokemons) {
                             }
                             // Exception for Cosmoem
                             else if (pokemon_id == "1320" && pokemon_level >= 53) {
-                                if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
-                                else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
+                                if (interaction.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
+                                else if (interaction.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
                                 if (evolved) {
                                     var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
@@ -402,12 +399,12 @@ function recycle(message, user_prompt, load_pokemons) {
                             else {
                                 if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
                                     if (pokemon_level >= pokemon_data.Evolution.Level) {
-                                        if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
+                                        if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == interaction.channel.name.toLowerCase())) {
 
                                             // Double evolution check.
                                             var double_pokemon_data = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
 
-                                            if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
+                                            if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == interaction.channel.name.toLowerCase()))) {
                                                 var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, load_pokemons, selected_pokemon.Shiny);
                                                 pokemon_id = double_pokemon_data.Evolution.Id;
                                             }
@@ -434,28 +431,28 @@ function recycle(message, user_prompt, load_pokemons) {
                 });
                 //#endregion
 
-                var embed = new Discord.MessageEmbed()
+                var embed = new Discord.EmbedBuilder()
                 embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
                 if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
                 else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
                 else { embed.addField(`**${old_pokemon_name} xp increased!**`, `${old_pokemon_name}'s xp is now ${old_pokemon_exp}`, false); }
                 embed.setColor(message.member.displayHexColor)
-                message.channel.send(embed);
+                interaction.reply({ embeds: [embed] });
             });
         });
     });
 }
 
 // Function to release pokemon.
-function release(message, user_prompt) {
+function release(interaction, user_prompt) {
 
     // Get all user pokemons.
-    getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+    getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
 
         var pokemon_to_release = user_prompt.Release.Pokemons;
         var new_user_pokemons = user_pokemons.filter(x => !pokemon_to_release.includes(x._id));
         var delete_pokemon_ids = [];
-        if (new_user_pokemons.length == 0) { return message.channel.send(`You can't release all pokemons. Spare atleast one.`); }
+        if (new_user_pokemons.length == 0) return interaction.reply({ content: `You can't release all pokemons. Spare atleast one.`, ephemeral: true });
 
         for (i = 0; i < pokemon_to_release.length; i++) {
             delete_pokemon_ids.push(pokemon_to_release[i]._id);
@@ -463,11 +460,11 @@ function release(message, user_prompt) {
 
         getPokemons.deletepokemon(delete_pokemon_ids).then(() => {
             user_prompt.remove();
-            message.channel.send(`Successfully released ${pokemon_to_release.length} pokemons!`);
-            user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            interaction.reply({ content: `Successfully released ${pokemon_to_release.length} pokemons!` });
+            user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
                 var selected_pokemon = new_user_pokemons.filter(it => it._id == user.Selected)[0];
                 if (selected_pokemon == undefined) {
-                    message.channel.send(`You have released your selected pokemon. Pokémon Number 1 selected!`);
+                    interaction.channel.send({ content: `You have released your selected pokemon. Pokémon Number 1 selected!`, ephemeral: true });
                     user.Selected = new_user_pokemons[0]._id;
                     user.save();
                 }
@@ -490,5 +487,6 @@ function exp_to_level(level) {
 
 module.exports.config = {
     name: "confirm",
+    description: "Confirm an prompt.",
     aliases: []
 }

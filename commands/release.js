@@ -9,43 +9,45 @@ const raid_model = require('../models/raids');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "Duel.Accepted": true }] }, (err, _duel) => {
         if (err) return console.log(err);
-        if (_duel) return message.channel.send("You can't release pokémon while you are in a duel!");
+        if (_duel) return interaction.reply({ content: "You can't release pokémon while you are in a duel!", ephemeral: true });
 
-        prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
+        prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "Trade.Accepted": true }] }, (err, _trade) => {
             if (err) return console.log(err);
-            if (_trade) return message.channel.send("You can't release pokémon while you are in a trade!");
+            if (_trade) return interaction.reply({ content: "You can't release pokémon while you are in a trade!", ephemeral: true });
 
-            raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
+            raid_model.findOne({ $and: [{ Trainers: { $in: interaction.user.id } }, { Timestamp: { $gt: Date.now() } }] }, (err, raid) => {
                 if (err) { console.log(err); return; }
                 if (raid) {
-                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == message.author.id) return message.channel.send("You can't release pokémon while you are in a raid!");
+                    if (raid.CurrentDuel != undefined && raid.CurrentDuel == interaction.user.id) return interaction.reply({ content: "You can't release pokémon while you are in a raid!", ephemeral: true });
                 } else {
                     //Get user data.
-                    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
                         if (!user) return;
                         if (err) console.log(err);
-                        getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+                        getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
+
+                            var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
 
                             // If no arguments
                             if (args.length == 0) {
-                                return message.channel.send("Please mention pokémon number or ``latest`` to release latest pokémon.");
+                                return interaction.reply({ content: "Please mention pokémon number or ``latest`` to release latest pokémon.", ephemeral: true });
                             }
 
                             // If arguments is latest or l
                             else if (args[0].toLowerCase() == "l" || args[0].toLowerCase() == "latest") {
                                 var selected_pokemon = [user_pokemons[user_pokemons.length - 1]];
-                                return release(message, pokemons, selected_pokemon, prefix);
+                                return release(interaction, pokemons, selected_pokemon);
                             }
 
                             // For only release int type command.
                             else if (onlyNumbers(args)) {
                                 user_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
-                                return release(message, pokemons, user_pokemons, prefix, user);
+                                return release(interaction, pokemons, user_pokemons, user);
                             }
 
                             // Multi commmand controller.
@@ -89,17 +91,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--quad") || _.isEqual(new_args[0], "--quadra"))) { quadra(new_args); }
                                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
                                 else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
-                                else { message.channel.send("Invalid command."); return; }
+                                else return interaction.reply({ content: "Invalid command.", ephemeral: true });
 
                                 // Check if error occurred in previous loop
                                 if (error.length > 1) {
-                                    message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                                    interaction.reply({ content: `Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`, ephemeral: true });
                                     break;
                                 }
                                 if (is_not) {
                                     user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
                                 }
-                                if (j == total_args.length - 1) { release(message, pokemons, user_pokemons, prefix); }
+                                if (j == total_args.length - 1) { release(interaction, pokemons, user_pokemons); }
                             }
 
                             // For release --shiny command.
@@ -507,8 +509,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 }
 
 // Function for release.
-function release(message, pokemons, user_pokemons, prefix) {
-    if (user_pokemons.length == 0) { message.channel.send("Pokemons not found."); return; }
+function release(interaction, pokemons, user_pokemons) {
+    if (user_pokemons.length == 0) return interaction.reply({ content: "Pokemons not found.", ephemeral: true });
 
     // Collecting pokemon ids.
     var pokemon_ids = [];
@@ -526,34 +528,34 @@ function release(message, pokemons, user_pokemons, prefix) {
     if (user_pokemons.length > 20) { description += `\n+${user_pokemons.length - 20} other pokemons` }
 
     // If alredy exists check
-    prompt_model.findOne({ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, (err, prompt) => {
+    prompt_model.findOne({ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (prompt != undefined && prompt.Trade.Accepted == true) return message.channel.send("You can't release pokemons while you are in a trade.");
+        if (prompt != undefined && prompt.Trade.Accepted == true) return interaction.reply({ content: "You can't release pokemons while you are in a trade.", ephemeral: true });
 
         var new_prompt = null;
         if (prompt) {
-            prompt.ChannelID = message.channel.id;
-            prompt.UserID.User1ID = message.author.id;
+            prompt.ChannelID = interaction.channel.id;
+            prompt.UserID.User1ID = interaction.user.id;
             prompt.PromptType = "Release";
             prompt.Release.Pokemons = pokemon_ids;
             new_prompt = prompt;
         } else {
             new_prompt = new prompt_model({
-                "ChannelID": message.channel.id,
+                "ChannelID": interaction.channel.id,
                 "PromptType": "Release",
-                "UserID": { "User1ID": message.author.id },
+                "UserID": { "User1ID": interaction.user.id },
                 "Release.Pokemons": pokemon_ids
             });
         }
 
         new_prompt.save().then(() => {
             // Create a new Message embed.
-            let embed = new Discord.MessageEmbed();
+            let embed = new Discord.EmbedBuilder();
             embed.setTitle(`Are you sure you want to release all these pokemons?`);
             embed.setDescription(description);
-            embed.setColor(message.member.displayHexColor);
-            embed.setFooter(`Type ${prefix}confirm to continue or ${prefix}cancel to cancel.`);
-            message.channel.send(embed);
+            embed.setColor(interaction.member.displayHexColor);
+            embed.setFooter({ text: `Type /confirm to continue or /cancel to cancel.` });
+            interaction.reply({ embeds: [embed] });
         });
     });
 }
@@ -614,5 +616,13 @@ function onlyNumbers(array) {
 
 module.exports.config = {
     name: "release",
+    description: "Release pokemons.",
+    options: [{
+        name: "filter",
+        description: "Filters to release pokemon.",
+        required: true,
+        type: 3,
+        min_length: 1
+    }],
     aliases: []
 }

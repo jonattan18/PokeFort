@@ -11,26 +11,24 @@ const _ = require('lodash');
 // Config file
 const config = require("../config/config.json");
 
-//FIXME: Not completed
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (user_available === false) { message.channel.send(`You should use ${prefix}start to use this command!`); return; }
-    if (args.length == 0) { message.channel.send("You have not mentioned any pokémon name. Use ``" + prefix + "catch <pokemon>`` to catch."); return; }
-
+    var guess = interaction.options.get("guess").value.split(" ");
     var form = "";
-    if (args[0].toLowerCase() == "alolan") { form = "Alola"; args.splice(0, 1) }
-    else if (args[0].toLowerCase() == "galarian") { form = "Galar"; args.splice(0, 1) }
-    else if (args[0].toLowerCase() == "hisuian") { form = "Hisuian"; args.splice(0, 1) }
+    if (guess[0].toLowerCase() == "alolan") { form = "Alola"; guess.splice(0, 1) }
+    else if (guess[0].toLowerCase() == "galarian") { form = "Galar"; guess.splice(0, 1) }
+    else if (guess[0].toLowerCase() == "hisuian") { form = "Hisuian"; guess.splice(0, 1) }
     else { form = "NULL"; }
 
-    let given_name = args.join(" ")._normalize();
+    let given_name = guess.join(" ")._normalize();
 
     var pokemon = pokemons.filter(it => it["Pokemon Name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in English Name.
     if (pokemon.length == 0) {
         dr_pokemon = pokemons.filter(it => it["dr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in Germany Name.
         jp_pokemon = pokemons.filter(it => it["jp_name"].some(x => x._normalize() === given_name) && it["Alternate Form Name"] === form); // Searching in Japanese Name.
         fr_pokemon = pokemons.filter(it => it["fr_name"]._normalize() === given_name && it["Alternate Form Name"] === form); // Searching in French Name.
-        if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) { message.channel.send("That is the wrong pokemon!"); return; };
+        if (language_finder(dr_pokemon, jp_pokemon, fr_pokemon) == false) return interaction.reply({ content: "That is the wrong pokemon!" });
     }
 
     function language_finder(dr_pokemon, jp_pokemon, fr_pokemon) {
@@ -42,16 +40,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
     pokemon = pokemon[0];
 
-    channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+    channel_model.findOne({ ChannelID: interaction.channel.id }, (err, channel) => {
         if (err) console.log(err);
         if (channel) {
-            if (channel.PokemonID == 0) { message.channel.send("No pokémon currently seen on wild."); return; }
+            if (channel.PokemonID == 0) return interaction.reply({ content: "No pokémon currently seen on wild.", ephemeral: true });
             if (pokemon["Pokemon Id"] == channel.PokemonID) {
-                user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
                     if (err) console.log(err);
 
                     // Get number of catached pokemons.
-                    getDexes.getalldex(message.author.id).then((user_pokemons) => {
+                    getDexes.getalldex(interaction.user.id).then((user_pokemons) => {
 
                         var no_of_pokemons = user_pokemons.filter(it => it["PokemonId"] == channel.PokemonID).length + 1;
                         var splitted_number = no_of_pokemons.toString().split('');
@@ -75,8 +73,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     leaderboard.Users = [];
                                 }
 
-                                var user_id = message.author.id;
-                                var username = message.author.username;
+                                var user_id = interaction.user.id;
+                                var username = interaction.user.username;
                                 if (user.HideWeeklyLeaderboard) username = "???";
                                 var no_of_caught = 1;
 
@@ -98,8 +96,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     leaderboard.save();
                                 }
                             } else {
-                                var user_id = message.author.id;
-                                var username = message.author.username;
+                                var user_id = interaction.user.id;
+                                var username = interaction.user.username;
                                 if (user.HideWeeklyLeaderboard) username = "???";
                                 var no_of_caught = 1;
                                 var new_leaderboard = new leaderboard_model({
@@ -120,7 +118,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                 Reason: "Catched"
                             }
 
-                            getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                            getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
 
                                 if (no_of_pokemons == 1) {
                                     user.TotalCaught = user.TotalCaught == undefined ? 1 : user.TotalCaught + 1;
@@ -134,13 +132,13 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     user.save();
                                 }
                                 else {
-                                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
+                                    user_model.findOneAndUpdate({ UserID: interaction.user.id }, { $inc: { "DexRewards.$[el].RewardAmount": credit_amount } }, {
                                         arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
                                         new: true
                                     }, (err, user) => {
                                         if (err) return console.log(err);
                                     });
-                                    user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
+                                    user_model.findOneAndUpdate({ UserID: interaction.user.id }, { $set: { "DexRewards.$[el].RewardDescription": `${no_of_pokemons} Caught!` } }, {
                                         arrayFilters: [{ "el.PokemonId": parseInt(pokemon["Pokemon Id"]) }],
                                         new: true
                                     }, (err, user) => {
@@ -150,19 +148,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                                 // Adding to dex.
                                 var dex_data = { PokemonId: pokemon["Pokemon Id"] };
-                                getDexes.insertdex(message.author.id, dex_data).then(result => {
+                                getDexes.insertdex(interaction.user.id, dex_data).then(result => {
 
                                     var message_string = "";
 
                                     // Pokemon Name
                                     var message_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon["Pokemon Id"], pokemons, channel.Shiny);
-                                    if (no_of_pokemons == 1) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
-                                    else if (no_of_pokemons == 10) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
-                                    else if (no_of_pokemons == 100) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
-                                    else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
-                                    else { message_string = `Congratulations <@${message.author.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
-                                    message.channel.send(message_string);
-                                    if (channel.ClearSpawns) message.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                                    if (no_of_pokemons == 1) { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! Added to Pokèdex.`; }
+                                    else if (no_of_pokemons == 10) { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 10th ${message_pokemon_name}`; }
+                                    else if (no_of_pokemons == 100) { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 100th ${message_pokemon_name}`; }
+                                    else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
+                                    else { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
+                                    interaction.reply({ content: message_string });
+                                    if (channel.ClearSpawns) interaction.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
                                 });
                             });
                         });
@@ -170,10 +168,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
 
                 // Removing pokemon in channel database.
-                channel_model.findOneAndUpdate({ ChannelID: message.channel.id }, { PokemonID: 0, PokemonLevel: 0, Shiny: false, Hint: 0, MessageCount: 0, SpawnLimit: 0 }, function (err, user) {
+                channel_model.findOneAndUpdate({ ChannelID: interaction.channel.id }, { PokemonID: 0, PokemonLevel: 0, Shiny: false, Hint: 0, MessageCount: 0, SpawnLimit: 0 }, function (err, user) {
                     if (err) { console.log(err) }
                 });
-            } else { message.channel.send("That is the wrong pokemon!"); return; }
+            } else return interaction.reply({ content: "That is the wrong pokemon!" });
         }
     });
 
@@ -186,5 +184,13 @@ String.prototype._normalize = function () {
 
 module.exports.config = {
     name: "catch",
+    description: "Catch a pokemon.",
+    options: [{
+        name: "guess",
+        description: "Guess the pokemon.",
+        required: true,
+        type: 3,
+        min_length: 1
+    }],
     aliases: []
 }

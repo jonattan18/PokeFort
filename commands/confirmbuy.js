@@ -8,19 +8,19 @@ const user_model = require('../models/user');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        prompt_model.findOne({ $and: [{ "UserID.User1ID": message.author.id }, { "ChannelID": message.channel.id }, { "PromptType": "ConfirmBuy" }] }, (err, prompt) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+        prompt_model.findOne({ $and: [{ "UserID.User1ID": interaction.user.id }, { "ChannelID": interaction.channel.id }, { "PromptType": "ConfirmBuy" }] }, (err, prompt) => {
             if (err) return console.log(err);
-            if (!prompt) return message.channel.send('No prompt asked for to use ``confirmbuy`` command.');
+            if (!prompt) return interaction.reply({ content: 'No prompt asked for to use ``confirmbuy`` command.', ephemeral: true });
 
             market_model.findOne({ $and: [{ "MarketID": prompt.List.MarketID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, market) => {
                 if (err) return console.log(err);
-                if (!market) return message.channel.send('Sorry, the pokémon you are trying to buy is not found.');
+                if (!market) return interaction.reply({ content: 'Sorry, the pokémon you are trying to buy is not found.', ephemeral: true });
 
-                if (user.PokeCredits < market.Price) return message.channel.send("You have insufficient balance to buy this pokemon.");
+                if (user.PokeCredits < market.Price) return interaction.reply({ content: "You have insufficient balance to buy this pokemon.", ephemeral: true });
 
                 let pokemon_data = {
                     CatchedOn: market.CatchedOn,
@@ -36,7 +36,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 user.PokeCredits -= market.Price;
 
-                getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
                     prompt.remove().then(() => {
                         market.remove().then(() => {
                             user.save().then(() => {
@@ -60,7 +60,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                     });
                                 });
                             });
-                            message.channel.send(`Your have bought Level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market for ${market.Price} Credits.`);
+                            interaction.reply({ content: `Your have bought Level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market for ${market.Price} Credits.` });
                         });
                     });
                 });
@@ -77,5 +77,6 @@ function percentCalculation(a, b) {
 
 module.exports.config = {
     name: "confirmbuy",
+    description: "Confirm the purchase of a pokémon.",
     aliases: []
 }

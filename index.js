@@ -457,10 +457,10 @@ client.on('messageCreate', async (message) => {
 
                     if (channel != null && channel.Silence === true) return;
                     if (user.Silence == false || user.Silence == undefined) {
-                        if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
-                        if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
+                        if (leveled_up) { embed.addFields({ name: `Your ${old_pokemon_name} has levelled up!`, value: `${old_pokemon_name_star} is now level ${pokemon_level}!`, inline: false }); }
+                        if (evolved) { embed.addFields({ name: `What ? ${old_pokemon_name} is evolving!`, value: `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, inline: false }); }
                         if (evolved || leveled_up) {
-                            message.channel.send(embed);
+                            message.channel.send({ embeds: [embed] });
                         }
                     }
 
@@ -584,9 +584,13 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     // Updating pokemon to database.
     var channel_to_send = channel_redirect_spawn == null ? message.channel.id : channel_redirect_spawn;
     var msg_id = "";
-    client.channels.fetch(channel_to_send).then(channel => { channel.send({ embeds: [embed], files: [image_url] }).then(message => { msg_id = message.id; }); });
-    channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, MessageID: msg_id }, function (err, user) {
-        if (err) { console.log(err) }
+    client.channels.fetch(channel_to_send).then(channel => {
+        channel.send({ embeds: [embed], files: [image_url] }).then(message => {
+            msg_id = message.id;
+            channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, MessageID: msg_id }, function (err, user) {
+                if (err) { console.log(err) }
+            });
+        });
     });
 }
 
