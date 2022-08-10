@@ -1,10 +1,9 @@
 // Models
 const user_model = require('../models/user');
 
-module.exports.run = async (bot, message, args, prefix, user_available) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length != 0) { message.channel.send(`Invalid Command!`); return; }
-    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
+module.exports.run = async (bot, interaction, user_available) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (user) {
 
             var dm = user.DuelDM == false || user.DuelDM == undefined ? true : false;
@@ -12,9 +11,9 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
             user.save();
             if (dm) {
-                message.channel.send(`Your duel instruction message has been muted!`);
+                interaction.reply({ content: `Your duel instruction message has been muted!`, ephemeral: true });
             } else {
-                message.channel.send(`Your duel instruction message has been un-muted!`);
+                interaction.reply({ content: `Your duel instruction message has been un-muted!`, ephemeral: true });
             }
         }
     });
@@ -23,5 +22,6 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
 module.exports.config = {
     name: "dm",
+    description: "Mutes or unmutes your duel instruction message.",
     aliases: []
 }
