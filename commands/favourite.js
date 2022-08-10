@@ -3,7 +3,6 @@ const _ = require('lodash');
 
 // Models
 const user_model = require('../models/user');
-const channel_model = require('../models/channel');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
@@ -13,17 +12,15 @@ const pagination = require('../utils/pagination');
 var pokemons_from_database = null;
 var static_user_pokemons = null;
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (message.isadmin) { message.author = message.mentions.users.first() || message.author; args.shift() } // Admin check
+module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    page = 1;
     //Get user data.
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (!user) return;
         if (err) console.log(err);
 
-        getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
+        getPokemons.getallpokemon(interaction.user.id).then(pokemons_from_database => {
             static_user_pokemons = pokemons_from_database;
             var user_pokemons = pokemons_from_database;
             var order_type = user.OrderType;
@@ -45,21 +42,16 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // For only fav command.
-            if (args.length == 0 || isInt(args[0])) {
-                user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite == true);
-                return create_pagination(message, pokemons, user_pokemons);
-            }
-            else {
-                return message.channel.send(`Invalid command! Use ${prefix}fav to see all favourite pokemons!`);
-            }
+            user_pokemons = user_pokemons.filter(pokemon => pokemon.Favourite == true);
+            return create_pagination(interaction, pokemons, user_pokemons);
         });
     });
 }
 
 // Function for pagination.
-function create_pagination(message, pokemons, user_pokemons) {
+function create_pagination(interaction, pokemons, user_pokemons, page = 1) {
 
-    if (user_pokemons.length == 0) { message.channel.send("Pokemons not found."); return; }
+    if (user_pokemons.length == 0) return interaction.reply({ content: "Pokemons not found.", ephemeral: true });
 
     var chunked_pokemons = chunkArray(user_pokemons, 20);
     var global_embed = [];
@@ -81,22 +73,22 @@ function create_pagination(message, pokemons, user_pokemons) {
         }
 
         // Create embed message
-        var username = message.author.username;
-        let embed = new Discord.MessageEmbed();
+        var username = interaction.user.username;
+        let embed = new Discord.EmbedBuilder();
         embed.setTitle(`**${username}'s Pokémon:**`)
-        embed.setColor(message.member.displayHexColor)
+        embed.setColor(interaction.member.displayHexColor)
         embed.setDescription(description);
-        embed.setFooter(`Page ${a + 1}/${chunked_pokemons.length}. You have ${user_pokemons.length} Pokemon.`);
+        embed.setFooter({ text: `Page ${a + 1}/${chunked_pokemons.length}. You have ${user_pokemons.length} Pokemon.` });
         global_embed.push(embed);
     }
 
     page = page - 1;
-    if (page > global_embed.length - 1 || page < 0) { return message.channel.send('No page found.') }
+    if (page > global_embed.length - 1 || page < 0) return interaction.reply({ content: 'No page found.', ephemeral: true });
 
     // Send message to channel.
-    message.channel.send(global_embed[page]).then(msg => {
+    interaction.reply({ embeds: [global_embed[page]] }).then(msg => {
         if (global_embed.length == 1) return;
-        pagination.createpage(message.channel.id, message.author.id, msg.id, global_embed, page);
+        pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, global_embed, page);
     });
 }
 
@@ -104,20 +96,6 @@ function create_pagination(message, pokemons, user_pokemons) {
 function total_iv(iv) {
     var total_iv = ((iv[0] + iv[1] + iv[2] + iv[3] + iv[4] + iv[5]) / 186 * 100).toFixed(2);
     return total_iv;
-}
-
-// Check if any value has repeated number of times.
-function has_repeated(array, times, number) {
-    const counts = {};
-    var array_counts = [];
-    array.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
-    for (i = 0; i < Object.keys(counts).length; i++) {
-        if (Object.keys(counts)[i] === number && counts[Object.keys(counts)[i]] == times) {
-            array_counts.push(Object.keys(counts)[i]);
-        }
-    }
-    if (array_counts.length > 0) { return true; }
-    else { return false; }
 }
 
 // Chunk array into equal parts.
@@ -135,20 +113,8 @@ function chunkArray(myArray, chunk_size) {
     return tempArray;
 }
 
-// Check if given value is float.
-function isFloat(x) { return !!(x % 1); }
-
-// Check if value is int.
-function isInt(value) {
-    var x;
-    if (isNaN(value)) {
-        return false;
-    }
-    x = parseFloat(value);
-    return (x | 0) === x;
-}
-
 module.exports.config = {
     name: "favourite",
+    description: "Show favourite pokemon.",
     aliases: []
 }
