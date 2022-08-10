@@ -5,16 +5,17 @@ const prompt_model = require('../models/prompt');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    prompt_model.findOne({ $and: [{ "UserID.User1ID": message.author.id }, { "ChannelID": message.channel.id }, { "PromptType": "ConfirmRemove" }] }, (err, prompt) => {
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+
+    prompt_model.findOne({ $and: [{ "UserID.User1ID": interaction.user.id }, { "ChannelID": interaction.channel.id }, { "PromptType": "ConfirmRemove" }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!prompt) return message.channel.send('No prompt asked for to use ``confirmremove`` command.');
+        if (!prompt) return interaction.reply({ content: 'No prompt asked for to use ``confirmremove`` command.', ephemeral: true });
 
         if (prompt.List.MarketID != undefined && prompt.List.AuctionID == undefined) {
             market_model.findOne({ $and: [{ "MarketID": prompt.List.MarketID }, { "PokemonUID": prompt.List.PokemonUID }] }, (err, market) => {
                 if (err) return console.log(err);
-                if (!market) return message.channel.send('Sorry, the pokémon you are trying to remove is not found.');
+                if (!market) return interaction.reply({ content: 'Sorry, the pokémon you are trying to remove is not found.', ephemeral: true });
 
                 let pokemon_data = {
                     CatchedOn: market.CatchedOn,
@@ -28,10 +29,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     Reason: market.Reason
                 }
 
-                getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
+                getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
                     prompt.remove().then(() => {
                         market.remove().then(() => {
-                            message.channel.send(`Your Level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has been removed from the market.`);
+                            interaction.reply({ content: `Your Level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} has been removed from the market.` });
                         });
                     });
                 });
@@ -42,5 +43,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 module.exports.config = {
     name: "confirmremove",
+    description: "Confirm remove a pokemon from the market.",
     aliases: []
 }

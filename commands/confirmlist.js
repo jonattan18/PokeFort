@@ -7,21 +7,21 @@ const user_model = require('../models/user');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        prompt_model.findOne({ $and: [{ "UserID.User1ID": message.author.id }, { "ChannelID": message.channel.id }, { "PromptType": "ConfirmList" }] }, (err, prompt) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+        prompt_model.findOne({ $and: [{ "UserID.User1ID": interaction.user.id }, { "ChannelID": interaction.channel.id }, { "PromptType": "ConfirmList" }] }, (err, prompt) => {
             if (err) return console.log(err);
-            if (!prompt) return message.channel.send('No prompt asked for to use ``confirmlist`` command.');
+            if (!prompt) return interaction.reply({ content: 'No prompt asked for to use ``confirmlist`` command.', ephemeral: true });
 
             // Adding to market or auction.
-            getPokemons.getallpokemon(message.author.id).then(pokemons_from_database => {
+            getPokemons.getallpokemon(interaction.user.id).then(pokemons_from_database => {
                 var user_pokemons = pokemons_from_database;
-                if (user_pokemons.length < 2) return message.channel.send('You should have more than 1 pokémon to list in the market.');
+                if (user_pokemons.length < 2) return interaction.reply({ content: 'You should have more than 1 pokémon to list in the market.', ephemeral: true });
                 var selected_pokemon = user_pokemons.filter(it => it._id == prompt.List.PokemonUID)[0];
 
-                if (selected_pokemon == undefined) return message.channel.send("Can't find that pokemon. Try again !");
+                if (selected_pokemon == undefined) return interaction.reply({ content: "Can't find that pokemon. Try again !", ephemeral: true });
 
                 var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == selected_pokemon.PokemonId)[0];
 
@@ -58,7 +58,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     auction_model.findOne({ "Primary": true }, (err, auction_unqiue) => {
                         auction = new auction_model({
                             AuctionID: auction_unqiue.Last_Unique_Value + 1,
-                            UserID: message.author.id,
+                            UserID: interaction.user.id,
                             PokemonId: selected_pokemon.PokemonId,
                             PokemonUID: selected_pokemon._id,
                             PokemonName: pokemon_name,
@@ -100,11 +100,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                         }
 
                                         user.save().then(() => {
-                                            if(did_selected_pokemon) message.channel.send(`You have added your seleted pokémon to auction list. Auto Selecting first pokemon.`);
+                                            if (did_selected_pokemon) interaction.reply({ content: `You have added your seleted pokémon to auction list. Auto Selecting first pokemon.`, ephemeral: true });
                                         });
 
                                         var time_string = prompt.List.BidTime[0, prompt.List.BidTime.length - 1] == "h" ? "hours" : "minutes";
-                                        message.channel.send(`You successfully auctioned your level ${level} ${pokemon_name} for ${prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)} ${time_string} with a buyout of ${prompt.List.Price} credits.`);
+                                        interaction.reply({ content: `You successfully auctioned your level ${level} ${pokemon_name} for ${prompt.List.BidTime.substring(0, prompt.List.BidTime.length - 1)} ${time_string} with a buyout of ${prompt.List.Price} credits.` });
                                     });
                                 });
                             });
@@ -117,7 +117,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     market_model.findOne({ "Primary": true }, (err, market_unqiue) => {
                         market = new market_model({
                             MarketID: market_unqiue.Last_Unique_Value + 1,
-                            UserID: message.author.id,
+                            UserID: interaction.user.id,
                             PokemonId: selected_pokemon.PokemonId,
                             PokemonUID: selected_pokemon._id,
                             PokemonName: pokemon_name,
@@ -150,10 +150,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                                             var new_pokemon = user_pokemons.filter(it => it._id !== selected_pokemon._id)[0];
                                             user.Selected = new_pokemon._id;
                                             user.save().then(() => {
-                                                message.channel.send(`You have added your seleted pokémon to market list. Auto Selecting first pokemon.`);
+                                                interaction.reply({ content: `You have added your seleted pokémon to market list. Auto Selecting first pokemon.`, ephemeral: true });
                                             });
                                         }
-                                        message.channel.send(`You have listed your level ${level} ${pokemon_name} on the market for ${prompt.List.Price} credits!`);
+                                        interaction.reply({ content: `You have listed your level ${level} ${pokemon_name} on the market for ${prompt.List.Price} credits!`, ephemeral: true });
                                     });
                                 });
                             });
@@ -209,5 +209,6 @@ function percentage(percent, total) {
 
 module.exports.config = {
     name: "confirmlist",
+    description: "Confirm the listing of your pokemon.",
     aliases: []
 }
