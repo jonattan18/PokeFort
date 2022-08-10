@@ -1,39 +1,35 @@
 const channel_model = require('../models/channel');
 
-//FIXME: Not completed
-
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!message.member.permissions.has('MANAGE_MESSAGES')) {
-        return message.channel.send("You are not allowed to change the bot's redirect channel!");
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!interaction.member.permissions.has('MANAGE_MESSAGES')) {
+        return interaction.reply({ content: "You are not allowed to change the bot's redirect channel!", ephemeral: true });
     }
 
-    if (args.length !== 1) return message.channel.send('Invalid command!');
-
-    channel_model.findOne({ ChannelID: message.channel.id }, function (err, channel) {
+    channel_model.findOne({ ChannelID: interaction.channel.id }, function (err, channel) {
         if (err) { console.log(err); return; }
 
-        if (args[0].toLowerCase() == 'enable') {
+        if (interaction.options.getSubcommand() === "enable") {
             if (channel.ClearSpawns == true) {
-                message.channel.send('This channel spawn clearer is already enabled!');
+                interaction.reply({ content: 'This channel spawn clearer is already enabled!' });
             }
             else {
                 channel.ClearSpawns = true;
-                message.channel.send('This channel spawn clearer alerts is enabled!');
+                interaction.reply({ content: 'This channel spawn clearer alerts is enabled!' });
                 channel.save();
             }
         }
-        else if (args[0].toLowerCase() == 'disable') {
+        else if (interaction.options.getSubcommand() === "disable") {
             if (channel.ClearSpawns == false) {
-                message.channel.send('This channel spawn clearer is already disabled!');
+                interaction.reply({ content: 'This channel spawn clearer is already disabled!' });
             }
             else {
                 channel.ClearSpawns = false;
-                message.channel.send('This channel spawn clearer is disabled!');
+                interaction.reply({ content: 'This channel spawn clearer is disabled!' });
                 channel.save();
             }
         }
         else {
-            message.channel.send('Invalid command!');
+            interaction.reply({ content: 'Invalid command!', ephemeral: true });
         }
     });
 
@@ -41,5 +37,15 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 module.exports.config = {
     name: "clearspawns",
+    description: "Enable or Disable automatic clearing of spawns.",
+    options: [{
+        name: "enable",
+        description: "Enable automatic clearing of spawns.",
+        type: 1
+    }, {
+        name: "disable",
+        description: "Disable automatic clearing of spawns.",
+        type: 1
+    }],
     aliases: []
 }

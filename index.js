@@ -210,53 +210,63 @@ client.on('interactionCreate', async interaction => {
     // Remove this
     if (!config.ALLOWED_GUILDS.includes(interaction.guild.id)) return;
 
-    // Loading Pokemons Data
-    var load_pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
-
-    // Initialize Variables
-    var prefix = config.DEFAULT_PREFIX;
+    // Initialize variables
     var user_available = false;
-    var channel_data = null;
 
     // Command Processing
     var cmd = interaction.commandName.toLowerCase();
 
-    //Getting the data from the user model
-    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
-        if (err) return console.log(err);
-        if (user) { user_available = true; }
-        global_user = user; // To access from outer fields.
-        var issuspend = false; // To check if the user is suspended
+    // Channel Update
+    //check if database exists
+    channel_model.findOne({ ChannelID: interaction.channel.id }, (err, channel) => {
+        if (err) console.log(err);
+        if (channel && channel.Disabled === true && (cmd != "channel" || (cmd == "channel" && interaction.options.getSubcommand() != "enable"))) return interaction.reply({ content: "This channel is disabled.", ephemeral: true });
+        // If channel not found create new one.
+        if (!channel) {
+            let new_channel = new channel_model({
+                ChannelID: interaction.channel.id,
+                ChannelName: interaction.channel.name,
+                MessageCount: 0,
+                SpawnLimit: 0
+            });
+            new_channel.save();
+        }
 
-        // Suspend Protection
-        if (user != null && user.Suspend.Hours != undefined) {
-            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
-                user.Suspend = undefined;
+        //Getting the data from the user model
+        user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+            if (err) return console.log(err);
+            if (user) { user_available = true; }
+            var issuspend = false; // To check if the user is suspended
+
+            // Suspend Protection
+            if (user != null && user.Suspend.Hours != undefined) {
+                if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
+                    user.Suspend = undefined;
+                }
+                else issuspend = true;
             }
-            else issuspend = true;
-        }
 
-        if (issuspend) return interaction.reply({ content: `You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`, ephemeral: true });
-        cmd = interaction.commandName;
-        if (channel_data != null && channel_data.Disabled === true && cmd.toLocaleLowerCase() != 'channel') return interaction.reply({ content: `Commands can't be used in this channel!`, ephemeral: true });
+            if (issuspend) return interaction.reply({ content: `You have been suspended for ${user.Suspend.Hours} hours. Reason: ${user.Suspend.Reason}`, ephemeral: true });
+            cmd = interaction.commandName;
 
-        // Mail notice.
-        if (user != null && user.MailNotice) {
-            var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
-            var embed = new Discord.EmbedBuilder();
-            embed.setColor("#1ec5ee");
-            embed.setTitle("Mail notification !");
-            embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `" + prefix + "mails` to check your mails.");
-            embed.setFooter({ text: `App: Inbox, Mails`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
-            interaction.reply({ embeds: [embed] });
-            user.MailNotice = false;
-        }
+            // Mail notice.
+            if (user != null && user.MailNotice) {
+                var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
+                var embed = new Discord.EmbedBuilder();
+                embed.setColor("#1ec5ee");
+                embed.setTitle("Mail notification !");
+                embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `/mails` to check your mails.");
+                embed.setFooter({ text: `App: Inbox, Mails`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
+                interaction.reply({ embeds: [embed] });
+                user.MailNotice = false;
+            }
 
-        if (user_available) user.save();
-        if (user != null && admin.iseligible(user.Admin, cmd, interaction)) { interaction.isadmin = true; interaction.Adminlvl = user.Admin; interaction.AdminServer = config.ADMIN_COMMAND_SERVER; }
-        const commandfile = client.commands.get(cmd);
-        if (!commandfile) return;
-        commandfile.run(client, interaction, user_available, load_pokemons);
+            if (user_available) user.save();
+            if (user != null && admin.iseligible(user.Admin, cmd, interaction)) { interaction.isadmin = true; interaction.Adminlvl = user.Admin; interaction.AdminServer = config.ADMIN_COMMAND_SERVER; }
+            const commandfile = client.commands.get(cmd);
+            if (!commandfile) return;
+            commandfile.run(client, interaction, user_available, pokemons);
+        });
     });
 });
 
@@ -271,15 +281,14 @@ client.on('interactionCreate', async interaction => {
 
 // This will be called on message received from discord
 // This will be used to increase xp and level up
-client.on('message', async (message) => {
+client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     if (message.guild === null) return;
 
     //#region Spawn Sytem
     //check if database exists
-    await channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
+    channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
         if (err) console.log(err);
-        channel_data = channel;
         if (channel && channel.Disabled === true) return;
         // If channel not found create new one.
         if (!channel) {
@@ -298,6 +307,7 @@ client.on('message', async (message) => {
 
             //Caching last message user.
             channel_message_cache[message.channel.id] = message.author.id;
+            channel_redirect_spawn = undefined;
             channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
                 let channel_id = message.channel.id;
                 var message_count = channel.MessageCount + 1;
@@ -308,7 +318,7 @@ client.on('message', async (message) => {
                 if (spawn_limit == message_count) {
                     spawn_limit = 0;
                     message_count = 0;
-                    spawn_pokemon(message, prefix, guild_redirect_spawn); // Spawn Pokemon
+                    spawn_pokemon(message, channel_redirect_spawn); // Spawn Pokemon
                 }
 
                 channel_model.findOneAndUpdate({ ChannelID: channel_id }, { MessageCount: message_count, SpawnLimit: spawn_limit }, function (err, user) {
@@ -317,149 +327,147 @@ client.on('message', async (message) => {
             });
             //   }
         }
-    });
-    //#endregion
 
-    //Getting the data from the user model
-    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
-        if (err) return console.log(err);
-        if (user) { user_available = true; }
-        var issuspend = false; // To check if the user is suspended
-        // Suspend Protection
-        if (user != null && user.Suspend.Hours != undefined) {
-            if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
-                user.Suspend = undefined;
-            }
-            else issuspend = true;
-        }
-        if (issuspend == false) advance_xp(message, user_available, user); // Increase XP
-    });
-
-    //#region Xp Increase
-    //check if user database exists
-    function advance_xp(message, user_avl, user) {
-        if (user_avl) {
-            if (channel_data != null && channel_data.Disabled === true) return;
-            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
-
-                var randomxp = getRandomInt(1, 100);
-
-                // Check for XP Boosters.
-                if (user.Boosters != undefined) {
-                    var old_date = user.Boosters.Timestamp;
-                    var new_date = new Date();
-                    var hours = Math.abs(old_date - new_date) / 36e5;
-                    if (hours < user.Boosters.Hours) { randomxp *= user.Boosters.Level; }
+        //Getting the data from the user model
+        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+            if (err) return console.log(err);
+            if (user) { user_available = true; }
+            var issuspend = false; // To check if the user is suspended
+            // Suspend Protection
+            if (user != null && user.Suspend.Hours != undefined) {
+                if ((Date.now() - user.Suspend.Timestamp) / 1000 > (user.Suspend.Hours * 3600)) {
+                    user.Suspend = undefined;
                 }
+                else issuspend = true;
+            }
+            if (issuspend == false) advance_xp(message, user_available, user); // Increase XP
+        });
 
-                //#region Update XP
-                var selected_pokemon = user_pokemons.filter(it => it._id == global_user.Selected)[0];
-                var _id = selected_pokemon._id;
-                var pokemon_id = selected_pokemon.PokemonId;
-                var pokemon_current_xp = selected_pokemon.Experience + randomxp
-                var pokemon_level = selected_pokemon.Level;
-                if (pokemon_level == 100 || pokemon_level > 100) return;
-                if (selected_pokemon.Held == "Xp blocker") return;
-                var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny);
-                var old_pokemon_name_star = getPokemons.get_pokemon_name_from_id(pokemon_id, load_pokemons, selected_pokemon.Shiny, true);
+        //#region Xp Increase
+        //check if user database exists
+        function advance_xp(message, user_avl, user) {
+            if (user_avl) {
+                getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
-                var old_pokemon_exp = pokemon_current_xp;
-                var leveled_up = false;
-                var evolved = false;
-                var new_evolved_name = "";
-                while (pokemon_current_xp > 0) {
-                    if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
-                        leveled_up = true;
+                    var randomxp = getRandomInt(1, 100);
 
-                        //Update level and send message.
-                        pokemon_level += 1;
-                        pokemon_current_xp -= exp_to_level(pokemon_level);
+                    // Check for XP Boosters.
+                    if (user.Boosters != undefined) {
+                        var old_date = user.Boosters.Timestamp;
+                        var new_date = new Date();
+                        var hours = Math.abs(old_date - new_date) / 36e5;
+                        if (hours < user.Boosters.Hours) { randomxp *= user.Boosters.Level; }
+                    }
 
-                        if (pokemon_level == 100) {
-                            pokemon_level = 100;
-                            pokemon_current_xp = 0;
-                            break;
-                        }
+                    //#region Update XP
+                    var selected_pokemon = user_pokemons.filter(it => it._id == user.Selected)[0];
+                    var _id = selected_pokemon._id;
+                    var pokemon_id = selected_pokemon.PokemonId;
+                    var pokemon_current_xp = selected_pokemon.Experience + randomxp
+                    var pokemon_level = selected_pokemon.Level;
+                    if (pokemon_level == 100 || pokemon_level > 100) return;
+                    if (selected_pokemon.Held == "Xp blocker") return;
+                    var old_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                    var old_pokemon_name_star = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny, true);
 
-                        if (selected_pokemon.Held != "Everstone") {
-                            // Get pokemon evolution.
-                            var pokemon_data = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
-                            //Exections for Tyrogue
-                            if (pokemon_id == "360" && pokemon_level >= 20) {
-                                var ev = 0;
-                                let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
-                                let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                    var old_pokemon_exp = pokemon_current_xp;
+                    var leveled_up = false;
+                    var evolved = false;
+                    var new_evolved_name = "";
+                    while (pokemon_current_xp > 0) {
+                        if (pokemon_current_xp >= exp_to_level(pokemon_level)) {
+                            leveled_up = true;
 
-                                if (atk > def) pokemon_id = "140";
-                                else if (atk < def) pokemon_id = "141";
-                                else pokemon_id = "361";
-                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
-                                evolved = true;
-                                new_evolved_name = new_pokemon_name;
+                            //Update level and send message.
+                            pokemon_level += 1;
+                            pokemon_current_xp -= exp_to_level(pokemon_level);
 
+                            if (pokemon_level == 100) {
+                                pokemon_level = 100;
+                                pokemon_current_xp = 0;
+                                break;
                             }
-                            //Exception for Cosmoem
-                            else if (pokemon_id == "1320" && pokemon_level >= 53) {
-                                if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
-                                else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
-                                if (evolved) {
+                            if (selected_pokemon.Held != "Everstone") {
+                                // Get pokemon evolution.
+                                var pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_id)[0];
+                                //Exections for Tyrogue
+                                if (pokemon_id == "360" && pokemon_level >= 20) {
+                                    var ev = 0;
+                                    let atk = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[1] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+                                    let def = (_.floor(0.01 * (2 * 35 + selected_pokemon.IV[2] + _.floor(0.25 * ev)) * pokemon_level) + 5);
+
+                                    if (atk > def) pokemon_id = "140";
+                                    else if (atk < def) pokemon_id = "141";
+                                    else pokemon_id = "361";
                                     var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
-                                    pokemon_id = pokemon_id;
+                                    evolved = true;
                                     new_evolved_name = new_pokemon_name;
+
                                 }
-                            }
-                            else {
-                                if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
-                                    if (pokemon_level >= pokemon_data.Evolution.Level) {
-                                        if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
+                                //Exception for Cosmoem
+                                else if (pokemon_id == "1320" && pokemon_level >= 53) {
+                                    if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
+                                    else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
-                                            // Double evolution check.
-                                            var double_pokemon_data = load_pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
+                                    if (evolved) {
+                                        var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
+                                        pokemon_id = pokemon_id;
+                                        new_evolved_name = new_pokemon_name;
+                                    }
+                                }
+                                else {
+                                    if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
+                                        if (pokemon_level >= pokemon_data.Evolution.Level) {
+                                            if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
 
-                                            if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
-                                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, load_pokemons, selected_pokemon.Shiny);
-                                                pokemon_id = double_pokemon_data.Evolution.Id;
+                                                // Double evolution check.
+                                                var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
+
+                                                if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
+                                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
+                                                    pokemon_id = double_pokemon_data.Evolution.Id;
+                                                }
+                                                else {
+                                                    var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_data.Evolution.Id, pokemons, selected_pokemon.Shiny);
+                                                    pokemon_id = pokemon_data.Evolution.Id;
+                                                }
+                                                evolved = true;
+                                                new_evolved_name = new_pokemon_name;
                                             }
-                                            else {
-                                                var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_data.Evolution.Id, load_pokemons, selected_pokemon.Shiny);
-                                                pokemon_id = pokemon_data.Evolution.Id;
-                                            }
-                                            evolved = true;
-                                            new_evolved_name = new_pokemon_name;
                                         }
                                     }
                                 }
                             }
                         }
+                        else {
+                            break;
+                        }
                     }
-                    else {
-                        break;
+                    if (pokemon_current_xp < 0) pokemon_current_xp = 0;
+                    // Update database
+                    pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                        if (err) return console.log(err);
+                    });
+                    //#endregion
+
+                    if (leveled_up || evolved) {
+                        var embed = new Discord.EmbedBuilder();
                     }
-                }
-                if (pokemon_current_xp < 0) pokemon_current_xp = 0;
-                // Update database
-                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Experience": pokemon_current_xp, "Pokemons.$[elem].Level": pokemon_level, "Pokemons.$[elem].PokemonId": pokemon_id } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
-                    if (err) return console.log(err);
+
+                    if (channel != null && channel.Silence === true) return;
+                    if (user.Silence == false || user.Silence == undefined) {
+                        if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
+                        if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
+                        if (evolved || leveled_up) {
+                            message.channel.send(embed);
+                        }
+                    }
+
                 });
-                //#endregion
-
-                if (leveled_up || evolved) {
-                    var embed = new Discord.MessageEmbed()
-                }
-
-                if (channel_data != null && channel_data.Silence === true) return;
-                if (global_user.Silence == false || global_user.Silence == undefined) {
-                    if (leveled_up) { embed.addField(`Your ${old_pokemon_name} has levelled up!`, `${old_pokemon_name_star} is now level ${pokemon_level}!`, false); }
-                    if (evolved) { embed.addField(`What ? ${old_pokemon_name} is evolving!`, `Your ${old_pokemon_name} evolved into ${new_evolved_name}`, false); }
-                    if (evolved || leveled_up) {
-                        message.channel.send(embed);
-                    }
-                }
-
-            });
+            }
         }
-    }
+    });
     //#endregion
 });
 
@@ -481,23 +489,11 @@ client.on('guildCreate', guild => {
     })
     write_data.save();
     guild.systemChannel.send(config.BOT_NAME + " Joined this server. Thanks for invitation :smile:")
-    guild.systemChannel.send("Use ``" + config.DEFAULT_PREFIX + "help`` to view list of commands.")
+    guild.systemChannel.send("Use ``/help`` to view list of commands.")
 });
 
-// Redirect Command
-function redirect_command(command, prefix) {
-    // Commands to redirect
-    command = command.slice(prefix.length);
-    var redirect_list = [["n", "next"], ["bal", "balance"], ["b", "back"], ["i", "info"], ["pk", "pokemon"], ["mi", "moveinfo"], ["addfav", "addfavourite"], ["removefav", "removefavourite"], ["fav", "favourite"], ["pf", "profile"], ["tms", "tmmoves"], ["m", "market"], ["auc", "auction"], ["mails", "mail"], ["lb", "leaderboard"], ["redeems", "redeem"]];
-    redirect_list = redirect_list.filter(it => it[0] == command);
-    if (redirect_list.length > 0) {
-        var index = redirect_list.findIndex(it => it[0] == command);
-        return prefix + redirect_list[index][1];
-    } else { return prefix + command; }
-}
-
 // Pokemon Spawn System
-function spawn_pokemon(message, prefix, guild_redirect_spawn) {
+function spawn_pokemon(message, channel_redirect_spawn) {
 
     // Initialize Variables
     let random = getRandomInt(0, 1000);
@@ -579,17 +575,16 @@ function spawn_pokemon(message, prefix, guild_redirect_spawn) {
     }
 
     // Create embed message
-    let embed = new Discord.MessageEmbed();
-    embed.attachFiles(image_url)
+    let embed = new Discord.EmbedBuilder();
     embed.setImage('attachment://' + image_name)
     embed.setTitle("A wild pokémon has appeared!")
-    embed.setDescription(`Guess the pokémon and type ${prefix}catch <pokémon> to catch it!`)
+    embed.setDescription(`Guess the pokémon and type /catch <pokémon> to catch it!`)
     embed.setColor("#1cb99a");
 
     // Updating pokemon to database.
-    var channel_to_send = guild_redirect_spawn == null ? message.channel.id : guild_redirect_spawn;
+    var channel_to_send = channel_redirect_spawn == null ? message.channel.id : channel_redirect_spawn;
     var msg_id = "";
-    client.channels.fetch(channel_to_send).then(channel => { channel.send(embed).then(message => { msg_id = message.id; }); });
+    client.channels.fetch(channel_to_send).then(channel => { channel.send({ embeds: [embed], files: [image_url] }).then(message => { msg_id = message.id; }); });
     channel_model.findOneAndUpdate({ ChannelID: channel_to_send }, { PokemonID: spawn_pokemon["Pokemon Id"], PokemonLevel: random_level, Shiny: is_shiny, Hint: 0, PokemonNature: random_nature, PokemonIV: IV, MessageID: msg_id }, function (err, user) {
         if (err) { console.log(err) }
     });
