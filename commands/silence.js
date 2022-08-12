@@ -1,10 +1,9 @@
 // Models
 const user_model = require('../models/user');
 
-module.exports.run = async (bot, message, args, prefix, user_available) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length != 0) { message.channel.send(`Invalid Command!`); return; }
-    await user_model.findOne({ UserID: message.author.id }, (err, user) => {
+module.exports.run = async (bot, interaction, user_available) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (user) {
 
             var silence = user.Silence == false || user.Silence == undefined ? true : false;
@@ -12,9 +11,9 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
             user.save();
             if (silence) {
-                message.channel.send(`Your level up message has been silenced!`);
+                interaction.reply({ content: `Your level up message has been silenced!` });
             } else {
-                message.channel.send(`Your level up message has been un-silenced!`);
+                interaction.reply({ content: `Your level up message has been un-silenced!` });
             }
         }
     });
@@ -23,5 +22,6 @@ module.exports.run = async (bot, message, args, prefix, user_available) => {
 
 module.exports.config = {
     name: "silence",
+    description: "Silence or un-silence your level up message.",
     aliases: []
 }

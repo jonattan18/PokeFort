@@ -80,6 +80,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons, _switch 
                 new_prompt = duel_copy(prompt, new_prompt);
                 new_prompt.save().then(() => { prompt.remove(); });
 
+                // Interaction reply
+                interaction.reply({ content: `\`${interaction.user.username}\` had made a move.` });
+
                 // Send Message
                 if (user2_data.DuelDM != true) bot.users.cache.get(prompt.UserID.User2ID).send(usr_embed);
             }
@@ -98,6 +101,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons, _switch 
                 else var damage = battle.calculate_damage(user_2_pokemon, user2_data.Attack, user1_data.Defense, pokemon_level, move_used_info, user_1_pokemon);
 
                 prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
+
+                // Interaction reply
+                interaction.reply({ content: `\`${interaction.user.username}\` had made a move.` });
 
                 var image_file = null;
                 // Create embed for damage.
@@ -130,7 +136,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons, _switch 
                         description = `${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n`;
                     }
                     const img_buffer = new Buffer.from(prompt.Duel.ImageCache, 'base64');
-                    image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
+                    image_file = img_buffer;
                     embed.setImage('attachment://img.jpeg')
 
                     if (prompt.Duel.User1Pokemon.Speed >= prompt.Duel.User2Pokemon.Speed) {
@@ -234,7 +240,8 @@ module.exports.run = async (bot, interaction, user_available, pokemons, _switch 
                 }
 
                 embed.setDescription(description);
-                interaction.channel.send({ embeds: [embed], files: [image_file] });
+                if (image_file == null) interaction.channel.send({ embeds: [embed] });
+                else interaction.channel.send({ embeds: [embed], files: [{ attachment: image_file, name: "img.jpeg" }] });
             }
 
             //#region Pokemon XP Update.
@@ -666,7 +673,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                             .composite([{ input: one, top: 180, left: 80 }, { input: two, top: 20, left: 430 }])
                             .jpeg({ quality: 100 })
                             .toBuffer("jpeg").then((image_buffer) => {
-                                const image_file = new Discord.MessageAttachment(image_buffer, 'img.jpeg');
                                 // Sending duel message.
 
                                 // Remove words after _r in forms and normal pokemons
@@ -682,7 +688,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                                 embed.setColor(interaction.member.displayHexColor);
                                 embed.setImage('attachment://img.jpeg');
                                 embed.setFooter({ text: `Use /team to see the current state of your team as well as what moves your pokémon has available to them!` });
-                                interaction.channel.send({ embeds: [embed], files: [image_file] });
+                                interaction.channel.send({ embeds: [embed], files: [{ attachment: image_buffer, name: "img.jpeg" }] });
                             });
                     });
                 });
