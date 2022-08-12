@@ -24,21 +24,19 @@ const battle = require('../utils/battle');
 const getPokemons = require('../utils/getPokemon');
 const movesparser = require('../utils/moveparser');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons, _switch = false) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length != 1) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
-    if (isInt(args[0]) == false) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
-    if (_switch == false && (args[0] > 4 || args[0] < 1)) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to duel.`); }
-    if (_switch == true && (args[0] > 6 || args[0] < 1)) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to raid.`); }
+module.exports.run = async (bot, interaction, user_available, pokemons, _switch = false) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (_switch == false && (interaction.options.get("move").value > 4 || interaction.options.get("move").value < 1)) return interaction.reply({ content: `Invalid Syntax. Use /help to know how to duel.`, ephemeral: true });
+    if (_switch == true && (interaction.options.get("id").value > 6 || interaction.options.get("id").value < 1)) return interaction.reply({ content: `Invalid Syntax. Use /help to know how to raid.`, ephemeral: true });
 
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Duel.Accepted": true }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "ChannelID": interaction.channel.id }, { "Duel.Accepted": true }] }, (err, prompt) => {
         if (err) return console.log(err);
         if (!prompt) {
             // Raid check.
-            raid_model.findOne({ $and: [{ Trainers: { $in: message.author.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: message.author.id }] }, (err, raid_data) => {
+            raid_model.findOne({ $and: [{ Trainers: { $in: interaction.user.id } }, { Timestamp: { $gt: Date.now() } }, { Started: true }, { CurrentDuel: interaction.user.id }] }, (err, raid_data) => {
                 if (err) { console.log(err); return; }
-                if (raid_data) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch);
-                else return message.channel.send('You are not in a duel!');
+                if (raid_data) return raid(raid_data, bot, interaction, user_available, pokemons, _switch);
+                else return interaction.reply({ content: 'You are not in a duel!', ephemeral: true });
             });
         }
         else {
@@ -49,11 +47,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var user2_data = duel_data.User2Pokemon;
 
             // Player 1
-            if (prompt.UserID.User1ID == message.author.id) {
-                if (duel_data.Turn != 1) return message.channel.send('It is not your turn!');
+            if (prompt.UserID.User1ID == interaction.user.id) {
+                if (duel_data.Turn != 1) return interaction.reply({ content: 'It is not your turn!', ephemeral: true });
                 var user_1_pokemon = pokemons.filter(it => it["Pokemon Id"] == user1_data.PokemonID)[0];
                 var user_2_pokemon = pokemons.filter(it => it["Pokemon Id"] == user2_data.PokemonID)[0];
-                var move_used = user1_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
+                var move_used = user1_data.Moves[interaction.options.get("move").value - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
                 var move_used_info = moveinfo[move_used];
                 var pokemon_level = user1_data.PokemonLevel;
 
@@ -64,18 +62,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 prompt.Duel.User1Move = [damage[0], damage[1], move_used_info.name];
                 prompt.Duel.Turn = 2;
 
-                if (user1_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
+                if (user1_data.DuelDM != true) interaction.user.send("Move chosen!\nWaiting for opponent to pick a move...");
 
-                var usr_embed = new Discord.MessageEmbed();
-                usr_embed.setColor(message.guild.me.displayHexColor);
+                var usr_embed = new Discord.EmbedBuilder();
+                usr_embed.setColor(interaction.member.displayHexColor);
                 usr_embed.setTitle(`Battle VS ${duel_data.User1name}`);
                 var description = "Pick a move by typing the corresponding command in the channel where you started the duel."
                 description += "\n\n";
                 description += "Available moves:\n\n"
-                description += `${user2_data.Moves[0]} ${prefix}use 1\n\n`;
-                description += `${user2_data.Moves[1]} ${prefix}use 2\n\n`;
-                description += `${user2_data.Moves[2]} ${prefix}use 3\n\n`;
-                description += `${user2_data.Moves[3]} ${prefix}use 4\n\n`;
+                description += `${user2_data.Moves[0]} /use 1\n\n`;
+                description += `${user2_data.Moves[1]} /use 2\n\n`;
+                description += `${user2_data.Moves[2]} /use 3\n\n`;
+                description += `${user2_data.Moves[3]} /use 4\n\n`;
                 usr_embed.setDescription(description);
 
                 var new_prompt = new prompt_model();
@@ -87,11 +85,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             }
 
             // Player 2
-            if (prompt.UserID.User2ID == message.author.id) {
-                if (duel_data.Turn != 2) return message.channel.send('It is not your turn!');
+            if (prompt.UserID.User2ID == interaction.user.id) {
+                if (duel_data.Turn != 2) return interaction.reply({ content: 'It is not your turn!', ephemeral: true });
                 var user_1_pokemon = pokemons.filter(it => it["Pokemon Id"] == user1_data.PokemonID)[0];
                 var user_2_pokemon = pokemons.filter(it => it["Pokemon Id"] == user2_data.PokemonID)[0];
-                var move_used = user2_data.Moves[args[0] - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
+                var move_used = user2_data.Moves[interaction.options.get("move").value - 1].replace(/ /g, "").replace(/[^a-zA-Z ]/g, "").toLowerCase();
                 var move_used_info = moveinfo[move_used];
                 var pokemon_level = user2_data.PokemonLevel;
                 var description = "";
@@ -101,10 +99,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
                 prompt.Duel.User1Pokemon.ActiveHP -= damage[0];
 
+                var image_file = null;
                 // Create embed for damage.
-                var embed = new Discord.MessageEmbed()
+                var embed = new Discord.EmbedBuilder()
                 embed.setTitle(`${duel_data.User1name} VS ${duel_data.User2name}`)
-                embed.setColor(message.guild.me.displayHexColor);
+                embed.setColor(interaction.member.displayHexColor);
 
                 if (prompt.Duel.User1Pokemon.ActiveHP <= 0 && prompt.Duel.User2Pokemon.ActiveHP <= 0) {
                     if (prompt.Duel.User1Pokemon.Speed > prompt.Duel.User2Pokemon.Speed) {
@@ -131,8 +130,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         description = `${duel_data.User2name}'s ${user2_data.PokemonName}: ${prompt.Duel.User2Pokemon.ActiveHP}/${user2_data.TotalHP}HP\n${duel_data.User1name}'s ${user1_data.PokemonName}: ${prompt.Duel.User1Pokemon.ActiveHP}/${user1_data.TotalHP}HP\n`;
                     }
                     const img_buffer = new Buffer.from(prompt.Duel.ImageCache, 'base64');
-                    const image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
-                    embed.attachFiles(image_file)
+                    image_file = new Discord.MessageAttachment(img_buffer, 'img.jpeg');
                     embed.setImage('attachment://img.jpeg')
 
                     if (prompt.Duel.User1Pokemon.Speed >= prompt.Duel.User2Pokemon.Speed) {
@@ -150,18 +148,18 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     prompt.Duel.Turn = 1;
                     prompt.save();
 
-                    if (user2_data.DuelDM != true) message.author.send("Move chosen!\nWaiting for opponent to pick a move...");
+                    if (user2_data.DuelDM != true) interaction.user.send("Move chosen!\nWaiting for opponent to pick a move...");
 
-                    var usr_embed = new Discord.MessageEmbed();
-                    usr_embed.setColor(message.guild.me.displayHexColor);
+                    var usr_embed = new Discord.EmbedBuilder();
+                    usr_embed.setColor(interaction.member.displayHexColor);
                     usr_embed.setTitle(`Battle VS ${duel_data.User2name}`);
                     var usr_description = "Pick a move by typing the corresponding command in the channel where you started the duel."
                     usr_description += "\n\n";
                     usr_description += "Available moves:\n\n"
-                    usr_description += `${user1_data.Moves[0]} ${prefix}use 1\n\n`;
-                    usr_description += `${user1_data.Moves[1]} ${prefix}use 2\n\n`;
-                    usr_description += `${user1_data.Moves[2]} ${prefix}use 3\n\n`;
-                    usr_description += `${user1_data.Moves[3]} ${prefix}use 4\n\n`;
+                    usr_description += `${user1_data.Moves[0]} /use 1\n\n`;
+                    usr_description += `${user1_data.Moves[1]} /use 2\n\n`;
+                    usr_description += `${user1_data.Moves[2]} /use 3\n\n`;
+                    usr_description += `${user1_data.Moves[3]} /use 4\n\n`;
                     usr_embed.setDescription(usr_description);
 
                     var new_prompt = new prompt_model();
@@ -236,7 +234,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 }
 
                 embed.setDescription(description);
-                message.channel.send(embed);
+                interaction.channel.send({ embeds: [embed], files: [image_file] });
             }
 
             //#region Pokemon XP Update.
@@ -279,8 +277,8 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             }
                             //Exception for Cosmoem
                             else if (pokemon_id == "1320" && pokemon_level >= 53) {
-                                if (message.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
-                                else if (message.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
+                                if (interaction.channel.name == "day") { evolved = true; pokemon_id = "1321"; }
+                                else if (interaction.channel.name == "night") { evolved = true; pokemon_id = "1322"; }
 
                                 if (evolved) {
                                     var new_pokemon_name = getPokemons.get_pokemon_name_from_id(pokemon_id, pokemons, selected_pokemon.Shiny);
@@ -290,12 +288,12 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                             else {
                                 if (pokemon_data.Evolution != "NULL" && pokemon_data.Evolution.Reason == "Level") {
                                     if (pokemon_level >= pokemon_data.Evolution.Level) {
-                                        if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase())) {
+                                        if (pokemon_data.Evolution.Time == undefined || (pokemon_data.Evolution.Time != undefined && pokemon_data.Evolution.Time.toLowerCase() == interaction.channel.name.toLowerCase())) {
 
                                             // Double evolution check.
                                             var double_pokemon_data = pokemons.filter(it => it["Pokemon Id"] == pokemon_data.Evolution.Id)[0];
 
-                                            if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == message.channel.name.toLowerCase()))) {
+                                            if ((double_pokemon_data.Evolution != "NULL" && double_pokemon_data.Evolution.Reason == "Level" && pokemon_level >= double_pokemon_data.Evolution.Level) && (double_pokemon_data.Evolution.Time == undefined || (double_pokemon_data.Evolution.Time != undefined && double_pokemon_data.Evolution.Time.toLowerCase() == interaction.channel.name.toLowerCase()))) {
                                                 var new_pokemon_name = getPokemons.get_pokemon_name_from_id(double_pokemon_data.Evolution.Id, pokemons, shiny);
                                                 pokemon_id = double_pokemon_data.Evolution.Id;
                                             }
@@ -322,11 +320,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 });
 
                 // Send Update Note
-                var embed = new Discord.MessageEmbed()
-                if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
-                else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
-                embed.setColor(message.member.displayHexColor)
-                if (evolved || leveled_up) message.channel.send(embed);
+                var embed = new Discord.EmbedBuilder()
+                if (evolved) { embed.addFields({ name: `**${old_pokemon_name} evolved to ${new_evolved_name}!**`, value: `${new_evolved_name} is now level ${pokemon_level}`, inline: false }); }
+                else if (leveled_up) { embed.addFields({ name: `**${old_pokemon_name} levelled up!**`, value: `${old_pokemon_name} is now level ${pokemon_level}`, inline: false }); }
+                embed.setColor(interaction.member.displayHexColor)
+                if (evolved || leveled_up) interaction.channel.send({ embeds: [embed] });
 
             }
             //#endregion
@@ -351,13 +349,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 }
 
-function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, _default = false, raid_function_health = 5) {
+function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _default = false, raid_function_health = 5) {
 
     // loop protection
     raid_function_health--;
     if (raid_function_health <= 0) { return; }
 
-    if (args.length != 1 || !isInt(args[0]) || (_switch && (args[0] > 6 || args[0] < 1)) || (!_switch && (args[0] > 4 || args[0] < 1))) return message.channel.send("Please enter a valid move.");
+    if ((_switch && (interaction.options.get("id").value > 6 || interaction.options.get("id").value < 1)) || (!_switch && (interaction.options.get("move").value > 4 || interaction.options.get("move").value < 1))) return interaction.reply({ content: "Please enter a valid move.", ephemeral: true });
+
+    var args = [];
+    if (_switch) args = [interaction.options.get("id").value];
+    else args = [interaction.options.get("move").value];
 
     //#region Module Pre Processing
 
@@ -376,7 +378,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     //Preparation move for player.
     if (raid_data.PreparationMove != undefined) {
-        if (args[0] != raid_data.PreparationMove && raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted != true) return message.channel.send("You can't use that move now.");
+        if (args[0] != raid_data.PreparationMove && raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted != true) return interaction.reply({ content: "You can't use that move now.", ephemeral: true });
         else {
             raid_data.PreparationMove = undefined;
         }
@@ -390,7 +392,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     // Fainted move block.
     if (raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted == true && _switch == false) {
-        return message.channel.send("Your pokémon is fainted. Use switch to switch pokemon.");
+        return interaction.reply({ content: "Your pokémon is fainted. Use switch to switch pokemon.", ephemeral: true });
     }
 
     //#endregion
@@ -401,58 +403,25 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
     if (_switch == true) {
         if (raid_data.ChangeOnFainted) {
-            if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
+            if (raid_data.CurrentPokemon == args[0] - 1) return interaction.reply({ content: "You can't switch to the same pokemon.", ephemeral: true });
             raid_data.ChangeOnFainted = false;
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             var choosed_pokemon = raid_data.UserStreamPokemons.indexOf(switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}`;
-            } else return message.channel.send("Please enter a valid pokémon to switch.");
+            } else return interaction.reply({ content: "Please enter a valid pokémon to switch.", ephemeral: true });
         }
         else {
-            if (raid_data.CurrentPokemon == args[0] - 1) return message.channel.send("You can't switch to the same pokemon.");
+            if (raid_data.CurrentPokemon == args[0] - 1) return interaction.reply({ content: "You can't switch to the same pokemon.", ephemeral: true });
             raid_data.CurrentPokemon = args[0] - 1;
             var switch_pokemon = raid_data.TrainersTeam[args[0] - 1];
             var choosed_pokemon = raid_data.UserStreamPokemons.indexOf(switch_pokemon.name) + 1;
             if ((switch_pokemon != null || switch_pokemon != undefined || switch_pokemon != {}) && switch_pokemon.fainted == false) {
                 var write_data = `${raid_data.Stream}\n>p1 switch ${choosed_pokemon}\n>p2 default`;
-            } else return message.channel.send("Please enter a valid pokémon to switch.");
+            } else return interaction.reply({ content: "Please enter a valid pokémon to switch.", ephemeral: true });
         }
     } else var write_data = `${raid_data.Stream}\n>p1 move ${args[0]}\n>p2 ${_default ? "default" : "move " + move_index}`;
-
-    //#region Module Bug Notification
-    // Remove me in release.
-    function raid_bugged() {
-        // Reporting in report channel if not already reported.
-        const reports_model = require('../models/reports');
-        reports_model.findOne({
-            UserID: raid_data.RaidID.toString()
-        }).then(function (report) {
-            if (report == null || report == undefined) {
-                message.channel.send("``Err:00_``");
-
-                raid_data.MyStream = write_data;
-                if (_battlestream.battle != null) raid_data.Stream = _battlestream.battle.inputLog.join('\n');
-                raid_data.Stream += "\n\n\nWriteData:" + write_data + "\n\n\n";
-                const reports_model = require('../models/reports');
-                let new_report = new reports_model({
-                    UserID: raid_data.RaidID.toString(),
-                    Reason: JSON.stringify(raid_data)
-                });
-                new_report.save();
-            }
-        });
-
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
-            if (err) return console.log(err);
-            if (user == null) return;
-            user.NoCooldownRaid = true;
-            user.save();
-        });
-    }
-
-    //#endregion
 
     // If over looping
     if (_default) {
@@ -514,14 +483,12 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
     void (async () => {
         var received_data = _battlestream.battle.log;
         if ((_battlestream.battle.turn == (raid_data.CurrentTurn != undefined ? raid_data.CurrentTurn : 1) && received_data[received_data.length - 1] != "|upkeep") && _switch == false && !received_data[received_data.length - 1].startsWith("|win") && !received_data[received_data.length - 2].startsWith("|win")) {
-            if (_default == false) return raid(raid_data, bot, message, args, prefix, user_available, pokemons, _switch, true, raid_function_health);
-            else {
-                return raid_bugged();
-            }
+            if (_default == false) return raid(raid_data, bot, interaction, user_available, pokemons, _switch, true, raid_function_health);
+            else return;
         }
         else {
             var show_str = [];
-            var battle_log = _battlestream.battle.log.filter(function(item, pos, arr) { return pos === 0 || item !== arr[pos-1]; }).join('\n');
+            var battle_log = _battlestream.battle.log.filter(function (item, pos, arr) { return pos === 0 || item !== arr[pos - 1]; }).join('\n');
             for (const { args, kwArgs } of Protocol.parse(battle_log)) {
                 var formatted = formatter.formatText(args, kwArgs);
 
@@ -649,18 +616,18 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
                     // Create user pokemon message.
-                    var usr_embed = new Discord.MessageEmbed();
+                    var usr_embed = new Discord.EmbedBuilder();
                     usr_embed.setTitle(first_user_message[0]);
                     usr_embed.setDescription(first_user_message.slice(1).join(""));
-                    message.channel.send(usr_embed);
+                    interaction.channel.send({ embeds: [usr_embed] });
                 }
 
                 if (!second_user_message[0].startsWith("$Player") && _switch != true) {
                     // Create raid boss message.
-                    var raid_embed = new Discord.MessageEmbed();
+                    var raid_embed = new Discord.EmbedBuilder();
                     raid_embed.setTitle(`${second_user_message[0]}`);
                     raid_embed.setDescription(second_user_message.slice(1).join(""));
-                    message.channel.send(raid_embed);
+                    interaction.channel.send({ embeds: [raid_embed] });
                 }
 
                 // Check if user pokemon fainted.
@@ -707,16 +674,15 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                                 var index_of_r = battle_stream_pokemon_name.indexOf("_r");
                                 if (index_of_r != -1) battle_stream_pokemon_name = battle_stream_pokemon_name.substring(0, index_of_r);
 
-                                var embed = new Discord.MessageEmbed();
-                                embed.setTitle(`${message.author.username.toUpperCase()} VS Raid Boss!`);
+                                var embed = new Discord.EmbedBuilder();
+                                embed.setTitle(`${interaction.user.username.toUpperCase()} VS Raid Boss!`);
                                 embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);
-                                embed.addField(`${message.author.username}'s Pokémon`, `${battle_stream_pokemon_name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, true);
-                                embed.addField(`Raid Boss`, `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, true);
-                                embed.setColor(message.guild.me.displayHexColor);
-                                embed.attachFiles(image_file)
+                                embed.addFields({ name: `${interaction.user.username}'s Pokémon`, value: `${battle_stream_pokemon_name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, inline: true });
+                                embed.addFields({ name: `Raid Boss`, value: `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, inline: true });
+                                embed.setColor(interaction.member.displayHexColor);
                                 embed.setImage('attachment://img.jpeg');
-                                embed.setFooter(`Use ${prefix}team to see the current state of your team as well as what moves your pokémon has available to them!`);
-                                message.channel.send(embed);
+                                embed.setFooter({ text: `Use /team to see the current state of your team as well as what moves your pokémon has available to them!` });
+                                interaction.channel.send({ embeds: [embed], files: [image_file] });
                             });
                     });
                 });
@@ -734,13 +700,13 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                     raid_data.ChangeOnFainted = true;
                     raid_data.markModified('TrainersTeam');
 
-                    var fainted_embed = new Discord.MessageEmbed();
-                    fainted_embed.setTitle(`${message.author.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "").slice(0, -2)} fainted.`);
-                    fainted_embed.setDescription(`${message.author.username}, please do ${prefix}switch <number> to switch your selected pokemon.`);
-                    message.channel.send(fainted_embed);
+                    var fainted_embed = new Discord.EmbedBuilder();
+                    fainted_embed.setTitle(`${interaction.user.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "").slice(0, -2)} fainted.`);
+                    fainted_embed.setDescription(`${interaction.user.username}, please do /switch <number> to switch your selected pokemon.`);
+                    interaction.channel.send({ embeds: [fainted_embed] });
                 } else {
                     // Check if other user exists.
-                    raid_data.CompletedDuel.push(message.author.id);
+                    raid_data.CompletedDuel.push(interaction.user.id);
 
                     // Find a user which has not completed duel.
                     var non_battled_user = raid_data.Trainers.filter(x => !raid_data.CompletedDuel.includes(x) && x != null);
@@ -767,10 +733,10 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                         raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
                         raid_data.markModified('RaidPokemon');
 
-                        var unable_embed = new Discord.MessageEmbed();
+                        var unable_embed = new Discord.EmbedBuilder();
                         unable_embed.setTitle(`Raid Incomplete!`);
-                        unable_embed.setDescription(`${message.author.username}, you have no more pokémon to battle. Your duel has ended!`);
-                        message.channel.send(unable_embed);
+                        unable_embed.setDescription(`${interaction.user.username}, you have no more pokémon to battle. Your duel has ended!`);
+                        interaction.channel.send({ embeds: [unable_embed] });
                     }
                     else {
                         _raid_boss_won = true;
@@ -784,18 +750,18 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
                 // Raid Health and damage
                 var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
                 if (current_damage > 0) {
-                    var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == message.author.id)[0];
+                    var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == interaction.user.id)[0];
                     if (raid_usr_damage_data) {
                         var index = raid_data.Damages.indexOf(raid_usr_damage_data);
                         raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
                     } else {
                         raid_data.Damages.push({
-                            UserID: message.author.id,
+                            UserID: interaction.user.id,
                             Damage: current_damage
                         });
                     }
 
-                    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+                    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
                         if (err) return;
                         if (user) {
                             user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
@@ -810,11 +776,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             function raid_boss_fainted() {
                 damage_addition();
                 raid_data.remove().then(() => {
-                    var channel_embed = new Discord.MessageEmbed();
+                    var channel_embed = new Discord.EmbedBuilder();
                     channel_embed.setTitle(`Congratulations!`);
                     channel_embed.setDescription(`You have defeated the raid boss. Your rewards are sent to your DM.`);
-                    channel_embed.setColor(message.guild.me.displayHexColor);
-                    message.channel.send(channel_embed);
+                    channel_embed.setColor(interaction.member.displayHexColor);
+                    interaction.channel.send({ embeds: [channel_embed] });
                     function raid_boss_faint_loop(i = 0) {
                         if (raid_data.Trainers[i]) {
                             // Get user data.
@@ -924,7 +890,7 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
 
                                         // Send Dm message to all users.
                                         if (!raid_data.MutedTrainers.includes(user_id)) {
-                                            var embed = new Discord.MessageEmbed();
+                                            var embed = new Discord.EmbedBuilder();
                                             embed.setTitle(`You defeated a level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name.replaceAll("_r", "")}!`);
                                             embed.setDescription(description);
                                             var user_s = bot.users.cache.get(user_id)
@@ -942,11 +908,11 @@ function raid(raid_data, bot, message, args, prefix, user_available, pokemons, _
             // Raid Boss won.
             function raid_boss_won() {
                 raid_data.remove().then(() => {
-                    var channel_embed = new Discord.MessageEmbed();
+                    var channel_embed = new Discord.EmbedBuilder();
                     channel_embed.setTitle(`Raid Boss Won!`);
                     channel_embed.setDescription(`Raid Boss has defeated you! Try again next time!`);
-                    channel_embed.setColor(message.guild.me.displayHexColor);
-                    message.channel.send(channel_embed);
+                    channel_embed.setColor(interaction.member.displayHexColor);
+                    interaction.channel.send({ embeds: [channel_embed] });
                     // Send Dm message to all users.
                     for (var i = 0; i < raid_data.Trainers.length; i++) {
                         if (raid_data.Trainers[i]) {
@@ -1020,17 +986,16 @@ function randomNumber(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-// Check if value is int.
-function isInt(value) {
-    var x;
-    if (isNaN(value)) {
-        return false;
-    }
-    x = parseFloat(value);
-    return (x | 0) === x;
-}
-
 module.exports.config = {
     name: "use",
+    description: "Use a move.",
+    options: [{
+        name: "move",
+        description: "The move to use.",
+        required: true,
+        type: 4,
+        min_value: 1,
+        max_value: 4
+    }],
     aliases: []
 }

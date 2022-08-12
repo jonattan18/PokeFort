@@ -11,6 +11,8 @@ const getPokemons = require('../utils/getPokemon');
 // Config
 const config = require('../config/config.json');
 
+//TODO: Slash commands
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length < 2) { return message.channel.send(`Invalid Command.`); }

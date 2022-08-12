@@ -6,15 +6,14 @@ const user_model = require('../models/user');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (user_available) return message.channel.send(`You have already picked a pokemon!`);
-    if (args.length == 0) { message.channel.send("You have not mentioned any pokemon! Use ``" + prefix + "start <pokemon>``"); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (user_available) return interaction.reply({ content: `You have already picked a pokemon!`, ephemeral: true });
     const starter_pokemon = ["Bulbasaur", "Charmander", "Squirtle", "Chikorita", "Cyndaquil", "Totodile", "Treecko", "Torchic", "Mudkip", "Turtwig", "Chimchar", "Piplup", "Snivy", "Tepig", "Oshawott", "Chespin", "Fennekin", "Froakie", "Rowlet", "Litten", "Popplio", "Grookey", "Scorbunny", "Sobble"];
-    if (starter_pokemon.some(x => x.toLowerCase() == args[0].toLowerCase()) == false) { message.channel.send("You have mentioned invalid pokemon!"); return; }
-    var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === args[0].toLowerCase());
+    if (starter_pokemon.some(x => x.toLowerCase() == interaction.options.get("name").value.toLowerCase()) == false) return interaction.reply({ content: "You have mentioned invalid pokemon!", ephemeral: true });
+    var pokemon = pokemons.filter(it => it["Pokemon Name"].toLowerCase() === interaction.options.get("name").value.toLowerCase());
     pokemon = pokemon[0];
 
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (err) console.log(err);
 
         // IV creation
@@ -47,7 +46,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         let new_user = new user_model({
-            UserID: message.author.id,
+            UserID: interaction.user.id,
             Started: true,
             OrderType: "Number",
             Joined: Date.now(),
@@ -57,11 +56,11 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         });
 
         new_user.save(function (err, saved) {
-            getPokemons.insertpokemon(message.author.id, pokemon_data).then(result => {
-                user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { Selected: result.Pokemons[0]._id } }, { new: true }, (err, updated) => {
+            getPokemons.insertpokemon(interaction.user.id, pokemon_data).then(result => {
+                user_model.findOneAndUpdate({ UserID: interaction.user.id }, { $set: { Selected: result.Pokemons[0]._id } }, { new: true }, (err, updated) => {
                     if (err) return console.log(err)
-                    message.channel.send("Congratulations! " + pokemon["Pokemon Name"] + " is your first pokemon! Type ``" + prefix + "info`` to see it!");
-                    message.channel.send("We welcome you for taking part in beta program of this bot. We have credited you 100,000 PokeCredits and 25 Redeems for testing. Help yourself !");
+                    interaction.reply({ content: "Congratulations! " + pokemon["Pokemon Name"] + " is your first pokemon! Type ``/info`` to see it!" });
+                    interaction.channel.send({ content: "We welcome you for taking part in beta program of this bot. We have credited you 100,000 PokeCredits and 25 Redeems for testing. Help yourself !" });
                 });
             }, err => { console.log(err) });
         });
@@ -77,5 +76,13 @@ function getRandomInt(min, max) {
 
 module.exports.config = {
     name: "pick",
+    description: "Pick a starter pokemon",
+    options: [{
+        name: "name",
+        description: "Pokemon name",
+        required: true,
+        type: 3,
+        min_length: 1
+    }],
     aliases: []
 }

@@ -1,27 +1,23 @@
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length != 1) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to raid.`); }
-    if (isInt(args[0]) == false) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to raid`); }
-    if (args[0] > 6 || args[0] < 1) { return message.channel.send(`Invalid Syntax. Use ${prefix}help to know how to raid.`); }
-
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    if (interaction.options.get("id").value > 6 || interaction.options.get("id").value < 1) return interaction.reply({ content: `Invalid Syntax. Use /help to know how to raid.`, ephemeral: true });
 
     const commandfile = bot.commands.get("use") || client.commands.get(client.aliases.get("use"));
-    if (!commandfile) return message.channel.send(`Invalid Command.`);
-    return commandfile.run(bot, message, args, prefix, user_available, pokemons, true);
+    if (!commandfile) return interaction.reply({ content: `Invalid Command.`, ephemeral: true });
+    return commandfile.run(bot, interaction, user_available, pokemons, true);
 
-}
-
-// Check if value is int.
-function isInt(value) {
-    var x;
-    if (isNaN(value)) {
-        return false;
-    }
-    x = parseFloat(value);
-    return (x | 0) === x;
 }
 
 module.exports.config = {
     name: "switch",
+    description: "Switches your current pokémon.",
+    options: [{
+        name: "id",
+        description: "The ID of the pokémon you want to switch to.",
+        type: 4,
+        required: true,
+        min_value: 1,
+        max_value: 6
+    }],
     aliases: []
 }

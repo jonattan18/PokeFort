@@ -4,12 +4,11 @@ const Discord = require('discord.js');
 //Utils
 const getPokemons = require('../utils/getPokemon');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (message.isadmin == true) { message.author = message.mentions.users.first() || message.author; args.shift() } // Admin check
-    if (args.length != 0) { return message.channel.send("Invalid Command!") }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
+    //if (message.isadmin == true) { interaction.user = message.mentions.users.first() || interaction.user; args.shift() } // Admin check
 
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (err) { console.log(err); return; }
 
         var balance = user.PokeCredits.toLocaleString();
@@ -23,14 +22,14 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         var shards = user.Shards == undefined ? 0 : user.Shards;
         var wishing_pieces = user.WishingPieces == undefined ? 0 : user.WishingPieces;
 
-        getPokemons.getallpokemon(message.author.id).then(result => {
+        getPokemons.getallpokemon(interaction.user.id).then(result => {
             var total_pokemons = result.length;
 
             // Create embed for user profile
-            const embed = new Discord.MessageEmbed()
-            embed.setTitle(`${message.author.username}'s Profile`)
-            embed.setColor(message.member.displayHexColor)
-            embed.setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
+            const embed = new Discord.EmbedBuilder()
+            embed.setTitle(`${interaction.user.username}'s Profile`)
+            embed.setColor(interaction.member.displayHexColor)
+            embed.setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
             embed.setDescription('**Date Started:** ' + date_started
                 + '\n**Balance:** ' + balance
                 + '\n**Redeems:** ' + redeems
@@ -42,7 +41,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 + '\n**Daily Streak:** ' + daily_streak
                 + '\n**Badge:** ' + badges)
 
-            message.channel.send(embed);
+            interaction.reply({ embeds: [embed] });
         });
     });
 
@@ -51,5 +50,6 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 module.exports.config = {
     name: "profile",
+    description: "Gives you a profile of your account.",
     aliases: []
 }
