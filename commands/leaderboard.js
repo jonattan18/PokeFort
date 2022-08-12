@@ -2,21 +2,21 @@ const Discord = require('discord.js'); // For message embed.
 const leaderboard_model = require('../models/leaderboard.js');
 const user_model = require('../models/user');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    if (args.length == 0) {
+    if (interaction.options.get("show") == null && interaction.options.get("hide") == null) {
 
         //Create an embed
-        var embed = new Discord.MessageEmbed();
+        var embed = new Discord.EmbedBuilder();
         embed.setTitle("Weekly Leaderboard");
-        embed.setColor(message.guild.me.displayHexColor);
+        embed.setColor(interaction.member.displayHexColor);
 
         // Add first 20 rank to embed fields.
         leaderboard_model.findOne({ Type: "Weekly" }, (err, leaderboard) => {
-            if (err) return message.channel.send("Looks like not many of you caught many pokemons to display. Please try again later.");
-            if (!leaderboard) return message.channel.send("Looks like not many of you caught many pokemons to display. Please try again later.");
-            
+            if (err) return interaction.reply({ content: "Looks like not many of you caught many pokemons to display. Please try again later.", ephemeral: true });
+            if (!leaderboard) return interaction.reply({ content: "Looks like not many of you caught many pokemons to display. Please try again later.", ephemeral: true });
+
             var current_week_monday = new Date();
             var days = ((current_week_monday.getDay() + 7) - 1) % 7;
             current_week_monday.setDate(current_week_monday.getDate() - days);
@@ -26,7 +26,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 leaderboard.Users = [];
             }
 
-            if (leaderboard.Users.length == 0) return message.channel.send("Looks like not many of you caught many pokemons to display. Please try again later.");
+            if (leaderboard.Users.length == 0) return interaction.reply({ content: "Looks like not many of you caught many pokemons to display. Please try again later." });
             var upcoming_week = getNextDayOfTheWeek("Monday", true);
             var upcoming_week_difference = new Date(upcoming_week.getTime() - new Date().getTime());
 
@@ -39,7 +39,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var time_string = `${days > 0 ? `${days} days,` : ""} ${hours > 0 ? `${hours} hours,` : ""} ${minutes > 0 ? `${minutes} minutes` : ""}`;
 
             // Find the user in the leaderboard with the same UserID.
-            var user_rank = leaderboard.Users.findIndex(user => user.UserID == message.author.id);
+            var user_rank = leaderboard.Users.findIndex(user => user.UserID == interaction.user.id);
             if (user_rank == -1) {
                 embed.setDescription("The weekly leaderboard resets in: " + time_string + "\nYou are not in the leaderboard.");
             }
@@ -56,43 +56,43 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var username = leaderboard.Users[i].Username;
                     var no_of_caught = leaderboard.Users[i].NoOfCaught;
                     var rank = leaderboard.Users.indexOf(leaderboard.Users[i]) + 1;
-                    embed.addField(`${rank}) ${username}`, `${no_of_caught} pokémon caught`, true);
+                    embed.addFields({ name: `${rank}) ${username}`, value: `${no_of_caught} pokémon caught`, inline: true });
                 }
             }
-            message.channel.send(embed);
+            interaction.reply({ embeds: [embed] });
         });
     }
-    else if (args.length == 1 && args[0] == "--hide") {
-        user_model.findOne({ UserID: message.author.id }).then(user => {
+    else if (interaction.options.get("hide") != null && interaction.options.get("show") == null) {
+        user_model.findOne({ UserID: interaction.user.id }).then(user => {
             if (user.HideWeeklyLeaderboard) {
-                message.channel.send("You are already hiding your username.");
+                interaction.reply({ content: "You are already hiding your username." });
             }
             else {
                 user.HideWeeklyLeaderboard = true;
                 user.save().then(() => {
-                    leaderboard_model.findOneAndUpdate({ 'Users.UserID': message.author.id }, { $set: { "Users.$[elem].Username": "???" } }, { arrayFilters: [{ 'elem.UserID': message.author.id }] }, (err, leaderboard) => {
-                        message.channel.send("You are now hiding your username.");
+                    leaderboard_model.findOneAndUpdate({ 'Users.UserID': interaction.user.id }, { $set: { "Users.$[elem].Username": "???" } }, { arrayFilters: [{ 'elem.UserID': interaction.user.id }] }, (err, leaderboard) => {
+                        interaction.reply({ content: "You are now hiding your username." });
                     });
                 });
             }
         });
     }
-    else if (args.length == 1 && args[0] == "--show") {
-        user_model.findOne({ UserID: message.author.id }).then(user => {
+    else if (interaction.options.get("show") != null && interaction.options.get("hide") == null) {
+        user_model.findOne({ UserID: interaction.user.id }).then(user => {
             if (!user.HideWeeklyLeaderboard) {
-                message.channel.send("You are already showing your username.");
+                interaction.reply({ content: "You are already showing your username." });
             }
             else {
                 user.HideWeeklyLeaderboard = false;
                 user.save().then(() => {
-                    leaderboard_model.findOneAndUpdate({ 'Users.UserID': message.author.id }, { $set: { "Users.$[elem].Username": message.author.username } }, { arrayFilters: [{ 'elem.UserID': message.author.id }] }, (err, leaderboard) => {
-                        message.channel.send("You are now showing your username.");
+                    leaderboard_model.findOneAndUpdate({ 'Users.UserID': interaction.user.id }, { $set: { "Users.$[elem].Username": interaction.user.username } }, { arrayFilters: [{ 'elem.UserID': interaction.user.id }] }, (err, leaderboard) => {
+                        interaction.reply({ content: "You are now showing your username." });
                     });
                 });
             }
         });
     }
-    else return message.channel.send("Invalid argument.");
+    else return interaction.reply({ content: "Invalid argument.", ephemeral: true });
 }
 
 // Get the upcoming week.
@@ -108,5 +108,23 @@ function getNextDayOfTheWeek(dayName, excludeToday = true, refDate = new Date())
 
 module.exports.config = {
     name: "leaderboard",
+    description: "Displays the weekly leaderboard.",
+    options: [{
+        name: "hide",
+        description: "Hide your username from the weekly leaderboard.",
+        type: 3,
+        choices: [{
+            name: "yes",
+            value: "yes",
+        }]
+    }, {
+        name: "show",
+        description: "Show your username in the weekly leaderboard.",
+        type: 3,
+        choices: [{
+            name: "yes",
+            value: "yes",
+        }]
+    }],
     aliases: []
 }
