@@ -6,14 +6,14 @@ const getPokemons = require('../utils/getPokemon');
 const pagination = require('../utils/pagination');
 const Mongoose = require('mongoose');
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
 
         // If no mail found.
-        if (user.Mails == undefined || user.Mails.length == 0) return message.channel.send(`You don't have any mail!`);
-        
+        if (user.Mails == undefined || user.Mails.length == 0) return interaction.reply({ content: `You don't have any mail!`, ephemeral: true });
+
         // Mail sort based on date.
         user.Mails.sort((a, b) => {
             return b.Timestamp - a.Timestamp;
@@ -21,17 +21,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
 
 
         // If only mail was typed.
-        if (args.length == 0) {
+        if (interaction.options.get("claim") == null && interaction.options.get("read") == null) {
 
             var no_of_unread = user.Mails.filter(mail => mail.Read == false).length;
             var chunks = chunkArray(user.Mails, 5);
             var embeds = [];
             var index_number = 1;
             for (i = 0; i < chunks.length; i++) {
-                embeds[i] = new Discord.MessageEmbed()
-                    .setTitle(`${message.author.username}'s inbox:`);
+                embeds[i] = new Discord.EmbedBuilder()
+                    .setTitle(`${interaction.user.username}'s inbox:`);
                 embeds[i].setColor("#1ec5ee");
-                var description = `You have ${no_of_unread} unread mail(s). Use \`${prefix}mail read index\` to read the mail.\n\n`
+                var description = `You have ${no_of_unread} unread mail(s). Use \`/mail read index\` to read the mail.\n\n`
                 for (j = 0; j < chunks[i].length; j++) {
                     var mail_subject = chunks[i][j].Subject;
                     var mail_message = chunks[i][j].Message;
@@ -54,20 +54,19 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     index_number++;
                 }
                 embeds[i].setDescription(description + "‎");
-                embeds[i].setFooter(`User Inbox - Page ${i + 1}/${chunks.length}`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
+                embeds[i].setFooter({ text: `User Inbox - Page ${i + 1}/${chunks.length}`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
             }
-            message.channel.send(embeds[0]).then(msg => {
-                if (chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                if (chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                 else return;
             });
         }
 
         // If user read the mail.
-        else if (args[0] == "read") {
-            if (args.length == 1) return message.channel.send(`You didn't specify the index of the mail you want to read!`);
-            if (args.length > 2 || !isInt(args[1])) return message.channel.send(`Please specify valid index of the mail!`);
+        else if (interaction.options.get("claim") == null && interaction.options.get("read") != null) {
+            var args = interaction.options.get("read").value;
 
-            var usr_selected_mail = user.Mails[args[1] - 1];
+            var usr_selected_mail = user.Mails[args - 1];
             var mail_from = usr_selected_mail.From;
             var mail_subject = usr_selected_mail.Subject;
             var mail_message = usr_selected_mail.Message;
@@ -75,10 +74,10 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
             var mail_claimed = usr_selected_mail.Claimed;
             var sent_time = unixTime(usr_selected_mail.Timestamp);
 
-            var embed = new Discord.MessageEmbed()
+            var embed = new Discord.EmbedBuilder()
             embed.setTitle(mail_subject);
             embed.setColor("#1ec5ee");
-            embed.setFooter(`From ${mail_from} at ${sent_time}`, "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png");
+            embed.setFooter({ text: `From ${mail_from} at ${sent_time}`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
 
             var mail_attachment_string = "";
             if (mail_attachment != undefined) {
@@ -91,32 +90,31 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                 if (mail_attachment.Pokemons != undefined && mail_attachment.Pokemons.length > 0) mail_attachment_string += "⁍ **Pokemons**: " + mail_attachment.Pokemons.length + "\n";
                 if (mail_attachment.Badges != undefined && mail_attachment.Badges.length > 0) mail_attachment_string += "⁍ **Badges**: " + mail_attachment.Badges.length + "\n";
                 if (mail_claimed) mail_attachment_string += "~~";
-                mail_attachment_string += `\nUse \`${prefix}mail claim ${args[1]}\` to claim these attachments.\n`;
+                mail_attachment_string += `\nUse \`/mail claim ${args}\` to claim these attachments.\n`;
             }
 
-            embed.setDescription(`${mail_message}${mail_attachment_string}${user.Mails[args[1] - 1].ImageURL == undefined ? "‎" : ""}`);
+            embed.setDescription(`${mail_message}${mail_attachment_string}${user.Mails[args - 1].ImageURL == undefined ? "‎" : ""}`);
 
-            if (user.Mails[args[1] - 1].ImageURL != undefined && user.Mails[args[1] - 1].ImageURL != "") {
-                embed.setImage(user.Mails[args[1] - 1].ImageURL);
+            if (user.Mails[args - 1].ImageURL != undefined && user.Mails[args - 1].ImageURL != "") {
+                embed.setImage(user.Mails[args - 1].ImageURL);
             }
 
-            user.Mails[args[1] - 1].Read = true;
+            user.Mails[args - 1].Read = true;
             user.save();
-            message.channel.send(embed);
+            interaction.reply({ embeds: [embed] });
         }
 
         // If user claims the message.
-        else if (args[0] == "claim") {
-            if (args.length == 1) return message.channel.send(`You didn't specify the index of the mail you want to claim!`);
-            if (args.length > 2 || !isInt(args[1])) return message.channel.send(`Please specify valid index of the mail!`);
+        else if (interaction.options.get("claim") != null && interaction.options.get("read") == null) {
+            var args = interaction.options.get("claim").value;
 
-            var usr_selected_mail = user.Mails[args[1] - 1];
+            var usr_selected_mail = user.Mails[args - 1];
             var mail_attachment = usr_selected_mail.Attachment;
             var mail_claimed = usr_selected_mail.Claimed;
             var claimed_message = "";
 
-            if (mail_claimed) return message.channel.send(`This mail has already been claimed!`);
-            else if (mail_attachment == undefined) return message.channel.send(`This mail doesn't have any attachments!`);
+            if (mail_claimed) return interaction.reply({ content: `This mail has already been claimed!`, ephemeral: true });
+            else if (mail_attachment == undefined) return interaction.reply({ content: `This mail doesn't have any attachments!`, ephemeral: true });
             else {
                 if (mail_attachment.PokeCredits != undefined && mail_attachment.PokeCredits > 0) {
                     user.PokeCredits += mail_attachment.PokeCredits;
@@ -155,17 +153,17 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                         pokemons_to_add.push(pokemon_data);
                     }
-                    getPokemons.insertpokemon(message.author.id, pokemons_to_add);
+                    getPokemons.insertpokemon(interaction.user.id, pokemons_to_add);
                 }
 
-                if (user.Mails[args[1] - 1].Read != true) user.Mails[args[1] - 1].Read = true;
-                user.Mails[args[1] - 1].Claimed = true;
+                if (user.Mails[args - 1].Read != true) user.Mails[args - 1].Read = true;
+                user.Mails[args - 1].Claimed = true;
                 user.save().then(() => {
-                    var embed = new Discord.MessageEmbed();
+                    var embed = new Discord.EmbedBuilder();
                     embed.setTitle("You have claimed the following attachments:");
                     embed.setColor("#1ec5ee");
                     embed.setDescription(claimed_message);
-                    message.channel.send(embed);
+                    interaction.reply({ embeds: [embed] });
                 });
             }
         }
@@ -215,5 +213,19 @@ function isInt(value) {
 
 module.exports.config = {
     name: "mail",
+    description: "View your mail.",
+    options: [{
+        name: "claim",
+        description: "Claim a mail.",
+        type: 4,
+        min_value: 1,
+        max_value: 100
+    }, {
+        name: "read",
+        description: "Read a mail.",
+        type: 4,
+        min_value: 1,
+        max_value: 100
+    }],
     aliases: []
 }

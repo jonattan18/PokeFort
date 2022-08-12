@@ -5,6 +5,8 @@ const pokemons_model = require('../models/pokemons');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
+//TODO: Not done
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
     if (args.length > 1) return message.channel.send("Invalid Syntax!")

@@ -4,12 +4,11 @@ const fs = require('fs'); // To read files.
 // Get moveinfo.
 const moveinfo = JSON.parse(fs.readFileSync('./assets/movesinfo.json').toString());
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length == 0) { return message.channel.send(`You should specify a move name!`); }
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    var original_move_name = args.join(" ");
-    var search_name = args.join("").replace(/[^a-zA-Z ]/g, "").toLowerCase();
+    var original_move_name = interaction.options.get("move").value;
+    var search_name = interaction.options.get("move").value.replace(/[^a-zA-Z ]/g, "").toLowerCase();
 
     var key_move_info = moveinfo[search_name];
 
@@ -40,17 +39,25 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
         }
 
         // Create discord embed.
-        var embed = new Discord.MessageEmbed()
-        embed.setColor(message.member.displayHexColor)
+        var embed = new Discord.EmbedBuilder()
+        embed.setColor(interaction.member.displayHexColor)
         embed.setTitle(name)
         embed.setDescription(description)
-        embed.setFooter(footer)
-        message.channel.send(embed);
+        embed.setFooter({ text: footer })
+        interaction.reply({ embeds: [embed] });
     }
-    else { return message.channel.send('No move found with the name ``' + original_move_name + '``!'); }
+    else return interaction.reply({ content: 'No move found with the name ``' + original_move_name + '``!', ephemeral: true });
 }
 
 module.exports.config = {
     name: "moveinfo",
+    description: "Information on a move.",
+    options: [{
+        name: "move",
+        description: "The move you want to know about.",
+        required: true,
+        type: 3,
+        min_length: 1
+    }],
     aliases: []
 }

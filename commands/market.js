@@ -11,6 +11,8 @@ const prompt_model = require('../models/prompt');
 const getPokemons = require('../utils/getPokemon');
 const pagination = require('../utils/pagination');
 
+//TODO: Not done
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 
