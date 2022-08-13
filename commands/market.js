@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For Embedded Message.
+const Discord = require('discord.js');
 const _ = require('lodash');
 const floor = require('lodash/floor');
 
@@ -11,78 +11,68 @@ const prompt_model = require('../models/prompt');
 const getPokemons = require('../utils/getPokemon');
 const pagination = require('../utils/pagination');
 
-//TODO: Not done
-
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons, cmd) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
+module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
     //Get user data.
-    user_model.findOne({ UserID: message.author.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (!user) return;
         if (err) console.log(err);
 
-        // Convert all args to lowercase.
-        args = args.map(arg => arg.toLowerCase());
-
-        // For only market command
-        if (args.length == 0) {
-            return message.channel.send("Invalid Syntax. Use " + prefix + "help to know about market commands.");
-        }
-
         // For market list command
-        if (args[0] == "list" && args.length == 3) {
-            getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
+        if (interaction.options.getSubcommand() === "list") {
+            getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
 
-                if (!isInt(args[2])) return message.channel.send("When listing on a market, you must specify a price.");
-                if (args[2] < 1) return message.channel.send("Isn't that too low for a pokémon ? Minimum price is 1.");
-                if (args[2] > 1000000000) return message.channel.send("Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.");
+                var list_id = interaction.options.get("id").value;
+                var list_price = interaction.options.get("price").value;
 
-                // If arguments is latest or l
-                if (args[1].toLowerCase() == "l" || args[1].toLowerCase() == "latest") var selected_pokemon = user_pokemons[user_pokemons.length - 1];
-                // If arguments is number
-                else if (isInt(args[1])) {
-                    if (typeof user_pokemons[args[1] - 1] != 'undefined') var selected_pokemon = user_pokemons[args[1] - 1];
-                    else return message.channel.send("No pokémon exists with that number.");
+                if (!isInt(list_price)) return interaction.reply({ content: "When listing on a market, you must specify a price.", ephemeral: true });
+                if (list_price < 1) return interaction.reply({ content: "Isn't that too low for a pokémon ? Minimum price is 1.", ephemeral: true });
+                if (list_price > 1000000000) return interaction.reply({ content: "Isn't that too high for a pokémon ? Maximum price is 1,000,000,000.", ephemeral: true });
+
+                if (isInt(list_id)) {
+                    if (typeof user_pokemons[list_id - 1] != 'undefined') var selected_pokemon = user_pokemons[list_id - 1];
+                    else return interaction.reply({ content: "No pokémon exists with that number.", ephemeral: true });
                 }
-                else return message.channel.send("Please type a valid pokémon number.");
+                else return interaction.reply({ content: "Please type a valid pokémon number.", ephemeral: true });
 
                 var pokemon_name = getPokemons.get_pokemon_name_from_id(selected_pokemon.PokemonId, pokemons, selected_pokemon.Shiny);
 
-                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
+                prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { $or: [{ "Trade.Accepted": true }, { "Duel.Accepted": true }] }] }, (err, _data) => {
                     if (err) return console.log(err);
-                    if (_data) return message.channel.send("You can't add market listing now!");
+                    if (_data) return interaction.reply({ content: "You can't add market listing now!", ephemeral: true });
 
                     var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
+                        ChannelID: interaction.channel.id,
                         PromptType: "ConfirmList",
                         UserID: {
-                            User1ID: message.author.id
+                            User1ID: interaction.user.id
                         },
                         List: {
                             PokemonUID: selected_pokemon._id,
-                            Price: args[2]
+                            Price: list_price
                         }
                     });
 
                     var tax_price = [];
-                    if (args[2] > 1000 && args[2] <= 10000) tax_price = ["1,000", 1.5, percentCalculation(args[2], 1.5).toFixed(0)];
-                    else if (args[2] > 10000 && args[2] <= 100000) tax_price = ["10,000", 3, percentCalculation(args[2], 3).toFixed(0)]
-                    else if (args[2] > 100000 && args[2] <= 1000000) tax_price = ["1,00,000", 4.5, percentCalculation(args[2], 4.5).toFixed(0)];
-                    else if (args[2] > 1000000) tax_price = ["1,000,000", 6, percentCalculation(args[2], 6).toFixed(0)];
+                    if (list_price > 1000 && list_price <= 10000) tax_price = ["1,000", 1.5, percentCalculation(list_price, 1.5).toFixed(0)];
+                    else if (list_price > 10000 && list_price <= 100000) tax_price = ["10,000", 3, percentCalculation(list_price, 3).toFixed(0)]
+                    else if (list_price > 100000 && list_price <= 1000000) tax_price = ["1,00,000", 4.5, percentCalculation(list_price, 4.5).toFixed(0)];
+                    else if (list_price > 1000000) tax_price = ["1,000,000", 6, percentCalculation(list_price, 6).toFixed(0)];
 
                     update_data.save().then(result => {
-                        return message.channel.send(`Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${args[2]} Credits?${tax_price.length > 0 ? ` _As your pokémon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${args[2] - tax_price[2]} credits._\n` : ""} Type \`\`${prefix}confirmlist\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the listing.`);
+                        return interaction.reply({ content: `Are you sure you want to list your level ${selected_pokemon.Level} ${pokemon_name}${selected_pokemon.Shiny == true ? " :star:" : ""} on the market for ${list_price} Credits?${tax_price.length > 0 ? ` _As your pokémon will be listed for over ${tax_price[0]} credits, ${tax_price[1]}% will be taken on sale and you will receive ${list_price - tax_price[2]} credits._\n` : ""} Type \`\`/confirmlist\`\` to confirm or \`\`/cancel\`\` to cancel the listing.` });
                     });
                 });
             });
         }
 
         // For view or info pokemon command  
-        else if ((args[0] == "view" || args[0] == "info" || args[0] == "i") && args.length == 2) {
-            if (!isInt(args[1])) return message.channel.send("Please type a valid pokémon ID.");
+        else if (interaction.options.getSubcommand() === "view") {
+            if (!isInt(interaction.options.get("id").value)) return interaction.reply({ content: "Please type a valid pokémon ID.", ephemeral: true });
 
-            market_model.findOne({ "MarketID": args[1] }, (err, market) => {
-                if (!market) return message.channel.send("No pokémon exists with that ID.");
+            market_model.findOne({ "MarketID": interaction.options.get("id").value }, (err, market) => {
+                if (!market) return interaction.reply({ content: "No pokémon exists with that ID.", ephemeral: true });
                 else {
                     var pokemon_db = pokemons.filter(it => it["Pokemon Id"] == market.PokemonId)[0];
 
@@ -103,7 +93,7 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     // Evs
                     var ev_available = false;
                     var EV = [0, 0, 0, 0, 0, 0];
-                    if (market.EV != undefined &&  market.EV.length > 0) {
+                    if (market.EV != undefined && market.EV.length > 0) {
                         ev_available = true;
                         let hp_ev = market.EV[0];
                         let atk_ev = market.EV[1];
@@ -150,10 +140,9 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                     var image_url = './assets/images/' + image_name.replace("%", "");
                     var held_item = market.Held != undefined ? `**\n_Holding: ${market.Held}_**` : "";
 
-                    var embed = new Discord.MessageEmbed();
-                    embed.attachFiles(image_url)
+                    var embed = new Discord.EmbedBuilder();
                     embed.setTitle(`Level ${market.Level} ${pokemon_name} - ID: ${market.MarketID} - Price: ${market.Price}`);
-                    embed.setColor(message.member.displayHexColor);
+                    embed.setColor(interaction.member.displayHexColor);
                     embed.setDescription(description +
                         `\n**Type**: ${type}` + held_item +
                         `\n**Nature**: ${nature_name}` +
@@ -165,25 +154,25 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         `\n**Speed**: ${spe} - IV ${spe_iv}/31 ${ev_available ? "- EV: " + EV[5] : ""}` +
                         `\n**Total IV**: ${total_iv}%`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
-                    embed.setFooter(`To buy this pokemon, type ${prefix}market buy ${market.MarketID}`);
-                    message.channel.send(embed)
+                    embed.setFooter({ text: `To buy this pokemon, type /market buy ${market.MarketID}` });
+                    interaction.reply({ embeds: [embed], files: [image_url] })
                 }
             });
         }
         // For market buy command
-        else if (args[0] == "buy" && args.length == 2 && isInt(args[1])) {
-            market_model.findOne({ "MarketID": args[1] }, (err, market) => {
+        else if (interaction.options.getSubcommand() === "buy") {
+            market_model.findOne({ "MarketID": interaction.options.get("id").value }, (err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokémon associted with that market ID.");
+                    return interaction.reply({ content: "We couldn't find any pokémon associted with that market ID.", ephemeral: true });
                 }
-                else if (market.UserID == message.author.id) return message.channel.send("You can't buy your own pokemon.");
+                else if (market.UserID == interaction.user.id) return interaction.reply({ content: "You can't buy your own pokemon.", ephemeral: true });
                 else {
-                    if (market.Price > user.PokeCredits) return message.channel.send("You don't have enough pokecredits to buy this pokemon.");
+                    if (market.Price > user.PokeCredits) return interaction.reply({ content: "You don't have enough pokecredits to buy this pokemon.", ephemeral: true });
                     var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
+                        ChannelID: interaction.channel.id,
                         PromptType: "ConfirmBuy",
                         UserID: {
-                            User1ID: message.author.id
+                            User1ID: interaction.user.id
                         },
                         List: {
                             PokemonUID: market.PokemonUID,
@@ -191,23 +180,23 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                     });
                     update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to buy level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmbuy\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the stop buying.`);
+                        return interaction.reply({ content: `Are you sure you want to buy level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`/confirmbuy\`\` to confirm or \`\`/cancel\`\` to cancel the stop buying.` });
                     });
                 }
             });
         }
         // For market remove command
-        else if ((args[0] == "remove" || args[0] == "rem") && args.length == 2 && isInt(args[1])) {
-            market_model.findOne({ $and: [{ "UserID": message.author.id }, { "MarketID": args[1] }] }, (err, market) => {
+        else if (interaction.options.getSubcommand() === "remove") {
+            market_model.findOne({ $and: [{ "UserID": interaction.user.id }, { "MarketID": interaction.options.get("id").value }] }, (err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("We couldn't find any pokémon associted with that market ID.");
+                    return interaction.reply({ content: "We couldn't find any pokémon associted with that market ID.", ephemeral: true });
                 }
                 else {
                     var update_data = new prompt_model({
-                        ChannelID: message.channel.id,
+                        ChannelID: interaction.channel.id,
                         PromptType: "ConfirmRemove",
                         UserID: {
-                            User1ID: message.author.id
+                            User1ID: interaction.user.id
                         },
                         List: {
                             PokemonUID: market.PokemonUID,
@@ -215,29 +204,29 @@ module.exports.run = async (bot, message, args, prefix, user_available, pokemons
                         }
                     });
                     update_data.save().then(() => {
-                        return message.channel.send(`Are you sure you want to remove your level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`${prefix}confirmremove\`\` to confirm or \`\`${prefix}cancel\`\` to cancel the removing.`);
+                        return interaction.reply({ content: `Are you sure you want to remove your level ${market.Level} ${market.PokemonName}${market.Shiny == true ? " :star:" : ""} from market? Type \`\`/confirmremove\`\` to confirm or \`\`/cancel\`\` to cancel the removing.` });
                     });
                 }
             });
         }
         // For market listings command
-        else if (args[0] == "listings" || args[0] == "lis") {
-            return arg_parsing(message, args, prefix, "listings", pokemons)
+        else if (interaction.options.getSubcommand() === "listings") {
+            return arg_parsing(interaction, "listings", pokemons)
         }
         // For market search command.
-        else if (args[0] == "search" || args[0] == "s") {
-            return arg_parsing(message, args, prefix, "search", pokemons);
+        else if (interaction.options.getSubcommand() === "search") {
+            return arg_parsing(interaction, "search", pokemons);
         }
-        else return message.channel.send("Invalid command. Type `" + prefix + "help` for a list of commands.");
+        else return interaction.reply({ content: "Invalid command. Type `/help` for a list of commands.", ephemeral: true });
     });
 }
 
 // Function for arg parsing and understanding.
-function arg_parsing(message, args, prefix, command, pokemons) {
+function arg_parsing(interaction, command, pokemons) {
     var showiv = false;
     var request_query = [];
-    args.shift(); // Remove search from args.
     var order_type = {};
+    var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
 
     var all_search_types = ["--o", "--order", "--showiv", "a", "d", "asc", "ascending", "desc", "descending", "iv", "id", "level", "lvl", "name", "n", "price", "p"];
     if (args.every(r => all_search_types.indexOf(r.toLowerCase()) >= 0)) {
@@ -260,7 +249,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
         if (command == "search") {
             market_model.find({ "Primary": undefined }).sort(order_type).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("No market listings found.");
+                    return interaction.reply({ content: "No market listings found.", ephemeral: true });
                 } else {
                     var temp_counter = 0;
                     var tot_len = market.length;
@@ -268,7 +257,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var embeds = [];
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
-                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i] = new Discord.EmbedBuilder();
                         embeds[i].setTitle("PokéFort Market:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
@@ -277,19 +266,19 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["MarketID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Price: ${split_chunks[i][j]["Price"]} Credits\n`;
                         }
                         embeds[i].setDescription(description);
-                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                        embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    message.channel.send(embeds[0]).then(msg => {
-                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
                 }
             });
         }
         else if (command == "listings") {
-            market_model.find({ "UserID": message.author.id }).sort(order_type).exec((err, market) => {
+            market_model.find({ "UserID": interaction.user.id }).sort(order_type).exec((err, market) => {
                 if (market == undefined || market == null || !market || market.length == 0) {
-                    return message.channel.send("No market listings found.");
+                    return interaction.reply({ content: "No market listings found.", ephemeral: true });
                 } else {
                     var temp_counter = 0;
                     var tot_len = market.length;
@@ -297,7 +286,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                     var embeds = [];
                     var current_index = 0;
                     for (i = 0; i < split_chunks.length; i++) {
-                        embeds[i] = new Discord.MessageEmbed();
+                        embeds[i] = new Discord.EmbedBuilder();
                         embeds[i].setTitle("Your Market Listings:");
                         var description = "";
                         temp_counter += split_chunks[i].length;
@@ -306,10 +295,10 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["MarketID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Price: ${split_chunks[i][j]["Price"]} Credits\n`;
                         }
                         embeds[i].setDescription(description);
-                        embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                        embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    message.channel.send(embeds[0]).then(msg => {
-                        if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                        if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
                 }
@@ -346,19 +335,19 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdefiv") || _.isEqual(new_args[0], "--specialdefenseiv"))) { spdefiv(new_args); }
             else if (new_args.length > 1 && (_.isEqual(new_args[0], "--spdiv") || _.isEqual(new_args[0], "--speediv"))) { spdiv(new_args); }
             else if (new_args.length >= 2 && new_args.length < 4 && (_.isEqual(new_args[0], "--order") || _.isEqual(new_args[0], "--o"))) { order(new_args); }
-            else { message.channel.send("Invalid command."); return; }
+            else return interaction.reply({ content: "Invalid command.", ephemeral: true });
 
             // Check if error occurred in previous loop
             if (error.length > 1) {
-                message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+                interaction.reply({ content: `Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`, ephemeral: true });
                 break;
             }
             if (j == total_args.length - 1) {
                 if (command == "listings") {
-                    request_query.unshift({ "UserID": message.author.id });
+                    request_query.unshift({ "UserID": interaction.user.id });
                     market_model.find({ $and: request_query }).sort(order_type).exec((err, market) => {
                         if (market == undefined || market == null || !market || market.length == 0) {
-                            return message.channel.send("No market listings found for your search.");
+                            return interaction.reply({ content: "No market listings found for your search.", ephemeral: true });
                         } else {
                             var temp_counter = 0;
                             var tot_len = market.length;
@@ -366,7 +355,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var embeds = [];
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
-                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i] = new Discord.EmbedBuilder();
                                 embeds[i].setTitle("Your Market Listings:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
@@ -377,8 +366,8 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                                 embeds[i].setDescription(description);
                                 embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
                             }
-                            message.channel.send(embeds[0]).then(msg => {
-                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });
                         }
@@ -387,7 +376,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                 else {
                     market_model.find({ $and: request_query }).sort(order_type).exec((err, market) => {
                         if (market == undefined || market == null || !market || market.length == 0) {
-                            return message.channel.send("No market listings found for your search.");
+                            return interaction.reply({ content: "No market listings found for your search.", ephemeral: true });
                         } else {
                             var temp_counter = 0;
                             var tot_len = market.length;
@@ -395,7 +384,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                             var embeds = [];
                             var current_index = 0;
                             for (i = 0; i < split_chunks.length; i++) {
-                                embeds[i] = new Discord.MessageEmbed();
+                                embeds[i] = new Discord.EmbedBuilder();
                                 embeds[i].setTitle("PokéFort Market:");
                                 var description = "";
                                 temp_counter += split_chunks[i].length;
@@ -404,10 +393,10 @@ function arg_parsing(message, args, prefix, command, pokemons) {
                                     description += `Level ${split_chunks[i][j]["Level"]} ${split_chunks[i][j]["PokemonName"]}${split_chunks[i][j].Shiny == true ? " :star:" : ""} | ID: ${split_chunks[i][j]["MarketID"]}${showiv == true ? ` | IV: ${split_chunks[i][j].IVPercentage}% ` : ``} | Price: ${split_chunks[i][j]["Price"]} Credits\n`;
                                 }
                                 embeds[i].setDescription(description);
-                                embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
+                                embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                             }
-                            message.channel.send(embeds[0]).then(msg => {
-                                if (split_chunks.length > 1) return pagination.createpage(message.channel.id, message.author.id, msg.id, embeds, 0);
+                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                                if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });
                         }
@@ -443,7 +432,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "Held": { $regex: new RegExp(`^${name.join(" ")}`, 'i') } });
         }
 
-        // For auction --legendary command.
+        // For market --legendary command.
         function legendary() {
             var legendaries = pokemons.filter(it => it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL" && it["Primary Ability"] != "Beast Boost");
             var legend_list = [];
@@ -453,7 +442,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: legend_list } });
         }
 
-        // For auction --mythical command.
+        // For market --mythical command.
         function mythical() {
             var mythicals = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
             var myth_list = [];
@@ -463,7 +452,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: myth_list } });
         }
 
-        // For auction --ultrabeast command.
+        // For market --ultrabeast command.
         function ultrabeast() {
             var ultrabeasts = pokemons.filter(it => it["Legendary Type"] === "Ultra Beast" && it["Alternate Form Name"] === "NULL");
             var ultra_list = [];
@@ -473,7 +462,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: ultra_list } });
         }
 
-        // For auction --alolan command.
+        // For market --alolan command.
         function alolan() {
             var alolans = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
             var alolan_list = [];
@@ -483,7 +472,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: alolan_list } });
         }
 
-        // For auction --hisuian command.
+        // For market --hisuian command.
         function hisuian() {
             var hisuian = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
             var hisuian_list = [];
@@ -493,7 +482,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: hisuian_list } });
         }
 
-        // For auction --galarian command.
+        // For market --galarian command.
         function galarian() {
             var galarians = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
             var galarian_list = [];
@@ -503,7 +492,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: galarian_list } });
         }
 
-        // For auction --gigantamax command.
+        // For market --gigantamax command.
         function gigantamax() {
             var gigantamax = pokemons.filter(it => it["Alternate Form Name"] === "Gigantamax");
             var gigantamax_list = [];
@@ -513,7 +502,7 @@ function arg_parsing(message, args, prefix, command, pokemons) {
             request_query.push({ "PokemonId": { $in: gigantamax_list } });
         }
 
-        // For auction --mega command.
+        // For market --mega command.
         function mega() {
             var megas = pokemons.filter(it => it["Alternate Form Name"] === "Mega" || it["Alternate Form Name"] === "Mega X" || it["Alternate Form Name"] === "Mega Y");
             var mega_list = [];
@@ -752,5 +741,78 @@ function isFloat(x) { return !!(x % 1); }
 
 module.exports.config = {
     name: "market",
+    description: "Market, where you can buy pokemons",
+    options: [{
+        name: "list",
+        description: "List your pokemon in market.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to list.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }, {
+            name: "price",
+            description: "Price of the pokemon.",
+            type: 4,
+            required: true,
+            min_value: 1,
+            max_value: 1000000000,
+        }]
+    }, {
+        name: "listings",
+        description: "List of all your pokemon in market.",
+        options: [{
+            name: "filter",
+            description: "Filter for the search.",
+            type: 3,
+            min_length: 1
+        }],
+        type: 1
+    }, {
+        name: "view",
+        description: "View a pokemon in market.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to view.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "search",
+        description: "Search for a pokemon in market.",
+        type: 1,
+        options: [{
+            name: "filter",
+            description: "Filter for the search.",
+            type: 3,
+            min_length: 1
+        }],
+    }, {
+        name: "buy",
+        description: "Buy a pokemon in market.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to buy.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "remove",
+        description: "Remove a pokemon from market.",
+        type: 1,
+        options: [{
+            name: "id",
+            description: "ID of the pokemon to remove.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }],
     aliases: []
 }

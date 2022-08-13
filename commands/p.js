@@ -532,7 +532,7 @@ function pokemon_filter(message, args, user_pokemons, pokemons) {
     // For p --nickname command.
     function nickname(args) {
         if (args.length == 1) {
-            user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
+            user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined);
         } else {
             args = args.slice(1);
             user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined && pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());

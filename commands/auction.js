@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For Embedded Message.
+const Discord = require('discord.js');
 const _ = require('lodash');
 const floor = require('lodash/floor');
 
@@ -181,7 +181,6 @@ module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => 
                     var time_left_string = `:hourglass_flowing_sand: ${time_left.getUTCHours() != 0 ? time_left.getUTCHours() + " hours " : ""} ${time_left.getUTCMinutes() != 0 ? time_left.getUTCMinutes() + " minutes " : ""}`;
 
                     var embed = new Discord.EmbedBuilder();
-                    embed.attachFiles(image_url)
                     embed.setTitle(`Level ${auction.Level} ${pokemon_name} - ID: ${auction.AuctionID}`);
                     embed.setColor(interaction.member.displayHexColor);
                     embed.setDescription(description +
@@ -198,7 +197,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => 
                         `\n**Buyout: ${auction.BuyOut} Credits**`);
                     embed.setImage('attachment://' + image_name.replace("%", ""))
                     embed.setFooter({ text: `To bid on this pokemon, place a bid ${auction.BidPrice == undefined ? "by" : `of credits more than ${auction.BidPrice} by`} typing "/auction bid ${auction.AuctionID} <bid>"` });
-                    interaction.reply({ embeds: [embed] })
+                    interaction.reply({ embeds: [embed], files: [image_url] })
                 }
             });
         }

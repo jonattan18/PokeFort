@@ -243,7 +243,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                             // For r --nickname command.
                             function nickname(args) {
                                 if (args.length == 1) {
-                                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
+                                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined);
                                 } else {
                                     args = args.slice(1);
                                     user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());

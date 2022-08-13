@@ -4,28 +4,28 @@
         "title": "PokéFort Commands",
         "description": [
             "**Page 1 | Getting Started!**\n",
-            "How to get started on the bot and dex commands. `p!help 1`\n\n",
+            "How to get started on the bot and dex commands. `/help 1`\n\n",
             "**Page 2 | Basic Commands!**\n",
-            "The main commands for the bot and pokemon commands. `p!help 2`\n\n",
+            "The main commands for the bot and pokémon commands. `/help 2`\n\n",
             "**Page 3 | Trading!**\n",
-            "How to trade pokémon, redeems and credits on the bot. `p!help 3`\n\n",
+            "How to trade pokémon, redeems and credits on the bot. `/help 3`\n\n",
             "**Page 4 | Market!**\n",
-            "How to buy and sell pokémon using the market. `p!help 4`\n\n",
+            "How to buy and sell pokémon using the market. `/help 4`\n\n",
             "**Page 5 | Search Options!**\n",
-            "Search options for market searching. `p!help 5`\n\n",
+            "Search options for market searching. `/help 5`\n\n",
             "**Page 6 | Shop and Others!**\n",
-            "Shop commands and some misc commands. `p!help 6`\n\n",
+            "Shop commands and some misc commands. `/help 6`\n\n",
             "**Page 7 | Duelling!**\n",
-            "How to duel with your pokémon. `p!help 7`\n\n",
+            "How to duel with your pokémon. `/help 7`\n\n",
             "**Page 8 | Raid!**\n",
-            "Create your own powerful teams and beat the raid boss along with your friends. `p!help 8`\n\n",
+            "Create your own powerful teams and beat the raid boss along with your friends. `/help 8`\n\n",
             "**Page 9 | Auction!**\n",
-            "How to join the global auction, buy and sell special pokémons. `p!help 9`\n\n",
+            "How to join the global auction, buy and sell special pokémons. `/help 9`\n\n",
             "**Page 10 | Bot commands!**\n",
-            "Bot commands and server commands. `p!help 10`\n\n"
+            "Bot commands and server commands. `/help 10`\n\n"
 
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -38,26 +38,26 @@
         "title": "Getting Started!",
         "description": [
             "How to get started on the bot and dex commands.\n\n",
-            "**p!start** | This enters you into the game. You have to use this command first before you can catch any Pokemon.\n\n",
-            "**p!pick** | Once you've done the start command. You can pick from any of the starters across all of the generations.\n\n",
-            "**p!catch** <Pokemon Name> | When a wild Pokemon spawns, you will use this command and the correct name to catch it.\n\n",
-            "**p!hint** | Will display a hint to the currently spawned Pokemon.\n\n",
-            "**p!select** <Pokemon Number> | Selects which Pokemon will receive XP from chatting and which will battle.\n\n",
-            "**p!select latest** | Selects your most recently caught or redeemed Pokemon.\n\n",
-            "**p!nickname** <nickname> | Gives a nickname to your selected Pokemon.\n\n",
-            "**p!info** | Displays the information of your SELECTED Pokemon.\n\n",
-            "**p!info latest** | Displays the information of the LATEST Pokemon you've caught.\n\n",
-            "**p!info** <Pokemon Number> | Displays the information of the Pokemon attached to this number.\n\n",
-            "**p!dex** <Pokemon Name> | Display a Pokemon with its base stats.\n\n",
-            "**p!dex shiny** <Pokemon Name> | Displays a shiny version of a Pokemon with its base stats.\n\n",
-            "**p!dex** | Displays your Pokedex.\n\n",
-            "**p!dex --caught** | Displays the caught Pokemon.\n\n",
-            "**p!dex --uncaught** | Displays the uncaught Pokemon.\n\n",
-            "**p!dex --rewards** | Displays all your dex rewards.\n\n",
-            "**p!dex claim** <Reward Name> | Collects the specified reward.\n\n",
-            "**p!dex claim all** | Collects all your dex rewards.\n\n"
+            "**/start** | This enters you into the game. You have to use this command first before you can catch any Pokémon.\n\n",
+            "**/pick** | Once you've done the start command. You can pick from any of the starters across all of the generations.\n\n",
+            "**/catch** <Pokémon Name> | When a wild Pokémon spawns, you will use this command and the correct name to catch it.\n\n",
+            "**/hint** | Will display a hint to the currently spawned Pokémon.\n\n",
+            "**/select** <Pokémon Number> | Selects which Pokémon will receive XP from chatting and which will battle.\n\n",
+            "**/select latest** | Selects your most recently caught or redeemed Pokémon.\n\n",
+            "**/nickname** <nickname> | Gives a nickname to your selected Pokémon.\n\n",
+            "**/info** | Displays the information of your SELECTED Pokémon.\n\n",
+            "**/info latest** | Displays the information of the LATEST Pokémon you've caught.\n\n",
+            "**/info** <Pokémon Number> | Displays the information of the Pokémon attached to this number.\n\n",
+            "**/dex** <Pokémon Name> | Display a Pokémon with its base stats.\n\n",
+            "**/dex shiny** <Pokémon Name> | Displays a shiny version of a Pokémon with its base stats.\n\n",
+            "**/dex** | Displays your Pokedex.\n\n",
+            "**/dex --caught** | Displays the caught Pokémon.\n\n",
+            "**/dex --uncaught** | Displays the uncaught Pokémon.\n\n",
+            "**/dex --rewards** | Displays all your dex rewards.\n\n",
+            "**/dex claim** <Reward Name> | Collects the specified reward.\n\n",
+            "**/dex claim all** | Collects all your dex rewards.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -70,32 +70,32 @@
         ],
         "title": "Basic Commands",
         "description": [
-            "The main commands for the bot and pokemon commands.",
-            "**p!daily** | Allows you to vote for the Pokéfort server on the Discord Bots site. You get 100 - 1000 credit for doing this every 12 hours.\n\n",
-            "**p!silence** | Toggles your level up messages.\n\n",
-            "**p!dm** | Toggles your duel instruction messages.\n\n",
-            "**p!redeem** <Pokemon Name> | If you have a redeem available, you will receive a Pokemon of the name you entered.\n\n",
-            "**p!redeem credits** | Sells a redeem you own for 15,000 credits back to the bot itself.\n\n",
-            "**p!redeemspawn** <Pokemon Name> | Spawns the given pokemon in the channel using your redeem.\n\n",
-            "**p!pokemon** | Displays a list of your Pokemon. It also displays information, such as Level, Number, IVs, and Nickname.\n\n",
-            "**p!pokemon --name** <Pokemon Name> | Displays a list of Pokemon you own of that particular name.\n\n",
-            "**p!pokemon --shiny** | Displays your shiny Pokemon.\n\n",
-            "**p!pokemon --legendary** | Displays your legendary Pokemon.\n\n",
-            "**p!pokemon --mythical** | Displays your mythical Pokemon.\n\n",
-            "**p!pokemon --ultrabeast** | Displays your ultra beast Pokemon.\n\n",
-            "**p!pokemon --alolan** | Displays your alolan Pokemon.\n\n",
-            "**p!pokemon --galarian** | Displays your galarian Pokemon.\n\n",
-            "**p!pokemon --hisuian** | Displays your hisuian pokemon.\n\n",
-            "**p!pokemon --nickname** <Nickname> | Displays your specific Pokemon with that nickname.\n\n",
-            "**p!pokemon --level** <Value> | Displays your Pokemon with that level.\n\n",
-            "**p!pokemon --level** < / > <Value> | Displays your Pokemon In-between that filter.\n\n",
-            "**p!pokemon --iv <Value> or --iv < / > <Value>** | Displays your Pokemon with or In-between that filter.\n\n",
-            "**p!pokemon --hpiv/attackiv/defenceiv/specialattackiv/specialdefenceiv/speediv <Value> or --hpiv/attackiv/defenceiv/specialattackiv/specialdefenceiv/speediv < / > <Value>** | Displays your Pokemon with or In-between that filter.\n\n",
-            "**p!pokemon --type** <Type name> | Displays your Pokemon of that type.\n\n",
-            "**p!pokemon --triple/quadra/penta** <Value> | Displays your Pokemon with triple/quadra/penta max iv (31) or min iv (0). Value = 31/0\n\n"
+            "The main commands for the bot and pokémon commands.",
+            "**/daily** | Allows you to vote for the Pokéfort server on the Discord Bots site. You get 100 - 1000 credit for doing this every 12 hours.\n\n",
+            "**/silence** | Toggles your level up messages.\n\n",
+            "**/dm** | Toggles your duel instruction messages.\n\n",
+            "**/redeem** <Pokémon Name> | If you have a redeem available, you will receive a Pokémon of the name you entered.\n\n",
+            "**/redeem credits** | Sells a redeem you own for 15,000 credits back to the bot itself.\n\n",
+            "**/redeemspawn** <Pokémon Name> | Spawns the given pokémon in the channel using your redeem.\n\n",
+            "**/pokémon** | Displays a list of your Pokémon. It also displays information, such as Level, Number, IVs, and Nickname.\n\n",
+            "**/pokémon --name** <Pokémon Name> | Displays a list of Pokémon you own of that particular name.\n\n",
+            "**/pokémon --shiny** | Displays your shiny Pokémon.\n\n",
+            "**/pokémon --legendary** | Displays your legendary Pokémon.\n\n",
+            "**/pokémon --mythical** | Displays your mythical Pokémon.\n\n",
+            "**/pokémon --ultrabeast** | Displays your ultra beast Pokémon.\n\n",
+            "**/pokémon --alolan** | Displays your alolan Pokémon.\n\n",
+            "**/pokémon --galarian** | Displays your galarian Pokémon.\n\n",
+            "**/pokémon --hisuian** | Displays your hisuian pokémon.\n\n",
+            "**/pokémon --nickname** <Nickname> | Displays your specific Pokémon with that nickname.\n\n",
+            "**/pokémon --level** <Value> | Displays your Pokémon with that level.\n\n",
+            "**/pokémon --level** < / > <Value> | Displays your Pokémon In-between that filter.\n\n",
+            "**/pokémon --iv <Value> or --iv < / > <Value>** | Displays your Pokémon with or In-between that filter.\n\n",
+            "**/pokémon --hpiv/attackiv/defenceiv/specialattackiv/specialdefenceiv/speediv <Value> or --hpiv/attackiv/defenceiv/specialattackiv/specialdefenceiv/speediv < / > <Value>** | Displays your Pokémon with or In-between that filter.\n\n",
+            "**/pokémon --type** <Type name> | Displays your Pokémon of that type.\n\n",
+            "**/pokémon --triple/quadra/penta** <Value> | Displays your Pokémon with triple/quadra/penta max iv (31) or min iv (0). Value = 31/0\n\n"
 
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -110,16 +110,16 @@
         "title": "Trading!",
         "description": [
             "How to trade Pokémon, redeems and credits on the bot.\n\n",
-            "**p!trade @User** | Begins a trade with someone. They will then have to do p!accept to do the trade or p!deny to reject it.\n\n",
-            "**p!p add** <Pokemon numbers, seperated by spaces> | Add one or multiple Pokemon to your trade offer.\n\n",
-            "**p!p remove** <Pokemon numbers, seperated by spaces> | Remove one or multiple Pokemon from your trade offer.\n\n",
-            "**p!c add** <Amount> | Add credits to your trade offer.\n\n",
-            "**p!c remove** <Amount> | Remove credits from your trade offer.\n\n",
-            "**p!r add** <Amount> | Add a redeem to your trade offer.\n\n",
-            "**p!r remove** <Amount> | Remove a redeem from your trade offer.\n\n",
-            "**p!confirm** | Confirm the trade, both users must confirm for the trade to go through.\n\n"
+            "**/trade @User** | Begins a trade with someone. They will then have to do /accept to do the trade or /deny to reject it.\n\n",
+            "**/p add** <Pokémon numbers, seperated by spaces> | Add one or multiple Pokémon to your trade offer.\n\n",
+            "**/p remove** <Pokémon numbers, seperated by spaces> | Remove one or multiple Pokémon from your trade offer.\n\n",
+            "**/c add** <Amount> | Add credits to your trade offer.\n\n",
+            "**/c remove** <Amount> | Remove credits from your trade offer.\n\n",
+            "**/r add** <Amount> | Add a redeem to your trade offer.\n\n",
+            "**/r remove** <Amount> | Remove a redeem from your trade offer.\n\n",
+            "**/confirm** | Confirm the trade, both users must confirm for the trade to go through.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -133,22 +133,22 @@
         "title": "Market!",
         "description": [
             "How to buy and sell pokémon using the market.\n\n",
-            "**p!market search** <Page number> | Show the requested page of the market.\n\n",
-            "**p!market search** <Page number> <Search Options> <Order Option> | Search the market.\n\n",
-            "**p!market view** <Pokemon ID> | View detailed information for a Pokemon on the market.\n\n",
-            "**p!market info** <Pokemon ID> | Alternative to view.\n\n",
-            "**p!market list** <Pokemon Number> <Price> | List a pokémon on the market.\n\n",
-            "**p!market buy** <Pokemon ID> | Buy a Pokemon from the market. You will need to confirm your purchase with p!confirmbuy or cancel it with p!cancel.\n\n`",
-            "**p!market remove** <Pokemon ID> | Remove one of your Pokemon from the market.\n\n",
-            "**p!market listings** <Page number> | Display the Pokemon you have listed on the market.\n\n",
+            "**/market search** <Page number> | Show the requested page of the market.\n\n",
+            "**/market search** <Page number> <Search Options> <Order Option> | Search the market.\n\n",
+            "**/market view** <Pokémon ID> | View detailed information for a Pokémon on the market.\n\n",
+            "**/market info** <Pokémon ID> | Alternative to view.\n\n",
+            "**/market list** <Pokémon Number> <Price> | List a pokémon on the market.\n\n",
+            "**/market buy** <Pokémon ID> | Buy a Pokémon from the market. You will need to confirm your purchase with /confirmbuy or cancel it with /cancel.\n\n`",
+            "**/market remove** <Pokémon ID> | Remove one of your Pokémon from the market.\n\n",
+            "**/market listings** <Page number> | Display the Pokémon you have listed on the market.\n\n",
             "**Order Options**\n\n",
-            "--order id ascending/descending | Order results by Pokemon ID.\n\n",
-            "--order lvl ascending/descending | Order results by Pokemon level.\n\n",
+            "--order id ascending/descending | Order results by Pokémon ID.\n\n",
+            "--order lvl ascending/descending | Order results by Pokémon level.\n\n",
             "--order price ascending/descending | Order results by price.\n\n",
-            "--order iv ascending/descending | Order by the sum of the Pokemon's IVs.\n\n",
+            "--order iv ascending/descending | Order by the sum of the Pokémon's IVs.\n\n",
             "--order name ascending/descending | Order results by name.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -162,20 +162,20 @@
         "title": "Search Options!",
         "description": [
             "Search options for market searching.\n\n",
-            "**--name** <name> | Search for Pokemon by name\n\n",
-            "**--level** <level> or < / > <level> | Search for Pokemon by level.\n\n",
-            "**--holding** <holding> | Search for Pokemon by the item they are holding.\n\n",
-            "**--type** <type> | Search for Pokemon by type.\n\n",
-            "**--price** <price> or < / > <price>  | Search for Pokemon with a specific price.\n\n",
-            "**--hpiv** <IV> or < / > <IVl> | Search for Pokemon by their HP IV.\n\n",
-            "**--atkiv** <IV> or < / > <IV> | Search for Pokemon by their Attack IV.\n\n",
-            "**--defiv** <IV> or < / > <IV> | Search for Pokemon by their Defense IV.\n\n",
-            "**--spatkiv** <IV> or < / > <IV> | Search for Pokemon by their Special Attack IV.\n\n",
-            "**--spdefiv** <IV>or < / > <IV> | Search for Pokemon by their Special Defense IV.\n\n",
-            "**--speediv** <IV> or < / > <IV> | Search for Pokemon by their Speed IV.\n\n",
-            "**--shiny** | Search for shiny Pokemon. \n\n"
+            "**--name** <name> | Search for Pokémon by name\n\n",
+            "**--level** <level> or < / > <level> | Search for Pokémon by level.\n\n",
+            "**--holding** <holding> | Search for Pokémon by the item they are holding.\n\n",
+            "**--type** <type> | Search for Pokémon by type.\n\n",
+            "**--price** <price> or < / > <price>  | Search for Pokémon with a specific price.\n\n",
+            "**--hpiv** <IV> or < / > <IVl> | Search for Pokémon by their HP IV.\n\n",
+            "**--atkiv** <IV> or < / > <IV> | Search for Pokémon by their Attack IV.\n\n",
+            "**--defiv** <IV> or < / > <IV> | Search for Pokémon by their Defense IV.\n\n",
+            "**--spatkiv** <IV> or < / > <IV> | Search for Pokémon by their Special Attack IV.\n\n",
+            "**--spdefiv** <IV>or < / > <IV> | Search for Pokémon by their Special Defense IV.\n\n",
+            "**--speediv** <IV> or < / > <IV> | Search for Pokémon by their Speed IV.\n\n",
+            "**--shiny** | Search for shiny Pokémon. \n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -183,23 +183,23 @@
             6,
             "six",
             "shop",
-            "shop!",
+            "sho/",
             "page 6"
         ],
         "title": "Shop and Others!",
         "description": [
             "Shop commands and some misc commands.\n\n",
-            "**p!shop** | Opens the shop menu. You can purchase XP Boosters, Rare Candies, Rare Stones, Evolution Items, Nature Modifiers, Held Items, and Mega Evolutions!.\n\n",
-            "**p!buy** <Item ID> | Purchases an item from the shop.\n\n",
-            "**p!dropitem** | Drops the item which your current Pokemon is holding.\n\n",
-            "**p!mega** | Command to evolve Pokemon to a Mega X or Y. You must have a Mega Evolution purchased, they cost 1,000 credits each.\n\n",
-            "**p!release** <Pokemon Number> | This will release a Pokemon. .release will attempt to release your selected Pokemon, confirmation prompt will be displayed beforehand.\n\n",
-            "**p!recycle** <Pokemon Number> | This will recycle the number of Pokemon. By recycling, the selected pokemon level ups.\n\n",
-            "**p!fav** | This will show a list of your favorite Pokemon!\n\n",
-            "**p!addfav** <Pokemon Number> | Adds a Pokemon to your favorites list.\n\n",
-            "**p!removefav** <Pokemon Number> | Removes a Pokemon from your favorites list.\n\n"
+            "**/shop** | Opens the shop menu. You can purchase XP Boosters, Rare Candies, Rare Stones, Evolution Items, Nature Modifiers, Held Items, and Mega Evolutions!.\n\n",
+            "**/buy** <Item ID> | Purchases an item from the shop.\n\n",
+            "**/dropitem** | Drops the item which your current Pokémon is holding.\n\n",
+            "**/mega** | Command to evolve Pokémon to a Mega X or Y. You must have a Mega Evolution purchased, they cost 1,000 credits each.\n\n",
+            "**/release** <Pokémon Number> | This will release a Pokémon. .release will attempt to release your selected Pokémon, confirmation prompt will be displayed beforehand.\n\n",
+            "**/recycle** <Pokémon Number> | This will recycle the number of Pokémon. By recycling, the selected pokémon level ups.\n\n",
+            "**/fav** | This will show a list of your favorite Pokémon!\n\n",
+            "**/addfav** <Pokémon Number> | Adds a Pokémon to your favorites list.\n\n",
+            "**/removefav** <Pokémon Number> | Removes a Pokémon from your favorites list.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -214,15 +214,15 @@
         "title": "Duelling!",
         "description": [
             "How to duel with your pokémon.\n\n",
-            "**p!select** <Pokemon Number> | This will be the Pokemon you use in battle.\n\n",
-            "**p!moves** | Displays your selected Pokemon's current moves, and the available moves it can learn.\n\n",
-            "**p!learn** <Move> | Attempts to learn the move you've chosen. You will need to choose which move you want to replace.\n\n",
-            "**p!replace** <Number> | Replaces a current move with the one you are trying to learn.\n\n",
-            "**p!duel** <@Username> | Challenges the select Discord user to a Duel. Be sure to @ them and not just type in their name.\n\n",
-            "**p!accept** | Accepts a duel if you've been challenged.\n\n",
-            "**p!use** <Move Number> | Your selected Pokemon will use the move that is listed by that number.\n\n"
+            "**/select** <Pokémon Number> | This will be the Pokémon you use in battle.\n\n",
+            "**/moves** | Displays your selected Pokémon's current moves, and the available moves it can learn.\n\n",
+            "**/learn** <Move> | Attempts to learn the move you've chosen. You will need to choose which move you want to replace.\n\n",
+            "**/replace** <Number> | Replaces a current move with the one you are trying to learn.\n\n",
+            "**/duel** <@Username> | Challenges the select Discord user to a Duel. Be sure to @ them and not just type in their name.\n\n",
+            "**/accept** | Accepts a duel if you've been challenged.\n\n",
+            "**/use** <Move Number> | Your selected Pokémon will use the move that is listed by that number.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -236,20 +236,20 @@
         "title": "Raid!",
         "description": [
             "Create your own powerful teams and beat the raid boss along with your friends.\n\n",
-            "**p!raid spawn**| Spawns a raid. A normal raid can be spawned every 3 hours, while event raids (which can only be done on weekends) cost 1 wishing piece. You can use p!r spawn as an abbreviation.\n\n",
-            "**p!raid join** <id> | Allows you to join a raid. p!r join <id> can be used as an abbreviation.\n\n",
-            "**p!raid leave** | Allows you to leave a raid. p!r leave can be used as an abbreviation.\n\n",
-            "**p!raid start** | Allows you to start the raid. This command can only be used by the leader of the raid!. p!r start can be used as an abbreviation.\n\n",
-            "**p!raid info** | Allows you to view the raid you are currently in. p!r info can be used as an abbreviation.\n\n",
-            "**p!raid duel** | Allows you to duel the raid boss. Once in a duel, you can use p!team to view your current team, p!use <move number> to use a move and p!switch <number> to switch pokemon.\n\n",
-            "**p!raid kick** | Allows you to kick a member in the raid you are currently in. This command can only be used by the leader of the raid. p!r kick <number> can be used as an abbreviation.\n\n",
-            "**p!raid ban** |  Allows you to ban a member in the raid you are currently in. This command can only be used by the leader of the raid. p!r ban <number> can be used as an abbreviation. This permanently kicks the user from the raid. The user cannot be unbanned.\n\n",
-            "**p!raid profile** | Allows you to view all the difficulties of raid bosses you have defeated. p!r profile can be used as an abbreviation.\n\n",
-            "**p!raid dex** | Allows you to view all the raid bosses you have defeated. p!r dex can be used as an abbreviation.\n\n",
-            "**p!raid eventdex** | Allows you to view all the gigantamax raid bosses you have defeated. p!r eventdex can be used as an abbreviation.\n\n",
-            "**p!raid cancel** | Allows you to cancel your raid battle in between. p!r cancel can be used as an abbreviation.\n\n"
+            "**/raid spawn**| Spawns a raid. A normal raid can be spawned every 3 hours, while event raids (which can only be done on weekends) cost 1 wishing piece. You can use /r spawn as an abbreviation.\n\n",
+            "**/raid join** <id> | Allows you to join a raid. /r join <id> can be used as an abbreviation.\n\n",
+            "**/raid leave** | Allows you to leave a raid. /r leave can be used as an abbreviation.\n\n",
+            "**/raid start** | Allows you to start the raid. This command can only be used by the leader of the raid!. /r start can be used as an abbreviation.\n\n",
+            "**/raid info** | Allows you to view the raid you are currently in. /r info can be used as an abbreviation.\n\n",
+            "**/raid duel** | Allows you to duel the raid boss. Once in a duel, you can use /team to view your current team, /use <move number> to use a move and /switch <number> to switch pokémon.\n\n",
+            "**/raid kick** | Allows you to kick a member in the raid you are currently in. This command can only be used by the leader of the raid. /r kick <number> can be used as an abbreviation.\n\n",
+            "**/raid ban** |  Allows you to ban a member in the raid you are currently in. This command can only be used by the leader of the raid. /r ban <number> can be used as an abbreviation. This permanently kicks the user from the raid. The user cannot be unbanned.\n\n",
+            "**/raid profile** | Allows you to view all the difficulties of raid bosses you have defeated. /r profile can be used as an abbreviation.\n\n",
+            "**/raid dex** | Allows you to view all the raid bosses you have defeated. /r dex can be used as an abbreviation.\n\n",
+            "**/raid eventdex** | Allows you to view all the gigantamax raid bosses you have defeated. /r eventdex can be used as an abbreviation.\n\n",
+            "**/raid cancel** | Allows you to cancel your raid battle in between. /r cancel can be used as an abbreviation.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -263,14 +263,14 @@
         "title": "Auction!",
         "description": [
             "How to join the global auction, buy and sell special pokémons.\n\n",
-            "**p!auction search** | Search Pokémons that are being auctioned. p!auc search or p!auc s can also be used.\n\n",
-            "**p!auction view** <ID> | View detailed information of a pokémon on the auction house. p!auc view <ID>, p!auc info <ID> , p!auc i <ID> are alternatives for this command.\n\n",
-            "**p!auction list** <Pokémon Number> <buyout> <time> | List a pokémon on the auction house. (Time format: XhYmZs).\n\n",
-            "**p!auction bid** <ID> <credits> | Bid on a pokémon from the auction house. p!auc bid <ID> <credits> can be used as an abbreviation.\n\n",
-            "**p!auction listings** | Display the pokémons you have listed on the auction house. p!auc listings can be used as an abbreviation.\n\n",
-            "**p!auction claim** <ID> | Claim a completed auction. Can be used by auctioneer or auction winner after the auction has ended. p!auc claim can be used as an abbreviation.\n\n"
+            "**/auction search** | Search Pokémons that are being auctioned. /auc search or /auc s can also be used.\n\n",
+            "**/auction view** <ID> | View detailed information of a pokémon on the auction house. /auc view <ID>, /auc info <ID> , /auc i <ID> are alternatives for this command.\n\n",
+            "**/auction list** <Pokémon Number> <buyout> <time> | List a pokémon on the auction house. (Time format: XhYmZs).\n\n",
+            "**/auction bid** <ID> <credits> | Bid on a pokémon from the auction house. /auc bid <ID> <credits> can be used as an abbreviation.\n\n",
+            "**/auction listings** | Display the pokémons you have listed on the auction house. /auc listings can be used as an abbreviation.\n\n",
+            "**/auction claim** <ID> | Claim a completed auction. Can be used by auctioneer or auction winner after the auction has ended. /auc claim can be used as an abbreviation.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
     {
@@ -284,83 +284,503 @@
         "title": "Bot commands!",
         "description": [
             "Bot commands and server commands.\n\n",
-            "**p!botinfo** | Shows general bot information.\n\n",
-            "**p!invite** | Gives the bot's invite link.\n\n",
-            "**p!donate** | Sends a link to donate to support the bot.\n\n",
-            "**p!server** | Sends an invite to the bot's official server.\n\n",
-            "**p!appeal** | (Official Server Only) Attempts to give you unbanned from the official server if you were banned for a reason.\n\n",
+            "**/botinfo** | Shows general bot information.\n\n",
+            "**/invite** | Gives the bot's invite link.\n\n",
+            "**/donate** | Sends a link to donate to support the bot.\n\n",
+            "**/server** | Sends an invite to the bot's official server.\n\n",
+            "**/appeal** | (Official Server Only) Attempts to give you unbanned from the official server if you were banned for a reason.\n\n",
             "**Server Commands**\n\n",
-            "**p!setprefix** <prefix> | Sets server prefix.\n\n",
-            "**p!redirect** <#Channel Name> | If you want Pokemon to spawn in a certain channel you can use this command to change it.\n\n",
-            "**p!redirect disable** | If you want to enable spawns in all channels again, you can use this command.\n\n",
-            "**p!channel enable/disable** | Enables or disables p!commands in the channel you are currently in.\n\n",
-            "**p!levelup enable/disable** | Enables or disables level up alerts.\n\n",
-            "**p!clearspawns enable/disable** | Enables or disables the deletion of spawn message once a Pokemon is caught.\n\n"
+            "**/setprefix** <prefix> | Sets server prefix.\n\n",
+            "**/redirect** <#Channel Name> | If you want Pokémon to spawn in a certain channel you can use this command to change it.\n\n",
+            "**/redirect disable** | If you want to enable spawns in all channels again, you can use this command.\n\n",
+            "**/channel enable/disable** | Enables or disables /commands in the channel you are currently in.\n\n",
+            "**/levelup enable/disable** | Enables or disables level up alerts.\n\n",
+            "**/clearspawns enable/disable** | Enables or disables the deletion of spawn message once a Pokémon is caught.\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": true
     },
-
     {
         "aliases": [
-            "teamcreate",
-            "team create"
+            "addfav",
+            "add fav",
+            "addfavourite",
+            "add favourite"
         ],
-        "title": "Creating Team",
+        "title": "Adding pokémon to favourite list",
         "description": [
-            "This command is used to create team for raid.\nNote: You can only create 30 teams\n\n",
-            "Syntax: `p!teamcreate` --name _<team-name>_ --id _<pokemon-id>_\n\n",
-            "Example: `p!teamcreate` --name myteam --id 1 2 3"
+            "This command is used to add your pokémon to favourite list.\n\n",
+            "Syntax: `/addfavourite` _<pokémon id>_\n\n"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    {
+        "aliases": [
+            "balance",
+            "bal"    
+        ],
+        "title": "Checking your credit balance",
+        "description": [
+            "This command is used to check your balance.\n\n",
+            "Syntax: `/balance`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "accept"
+        ],
+        "title": "Accepting trade or duel invites",
+        "description": [
+            "This command is used to accept either a trade or duel request.\n\n",
+            "Syntax: `/accept`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "back",
+            "b"    
+        ],
+        "title": "Navigating to previous page",
+        "description": [
+            "This command is used to go back to the previous page.\n\n",
+            "Syntax: `/back`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "buy"    
+        ],
+        "title": "Purchase items from the shop",
+        "description": [
+            "This command is used to buy items from the shop.\n\n",
+            "Syntax: `/buy` _<item name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "cancel"   
+        ],
+        "title": "Cancel command",
+        "description": [
+            "This command is used to cancel a prompt.\n\n",
+            "Syntax: `/cancel`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "catch"    
+        ],
+        "title": "Catching a pokémon",
+        "description": [
+            "This command is used to catch a pokémon.\n\n",
+            "Syntax: `/catch`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "confirm"
+        ],
+        "title": "Confirm command",
+        "description": [
+            "This command is used to confirm a prompt.\n\n",
+            "Syntax: `/confirm`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "confirmbid",
+            "confirm bid"
+        ],
+        "title": "Confirming bids in auction",
+        "description": [
+            "This command is used to confirm a bid placed in auction.\n\n",
+            "Syntax: `/confirmbid`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "confirmlist",
+            "confirm list"    
+        ],
+        "title": "Confirm listings of pokémon",
+        "description": [
+            "This command is used to confirm listings in auction and market.\n\n",
+            "Syntax: `/confirmlist`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "confirmremove",
+            "confirm remove"    
+        ],
+        "title": "Confirms removal of pokémon from your listings",
+        "description": [
+            "This command is used to confirm removal of pokémon from the listings.\n\n",
+            "Syntax: `/confirmremove`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "daily"    
+        ],
+        "title": "Daily voting",
+        "description": [
+            "This command is used to upvote the bot and get rewards on a daily basis.\n\n",
+            "Syntax: `/daily`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "dex"    
+        ],
+        "title": "Dex details",
+        "description": [
+            "This command is used to view entire pokedex or dex info of a particular pokémon.\n\n",
+            "Syntax: `/dex`\n\n",
+            "Syntax: `/dex` _<pokémon name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "dm"  
+        ],
+        "title": "Muting and un-muting duel instructions",
+        "description": [
+            "This command is used to mute and un-mute the duel instructions that are sent to dm.\n\n",
+            "Syntax: `/dm`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "donate"  
+        ],
+        "title": "Donate to the bot",
+        "description": [
+            "This command enables the user to make donations to the bot.\n\n",
+            "Syntax: `/donate`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "drop item",
+            "dropitem"   
+        ],
+        "title": "Drops your pokémon's held item",
+        "description": [
+            "This command is used to drop the item that your pokémon is holding.\n\n",
+            "Syntax: `/drop item`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "favourite",
+            "fav"    
+        ],
+        "title": "Your favourite pokémon list",
+        "description": [
+            "This command enables the user to view the pokémons listed as favourite.\n\n",
+            "Syntax: `/favourite`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "hint"    
+        ],
+        "title": "Catch hint",
+        "description": [
+            "This command is used to get hints while catching pokémon.\n\n",
+            "Syntax: `/hint`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "info",
+            "i"    
+        ],
+        "title": "Information of selected pokémon",
+        "description": [
+            "This command is used to see info of the selected pokémon.\n\n",
+            "Syntax: `/info`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "invite"   
+        ],
+        "title": "Invite the bot to your servers",
+        "description": [
+            "This command is used to get the invite link of the bot.\n\n",
+            "Syntax: `/invite`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "leaderboard",
+            "lb"    
+        ],
+        "title": "Weekly Leader board",
+        "description": [
+            "This command displays the top 20 pokémon catchers of the week.\n\n",
+            "Syntax: `/leaderboard`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "learn"   
+        ],
+        "title": "Learning pokémon moves",
+        "description": [
+            "This command is used to learn a move for the pokémon from the available moveset.\n\n",
+            "Syntax: `/learn` _<move name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "mail",
+            "mails"  
+        ],
+        "title": "Mails from the Developer",
+        "description": [
+            "This command is used to see mails from the Developer containing message, rewards and gifts attached with it.\n\n",
+            "Syntax: `/mail`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "moveinfo",
+            "mi"    
+        ],
+        "title": "Information on moves",
+        "description": [
+            "This command is used to see the detailed info of moves.\n\n",
+            "Syntax: `/moveinfo` _<move name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "mega"   
+        ],
+        "title": "Mega evolution",
+        "description": [
+            "This command is used to mega evolve your pokémon after purchasing mega stone from the shop.\n\n",
+            "Syntax: `/mega`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "moves"    
+        ],
+        "title": "List of available moves",
+        "description": [
+            "This command is used to see the available moves of the selected pokémon.\n\n",
+            "Syntax: `/moves`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "next",
+            "n"    
+        ],
+        "title": "Navigating to the next page",
+        "description": [
+            "This command is used to go to the next page.\n\n",
+            "Syntax: `/next`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "nickname"   
+        ],
+        "title": "Adding nickname to pokémon",
+        "description": [
+            "This command is used to give a nickname to the selected pokémon.\n\n",
+            "Syntax: `/nickname` _<name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "pick"    
+        ],
+        "title": "Picking starters",
+        "description": [
+            "This command enables the user to pick a starter pokémon.\n\n",
+            "Syntax: `/pick` _<pokémon name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "ping"   
+        ],
+        "title": "Response time",
+        "description": [
+            "This command shows the API Latency.\n\n",
+            "Syntax: `/ping`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "pokémon",
+            "pk"    
+        ],
+        "title": "List of all owned pokémon",
+        "description": [
+            "This command shows list of all pokémon owned by the user.\n\n",
+            "Syntax: `/pokémon`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "profile",
+            "pf"    
+        ],
+        "title": "User profile",
+        "description": [
+            "This command displays the user's profile.\n\n",
+            "Syntax: `/next`\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "recycle"  
+        ],
+        "title": "Recycling pokémon",
+        "description": [
+            "This command is used to recycle pokémon using appropriate filters.\n\n",
+            "Syntax: `/recycle` _<pokémon ids>_\n\n",
+            "Example: `/recycle` 1 2 3"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "redeem",
+            "redeems"    
+        ],
+        "title": "Checking your redeem balance and redeeming pokémon",
+        "description": [
+            "This command shows the total number of redeem(s) you own.\n\n",
+            "Syntax: `/redeem`\n\n",
+            "You can also redeem a pokémon of your choice by using the redeem command.\n\n",
+            "Syntax: `/redeem` _<pokémon name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "redeemspawn"
+        ],
+        "title": "Spawning a pokémon using redeem",
+        "description": [
+            "This command enables the user to spawn a pokémon of their choice.\n\n",
+            "Syntax: `/redeemspawn` _<pokémon name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "redirect"    
+        ],
+        "title": "Redirecting spawns",
+        "description": [
+            "This command is used to redirect all the spawns to a selected channel in the server.\n\n",
+            "Syntax: `/redirect` _<#channel name>_\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "release"  
+        ],
+        "title": "Releasing your pokémon",
+        "description": [
+            "This command helps you to release single or multiple pokémons.\n\n",
+            "Syntax: `/release` _<pokémon ids>_\n\n",
+            "Example: `/release` 1 2 3 4"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
+    {
+        "aliases": [
+            "removefavourite",
+            "removefav"    
+        ],
+        "title": "Removing pokémon from your favourite list",
+        "description": [
+            "This command enables the user to remove pokémon from their favourite list.\n\n",
+            "Syntax: `/removefavourite` _<pokémon id>_\n\n",
+            "Example: `/removefavourite` 1 2 3\n\n"
+        ],
+        "footer": "Need more help? Join the official server by using the /server command!",
+        "send_dm": false
+    },
     {
         "aliases": [
             "teamcreate",
@@ -369,10 +789,10 @@
         "title": "Creating Team",
         "description": [
             "This command is used to create team for raid.\nNote: You can only create 30 teams\n\n",
-            "Syntax: `p!teamcreate` --name _<team-name>_ --id _<pokemon-id>_\n\n",
-            "Example: `p!teamcreate` --name myteam --id 1 2 3"
+            "Syntax: `/teamcreate` --name _<team-name>_ --id _<pokémon-id>_\n\n",
+            "Example: `/teamcreate` --name myteam --id 1 2 3"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -383,10 +803,10 @@
         "title": "Editing Team",
         "description": [
             "This command is used to edit previously created team.\n\n",
-            "Syntax: `p!teamedit` _<slot-id>_ _<pokemon-id>_\n\n",
-            "Example: `p!teamedit` 6 23"
+            "Syntax: `/teamedit` _<slot-id>_ _<pokémon-id>_\n\n",
+            "Example: `/teamedit` 6 23"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -397,10 +817,10 @@
         "title": "Selecting Team",
         "description": [
             "This command is used to select a created team.\n\n",
-            "Syntax: `p!teamselect` _<team-id>_\n\n",
-            "Example: `p!teamselect` 2"
+            "Syntax: `/teamselect` _<team-id>_\n\n",
+            "Example: `/teamselect` 2"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -411,10 +831,10 @@
         "title": "Deleting Team",
         "description": [
             "This command is used to delete created team.\n\n",
-            "Syntax: `p!teamdelete` _<team-id>_\n\n",
-            "Example: `p!teamdelete` 3"
+            "Syntax: `/teamdelete` _<team-id>_\n\n",
+            "Example: `/teamdelete` 3"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -424,10 +844,10 @@
         "title": "Displaying Teams",
         "description": [
             "This command is used to display all teams you have.\nNote: `Teams` and `Team` are different.\n\n",
-            "Syntax: `p!teams`\n\n",
-            "Example: `p!teams"
+            "Syntax: `/teams`\n\n",
+            "Example: `/teams"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -437,10 +857,10 @@
         "title": "Displaying Current Team",
         "description": [
             "This command is used to display currently selected team.\nNote: `Teams` and `Team` are different.\n\n",
-            "Syntax: `p!team`\n\n",
-            "Example: `p!team"
+            "Syntax: `/team`\n\n",
+            "Example: `/team"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -454,12 +874,12 @@
         ],
         "title": "Displays TMS",
         "description": [
-            "This command is used to display TM moves selected pokemon or given pokemon.\n\n",
-            "Syntax: `p!tms [_<pokemon-name>_]`\n\n",
-            "Example#1: `p!tms bulbasaur  --> Shows TMS of Bulbsaur\n",
-            "Example#2: `p!tms` --> Shows TMS of selected pokemon." 
+            "This command is used to display TM moves selected pokémon or given pokémon.\n\n",
+            "Syntax: `/tms [_<pokémon-name>_]`\n\n",
+            "Example#1: `/tms bulbasaur  --> Shows TMS of Bulbsaur\n",
+            "Example#2: `/tms` --> Shows TMS of selected pokémon." 
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -468,12 +888,12 @@
         ],
         "title": "Displaying Weakness",
         "description": [
-            "This command is used to display weakness of a pokemon/move.\n\n",
-            "Syntax: `p!weak <pokemon-name> or <move-name>`\n\n",
-            "Example#1: `p!weak bulbasaur --> Shows weakness of Bulbasaur",
-            "Example#2: `p!weak tackle` --> Shows information of tackle."
+            "This command is used to display weakness of a pokémon/move.\n\n",
+            "Syntax: `/weak <pokémon-name> or <move-name>`\n\n",
+            "Example#1: `/weak bulbasaur --> Shows weakness of Bulbasaur",
+            "Example#2: `/weak tackle` --> Shows information of tackle."
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     },
     {
@@ -483,10 +903,10 @@
         "title": "Use command",
         "description": [
             "This command is used to make a move in duel or raid.\n\n",
-            "Syntax: `p!use <move-number>`\n\n",
-            "Example: `p!use 2"
+            "Syntax: `/use <move-number>`\n\n",
+            "Example: `/use 2"
         ],
-        "footer": "Need more help? Join the official server by using the p!server command!",
+        "footer": "Need more help? Join the official server by using the /server command!",
         "send_dm": false
     }
 ]

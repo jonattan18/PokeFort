@@ -153,7 +153,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                                                 interaction.reply({ content: `You have added your seleted pokémon to market list. Auto Selecting first pokemon.`, ephemeral: true });
                                             });
                                         }
-                                        interaction.reply({ content: `You have listed your level ${level} ${pokemon_name} on the market for ${prompt.List.Price} credits!`, ephemeral: true });
+                                        interaction.reply({ content: `You have listed your level ${level} ${pokemon_name} on the market for ${prompt.List.Price} credits!`});
                                     });
                                 });
                             });

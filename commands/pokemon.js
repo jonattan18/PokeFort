@@ -123,7 +123,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => 
                     if (is_not) {
                         user_pokemons = old_pokemons.filter(x => !user_pokemons.includes(x));
                     }
-                    if (j == total_args.length - 1) { create_pagination( interaction, pokemons, user_pokemons, page); }
+                    if (j == total_args.length - 1) { create_pagination(interaction, pokemons, user_pokemons, page); }
                 }
             }
 
@@ -263,7 +263,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => 
             // For pk --nickname command.
             function nickname(args) {
                 if (args.length == 1) {
-                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != "");
+                    user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined);
                 } else {
                     args = args.slice(1);
                     user_pokemons = user_pokemons.filter(pokemon => pokemon.Nickname != undefined && pokemon.Nickname.toLowerCase() === args.join(" ").toLowerCase());
