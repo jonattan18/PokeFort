@@ -1,39 +1,50 @@
-const guildModel = require("../models/guild")
+const channel_model = require('../models/channel');
 
-module.exports.run = async (bot, message, args) => {
-    if (!message.member.permissions.has('MANAGE_MESSAGES')) {
-        return message.channel.send("You are not allowed to change the bot's redirect channel!");
+module.exports.run = async (bot, interaction, args) => {
+    if (!interaction.member.permissions.has('MANAGE_MESSAGES')) {
+        return interaction.reply({ content: "You are not allowed to change the bot's redirect channel!", ephemeral: true });
     }
 
-    if (args.length < 1) return message.channel.send('Invalid command!');
-    if (args.length > 1) return message.channel.send('Invalid command!');
-
-    if (args[0].toLowerCase() == 'disable') {
-        guildModel.findOne({ GuildID: message.guild.id }, function (err, guild) {
+    if (interaction.options.get("disable") != null && interaction.options.get("channel") == null) {
+        channel_model.findOne({ ChannelID: interaction.channel.id }, function (err, channel) {
             if (err) { console.log(err) }
-            guild.Redirect = undefined;
-            guild.save().then(() => {
-                message.channel.send(`Spawn channels are removed!`);
+            channel.Redirect = undefined;
+            channel.save().then(() => {
+                interaction.reply({ content: `Spawn channels are removed!` });
             }).catch(err => {
                 console.log(err);
             });
         });
     }
-    else if (args[0].substring(0, 2) == '<#') {
-        // Remove first two letters and last one letter from a string
-        var channelID = args[0].substring(2, args[0].length - 1);
-        guildModel.findOneAndUpdate({ GuildID: message.guild.id }, { Redirect: channelID }, function (err, guild) {
+    else if (interaction.options.get("disable") == null && interaction.options.get("channel") != null) {
+        if (interaction.options.get("channel").channel.type != 0) return interaction.reply({ content: "This is not a text channel!", ephemeral: true });
+        var channelID = interaction.options.get("channel").channel.id;
+        channel_model.findOneAndUpdate({ ChannelID: interaction.channel.id }, { Redirect: channelID }, function (err, channel) {
             if (err) { return console.log(err) }
-            message.channel.send(`Spawn channel set to ${args[0]}`);
+            interaction.reply({ content: `Spawn channel set to <#${channelID}>` });
         });
     }
     else {
-        message.channel.send('Invalid command!');
+        interaction.reply({ content: 'Invalid command!', ephemeral: true });
     }
 
 }
 
 module.exports.config = {
     name: "redirect",
+    description: "Sets the channel where the bot will send the spawn messages.",
+    options: [{
+        name: "disable",
+        description: "Disables the redirect channel.",
+        type: 3,
+        choices: [{
+            name: "yes",
+            value: "yes"
+        }]
+    }, {
+        name: "channel",
+        description: "Sets the channel where the bot will send the spawn messages.",
+        type: 7
+    }],
     aliases: []
 }

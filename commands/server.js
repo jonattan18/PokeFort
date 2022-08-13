@@ -11,5 +11,6 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
 
 module.exports.config = {
     name: "server",
+    description: "Shows the official server invitation link!",
     aliases: []
 }

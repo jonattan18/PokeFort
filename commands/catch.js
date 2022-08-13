@@ -160,7 +160,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                                     else if (no_of_pokemons == 1000) { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}! This is your 1000th ${message_pokemon_name}`; }
                                     else { message_string = `Congratulations <@${interaction.user.id}>. You caught a level ${channel.PokemonLevel} ${message_pokemon_name}!`; }
                                     interaction.reply({ content: message_string });
-                                    if (channel.ClearSpawns) interaction.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); });
+                                    if (channel.ClearSpawns) interaction.channel.messages.fetch(channel.MessageID).then(msg => { msg.delete(); }).catch(err => { });
                                 });
                             });
                         });

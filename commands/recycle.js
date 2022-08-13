@@ -9,6 +9,8 @@ const raid_model = require('../models/raids');
 // Utils
 const getPokemons = require('../utils/getPokemon');
 
+//TODO: slash commands
+
 // Declaration
 var global_user_pokemon = null;
 

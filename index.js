@@ -307,7 +307,6 @@ client.on('messageCreate', async (message) => {
 
             //Caching last message user.
             channel_message_cache[message.channel.id] = message.author.id;
-            channel_redirect_spawn = undefined;
             channel_model.findOne({ ChannelID: message.channel.id }, (err, channel) => {
                 let channel_id = message.channel.id;
                 var message_count = channel.MessageCount + 1;
@@ -318,6 +317,7 @@ client.on('messageCreate', async (message) => {
                 if (spawn_limit == message_count) {
                     spawn_limit = 0;
                     message_count = 0;
+                    channel_redirect_spawn = channel.Redirect ? channel.Redirect : null;
                     spawn_pokemon(message, channel_redirect_spawn); // Spawn Pokemon
                 }
 

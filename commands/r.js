@@ -5,6 +5,8 @@ const prompt_model = require('../models/prompt');
 // Config
 const config = require('../config/config.json');
 
+//TODO: slash commands
+
 module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
     if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
 

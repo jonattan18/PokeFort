@@ -5,6 +5,7 @@ const ChannelSchema = new mongoose.Schema({
     ChannelName: String,
     MessageCount: Number,
     SpawnLimit: Number,
+    Redirect: String,
     PokemonID: { type: Number, default: 0 },
     Shiny: { type: Boolean, default: false },
     PokemonLevel: Number,

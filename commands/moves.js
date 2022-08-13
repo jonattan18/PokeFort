@@ -86,7 +86,8 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             embed.setTitle(title);
             embed.setDescription(description);
         }
-        interaction.reply({ embeds: [embed], files: [attachFiles] });
+        if (attachFiles != null) interaction.reply({ embeds: [embed], files: [attachFiles] });
+        else interaction.reply({ embeds: [embed] });
 
     }
 }
