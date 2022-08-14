@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For message embed.
+const Discord = require('discord.js');
 const _ = require('lodash'); // for utils
 
 // Models
@@ -64,7 +64,7 @@ function trade(interaction, trade_prompt, pokemons) {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
-                    change_trade(message, trade_prompt, pokemons);
+                    change_trade(interaction, trade_prompt, pokemons);
                 });
             });
         }
@@ -91,7 +91,7 @@ function trade(interaction, trade_prompt, pokemons) {
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
                     message_old.edit(new_embed);
-                    change_trade(message, trade_prompt, pokemons);
+                    change_trade(interaction, trade_prompt, pokemons);
                 });
             });
         }
@@ -343,7 +343,7 @@ function recycle(interaction, user_prompt, load_pokemons) {
                     var embed = new Discord.EmbedBuilder()
                     embed.setTitle(`Successfully recycled ${pokemon_to_recycle.length} pokemons!`)
                     embed.setDescription(`Your Pokémon in max level!`)
-                    embed.setColor(message.member.displayHexColor)
+                    embed.setColor(interaction.member.displayHexColor)
                     interaction.reply({ embeds: [embed] });
                     return;
                 }
@@ -436,7 +436,7 @@ function recycle(interaction, user_prompt, load_pokemons) {
                 if (evolved) { embed.addField(`**${old_pokemon_name} evolved to ${new_evolved_name}!**`, `${new_evolved_name} is now level ${pokemon_level}`, false); }
                 else if (leveled_up) { embed.addField(`**${old_pokemon_name} levelled up!**`, `${old_pokemon_name} is now level ${pokemon_level}`, false); }
                 else { embed.addField(`**${old_pokemon_name} xp increased!**`, `${old_pokemon_name}'s xp is now ${old_pokemon_exp}`, false); }
-                embed.setColor(message.member.displayHexColor)
+                embed.setColor(interaction.member.displayHexColor)
                 interaction.reply({ embeds: [embed] });
             });
         });

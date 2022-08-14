@@ -620,6 +620,9 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                     second_user_message[r] = second_user_message[r].replace("_", " ");
                 }
 
+                // Create interaction and delete it.
+                interaction.reply({ content: "You have made a move!" });
+
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
                     // Create user pokemon message.
