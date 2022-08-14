@@ -877,7 +877,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
                                     var difficulty_string = getDifficultyString(raid_data.RaidType);
                                     if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Gigantamax ? user.Raids.Gigantamax + 1 : 1;
-                                    else user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
+                                    user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
 
                                     // Add data to raid dex if raid is normal
                                     if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) var raid_dex = user.Raids.EventDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
@@ -894,6 +894,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                                         else user.Raids.RaidDex.push(new_dex);
                                     }
 
+                                    user.markModified('Raids.Completed');
                                     user.markModified('Raids');
                                     user.save().then(() => {
 
