@@ -63,7 +63,8 @@ function trade(interaction, trade_prompt, pokemons) {
                 interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
-                    message_old.edit(new_embed);
+                    interaction.reply({ content: `You have confirmed the trade!` });
+                    message_old.edit({ embeds: [new_embed] });
                     change_trade(interaction, trade_prompt, pokemons);
                 });
             });
@@ -77,7 +78,8 @@ function trade(interaction, trade_prompt, pokemons) {
                 interaction.channel.messages.fetch(trade_prompt.Trade.MessageID).then(message_old => {
                     var new_embed = message_old.embeds[0];
                     new_embed.fields[0].name += " | :white_check_mark:";
-                    message_old.edit(new_embed);
+                    interaction.reply({ content: `You have confirmed the trade!` });
+                    message_old.edit({ embeds: [new_embed] });
                 });
             });
         }
@@ -90,7 +92,8 @@ function trade(interaction, trade_prompt, pokemons) {
                     var new_embed = message_old.embeds[0];
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
-                    message_old.edit(new_embed);
+                    interaction.reply({ content: `You have confirmed the trade!` });
+                    message_old.edit({ embeds: [new_embed] });
                     change_trade(interaction, trade_prompt, pokemons);
                 });
             });
@@ -105,7 +108,8 @@ function trade(interaction, trade_prompt, pokemons) {
                     var new_embed = message_old.embeds[0];
                     var last_index = parseInt((trade_prompt.Trade.User1Items.length - 1) / config.TRADE_POKEMON_PER_PAGE) + 1;
                     new_embed.fields[last_index].name += " | :white_check_mark:";
-                    message_old.edit(new_embed);
+                    interaction.reply({ content: `You have confirmed the trade!` });
+                    message_old.edit({ embeds: [new_embed] });
                 });
             });
         }
@@ -283,8 +287,6 @@ function change_trade(interaction, trade_prompt, pokemons) {
                 user1.save().then(() => {
                     user2.save().then(() => {
                         trade_prompt.remove().then(() => {
-                            interaction.reply({ content: `Trade has been confirmed.`, ephemeral: true });
-
                             if (user_1_trade_evolutions.length > 0) {
                                 var evolved_pokemons = duplicate(user_1_trade_evolutions);
                                 var message_string = `<@${trade_prompt.UserID.User2ID}> During this trade,\n`;

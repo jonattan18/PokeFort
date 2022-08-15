@@ -68,7 +68,8 @@ function add(interaction, prompt, user_data) {
             new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
-        message_old.edit(new_embed);
+        interaction.reply({ content: "Trade updated!", ephemeral: true });
+        message_old.edit({ embeds: [new_embed] });
     }).catch(console.error);
 }
 
@@ -115,7 +116,8 @@ function remove(interaction, prompt) {
             new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
-        message_old.edit(new_embed);
+        interaction.reply({ content: "Trade updated!", ephemeral: true });
+        message_old.edit({ embeds: [new_embed] });
     }).catch(console.error);
 
 }

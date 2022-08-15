@@ -25,6 +25,7 @@ module.exports.run = async (bot, interaction, user_available) => {
 
         interaction.channel.messages.fetch(pages.MessageID)
             .then(message_old => {
+                interaction.reply({ content: `Moved to previous page!`, ephemeral: true });
                 message_old.edit({ embeds: [new_embed] });
                 pages.CurrentPage = current_page;
                 pages.save();

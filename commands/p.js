@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For Embedded Message.
+const Discord = require('discord.js');
 const _ = require('lodash'); // For utils
 
 // Models
@@ -11,39 +11,36 @@ const getPokemons = require('../utils/getPokemon');
 // Config
 const config = require('../config/config.json');
 
-//TODO: Slash commands
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length < 2) { return message.channel.send(`Invalid Command.`); }
-
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "ChannelID": interaction.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!prompt) return message.channel.send('You are not in a trade!');
+        if (!prompt) return interaction.reply({ content: 'You are not in a trade!', ephemeral: true });
 
-        if (args[0].toLowerCase() == "add") return add(bot, message, args.splice(1), pokemons, prompt);
-        else if (args[0].toLowerCase() == "remove") return remove(bot, message, args.splice(1), pokemons, prompt);
+        if (interaction.options.getSubcommand() === "add") return add(bot, interaction, pokemons, prompt);
+        else if (interaction.options.getSubcommand() === "remove") return remove(bot, interaction, pokemons, prompt);
     });
 }
 
 // Function to add pokemons to trade.
-function add(bot, message, args, pokemons, prompt) {
+function add(bot, interaction, pokemons, prompt) {
     var current_user = 0;
-    if (message.author.id == prompt.UserID.User1ID) {
+    if (interaction.user.id == prompt.UserID.User1ID) {
         current_user = 1;
-        if (prompt.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User1IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_items = prompt.Trade.User1Items == undefined ? [] : prompt.Trade.User1Items;
     } else {
         current_user = 2;
-        if (prompt.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User2IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_items = prompt.Trade.User2Items == undefined ? [] : prompt.Trade.User2Items;
     }
 
-    getPokemons.getallpokemon(message.author.id).then(function (user_pokemons) {
+    getPokemons.getallpokemon(interaction.user.id).then(function (user_pokemons) {
 
-        var trade_pokemons = pokemon_filter(message, args, user_pokemons, pokemons);
-        if (trade_pokemons == undefined || trade_pokemons.length == 0) return message.channel.send('Pokemons not found.')
-        if ((user_pokemons.length - trade_pokemons.length) == 0) return message.channel.send('You should atleast spare one pokemon.')
+        var trade_pokemons = pokemon_filter(interaction, user_pokemons, pokemons);
+        if (trade_pokemons == undefined || trade_pokemons.length == 0) return interaction.reply({ content: 'Pokemons not found.', ephemeral: true });
+        if ((user_pokemons.length - trade_pokemons.length) == 0) return interaction.reply({ content: 'You should atleast spare one pokemon.', ephemeral: true });
 
         var add_items = trade_pokemons;
         var processed_add_items = [];
@@ -62,14 +59,14 @@ function add(bot, message, args, pokemons, prompt) {
             prompt.Trade.User2IConfirm = false;
             if ((processed_add_items.length + prompt.Trade.User2Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
                 processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User2Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
-                message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
+                interaction.reply({ content: `You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`, ephemeral: true });
             }
         }
         else {
             prompt.Trade.User1IConfirm = false;
             if ((processed_add_items.length + prompt.Trade.User1Items.length) > config.TRADE_POKEMON_MAX_LIMIT) {
                 processed_add_items.splice(-((processed_add_items.length + prompt.Trade.User1Items.length) - config.TRADE_POKEMON_MAX_LIMIT));
-                message.channel.send(`You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`);
+                interaction.reply({ content: `You can't add more than ${config.TRADE_POKEMON_MAX_LIMIT} pokemons.`, ephemeral: true });
             }
         }
 
@@ -87,7 +84,7 @@ function add(bot, message, args, pokemons, prompt) {
             }
         }
 
-        if ((user_pokemons.length - update_items.length) == 0) return message.channel.send('You should atleast spare one pokemon.')
+        if ((user_pokemons.length - update_items.length) == 0) return interaction.reply({ content: 'You should atleast spare one pokemon.', ephemeral: true });
 
         if (current_user == 1) prompt.Trade.User1Items = update_items;
         else prompt.Trade.User2Items = update_items;
@@ -134,7 +131,7 @@ function add(bot, message, args, pokemons, prompt) {
                     user2name = user_data.username;
                     tag2 = user_data.discriminator;
 
-                    message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
+                    interaction.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
                         var new_embed = message_old.embeds[0];
                         if (current_user == 1) {
                             if (new_field.length > 0) {
@@ -178,7 +175,8 @@ function add(bot, message, args, pokemons, prompt) {
                                 }
                             }
                         }
-                        message_old.edit(new_embed);
+                        interaction.reply({ content: "Trade Updated!", ephemeral: true });
+                        message_old.edit({ embeds: [new_embed] });
                     }).catch(console.error);
                 });
             });
@@ -187,22 +185,22 @@ function add(bot, message, args, pokemons, prompt) {
 }
 
 // Function to remove pokemons from trade.
-function remove(bot, message, args, pokemons, prompt) {
+function remove(bot, interaction, pokemons, prompt) {
     var current_user = 0;
-    if (message.author.id == prompt.UserID.User1ID) {
+    if (interaction.user.id == prompt.UserID.User1ID) {
         current_user = 1;
-        if (prompt.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User1IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_items = prompt.Trade.User1Items == undefined ? [] : prompt.Trade.User1Items;
     } else {
         current_user = 2;
-        if (prompt.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User2IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_items = prompt.Trade.User2Items == undefined ? [] : prompt.Trade.User2Items;
     }
 
-    getPokemons.getallpokemon(message.author.id).then(function (user_pokemons) {
+    getPokemons.getallpokemon(interaction.user.id).then(function (user_pokemons) {
 
-        var trade_pokemons = pokemon_filter(message, args, user_pokemons, pokemons);
-        if (trade_pokemons == undefined || trade_pokemons.length == 0) return message.channel.send('Pokemons not found.')
+        var trade_pokemons = pokemon_filter(interaction, user_pokemons, pokemons);
+        if (trade_pokemons == undefined || trade_pokemons.length == 0) return interaction.reply({ content: 'Pokemons not found.', ephemeral: true });
 
         var add_items = trade_pokemons;
         var processed_add_items = [];
@@ -281,7 +279,7 @@ function remove(bot, message, args, pokemons, prompt) {
                     user2name = user_data.username;
                     tag2 = user_data.discriminator;
 
-                    message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
+                    interaction.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
                         var new_embed = message_old.embeds[0];
                         if (current_user == 1) {
                             if (new_field.length > 0) {
@@ -326,7 +324,8 @@ function remove(bot, message, args, pokemons, prompt) {
                                 }
                             }
                         }
-                        message_old.edit(new_embed);
+                        interaction.reply({ content: "Trade Updated!", ephemeral: true });
+                        message_old.edit({ embeds: [new_embed] });
                     }).catch(console.error);
                 });
             });
@@ -334,7 +333,9 @@ function remove(bot, message, args, pokemons, prompt) {
     });
 }
 
-function pokemon_filter(message, args, user_pokemons, pokemons) {
+function pokemon_filter(interaction, user_pokemons, pokemons) {
+
+    var args = interaction.options.get('filter').value.split(" ");
 
     if (onlyNumbers(args)) {
         var filtered_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));
@@ -383,11 +384,11 @@ function pokemon_filter(message, args, user_pokemons, pokemons) {
         else if (new_args.length == 2 && (_.isEqual(new_args[0], "--pent") || _.isEqual(new_args[0], "--penta"))) { penta(new_args); }
         else if (new_args.length == 2 && (_.isEqual(new_args[0], "--evolution") || _.isEqual(new_args[0], "--e"))) { evolution(new_args); }
         else if (new_args.length == 2 && (_.isEqual(new_args[0], "--order"))) { return order(new_args); }
-        else { message.channel.send("Invalid command."); return; }
+        else return interaction.reply({ content: "Invalid command.", ephemeral: true });
 
         // Check if error occurred in previous loop
         if (error.length > 1) {
-            message.channel.send(`Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`);
+            interaction.reply({ content: `Error: Argument ${'``' + error[0] + '``'} says ${error[1][1]}`, ephemeral: true });
             break;
         }
         if (is_not) {
@@ -748,20 +749,6 @@ function pokemon_filter(message, args, user_pokemons, pokemons) {
         else { return error[1] = [false, "Invalid argument syntax."] }
     }
 
-    // For p --order command.
-    function order(args) {
-        var order_type = "";
-        if (args[1].toLowerCase() == "iv") { order_type = "IV"; }
-        else if (args[1].toLowerCase() == "level") { order_type = "Level"; }
-        else if (args[1].toLowerCase() == "alphabet") { order_type = "Alphabet"; }
-        else if (args[1].toLowerCase() == "number") { order_type = "Number"; }
-
-        user_model.findOneAndUpdate({ UserID: message.author.id }, { $set: { OrderType: order_type } }, { new: true }, (err, doc) => {
-            if (err) return console.log(err);
-            return message.channel.send("Pokemon Order updated.");
-        });
-    }
-
     // For p --evolution command.
     function evolution(args) {
         var filtered_pokemons = [];
@@ -868,9 +855,25 @@ module.exports.config = {
     description: "Get information about a Pokémon.",
     options: [
         {
-            name: "cmd",
-            description: "ID / Latest / Selected",
-            type: 3
+            name: "add",
+            description: "Add pokemons to trade.",
+            type: 1,
+            options: [{
+                name: "filter",
+                description: "ID / Latest / Selected",
+                type: 3,
+                required: true
+            }]
+        }, {
+            name: "remove",
+            description: "Remove pokemons to trade.",
+            type: 1,
+            options: [{
+                name: "filter",
+                description: "ID / Latest / Selected",
+                type: 3,
+                required: true
+            }]
         }],
     aliases: []
 }

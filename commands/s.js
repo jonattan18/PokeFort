@@ -1,4 +1,4 @@
-const Discord = require('discord.js'); // For Embedded Message.
+const Discord = require('discord.js');
 const _ = require('lodash'); // For utils
 
 // Models
@@ -8,46 +8,42 @@ const prompt_model = require('../models/prompt');
 // Config
 const config = require('../config/config.json');
 
-//TODO: complete slash commands
+module.exports.run = async (bot, interaction, user_available, pokemons) => {
+    if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-module.exports.run = async (bot, message, args, prefix, user_available, pokemons) => {
-    if (!user_available) { message.channel.send(`You should have started to use this command! Use ${prefix}start to begin the journey!`); return; }
-    if (args.length < 2) { return message.channel.send(`Invalid Command.`); }
-
-    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": message.author.id }, { "UserID.User2ID": message.author.id }] }, { "ChannelID": message.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
+    prompt_model.findOne({ $and: [{ $or: [{ "UserID.User1ID": interaction.user.id }, { "UserID.User2ID": interaction.user.id }] }, { "ChannelID": interaction.channel.id }, { "Trade.Accepted": true }] }, (err, prompt) => {
         if (err) return console.log(err);
-        if (!prompt) return message.channel.send('You are not in a trade!');
+        if (!prompt) return interaction.reply({ content: 'You are not in a trade!', ephemeral: true });
 
-        user_model.findOne({ UserID: message.author.id }, (err, user) => {
+        user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
             if (!user) return;
             if (err) console.log(err);
 
-            if (args[0].toLowerCase() == "add") return add(message, args.splice(1), prompt, user);
-            else if (args[0].toLowerCase() == "remove") return remove(message, args.splice(1), prompt);
+            if (interaction.options.getSubcommand() === "add") return add(interaction, prompt, user);
+            else if (interaction.options.getSubcommand() === "remove") return remove(interaction, prompt);
         });
     });
 }
 
 // Function to add Shards to trade.
-function add(message, args, prompt, user_data) {
+function add(interaction, prompt, user_data) {
     var current_user = 0;
-    if (message.author.id == prompt.UserID.User1ID) {
+    if (interaction.user.id == prompt.UserID.User1ID) {
         current_user = 1;
-        if (prompt.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User1IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_credit = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
     } else {
         current_user = 2;
-        if (prompt.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User2IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_credit = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
     }
 
-    if (!isInt(args[0])) { return message.channel.send('Invalid Syntax!'); }
-    var amount = parseInt(args[0]);
-    if (amount < 1) { return message.channel.send('Invalid Amount!'); }
+    var amount = interaction.options.get("amount").value;
+    if (amount < 1) return interaction.reply({ content: 'Invalid Amount!', ephemeral: true });
 
     var new_credit = old_credit + amount;
 
-    if (new_credit > user_data.Shards || user_data.Shards == undefined || user_data.Shards == NaN) { return message.channel.send('You do not have enough Shards!'); }
+    if (new_credit > user_data.Shards || user_data.Shards == undefined || user_data.Shards == NaN) return interaction.reply({ content: 'You do not have enough Shards!', ephemeral: true });
 
     if (current_user == 1) {
         prompt.Trade.User2IConfirm = false;
@@ -59,7 +55,7 @@ function add(message, args, prompt, user_data) {
         prompt.save();
     }
 
-    message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
+    interaction.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
         var new_embed = message_old.embeds[0];
         if (current_user == 1) {
             var user_items = prompt.Trade.User1Items;
@@ -72,31 +68,31 @@ function add(message, args, prompt, user_data) {
             new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
-        message_old.edit(new_embed);
+        interaction.reply({ content: "Trade updated!", ephemeral: true });
+        message_old.edit({ embeds: [new_embed] });
     }).catch(console.error);
 
 }
 
 // Function to remove Shards from trade.
-function remove(message, args, prompt) {
+function remove(interaction, prompt) {
     var current_user = 0;
-    if (message.author.id == prompt.UserID.User1ID) {
+    if (interaction.user.id == prompt.UserID.User1ID) {
         current_user = 1;
-        if (prompt.Trade.User1IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User1IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_credit = prompt.Trade.Shards.User1 == undefined ? 0 : prompt.Trade.Shards.User1;
     } else {
         current_user = 2;
-        if (prompt.Trade.User2IConfirm == true) { message.channel.send('You already confirmed your trade.'); return; }
+        if (prompt.Trade.User2IConfirm == true) return interaction.reply({ content: 'You already confirmed your trade.', ephemeral: true });
         var old_credit = prompt.Trade.Shards.User2 == undefined ? 0 : prompt.Trade.Shards.User2;
     }
 
-    if (!isInt(args[0])) { return message.channel.send('Invalid Syntax!'); }
-    var amount = parseInt(args[0]);
-    if (amount < 1) { return message.channel.send('Invalid Amount!'); }
+    var amount = interaction.options.get("amount").value;
+    if (amount < 1) return interaction.reply({ content: 'Invalid Amount!', ephemeral: true });
 
     var new_credit = old_credit - amount;
 
-    if (new_credit < 0) { return message.channel.send('Invalid amount to remove!'); }
+    if (new_credit < 0) return interaction.reply({ content: 'Invalid amount to remove!', ephemeral: true });
 
     if (current_user == 1) {
         prompt.Trade.User2IConfirm = false;
@@ -108,7 +104,7 @@ function remove(message, args, prompt) {
         prompt.save();
     }
 
-    message.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
+    interaction.channel.messages.fetch(prompt.Trade.MessageID).then(message_old => {
         var new_embed = message_old.embeds[0];
         if (current_user == 1) {
             var user_items = prompt.Trade.User1Items;
@@ -121,7 +117,8 @@ function remove(message, args, prompt) {
             new_embed.fields[0].name = (new_embed.fields[0].name).replace(' | :white_check_mark:', '');
             new_embed.fields[new_embed.fields.length - 1].value = '```' + msg + '```';
         }
-        message_old.edit(new_embed);
+        interaction.reply({ content: "Trade updated!", ephemeral: true });
+        message_old.edit({ embeds: [new_embed] });
     }).catch(console.error);
 
 }
@@ -171,5 +168,29 @@ function isInt(value) {
 
 module.exports.config = {
     name: "s",
+    description: "Trade shards.",
+    options: [{
+        name: "add",
+        description: "Add shards to trade.",
+        type: 1,
+        options: [{
+            name: "amount",
+            description: "Amount of shard to add.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }, {
+        name: "remove",
+        description: "Remove shards from trade.",
+        type: 1,
+        options: [{
+            name: "amount",
+            description: "Amount of shards to remove.",
+            type: 4,
+            required: true,
+            min_value: 1
+        }]
+    }],
     aliases: []
 }
