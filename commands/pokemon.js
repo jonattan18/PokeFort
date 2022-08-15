@@ -580,7 +580,7 @@ function create_pagination(interaction, pokemons, user_pokemons, page = 1) {
     if (page > global_embed.length - 1 || page < 0) return interaction.reply({ content: 'No page found.', ephemeral: true });
 
     // Send message to channel.
-    interaction.reply({ embeds: [global_embed[page]] }).then(msg => {
+    interaction.reply({ embeds: [global_embed[page]] , fetchReply: true}).then(msg => {
         if (global_embed.length == 1) return;
         pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, global_embed, page);
     });

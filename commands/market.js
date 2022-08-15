@@ -268,7 +268,7 @@ function arg_parsing(interaction, command, pokemons) {
                         embeds[i].setDescription(description);
                         embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                    interaction.reply({ embeds: [embeds[0]], fetchReply: true }).then(msg => {
                         if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
@@ -297,7 +297,7 @@ function arg_parsing(interaction, command, pokemons) {
                         embeds[i].setDescription(description);
                         embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                     }
-                    interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                    interaction.reply({ embeds: [embeds[0]] , fetchReply: true}).then(msg => {
                         if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                         else return;
                     });
@@ -366,7 +366,7 @@ function arg_parsing(interaction, command, pokemons) {
                                 embeds[i].setDescription(description);
                                 embeds[i].setFooter(`Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}`);
                             }
-                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                            interaction.reply({ embeds: [embeds[0]], fetchReply: true }).then(msg => {
                                 if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });
@@ -395,7 +395,7 @@ function arg_parsing(interaction, command, pokemons) {
                                 embeds[i].setDescription(description);
                                 embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
                             }
-                            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+                            interaction.reply({ embeds: [embeds[0]], fetchReply: true }).then(msg => {
                                 if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                                 else return;
                             });

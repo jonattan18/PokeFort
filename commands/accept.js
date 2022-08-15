@@ -259,7 +259,7 @@ function trade(bot, interaction, prompt) {
             embed.setColor(interaction.member.displayHexColor);
             embed.addFields([{ name: `${user1name + '#' + tag1}'s is offering`, value: '``` ```', inline: false },
             { name: `${user2name + '#' + tag2}'s is offering`, value: '``` ```', inline: false }]);
-            interaction.reply({ embeds: [embed] }).then(msg => {
+            interaction.reply({ embeds: [embed], fetchReply: true }).then(msg => {
                 prompt.Trade.Accepted = true;
                 prompt.Trade.MessageID = msg.id;
                 prompt.save();

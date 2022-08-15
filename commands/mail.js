@@ -56,7 +56,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                 embeds[i].setDescription(description + "‎");
                 embeds[i].setFooter({ text: `User Inbox - Page ${i + 1}/${chunks.length}`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
             }
-            interaction.reply({ embeds: [embeds[0]] }).then(msg => {
+            interaction.reply({ embeds: [embeds[0]], fetchReply: true }).then(msg => {
                 if (chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
                 else return;
             });

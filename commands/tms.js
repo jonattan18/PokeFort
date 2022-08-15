@@ -59,7 +59,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
         }
 
         // Send message to channel.
-        interaction.reply({ embeds: [global_embed[0]] }).then(msg => {
+        interaction.reply({ embeds: [global_embed[0]], fetchReply: true }).then(msg => {
             if (global_embed.length == 1) return;
             pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, global_embed, 0);
         });

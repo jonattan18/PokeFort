@@ -752,7 +752,7 @@ function create_pagination(interaction, title = "Raid Dex", page = 0, raid_pokem
         embeds[i].setDescription(description);
         embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
     }
-    interaction.reply({ embeds: [embeds[page]] }).then(msg => {
+    interaction.reply({ embeds: [embeds[page]] , fetchReply: true}).then(msg => {
         if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
         else return;
     });
