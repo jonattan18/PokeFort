@@ -815,6 +815,12 @@ function onlyNumbers(array) {
     });
 }
 
+// Calculate total iv from iv array.
+function total_iv(iv) {
+    var total_iv = ((iv[0] + iv[1] + iv[2] + iv[3] + iv[4] + iv[5]) / 186 * 100).toFixed(2);
+    return total_iv;
+}
+
 // Check if given value is float.
 function isFloat(x) { return !!(x % 1); }
 

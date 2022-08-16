@@ -103,6 +103,7 @@ auction_model.findOne({ Primary: true }, (err, auction) => {
 process.on('uncaughtException', function (err) {
     // Ignore discord permission error.
     if (err.name.toString().startsWith("DiscordAPIError") && err.message.toString().startsWith("Missing Permission")) return;
+    if (err.name.toString().startsWith("DiscordAPIError") && err.message.toString().startsWith("Cannot send messages to this user")) return;
     console.log(err);
     var error_json = {
         time: new Date().toLocaleString(),

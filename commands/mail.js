@@ -67,6 +67,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             var args = interaction.options.get("read").value;
 
             var usr_selected_mail = user.Mails[args - 1];
+            if (usr_selected_mail == undefined) return interaction.reply({ content: `We couldn't found that index.`, ephemeral: true });
             var mail_from = usr_selected_mail.From;
             var mail_subject = usr_selected_mail.Subject;
             var mail_message = usr_selected_mail.Message;
@@ -109,6 +110,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             var args = interaction.options.get("claim").value;
 
             var usr_selected_mail = user.Mails[args - 1];
+            if (usr_selected_mail == undefined) return interaction.reply({ content: `We couldn't found that index.`, ephemeral: true });
             var mail_attachment = usr_selected_mail.Attachment;
             var mail_claimed = usr_selected_mail.Claimed;
             var claimed_message = "";

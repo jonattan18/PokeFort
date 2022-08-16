@@ -264,6 +264,7 @@ function claim(bot, interaction, args, user_available, pokemons) {
     user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (err) return console.log(err);
         if (!user) return;
+        if (args.length == 1) return interaction.reply({ content: "You need to specify which reward you want to claim or use /dex claim all", ephemeral: true });
         var dex_rewards = user.DexRewards;
         var rewards = dex_rewards.filter(it => it["RewardName"].toLowerCase() == args[1].toLowerCase());
         var reward_index = dex_rewards.findIndex(it => it["RewardName"].toLowerCase() == args[1].toLowerCase());
