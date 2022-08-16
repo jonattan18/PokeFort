@@ -4398,9 +4398,9 @@ exports.Moves = {
         onTryHit(target, source) {
             return false;
         },
-        //  damageCallback(pokemon, target) {
-        //      return target.getUndynamaxedHP() - pokemon.hp;
-        // },
+        //damageCallback(pokemon, target) {
+        //    return target.getUndynamaxedHP() - pokemon.hp;
+        //},
         category: "Physical",
         name: "Endeavor",
         pp: 5,

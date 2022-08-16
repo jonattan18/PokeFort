@@ -558,26 +558,30 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
             var second_user_message = [show_str[0]];
             show_str.splice(0, 1);
             for (var i = 0; i < show_str.length; i++) {
-                if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
-                if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+                if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) {
+                    _user_pokemon_fainted = true;
+                }
+                if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) {
+                    _raid_pokemon_fainted = true;
+                }
                 if (show_str[i].startsWith("  ")) {
                     second_user_message.push(show_str[i]);
                 }
-               /* else {
-                    show_str.splice(0, i);
-                    console.log(show_str);
-                   
-                    while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
-                        second_user_message.push("\n" + show_str[i].replace("  ", " "));
-                        i++;
-                    }
-                    var j = 1;
-                    while (show_str[j] != undefined && show_str[j].startsWith("  ")) {
-                        second_user_message.push(show_str[j].replace("  ", " "));
-                        j++;
-                    }
-                    break;
-                } */
+                /* else {
+                     show_str.splice(0, i);
+                     console.log(show_str);
+                    
+                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
+                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
+                         i++;
+                     }
+                     var j = 1;
+                     while (show_str[j] != undefined && show_str[j].startsWith("  ")) {
+                         second_user_message.push(show_str[j].replace("  ", " "));
+                         j++;
+                     }
+                     break;
+                 } */
             }
 
             if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
@@ -622,7 +626,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                     second_user_message[r] = second_user_message[r].replace("_", " ");
                 }
 
-                // Create interaction and delete it.
+                // Create interaction
                 interaction.reply({ content: "You have made a move!" });
 
                 // Filter system message $player
@@ -630,16 +634,22 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                     // Create user pokemon message.
                     var usr_embed = new Discord.EmbedBuilder();
                     usr_embed.setTitle(first_user_message[0]);
-                    usr_embed.setDescription(first_user_message.slice(1).join(""));
-                    interaction.channel.send({ embeds: [usr_embed] });
+                    var description = first_user_message.slice(1);
+                    if (description.length > 0) {
+                        usr_embed.setDescription(description.join(""));
+                        interaction.channel.send({ embeds: [usr_embed] });
+                    }
                 }
 
                 if (!second_user_message[0].startsWith("$Player") && _switch != true) {
                     // Create raid boss message.
                     var raid_embed = new Discord.EmbedBuilder();
                     raid_embed.setTitle(`${second_user_message[0]}`);
-                    raid_embed.setDescription(second_user_message.slice(1).join(""));
-                    interaction.channel.send({ embeds: [raid_embed] });
+                    var description = second_user_message.slice(1);
+                    if (description.length > 0) {
+                        raid_embed.setDescription(description.join(""));
+                        interaction.channel.send({ embeds: [raid_embed] });
+                    }
                 }
 
                 // Check if user pokemon fainted.
@@ -908,7 +918,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                                             embed.setTitle(`You defeated a level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name.replaceAll("_r", "")}!`);
                                             embed.setDescription(description);
                                             var user_s = bot.users.cache.get(user_id)
-                                            if (user_s) user_s.send(embed);
+                                            if (user_s) user_s.send({ embeds: [embed] });
                                             if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1);
                                         } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
                                     });
@@ -959,16 +969,16 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
     })();
 }
 
-// Move thinker based on type effectiveness.
+// Move thinker based on type effectiveness and base power.
 function move_thinker(available_moves, foe_type1, foe_type2) {
     var move_list = [];
     var non_sorted = [];
     for (var i = 0; i < available_moves.length; i++) {
         var effectiveness = battle.type_calc(available_moves[i][1].toLowerCase(), foe_type1.toLowerCase(), foe_type2.toLowerCase());
-        move_list.push([available_moves[i][0], effectiveness]);
-        non_sorted.push([available_moves[i][0], effectiveness]);
+        move_list.push([available_moves[i][0], effectiveness, available_moves[i][2], available_moves[i][3]]);
+        non_sorted.push([available_moves[i][0], effectiveness, available_moves[i][2], available_moves[i][3]]);
     }
-    move_list.sort((a, b) => b[1] - a[1]);
+    move_list.sort((a, b) => b[1] - a[1] || a[3].localeCompare(b[3]) || b[2] - a[2]);
     if (move_list.length == 0) return 1;
     else {
         // Filter the elements which has highest effectiveness.

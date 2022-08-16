@@ -92,7 +92,7 @@ function spawn_pokemon(message, prefix, spawn_pokemon, pokemon_level, pokemon_sh
     embed.setTitle("A wild pokémon has appeared!")
     embed.setDescription(`Guess the pokémon and type ${prefix}catch <pokémon> to catch it!`)
     embed.setColor("#1cb99a");
-    message.channel.send(embed).then(msg => {
+    message.channel.send({ embeds: [embed] }).then(msg => {
         msg_id = msg.id;
 
         // Pokemon Nature

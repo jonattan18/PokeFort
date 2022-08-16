@@ -51,14 +51,14 @@ function get_raid_moves_from_id(pokemon_id, pokemons) {
     // Normal moves (No Status)
     for (var i = 0; i < move_available["Level"].length; i++) {
         var move_info = movesinfo[move_available["Level"][i][0].replace("-", "").toLowerCase()];
-        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type]);
+        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type, move_info.basePower, move_info.category]);
     }
 
     // TM moves (No Status)
     for (var i = 0; i < move_available["TM"].length; i++) {
         var move_info = movesinfo[move_available["TM"][i].replace("-", "").toLowerCase()];
         if (move_info.tm == undefined) continue;
-        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type]);
+        if (move_info.category != "Status" && move_info.flags.charge != 1 && move_info.flags.recharge != 1 && !config.RAID_EXCEPTIONAL_MOVES.includes(move_info.name)) moves_to_send.push([move_info.name, move_info.type, move_info.basePower, move_info.category]);
     }
 
     return _.uniqWith(moves_to_send, _.isEqual);
