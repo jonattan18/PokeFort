@@ -52,8 +52,6 @@ channel_message_cache = {};
 mongoose.connect(config.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true
 });
 
 // Discord Login

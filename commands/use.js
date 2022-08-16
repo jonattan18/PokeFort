@@ -558,13 +558,15 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
             var second_user_message = [show_str[0]];
             show_str.splice(0, 1);
             for (var i = 0; i < show_str.length; i++) {
+                if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
+                if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
                 if (show_str[i].startsWith("  ")) {
                     second_user_message.push(show_str[i]);
                 }
-                else {
+               /* else {
                     show_str.splice(0, i);
-                    if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
-                    if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+                    console.log(show_str);
+                   
                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
                         i++;
@@ -575,7 +577,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                         j++;
                     }
                     break;
-                }
+                } */
             }
 
             if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
@@ -625,8 +627,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
-                    // Remove duplicate from first_user_message.
-                    first_user_message = [...new Set(first_user_message)];
                     // Create user pokemon message.
                     var usr_embed = new Discord.EmbedBuilder();
                     usr_embed.setTitle(first_user_message[0]);
@@ -635,8 +635,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                 }
 
                 if (!second_user_message[0].startsWith("$Player") && _switch != true) {
-                    // Remove duplicate from second_user_message.
-                    second_user_message = [...new Set(second_user_message)];
                     // Create raid boss message.
                     var raid_embed = new Discord.EmbedBuilder();
                     raid_embed.setTitle(`${second_user_message[0]}`);
@@ -656,6 +654,8 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                 }
 
             }
+
+            if (_switch) interaction.reply({ content: "You have switched pokemon!" });
 
             //#region Module Image Generation
             if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
