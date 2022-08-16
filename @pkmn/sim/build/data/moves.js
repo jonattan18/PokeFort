@@ -4353,7 +4353,8 @@ exports.Moves = {
                     return false;
                 }
                 this.effectState.move = move.id;
-                this.add('-start', target, 'Encore');
+                this.effectState.duration = this.random(3, 5);
+                this.add('-start', target, 'Encore', undefined, this.effectState.duration);
                 if (!this.queue.willMove(target)) {
                     this.effectState.duration++;
                 }
@@ -12140,7 +12141,7 @@ exports.Moves = {
             },
             onResidualOrder: 11,
             onResidual(pokemon) {
-                this.damage(pokemon.baseMaxhp / 16);
+                this.damage(pokemon.baseMaxhp / 12);
             },
         },
         secondary: null,

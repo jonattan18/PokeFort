@@ -669,6 +669,14 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             interaction.reply({ embeds: [embed] });
         });
     }
+    else if (interaction.options.getSubcommand() === "wp") {
+        user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+            if (err) return;
+            if (!user) return;
+            var wishing_pieces = user.WishingPieces == undefined ? 0 : user.WishingPieces;
+            interaction.reply({ content: `You have ${wishing_pieces} wishing pieces.` });
+        });
+    }
     else if (interaction.options.getSubcommand() === "dex" || interaction.options.getSubcommand() === "eventdex") {
 
         user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
@@ -752,7 +760,7 @@ function create_pagination(interaction, title = "Raid Dex", page = 0, raid_pokem
         embeds[i].setDescription(description);
         embeds[i].setFooter({ text: `Page: ${i + 1}/${split_chunks.length} Showing ${current_index} to ${(current_index - 1) + split_chunks[i].length} out of ${tot_len}` });
     }
-    interaction.reply({ embeds: [embeds[page]] , fetchReply: true}).then(msg => {
+    interaction.reply({ embeds: [embeds[page]], fetchReply: true }).then(msg => {
         if (split_chunks.length > 1) return pagination.createpage(interaction.channel.id, interaction.user.id, msg.id, embeds, 0);
         else return;
     });
@@ -1101,6 +1109,10 @@ module.exports.config = {
             min_value: 1,
             max_value: 4
         }]
+    }, {
+        name: "wp",
+        description: "Shows the amount of wishing pieces you have!",
+        type: 1
     }],
     aliases: []
 }

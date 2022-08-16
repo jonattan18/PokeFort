@@ -542,7 +542,7 @@ class Handler {
     }
     '|-start|'(args, kwArgs) {
         var _a;
-        const [, pokemon, effect, arg3] = args;
+        const [, pokemon, effect, arg3, duration] = args;
         const line1 = this.parser.maybeAbility(effect, pokemon) ||
             this.parser.maybeAbility(kwArgs.from, kwArgs.of || pokemon);
         const id = LogFormatter.effectId(effect);
@@ -599,7 +599,8 @@ class Handler {
             .replace('[EFFECT]', this.parser.effect(effect))
             .replace('[MOVE]', arg3)
             .replace('[SOURCE]', this.parser.pokemon(kwArgs.of))
-            .replace('[ITEM]', this.parser.effect(kwArgs.from)));
+            .replace('[ITEM]', this.parser.effect(kwArgs.from))
+            .replace('[DURATION]', duration));
     }
     '|-end|'(args, kwArgs) {
         var _a;

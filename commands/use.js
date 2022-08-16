@@ -474,7 +474,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
             _battlestream.battle.sides[1].pokemon[0].sethp(raidside.hp);
 
             // Status changes.
-            if (raidside.status != "") _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
+            // if (raidside.status != "") _battlestream.battle.sides[1].pokemon[0].setStatus(raidside.status, _battlestream.battle.sides[0].pokemon[0], _battlestream.battle.sides[1].pokemon[0]);
 
         }
     }
@@ -625,6 +625,8 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
+                    // Remove duplicate from first_user_message.
+                    first_user_message = [...new Set(first_user_message)];
                     // Create user pokemon message.
                     var usr_embed = new Discord.EmbedBuilder();
                     usr_embed.setTitle(first_user_message[0]);
@@ -633,6 +635,8 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                 }
 
                 if (!second_user_message[0].startsWith("$Player") && _switch != true) {
+                    // Remove duplicate from second_user_message.
+                    second_user_message = [...new Set(second_user_message)];
                     // Create raid boss message.
                     var raid_embed = new Discord.EmbedBuilder();
                     raid_embed.setTitle(`${second_user_message[0]}`);
