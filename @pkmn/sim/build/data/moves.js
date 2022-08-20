@@ -1084,6 +1084,7 @@ exports.Moves = {
         accuracy: 100,
         basePower: 0,
         basePowerCallback(pokemon, target, move) {
+            if (!move.allies) return false;
             return 5 + Math.floor(move.allies.shift().species.baseStats.atk / 10);
         },
         category: "Physical",
@@ -1092,6 +1093,7 @@ exports.Moves = {
         priority: 0,
         flags: { protect: 1, mirror: 1, allyanim: 1 },
         onModifyMove(move, pokemon) {
+            if (!move.allies) return false;
             move.allies = pokemon.side.pokemon.filter(ally => ally === pokemon || !ally.fainted && !ally.status);
             move.multihit = move.allies.length;
         },
@@ -5920,6 +5922,7 @@ exports.Moves = {
         accuracy: 95,
         basePower: 40,
         basePowerCallback(pokemon, target, move) {
+            if (!pokemon.volatiles['furycutter']) return false;
             if (!pokemon.volatiles['furycutter'] || move.hit === 1) {
                 pokemon.addVolatile('furycutter');
             }
@@ -9759,10 +9762,10 @@ exports.Moves = {
                 //const damage = this.damage(pokemon.baseMaxhp / 8, pokemon, target);
                 var mydamage = Math.floor(pokemon.baseMaxhp / 8);
                 if (pokemon.level >= 200 && pokemon.level <= 300) mydamage = Math.floor(pokemon.baseMaxhp / 200);
-                else if (pokemon.level >= 600 && pokemon.level <= 800) mydamage = Math.floor(pokemon.baseMaxhp / 600);
-                else if (pokemon.level >= 1600 && pokemon.level <= 1800) mydamage = Math.floor(pokemon.baseMaxhp / 1000);
-                else if (pokemon.level >= 2600 && pokemon.level <= 2800) mydamage = Math.floor(pokemon.baseMaxhp / 1500);
-                else if (pokemon.level >= 3400 && pokemon.level <= 3500) mydamage = Math.floor(pokemon.baseMaxhp / 2000);
+                else if (pokemon.level >= 600 && pokemon.level <= 800) mydamage = Math.floor(pokemon.baseMaxhp / 350);
+                else if (pokemon.level >= 1600 && pokemon.level <= 1800) mydamage = Math.floor(pokemon.baseMaxhp / 650);
+                else if (pokemon.level >= 2600 && pokemon.level <= 2800) mydamage = Math.floor(pokemon.baseMaxhp / 850);
+                else if (pokemon.level >= 3400 && pokemon.level <= 3500) mydamage = Math.floor(pokemon.baseMaxhp / 950);
                 const damage = this.damage(mydamage, pokemon, target);
                 if (damage) {
                     this.heal(damage, target, pokemon);
@@ -12141,7 +12144,7 @@ exports.Moves = {
             },
             onResidualOrder: 11,
             onResidual(pokemon) {
-                this.damage(pokemon.baseMaxhp / 12);
+                this.damage(pokemon.baseMaxhp / 16);
             },
         },
         secondary: null,
@@ -20412,6 +20415,7 @@ exports.Moves = {
         priority: 0,
         flags: { protect: 1, reflectable: 1, mirror: 1 },
         volatileStatus: 'yawn',
+        // Modified By Pokefort
         onTryHit(target) {
             if (target.status || !target.runStatusImmunity('slp')) {
                 return false;
@@ -20420,13 +20424,14 @@ exports.Moves = {
         condition: {
             noCopy: true,
             duration: 2,
-            onStart(target, source) {
-                this.add('-start', target, 'move: Yawn', '[of] ' + source);
+            onStart(target) {
+                target.trySetStatus('slp', this.effectState.source);
+                //this.add('-start', target, 'move: Yawn', '[of] ' + source);
             },
             onResidualOrder: 23,
             onEnd(target) {
-                this.add('-end', target, 'move: Yawn', '[silent]');
-                target.trySetStatus('slp', this.effectState.source);
+                //this.add('-end', target, 'move: Yawn', '[silent]');
+                //target.trySetStatus('slp', this.effectState.source);
             },
         },
         secondary: null,

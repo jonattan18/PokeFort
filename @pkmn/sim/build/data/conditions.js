@@ -130,7 +130,7 @@ exports.Conditions = {
         name: 'psn',
         effectType: 'Status',
         onStart(target, source, sourceEffect) {
-            this.effectState.stage = 32;
+            this.effectState.stage = 46;
             if (sourceEffect && sourceEffect.effectType === 'Ability') {
                 this.add('-status', target, 'psn', '[from] ability: ' + sourceEffect.name, '[of] ' + source);
             }
@@ -139,14 +139,13 @@ exports.Conditions = {
             }
         },
         onSwitchIn() {
-            this.effectState.stage = 32;
+            this.effectState.stage = 46;
         },
         onResidualOrder: 9,
         onResidual(pokemon) {
             if (this.effectState.stage > 14) {
                 this.effectState.stage--;
             }
-            console.log(this.effectState.stage);
             this.damage(pokemon.baseMaxhp / this.effectState.stage);
         },
     },
@@ -154,7 +153,7 @@ exports.Conditions = {
         name: 'tox',
         effectType: 'Status',
         onStart(target, source, sourceEffect) {
-            this.effectState.stage = 0;
+            this.effectState.stage = 46;
             if (sourceEffect && sourceEffect.id === 'toxicorb') {
                 this.add('-status', target, 'tox', '[from] item: Toxic Orb');
             }
@@ -166,16 +165,26 @@ exports.Conditions = {
             }
         },
         onSwitchIn() {
-            this.effectState.stage = 0;
+            this.effectState.stage = 46;
         },
         onResidualOrder: 9,
         onResidual(pokemon) {
-            // if (this.effectState.stage < 15) {
-            if (this.effectState.stage < 2) {
-                this.effectState.stage++;
+            if (this.effectState.stage > 14) {
+                this.effectState.stage--;
             }
-            this.damage(this.clampIntRange(pokemon.baseMaxhp / 16, 1) * this.effectState.stage);
+            this.damage(pokemon.baseMaxhp / this.effectState.stage);
         },
+        //Modified by pokefort
+        /*
+        this.effectState.stage = 0;  
+        
+         onResidual(pokemon) {
+               // if (this.effectState.stage < 15) {
+               if (this.effectState.stage < 2) {
+                   this.effectState.stage++;
+               }
+               this.damage(this.clampIntRange(pokemon.baseMaxhp / 16, 1) * this.effectState.stage);
+           }, */
     },
     confusion: {
         name: 'confusion',
