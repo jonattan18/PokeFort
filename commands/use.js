@@ -623,7 +623,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                     }
 
                     // Create interaction
-                    interaction.reply({ content: "You have made a move!" });
+                    if (!_switch) interaction.reply({ content: "You have made a move!" });
 
                     // Filter system message $player
                     if (!first_user_message[0].startsWith("$Player")) {
