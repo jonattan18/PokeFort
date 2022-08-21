@@ -667,7 +667,7 @@ class BattleActions {
             else {
                 accuracy = this.battle.runEvent('Accuracy', target, pokemon, move, accuracy);
             }
-            if (accuracy !== true && !this.battle.randomChance(accuracy, 100)) {
+            if (accuracy !== true && !this.battle.randomChance(accuracy, 100) && pokemon.level < 101) {
                 if (move.smartTarget) {
                     move.smartTarget = false;
                 }
