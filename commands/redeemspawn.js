@@ -7,7 +7,7 @@ const user_model = require('../models/user');
 module.exports.run = async (bot, interaction, user_available, pokemons) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
-    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (user) {
             var redeems = user.Redeems == undefined ? 0 : user.Redeems;
             if (redeems >= 1) {

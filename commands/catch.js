@@ -5,6 +5,7 @@ const leaderboard_model = require('../models/leaderboard');
 
 // Utils
 const getPokemons = require('../utils/getPokemon');
+const mail = require('../utils/mail');
 const getDexes = require('../utils/getDex');
 const _ = require('lodash');
 
@@ -69,6 +70,48 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                                 current_week_monday.setDate(current_week_monday.getDate() - days);
                                 current_week_monday.setHours(0, 0, 0, 0);
                                 if (new Date(leaderboard.Timestamp).getTime() < current_week_monday.getTime()) {
+                                    if (leaderboard.Users.length > 0) {
+                                        var first_winner = leaderboard.Users[0];
+                                        var second_winner = leaderboard.Users.length > 1 ? leaderboard.Users[1] : undefined;
+                                        var third_winner = leaderboard.Users.length > 2 ? leaderboard.Users[2] : undefined;
+
+                                        // Creation of reward mail attachment for first user.
+                                        var first_reward_pokemon_id = config.LEADERBOARD_REWARDS_POKEMON_IDS[Math.floor(Math.random() * config.LEADERBOARD_REWARDS_POKEMON_IDS.length)]
+                                        var first_reward_attachment = {
+                                            Pokemons: [{
+                                                PokemonId: first_reward_pokemon_id,
+                                                Experience: 0,
+                                                Level: 1,
+                                                Nature: Math.floor(Math.random() * 25) + 1,
+                                                IV: [
+                                                    Math.floor(Math.random() * 11) + 20,
+                                                    Math.floor(Math.random() * 11) + 20,
+                                                    Math.floor(Math.random() * 11) + 20,
+                                                    Math.floor(Math.random() * 11) + 20,
+                                                    Math.floor(Math.random() * 11) + 20,
+                                                    Math.floor(Math.random() * 11) + 20
+                                                ],
+                                                Shiny: false,
+                                                Reason: "Leaderboard"
+                                            }]
+                                        }
+
+                                        var second_reward_attachment = {
+                                            Redeems: 2,
+                                            PokeCredits: 15000
+                                        }
+
+                                        var third_reward_attachment = {
+                                            Redeems: 1,
+                                            PokeCredits: 15000
+                                        }
+
+                                        // Function to send mail to reward user
+                                        mail.sendmail(first_winner.UserID, "Pokefort", "Leaderboard Winner!", `You have won the weekly leaderboard in first place by catching ${first_winner.NoOfCaught} pokemons! This is reward from us for your hardwork! Please collect the following attachment.`, first_reward_attachment, undefined, true);
+                                        if (second_winner) mail.sendmail(second_winner.UserID, "Pokefort", "Leaderboard Winner!", `You have won the weekly leaderboard in second place by catching ${second_winner.NoOfCaught} pokemons! This is reward from us for your hardwork! Please collect the following attachment.`, second_reward_attachment, undefined, true);
+                                        if (third_winner) mail.sendmail(third_winner.UserID, "Pokefort", "Leaderboard Winner!", `You have won the weekly leaderboard in third place by catching ${third_winner.NoOfCaught} pokemons! This is reward from us for your hardwork! Please collect the following attachment.`, third_reward_attachment, undefined, true);
+                                    }
+
                                     leaderboard.Timestamp = current_week_monday;
                                     leaderboard.Users = [];
                                 }

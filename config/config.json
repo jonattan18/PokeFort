@@ -20,6 +20,7 @@
     "TRADE_POKEMON_MAX_LIMIT": 200,
     "MAX_TEAMS_PER_USER": 30,
     "LEADERBOARD_MAX_LIMIT": 1000,
+    "LEADERBOARD_REWARDS_POKEMON_IDS": ["373", "241", "1386", "513"],
     "MOVES_CANT_BE_LEARNT": ["Super Fang", "Endeavor", "Nature's Madness", "Destiny Bond", "Circle Throw", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse"],
     "RAID_EXCEPTIONAL_MOVES": ["Self-Destruct", "Explosion", "Final Gambit", "Misty Explosion", "Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Sheer Cold", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse", "Mirror Coat"],
     "RAID_EXCEPTIONAL_POKEMON": [ ["Cosmog", "NULL"], ["Cosmoem", "NULL"], ["Alcremie", "Gigantamax"] ],

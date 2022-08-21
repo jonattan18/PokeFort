@@ -3,7 +3,7 @@ const user_model = require('../models/user');
 
 module.exports.run = async (bot, interaction, user_available) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
-    await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
         if (user) {
 
             var silence = user.Silence == false || user.Silence == undefined ? true : false;

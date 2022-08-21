@@ -254,7 +254,7 @@ client.on('interactionCreate', async interaction => {
                 var embed = new Discord.EmbedBuilder();
                 embed.setColor("#1ec5ee");
                 embed.setTitle("Mail notification !");
-                embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `/mails` to check your mails.");
+                embed.setDescription("You have received a new mail. You have " + no_of_unread + " unread mails.\nPlease use `/mail` to check your mails.");
                 embed.setFooter({ text: `App: Inbox, Mails`, iconURL: "https://cdn4.iconfinder.com/data/icons/ios7-active-2/512/Open_mail.png" });
                 interaction.channel.send({ embeds: [embed] });
                 user.MailNotice = false;

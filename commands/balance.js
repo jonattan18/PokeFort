@@ -23,20 +23,18 @@ module.exports.run = async (bot, interaction, user_available) => {
 
     function call_balance() {*/
 
-    (async () => {
-        await user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
-            if (user) {
-                var balance = user.PokeCredits.toLocaleString();
-                var username = interaction.user.username;
-                let embed = new Discord.EmbedBuilder();
-                embed.setTitle(`${username}'s balance:`);
-                embed.setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/emoji-one/98/money-bag_1f4b0.png')
-                embed.setDescription(`You currently have ${balance} credits.`)
-                embed.setColor(interaction.member ? interaction.member.displayHexColor : '#000000');
-                interaction.reply({ embeds: [embed] });
-            }
-        });
-    })();
+    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+        if (user) {
+            var balance = user.PokeCredits.toLocaleString();
+            var username = interaction.user.username;
+            let embed = new Discord.EmbedBuilder();
+            embed.setTitle(`${username}'s balance:`);
+            embed.setThumbnail('https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/emoji-one/98/money-bag_1f4b0.png')
+            embed.setDescription(`You currently have ${balance} credits.`)
+            embed.setColor(interaction.member ? interaction.member.displayHexColor : '#000000');
+            interaction.reply({ embeds: [embed] });
+        }
+    });
 
     //   }
 }
