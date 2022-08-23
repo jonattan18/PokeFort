@@ -20,7 +20,7 @@ function loadCommands(bot) {
                     });
                 }
             }).on('end', () => {
-                rest.put(Discord.Routes.applicationGuildCommands(bot.user.id), { body: commmand_body })
+                rest.put(Discord.Routes.applicationCommands(bot.user.id), { body: commmand_body })
             });
         } catch (error) {
             console.error(error);
