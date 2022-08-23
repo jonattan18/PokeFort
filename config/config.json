@@ -25,5 +25,6 @@
     "RAID_EXCEPTIONAL_MOVES": ["Self-Destruct", "Explosion", "Final Gambit", "Misty Explosion", "Super Fang", "Endeavor", "Destiny Bond", "Circle Throw", "Sheer Cold", "Fissure", "Guillotine", "Horn Drill", "Perish Song", "Whirlwind", "Roar", "Curse", "Mirror Coat"],
     "RAID_EXCEPTIONAL_POKEMON": [ ["Cosmog", "NULL"], ["Cosmoem", "NULL"], ["Alcremie", "Gigantamax"] ],
     "RAID_INCLUDE_POKEMON": [ [ "Name", "Alternate Form Name" ] ],
+    "EVENT_RAID_ALLOWED_DAYS": ["Saturday", "Sunday" ],
     "ALLOWED_GUILDS" : ["1004952324978000014", "672022278590169118", "980822800581406792", "924169333662441492", "924169531776204871", "925788851442692176", "614856074054598678"]
 }

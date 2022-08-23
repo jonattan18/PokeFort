@@ -34,6 +34,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                     if (user) {
 
                         if (interaction.options.get("gmax") != null) {
+                            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                            var day = days[new Date().getDay()];
+                            if (!config.EVENT_RAID_ALLOWED_DAYS.includes(day)) return interaction.reply({ content: `You can't spawn event raid today. Please try on weekend!`, ephemeral: true });
                             if (user.WishingPieces != undefined && user.WishingPieces > 0) user.WishingPieces--;
                             else return interaction.reply({ content: `You do not have any wishing pieces to spawn this raid.`, ephemeral: true });
                         }
