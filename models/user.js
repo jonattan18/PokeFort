@@ -13,6 +13,11 @@ const UserSchema = new mongoose.Schema({
     DailyStreak: Number,
     RaidAlphaAgree: Boolean,
     NoCooldownRaid: Boolean,
+    RewardsCatalog: {
+        DexComplete: false,
+        RaidDexComplete: false,
+        RaidEventDexComplete: false
+    },
     Raids: {
         SpawnTimestamp: Number,
         TotalDuels: Number,

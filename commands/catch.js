@@ -56,6 +56,36 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                         var splitted_number = no_of_pokemons.toString().split('');
                         var credit_amount = 0;
 
+                        // Dex completed reward
+                        if (user.RewardsCatalog != undefined && user.RewardsCatalog.DexComplete != true) {
+                            var dex_holder = [];
+                            var new_alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola")
+                            var new_galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar")
+                            var new_hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian")
+                            var dex_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL").concat(pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL")).concat(pokemons.filter(it => it["Legendary Type"] === "Sub-Legendary" && it["Alternate Form Name"] === "NULL"));
+                            dex_pokemons = dex_pokemons.concat(new_galarian_pokemons).concat(new_alolan_pokemons).concat(new_hisuian_pokemons);
+                            user_pokemons.forEach(element => {
+                                if (dex_pokemons.some(el => el["Pokemon Id"] == element.PokemonId) && dex_holder.indexOf(element.PokemonId) == -1) dex_holder.push(element.PokemonId);
+                            });
+
+                            // Add currently caught pokemon.
+                            if (dex_pokemons.some(el => el["Pokemon Id"] == channel.PokemonID) && dex_holder.indexOf(channel.PokemonID) == -1) {
+                                dex_holder.push(channel.PokemonID);
+                            }
+
+                            //Reward requirements satisfied.
+                            if (dex_holder.length == dex_pokemons.length) {
+                                var dex_complete_reward = {
+                                    Redeems: 1,
+                                    PokeCredits: 15000
+
+                                }
+                                mail.sendmail(interaction.user.id, "Pokefort", "Dex completed!", `You travelled so far and completed the collection of dex, Isn't it great ? You have given a reward. Don't forget to claim it :)`, dex_complete_reward, undefined, true);
+                                user.RewardsCatalog.DexComplete = true;
+                            }
+                        }
+
+
                         if (no_of_pokemons == 1) { credit_amount = 35; }
                         if (splitted_number.length == 2 && splitted_number[1] == 0) { credit_amount = 350; }
                         if (splitted_number.length == 3 && splitted_number[1] == 0 && splitted_number[2] == 0) { credit_amount = 3500; }
