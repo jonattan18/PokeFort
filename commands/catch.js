@@ -74,11 +74,10 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                             }
 
                             //Reward requirements satisfied.
-                            if (dex_holder.length == dex_pokemons.length) {
+                            if (dex_holder.length >= dex_pokemons.length) {
                                 var dex_complete_reward = {
                                     Redeems: 1,
                                     PokeCredits: 15000
-
                                 }
                                 mail.sendmail(interaction.user.id, "Pokefort", "Dex completed!", `You travelled so far and completed the collection of dex, Isn't it great ? You have given a reward. Don't forget to claim it :)`, dex_complete_reward, undefined, true);
                                 user.RewardsCatalog.DexComplete = true;

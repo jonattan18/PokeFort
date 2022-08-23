@@ -23,6 +23,10 @@ const raid_model = require('../models/raids');
 const battle = require('../utils/battle');
 const getPokemons = require('../utils/getPokemon');
 const movesparser = require('../utils/moveparser');
+const mail = require('../utils/mail');
+
+// Misc
+const config = require("../config/config.json");
 
 module.exports.run = async (bot, interaction, user_available, pokemons, _switch = false) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
@@ -886,7 +890,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                                         var description = rewards_string + "\n" + overview;
 
                                         var difficulty_string = getDifficultyString(raid_data.RaidType);
-                                        if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Gigantamax ? user.Raids.Gigantamax + 1 : 1;
+                                        if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Completed.Gigantamax ? user.Raids.Completed.Gigantamax + 1 : 1;
                                         user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
 
                                         // Add data to raid dex if raid is normal
@@ -902,6 +906,58 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                                             new_dex.Completed[difficulty_string] = 1;
                                             if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.EventDex.push(new_dex);
                                             else user.Raids.RaidDex.push(new_dex);
+                                        }
+
+                                        // Raid Dex completed reward
+                                        if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidDexComplete != true) {
+                                            var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+                                            raid_pokemons.forEach(element => {
+                                                var dex_data = user.Raids.RaidDex.filter(it => it.PokemonId == element["Pokemon Id"]);
+                                                dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
+                                                element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
+                                                element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
+                                                element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
+                                                element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
+                                                element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
+                                                element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
+                                            });
+
+                                            var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+                                            if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
+                                                // Give reward
+                                                var raid_dex_complete_reward = {
+                                                    Redeems: 1,
+                                                    PokeCredits: 15000
+                                                }
+                                                mail.sendmail(user_id, "Pokefort", "Raid Dex completed!", `Well, Who is the boss now ? You have encountered all the bosses in our collection. #SAVEBOSS`, raid_dex_complete_reward, undefined, true);
+                                                user.RewardsCatalog.RaidDexComplete = true;
+                                            }
+                                        }
+
+                                        // Event Raid Dex completed reward
+                                        if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidEventDexComplete != true) {
+                                            var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
+                                            raid_pokemons.forEach(element => {
+                                                var dex_data = user.Raids.EventDex.filter(it => it.PokemonId == element["Pokemon Id"]);
+                                                dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
+                                                element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
+                                                element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
+                                                element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
+                                                element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
+                                                element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
+                                                element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
+                                            });
+
+                                            var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+                                            if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
+                                                // Give reward
+                                                var raid_eventdex_complete_reward = {
+                                                    Redeems: 1,
+                                                    PokeCredits: 15000
+                                                }
+                                                mail.sendmail(user_id, "Pokefort", "Raid Event Dex completed!", `Well, Who is the boss now ? You have encountered all the event bosses in our collection. #SAVEGMAXBOSS`, raid_eventdex_complete_reward, undefined, true);
+                                                user.RewardsCatalog.RaidEventDexComplete = true;
+                                            }
                                         }
 
                                         user.markModified('Raids.Completed');
