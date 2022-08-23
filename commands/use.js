@@ -1036,7 +1036,13 @@ function move_thinker(battle) {
     }
     damages = damages.filter(x => x[0] != undefined);
     if (damages.length == 0) return 1;
-    var raid_move = damages.sort((a, b) => b[0] - a[0] || b[1] - a[1])[0];
+    damages.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
+    /* By chance if next damage is higher
+       But current effective is 2 
+       And next effective is 1 -> Swap this alone
+    */
+    if (damages.length > 1 && damages[0][0] == 2 && damages[1][0] == 1 && ((damages[1][1] - damages[0][1]) > 300)) [damages[0], damages[1]] = [damages[1], damages[0]]
+    var raid_move = damages[0];
     var move_index = moves.indexOf(raid_move[2]) + 1;
     return move_index;
 }

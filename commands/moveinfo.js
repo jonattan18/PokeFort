@@ -8,7 +8,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
     var original_move_name = interaction.options.get("move").value;
-    var search_name = interaction.options.get("move").value.replace(/[^a-zA-Z ]/g, "").toLowerCase();
+    var search_name = interaction.options.get("move").value.replace(/[^a-zA-Z]/g, "").toLowerCase();
 
     var key_move_info = moveinfo[search_name];
 
