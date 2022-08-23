@@ -264,7 +264,7 @@ client.on('interactionCreate', async interaction => {
             if (user != null && admin.iseligible(user.Admin, cmd, interaction)) { interaction.isadmin = true; interaction.Adminlvl = user.Admin; interaction.AdminServer = config.ADMIN_COMMAND_SERVER; }
             const commandfile = client.commands.get(cmd);
             if (!commandfile) return;
-            commandfile.run(client, interaction, user_available, pokemons);
+            commandfile.run(client, interaction, user_available, JSON.parse(JSON.stringify(pokemons)));
         });
     });
 });
