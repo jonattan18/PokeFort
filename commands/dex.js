@@ -42,9 +42,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
         if (args[0] == "--od" || args[0] == "--orderd") { dex_orderd(bot, interaction, args, user_available, pokemons); return; }
 
         //#region Create Message
-
         pokemon = getPokemons.getPokemonData(args, pokemons, true);
         if (pokemon == null) return interaction.reply({ content: "Pokemon not found!", ephemeral: true });
+        if (pokemon.Shiny && pokemon["No Shiny"]) return interaction.reply({ content: "No Shiny found for this pokemon", ephemeral: true });
 
         // No of caught
         //Getting the data from the user model
