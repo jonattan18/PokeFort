@@ -470,6 +470,10 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
     //#endregion
 
+    // Reply interaction
+    var reply_message = !_switch ? "You have made a move!" : _switch ? "You have switched pokemon!" : "Raid Boss is thinking";
+    interaction.reply({ content: reply_message });
+
     var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
     var move_index = move_thinker(_battlestream.battle, raid_data.CurrentPokemon);
     write_data = write_data.replace("[MOVE INDEX]", "move " + move_index);
@@ -617,9 +621,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                     second_user_message[r] = second_user_message[r].replace("_", " ");
                 }
 
-                // Create interaction
-                if (!_switch) interaction.reply({ content: "You have made a move!" });
-
                 // Filter system message $player
                 if (!first_user_message[0].startsWith("$Player")) {
                     // Create user pokemon message.
@@ -655,8 +656,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                 }
 
             }
-
-            if (_switch) interaction.reply({ content: "You have switched pokemon!" });
 
             //#region Module Image Generation
             if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
