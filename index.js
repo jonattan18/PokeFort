@@ -346,7 +346,7 @@ client.on('messageCreate', async (message) => {
         //#region Xp Increase
         //check if user database exists
         function advance_xp(message, user_avl, user) {
-            if (user_avl || user) {
+            if (user_avl && user) {
                 getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
                     var randomxp = getRandomInt(1, 100);

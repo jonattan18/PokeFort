@@ -470,18 +470,10 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
     //#endregion
 
-    var except_five = false;
-    if (parsed_stream.length > 5) {
-        except_five = true;
-        var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
-        void streams.omniscient.write(except_first_five_stream_write.join("\n"));
-    }
-
-    var move_index = move_thinker(_battlestream.battle);
+    var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
+    var move_index = move_thinker(_battlestream.battle, raid_data.CurrentPokemon);
     write_data = write_data.replace("[MOVE INDEX]", "move " + move_index);
-
-    if (except_five) except_five = false;
-    void streams.omniscient.write(_battlestream.battle.inputLog.join("\n") + "\n" + write_data);
+    void streams.omniscient.write(except_first_five_stream_write.join("\n") + "\n" + write_data);
 
     const battle = new Battle(new Generations(Dex));
     const formatter = new LogFormatter('p1', battle);
@@ -493,529 +485,527 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
             else return;
         }
         else {
-            if (!except_five) {
-                var show_str = [];
-                var battle_log = _battlestream.battle.log.filter(function (item, pos, arr) { return pos === 0 || item !== arr[pos - 1]; }).join('\n');
-                for (const { args, kwArgs } of Protocol.parse(battle_log)) {
-                    var formatted = formatter.formatText(args, kwArgs);
+            var show_str = [];
+            var battle_log = _battlestream.battle.log.filter(function (item, pos, arr) { return pos === 0 || item !== arr[pos - 1]; }).join('\n');
+            for (const { args, kwArgs } of Protocol.parse(battle_log)) {
+                var formatted = formatter.formatText(args, kwArgs);
 
-                    // Execption
-                    if (formatted == "\n") continue;
-                    if (formatted.startsWith("\n== Turn") || formatted.startsWith("== Turn")) continue;
-                    if (formatted.startsWith("\nGo!") || formatted.startsWith("Go!")) continue;
-                    if (formatted.startsWith("Go!")) continue;
-                    if (formatted.startsWith("\n$Player2 sent out") || formatted.startsWith("$Player2 sent out")) continue;
-                    if (formatted.startsWith("Battle started between")) continue;
+                // Execption
+                if (formatted == "\n") continue;
+                if (formatted.startsWith("\n== Turn") || formatted.startsWith("== Turn")) continue;
+                if (formatted.startsWith("\nGo!") || formatted.startsWith("Go!")) continue;
+                if (formatted.startsWith("Go!")) continue;
+                if (formatted.startsWith("\n$Player2 sent out") || formatted.startsWith("$Player2 sent out")) continue;
+                if (formatted.startsWith("Battle started between")) continue;
 
-                    // Remove opposing.
-                    formatted = formatted.replace("The opposing ", "");
-                    // Remove newlines.
-                    formatted = formatted.replaceAll("\n", "");
-                    // Remove asterisks.
-                    formatted = formatted.replaceAll("*", "");
-                    // Remove brackets.
-                    formatted = formatted.replaceAll("(", "").replaceAll(")", "");
-                    // Remove _r_<index> name.
-                    if (formatted.includes("_r_")) formatted = formatted = formatted.substring(0, formatted.indexOf("_r_")) + formatted.substring(formatted.indexOf("_r_") + 4);
-                    // Remove _r.
-                    formatted = formatted.replaceAll("_r", "");
-                    // Remove underscores
-                    formatted = formatted.replaceAll("_", "");
+                // Remove opposing.
+                formatted = formatted.replace("The opposing ", "");
+                // Remove newlines.
+                formatted = formatted.replaceAll("\n", "");
+                // Remove asterisks.
+                formatted = formatted.replaceAll("*", "");
+                // Remove brackets.
+                formatted = formatted.replaceAll("(", "").replaceAll(")", "");
+                // Remove _r_<index> name.
+                if (formatted.includes("_r_")) formatted = formatted = formatted.substring(0, formatted.indexOf("_r_")) + formatted.substring(formatted.indexOf("_r_") + 4);
+                // Remove _r.
+                formatted = formatted.replaceAll("_r", "");
+                // Remove underscores
+                formatted = formatted.replaceAll("_", "");
 
-                    if (formatted) show_str.push(formatted);
+                if (formatted) show_str.push(formatted);
+            }
+
+            // Faint check.
+            if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
+            if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+
+            // Get message text to show user.
+            var old_stream_no = raid_data.OldStreamText;
+            raid_data.OldStreamText = show_str.length;
+            if (raid_data.OldStreamText) show_str.splice(0, old_stream_no);
+            raid_data.CurrentTurn = _battlestream.battle.turn;
+
+            var _user_pokemon_fainted = false;
+            var _raid_pokemon_fainted = false;
+
+            if (show_str[0] != undefined && !show_str[0].includes("used")) show_str.splice(0, 1);
+
+            // Formatting for sending message.
+            var first_user_message = [show_str[0]];
+            show_str.splice(0, 1);
+            for (var i = 0; i < show_str.length; i++) {
+                if (show_str[i].startsWith("  ")) {
+                    first_user_message.push(show_str[i]);
+                }
+                else {
+                    show_str.splice(0, i);
+                    if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
+                    if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+                    break;
+                }
+            }
+
+            var second_user_message = [show_str[0]];
+            show_str.splice(0, 1);
+            for (var i = 0; i < show_str.length; i++) {
+                if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) {
+                    _user_pokemon_fainted = true;
+                }
+                if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) {
+                    _raid_pokemon_fainted = true;
+                }
+                if (show_str[i].startsWith("  ")) {
+                    second_user_message.push(show_str[i]);
+                }
+                /* else {
+                     show_str.splice(0, i);
+                     console.log(show_str);
+                    
+                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
+                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
+                         i++;
+                     }
+                     var j = 1;
+                     while (show_str[j] != undefined && show_str[j].startsWith("  ")) {
+                         second_user_message.push(show_str[j].replace("  ", " "));
+                         j++;
+                     }
+                     break;
+                 } */
+            }
+
+            if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
+
+                // Remove duplicate from first_user_message.
+                first_user_message = [...new Set(first_user_message)];
+
+                // Remove duplicate from second_user_message.
+                second_user_message = [...new Set(second_user_message)];
+
+                // Remove words after fainted!:p1a: in first_user_message
+                if (_user_pokemon_fainted || _raid_pokemon_fainted) {
+                    // Find index of fainted!:p1a:
+                    var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p1a:"));
+                    // Remove every string after fainted!:p1a: in that index.
+                    if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p1a:"));
+                    // Find index of fainted!:p2a:
+                    var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p2a:"));
+                    // Remove every string after fainted!:p2a: in that index.
+                    if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p2a:"));
                 }
 
-                // Faint check.
-                if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
-                if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
+                // Remove words after fainted!:p2a: in second_user_message
+                if (_user_pokemon_fainted || _raid_pokemon_fainted) {
+                    // Find index of fainted!:p1a:
+                    var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p1a:"));
+                    // Remove every string after fainted!:p1a: in that index.
+                    if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p1a:"));
+                    // Find index of fainted!:p2a:
+                    var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p2a:"));
+                    // Remove every string after fainted!:p2a: in that index.
+                    if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p2a:"));
+                }
 
-                // Get message text to show user.
-                var old_stream_no = raid_data.OldStreamText;
-                raid_data.OldStreamText = show_str.length;
-                if (raid_data.OldStreamText) show_str.splice(0, old_stream_no);
-                raid_data.CurrentTurn = _battlestream.battle.turn;
+                // Remove _ from first_user_message
+                for (var r = 0; r < first_user_message.length; r++) {
+                    first_user_message[r] = first_user_message[r].replace("_", " ");
+                }
 
-                var _user_pokemon_fainted = false;
-                var _raid_pokemon_fainted = false;
+                // Remove _ from second_user_message
+                for (var r = 0; r < second_user_message.length; r++) {
+                    second_user_message[r] = second_user_message[r].replace("_", " ");
+                }
 
-                if (show_str[0] != undefined && !show_str[0].includes("used")) show_str.splice(0, 1);
+                // Create interaction
+                if (!_switch) interaction.reply({ content: "You have made a move!" });
 
-                // Formatting for sending message.
-                var first_user_message = [show_str[0]];
-                show_str.splice(0, 1);
-                for (var i = 0; i < show_str.length; i++) {
-                    if (show_str[i].startsWith("  ")) {
-                        first_user_message.push(show_str[i]);
-                    }
-                    else {
-                        show_str.splice(0, i);
-                        if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) _user_pokemon_fainted = true;
-                        if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) _raid_pokemon_fainted = true;
-                        break;
+                // Filter system message $player
+                if (!first_user_message[0].startsWith("$Player")) {
+                    // Create user pokemon message.
+                    var usr_embed = new Discord.EmbedBuilder();
+                    usr_embed.setTitle(first_user_message[0]);
+                    var description = first_user_message.slice(1);
+                    if (description.length > 0) {
+                        usr_embed.setDescription(description.join(""));
+                        interaction.channel.send({ embeds: [usr_embed] });
                     }
                 }
 
-                var second_user_message = [show_str[0]];
-                show_str.splice(0, 1);
-                for (var i = 0; i < show_str.length; i++) {
-                    if (_battlestream.battle.p1.faintedThisTurn != undefined ? _battlestream.battle.p1.faintedThisTurn.fainted : false) {
-                        _user_pokemon_fainted = true;
+                if (!second_user_message[0].startsWith("$Player") && _switch != true) {
+                    // Create raid boss message.
+                    var raid_embed = new Discord.EmbedBuilder();
+                    raid_embed.setTitle(`${second_user_message[0]}`);
+                    var description = second_user_message.slice(1);
+                    if (description.length > 0) {
+                        raid_embed.setDescription(description.join(""));
+                        interaction.channel.send({ embeds: [raid_embed] });
                     }
-                    if (_battlestream.battle.p2.faintedThisTurn != undefined ? _battlestream.battle.p2.faintedThisTurn.fainted : false) {
-                        _raid_pokemon_fainted = true;
-                    }
-                    if (show_str[i].startsWith("  ")) {
-                        second_user_message.push(show_str[i]);
-                    }
-                    /* else {
-                         show_str.splice(0, i);
-                         console.log(show_str);
-                        
-                         while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
-                             second_user_message.push("\n" + show_str[i].replace("  ", " "));
-                             i++;
-                         }
-                         var j = 1;
-                         while (show_str[j] != undefined && show_str[j].startsWith("  ")) {
-                             second_user_message.push(show_str[j].replace("  ", " "));
-                             j++;
-                         }
-                         break;
-                     } */
                 }
 
-                if (first_user_message[0] != undefined && second_user_message[0] != undefined) {
-
-                    // Remove duplicate from first_user_message.
-                    first_user_message = [...new Set(first_user_message)];
-
-                    // Remove duplicate from second_user_message.
-                    second_user_message = [...new Set(second_user_message)];
-
-                    // Remove words after fainted!:p1a: in first_user_message
-                    if (_user_pokemon_fainted || _raid_pokemon_fainted) {
-                        // Find index of fainted!:p1a:
-                        var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p1a:"));
-                        // Remove every string after fainted!:p1a: in that index.
-                        if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p1a:"));
-                        // Find index of fainted!:p2a:
-                        var fainted_index = first_user_message.findIndex(x => x.includes("fainted!:p2a:"));
-                        // Remove every string after fainted!:p2a: in that index.
-                        if (fainted_index != -1) first_user_message[fainted_index] = first_user_message[fainted_index].substring(0, first_user_message[fainted_index].indexOf(":p2a:"));
-                    }
-
-                    // Remove words after fainted!:p2a: in second_user_message
-                    if (_user_pokemon_fainted || _raid_pokemon_fainted) {
-                        // Find index of fainted!:p1a:
-                        var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p1a:"));
-                        // Remove every string after fainted!:p1a: in that index.
-                        if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p1a:"));
-                        // Find index of fainted!:p2a:
-                        var fainted_index = second_user_message.findIndex(x => x.includes("fainted!:p2a:"));
-                        // Remove every string after fainted!:p2a: in that index.
-                        if (fainted_index != -1) second_user_message[fainted_index] = second_user_message[fainted_index].substring(0, second_user_message[fainted_index].indexOf(":p2a:"));
-                    }
-
-                    // Remove _ from first_user_message
-                    for (var r = 0; r < first_user_message.length; r++) {
-                        first_user_message[r] = first_user_message[r].replace("_", " ");
-                    }
-
-                    // Remove _ from second_user_message
-                    for (var r = 0; r < second_user_message.length; r++) {
-                        second_user_message[r] = second_user_message[r].replace("_", " ");
-                    }
-
-                    // Create interaction
-                    if (!_switch) interaction.reply({ content: "You have made a move!" });
-
-                    // Filter system message $player
-                    if (!first_user_message[0].startsWith("$Player")) {
-                        // Create user pokemon message.
-                        var usr_embed = new Discord.EmbedBuilder();
-                        usr_embed.setTitle(first_user_message[0]);
-                        var description = first_user_message.slice(1);
-                        if (description.length > 0) {
-                            usr_embed.setDescription(description.join(""));
-                            interaction.channel.send({ embeds: [usr_embed] });
-                        }
-                    }
-
-                    if (!second_user_message[0].startsWith("$Player") && _switch != true) {
-                        // Create raid boss message.
-                        var raid_embed = new Discord.EmbedBuilder();
-                        raid_embed.setTitle(`${second_user_message[0]}`);
-                        var description = second_user_message.slice(1);
-                        if (description.length > 0) {
-                            raid_embed.setDescription(description.join(""));
-                            interaction.channel.send({ embeds: [raid_embed] });
-                        }
-                    }
-
-                    // Check if user pokemon fainted.
-                    if (_user_pokemon_fainted == true && _raid_pokemon_fainted == true) {
-                        _raid_boss_fainted = true;
-                        raid_boss_fainted();
-                    }
-                    else if (_user_pokemon_fainted == true && _raid_boss_fainted == false) user_pokemon_fainted();
-                    else if (_raid_pokemon_fainted == true) {
-                        _raid_boss_fainted = true;
-                        raid_boss_fainted();
-                    }
-
+                // Check if user pokemon fainted.
+                if (_user_pokemon_fainted == true && _raid_pokemon_fainted == true) {
+                    _raid_boss_fainted = true;
+                    raid_boss_fainted();
+                }
+                else if (_user_pokemon_fainted == true && _raid_boss_fainted == false) user_pokemon_fainted();
+                else if (_raid_pokemon_fainted == true) {
+                    _raid_boss_fainted = true;
+                    raid_boss_fainted();
                 }
 
-                if (_switch) interaction.reply({ content: "You have switched pokemon!" });
+            }
 
-                //#region Module Image Generation
-                if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
+            if (_switch) interaction.reply({ content: "You have switched pokemon!" });
 
-                    var raid_boss_image_data = raid_data.RaidPokemon.Image;
-                    var user_image_data = raid_data.TrainersTeam[raid_data.CurrentPokemon].Image;
+            //#region Module Image Generation
+            if (_user_pokemon_fainted == false && _raid_pokemon_fainted == false) {
 
-                    // Background image url.
-                    var image_url = "./assets/raid_images/background.jpeg";
-                    if (_battlestream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
-                    else if (_battlestream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
-                    else if (_battlestream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
-                    else if (_battlestream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
+                var raid_boss_image_data = raid_data.RaidPokemon.Image;
+                var user_image_data = raid_data.TrainersTeam[raid_data.CurrentPokemon].Image;
 
-                    // Creating Image for embed.
+                // Background image url.
+                var image_url = "./assets/raid_images/background.jpeg";
+                if (_battlestream.battle.field.weather == "hail") image_url = "./assets/raid_images/background-hail.jpeg";
+                else if (_battlestream.battle.field.weather == "sunny") image_url = "./assets/raid_images/background-sunny.jpeg";
+                else if (_battlestream.battle.field.weather == "rain") image_url = "./assets/raid_images/background-rain.jpeg";
+                else if (_battlestream.battle.field.weather == "sandstorm") image_url = "./assets/raid_images/background-sandstorm.jpeg";
 
-                    // Image 1
-                    sharp(user_image_data[1]).resize({ width: 200, height: 200 }).toBuffer().then(function (one) {
-                        // Image 2
-                        sharp(raid_boss_image_data[1]).resize({ width: 360, height: 360 }).toBuffer().then(function (two) {
-                            sharp(image_url)
-                                .composite([{ input: one, top: 180, left: 80 }, { input: two, top: 20, left: 430 }])
-                                .jpeg({ quality: 100 })
-                                .toBuffer("jpeg").then((image_buffer) => {
-                                    // Sending duel message.
+                // Creating Image for embed.
 
-                                    // Remove words after _r in forms and normal pokemons
-                                    var battle_stream_pokemon_name = _battlestream.battle.sides[0].pokemon[0].name;
-                                    var index_of_r = battle_stream_pokemon_name.indexOf("_r");
-                                    if (index_of_r != -1) battle_stream_pokemon_name = battle_stream_pokemon_name.substring(0, index_of_r);
+                // Image 1
+                sharp(user_image_data[1]).resize({ width: 200, height: 200 }).toBuffer().then(function (one) {
+                    // Image 2
+                    sharp(raid_boss_image_data[1]).resize({ width: 360, height: 360 }).toBuffer().then(function (two) {
+                        sharp(image_url)
+                            .composite([{ input: one, top: 180, left: 80 }, { input: two, top: 20, left: 430 }])
+                            .jpeg({ quality: 100 })
+                            .toBuffer("jpeg").then((image_buffer) => {
+                                // Sending duel message.
 
-                                    var embed = new Discord.EmbedBuilder();
-                                    embed.setTitle(`${interaction.user.username.toUpperCase()} VS Raid Boss!`);
-                                    embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);
-                                    embed.addFields({ name: `${interaction.user.username}'s Pokémon`, value: `${battle_stream_pokemon_name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, inline: true });
-                                    embed.addFields({ name: `Raid Boss`, value: `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, inline: true });
-                                    embed.setColor(interaction.member.displayHexColor);
-                                    embed.setImage('attachment://img.jpeg');
-                                    embed.setFooter({ text: `Use /team to see the current state of your team as well as what moves your pokémon has available to them!` });
-                                    interaction.channel.send({ embeds: [embed], files: [{ attachment: image_buffer, name: "img.jpeg" }] });
-                                });
-                        });
+                                // Remove words after _r in forms and normal pokemons
+                                var battle_stream_pokemon_name = _battlestream.battle.sides[0].pokemon[0].name;
+                                var index_of_r = battle_stream_pokemon_name.indexOf("_r");
+                                if (index_of_r != -1) battle_stream_pokemon_name = battle_stream_pokemon_name.substring(0, index_of_r);
+
+                                var embed = new Discord.EmbedBuilder();
+                                embed.setTitle(`${interaction.user.username.toUpperCase()} VS Raid Boss!`);
+                                embed.setDescription(`**Weather: ${_battlestream.battle.field.weather == "" ? "Clear Skies" : _.capitalize(_battlestream.battle.field.weather)}**${_battlestream.battle.field.terrain == "" ? "" : "\n**Terrain: " + _.capitalize(_battlestream.battle.field.terrain.replace("terrain", "") + "**")}`);
+                                embed.addFields({ name: `${interaction.user.username}'s Pokémon`, value: `${battle_stream_pokemon_name} | ${_battlestream.battle.sides[0].pokemon[0].hp}/${_battlestream.battle.sides[0].pokemon[0].maxhp}HP`, inline: true });
+                                embed.addFields({ name: `Raid Boss`, value: `${raid_data.RaidPokemon.Name.replaceAll("_r", "")} | ${_battlestream.battle.sides[1].pokemon[0].hp}/${_battlestream.battle.sides[1].pokemon[0].maxhp}HP`, inline: true });
+                                embed.setColor(interaction.member.displayHexColor);
+                                embed.setImage('attachment://img.jpeg');
+                                embed.setFooter({ text: `Use /team to see the current state of your team as well as what moves your pokémon has available to them!` });
+                                interaction.channel.send({ embeds: [embed], files: [{ attachment: image_buffer, name: "img.jpeg" }] });
+                            });
                     });
-                    raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
-                }
-                //#endregion
+                });
+                raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
+            }
+            //#endregion
 
-                //#region Module Final
-                // User Pokemon fainted.
-                function user_pokemon_fainted() {
-                    raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted = true;
-                    // Check if pokemon exists.
-                    var non_fainted_pokemon = raid_data.TrainersTeam.filter(x => (x != null || x != undefined || x != {}) && !x.fainted && x.fainted != undefined);
-                    if (non_fainted_pokemon.length > 0) {
-                        raid_data.ChangeOnFainted = true;
+            //#region Module Final
+            // User Pokemon fainted.
+            function user_pokemon_fainted() {
+                raid_data.TrainersTeam[raid_data.CurrentPokemon].fainted = true;
+                // Check if pokemon exists.
+                var non_fainted_pokemon = raid_data.TrainersTeam.filter(x => (x != null || x != undefined || x != {}) && !x.fainted && x.fainted != undefined);
+                if (non_fainted_pokemon.length > 0) {
+                    raid_data.ChangeOnFainted = true;
+                    raid_data.markModified('TrainersTeam');
+
+                    var fainted_embed = new Discord.EmbedBuilder();
+                    fainted_embed.setTitle(`${interaction.user.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "").slice(0, -2)} fainted.`);
+                    fainted_embed.setDescription(`${interaction.user.username}, please do /switch <number> to switch your selected pokemon.`);
+                    interaction.channel.send({ embeds: [fainted_embed] });
+                } else {
+                    // Check if other user exists.
+                    raid_data.CompletedDuel.push(interaction.user.id);
+
+                    // Find a user which has not completed duel.
+                    var non_battled_user = raid_data.Trainers.filter(x => !raid_data.CompletedDuel.includes(x) && x != null);
+                    if (non_battled_user.length > 0) {
+                        raid_data.CurrentDuel = undefined;
+                        raid_data.TrainersTeam = undefined;
+                        raid_data.OldStreamText = 0;
+                        raid_data.CurrentTurn = 0;
                         raid_data.markModified('TrainersTeam');
 
-                        var fainted_embed = new Discord.EmbedBuilder();
-                        fainted_embed.setTitle(`${interaction.user.username}'s ${raid_data.TrainersTeam[raid_data.CurrentPokemon].name.replaceAll("_r", "").slice(0, -2)} fainted.`);
-                        fainted_embed.setDescription(`${interaction.user.username}, please do /switch <number> to switch your selected pokemon.`);
-                        interaction.channel.send({ embeds: [fainted_embed] });
+                        raid_data.RaidPokemon.RaidStream.field = JSON.stringify(_battlestream.battle.field);
+                        var a = _battlestream.battle.sides[1];
+                        var save_data_raid_stream = {
+                            pokemon: [
+                                {
+                                    status: a.pokemon[0].status,
+                                    statusState: a.pokemon[0].statusState,
+                                    volatiles: a.pokemon[0].volatiles,
+                                    boosts: a.pokemon[0].boosts,
+                                    hp: a.pokemon[0].hp,
+                                    maxhp: a.pokemon[0].maxhp
+                                }]
+                        }
+                        raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
+                        raid_data.markModified('RaidPokemon');
+
+                        var unable_embed = new Discord.EmbedBuilder();
+                        unable_embed.setTitle(`Raid Incomplete!`);
+                        unable_embed.setDescription(`${interaction.user.username}, you have no more pokémon to battle. Your duel has ended!`);
+                        interaction.channel.send({ embeds: [unable_embed] });
+                    }
+                    else {
+                        _raid_boss_won = true;
+                        raid_boss_won();
+                    }
+                }
+            }
+
+            // Funcitont to add damage data
+            function damage_addition() {
+                // Raid Health and damage
+                var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
+                if (current_damage > 0) {
+                    var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == interaction.user.id)[0];
+                    if (raid_usr_damage_data) {
+                        var index = raid_data.Damages.indexOf(raid_usr_damage_data);
+                        raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
                     } else {
-                        // Check if other user exists.
-                        raid_data.CompletedDuel.push(interaction.user.id);
-
-                        // Find a user which has not completed duel.
-                        var non_battled_user = raid_data.Trainers.filter(x => !raid_data.CompletedDuel.includes(x) && x != null);
-                        if (non_battled_user.length > 0) {
-                            raid_data.CurrentDuel = undefined;
-                            raid_data.TrainersTeam = undefined;
-                            raid_data.OldStreamText = 0;
-                            raid_data.CurrentTurn = 0;
-                            raid_data.markModified('TrainersTeam');
-
-                            raid_data.RaidPokemon.RaidStream.field = JSON.stringify(_battlestream.battle.field);
-                            var a = _battlestream.battle.sides[1];
-                            var save_data_raid_stream = {
-                                pokemon: [
-                                    {
-                                        status: a.pokemon[0].status,
-                                        statusState: a.pokemon[0].statusState,
-                                        volatiles: a.pokemon[0].volatiles,
-                                        boosts: a.pokemon[0].boosts,
-                                        hp: a.pokemon[0].hp,
-                                        maxhp: a.pokemon[0].maxhp
-                                    }]
-                            }
-                            raid_data.RaidPokemon.RaidStream.raidside = JSON.stringify(save_data_raid_stream);
-                            raid_data.markModified('RaidPokemon');
-
-                            var unable_embed = new Discord.EmbedBuilder();
-                            unable_embed.setTitle(`Raid Incomplete!`);
-                            unable_embed.setDescription(`${interaction.user.username}, you have no more pokémon to battle. Your duel has ended!`);
-                            interaction.channel.send({ embeds: [unable_embed] });
-                        }
-                        else {
-                            _raid_boss_won = true;
-                            raid_boss_won();
-                        }
-                    }
-                }
-
-                // Funcitont to add damage data
-                function damage_addition() {
-                    // Raid Health and damage
-                    var current_damage = (raid_data.RaidPokemon.PreviousHealth ? raid_data.RaidPokemon.PreviousHealth : _battlestream.battle.sides[1].pokemon[0].maxhp) - _battlestream.battle.sides[1].pokemon[0].hp;
-                    if (current_damage > 0) {
-                        var raid_usr_damage_data = raid_data.Damages.filter(x => x.UserID == interaction.user.id)[0];
-                        if (raid_usr_damage_data) {
-                            var index = raid_data.Damages.indexOf(raid_usr_damage_data);
-                            raid_data.Damages[index].Damage = raid_usr_damage_data.Damage + current_damage;
-                        } else {
-                            raid_data.Damages.push({
-                                UserID: interaction.user.id,
-                                Damage: current_damage
-                            });
-                        }
-
-                        user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
-                            if (err) return;
-                            if (user) {
-                                user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
-                            }
-                            user.save();
+                        raid_data.Damages.push({
+                            UserID: interaction.user.id,
+                            Damage: current_damage
                         });
-                        raid_data.markModified('Damages');
                     }
-                }
 
-                // Raid Boss fainted.
-                function raid_boss_fainted() {
-                    damage_addition();
-                    raid_data.remove().then(() => {
-                        var channel_embed = new Discord.EmbedBuilder();
-                        channel_embed.setTitle(`Congratulations!`);
-                        channel_embed.setDescription(`You have defeated the raid boss. Your rewards are sent to your DM.`);
-                        channel_embed.setColor(interaction.member.displayHexColor);
-                        interaction.channel.send({ embeds: [channel_embed] });
-                        function raid_boss_faint_loop(i = 0) {
-                            if (raid_data.Trainers[i]) {
-                                // Get user data.
-                                var user_id = raid_data.Trainers[i];
-                                user_model.findOne({ UserID: user_id }, (err, user) => {
-                                    if (err) raid_boss_faint_loop(i++);
-                                    if (user) {
-                                        var credits, redeems, wishing_piece, raid_boss_reward;
-                                        credits = Math.floor(_.random(180, 220) * ((raid_data.RaidType + 1) ** 2));
-                                        user.PokeCredits = user.PokeCredits ? user.PokeCredits + credits : credits;
-
-                                        // Reward for winning the raid calculation.
-                                        switch (raid_data.RaidType) {
-                                            case 0:
-                                                if (_.random(1, 1000) > 999) redeems = true;
-                                                if (_.random(1, 1000) > 995) wishing_piece = true;
-                                                if (_.random(1, 1000) > 997) raid_boss_reward = true;
-                                                break;
-                                            case 1:
-                                                if (_.random(1, 1000) > 999) redeems = true;
-                                                if (_.random(1, 100) > 99) wishing_piece = true;
-                                                if (_.random(1, 100) > 99) raid_boss_reward = true;
-                                                break;
-                                            case 2:
-                                                if (_.random(1, 1000) > 997) redeems = true;
-                                                if (_.random(1, 100) > 95) wishing_piece = true;
-                                                if (_.random(1, 100) > 95) raid_boss_reward = true;
-                                                break;
-                                            case 3:
-                                                if (_.random(1, 100) > 99) redeems = true;
-                                                if (_.random(1, 100) > 90) wishing_piece = true;
-                                                if (_.random(1, 100) > 90) raid_boss_reward = true;
-                                                break;
-                                            case 4:
-                                                if (_.random(1, 100) > 95) redeems = true;
-                                                if (_.random(1, 100) > 75) wishing_piece = true;
-                                                if (_.random(1, 100) > 75) raid_boss_reward = true;
-                                                break;
-                                        }
-
-                                        var rewards_string = `**Rewards:**\nCredits: ${credits}`;
-                                        if (redeems) {
-                                            user.Redeems = user.Redeems ? user.Redeems + 1 : 1;
-                                            rewards_string += `\nRedeems: 1`;
-                                        }
-                                        if (wishing_piece) {
-                                            user.WishingPieces = user.WishingPieces ? user.WishingPieces + 1 : 1;
-                                            rewards_string += `\nWishing Piece: 1`;
-                                        }
-                                        if (raid_boss_reward) {
-                                            let pokemon_data = {
-                                                PokemonId: raid_data.RaidPokemon.ID,
-                                                Experience: 0,
-                                                Level: 1,
-                                                Nature: _.random(1, 25),
-                                                IV: [_.random(1, 31), _.random(1, 30), _.random(1, 30), _.random(1, 30), _.random(1, 30), _.random(1, 30)],
-                                                Shiny: false,
-                                                Reason: "Raid"
-                                            }
-
-                                            getPokemons.insertpokemon(user_id, pokemon_data).then(result => { });
-                                            rewards_string += `\nLevel 1 ${raid_data.RaidPokemon.Name}`;
-                                        }
-
-                                        rewards_string += "\n";
-
-                                        var overview = "**Overview:**";
-                                        var sorted_damages = raid_data.Damages.sort((a, b) => Number(b.Damage) - Number(a.Damage));
-                                        var final_index_number = 0;
-                                        for (var j = 0; j < sorted_damages.length; j++) {
-                                            if (raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)] != undefined) {
-                                                overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
-                                                if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
-                                                final_index_number = j + 1;
-                                            }
-                                        }
-
-                                        var zero_damage_users = raid_data.Trainers.filter(x => raid_data.Damages.findIndex(y => y.UserID == x) == -1);
-                                        for (var j = 0; j < zero_damage_users.length; j++) {
-                                            overview += `\n#${final_index_number + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == zero_damage_users[j])].slice(0, -5)} -> Damage: 0`;
-                                            if (raid_data.Trainers.findIndex(x => x == zero_damage_users[j]) == 0) overview += " :crown:";
-                                        }
-
-                                        var description = rewards_string + "\n" + overview;
-
-                                        var difficulty_string = getDifficultyString(raid_data.RaidType);
-                                        if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Completed.Gigantamax ? user.Raids.Completed.Gigantamax + 1 : 1;
-                                        user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
-
-                                        // Add data to raid dex if raid is normal
-                                        if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) var raid_dex = user.Raids.EventDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
-                                        else var raid_dex = user.Raids.RaidDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
-                                        if (raid_dex[0]) {
-                                            raid_dex[0].Completed[difficulty_string] = raid_dex[0].Completed[difficulty_string] ? raid_dex[0].Completed[difficulty_string] + 1 : 1;
-                                        } else {
-                                            var new_dex = {
-                                                PokemonId: raid_data.RaidPokemon.ID,
-                                                Completed: {}
-                                            }
-                                            new_dex.Completed[difficulty_string] = 1;
-                                            if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.EventDex.push(new_dex);
-                                            else user.Raids.RaidDex.push(new_dex);
-                                        }
-
-                                        // Raid Dex completed reward
-                                        if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidDexComplete != true) {
-                                            var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
-                                            raid_pokemons.forEach(element => {
-                                                var dex_data = user.Raids.RaidDex.filter(it => it.PokemonId == element["Pokemon Id"]);
-                                                dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
-                                                element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
-                                                element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
-                                                element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
-                                                element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
-                                                element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
-                                                element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
-                                            });
-
-                                            var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
-                                            if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
-                                                // Give reward
-                                                var raid_dex_complete_reward = {
-                                                    Redeems: 1,
-                                                    PokeCredits: 15000
-                                                }
-                                                mail.sendmail(user_id, "Pokefort", "Raid Dex completed!", `Well, Who is the boss now ? You have encountered all the bosses in our collection. #SAVEBOSS`, raid_dex_complete_reward, undefined, true);
-                                                user.RewardsCatalog.RaidDexComplete = true;
-                                            }
-                                        }
-
-                                        // Event Raid Dex completed reward
-                                        if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidEventDexComplete != true) {
-                                            var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
-                                            raid_pokemons.forEach(element => {
-                                                var dex_data = user.Raids.EventDex.filter(it => it.PokemonId == element["Pokemon Id"]);
-                                                dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
-                                                element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
-                                                element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
-                                                element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
-                                                element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
-                                                element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
-                                                element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
-                                            });
-
-                                            var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
-                                            if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
-                                                // Give reward
-                                                var raid_eventdex_complete_reward = {
-                                                    Redeems: 1,
-                                                    PokeCredits: 15000
-                                                }
-                                                mail.sendmail(user_id, "Pokefort", "Raid Event Dex completed!", `Well, Who is the boss now ? You have encountered all the event bosses in our collection. #SAVEGMAXBOSS`, raid_eventdex_complete_reward, undefined, true);
-                                                user.RewardsCatalog.RaidEventDexComplete = true;
-                                            }
-                                        }
-
-                                        user.markModified('Raids.Completed');
-                                        user.markModified('Raids');
-                                        user.save().then(() => {
-
-                                            // Send Dm message to all users.
-                                            if (!raid_data.MutedTrainers.includes(user_id)) {
-                                                var embed = new Discord.EmbedBuilder();
-                                                embed.setTitle(`You defeated a level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name.replaceAll("_r", "")}!`);
-                                                embed.setDescription(description);
-                                                var user_s = bot.users.cache.get(user_id)
-                                                if (user_s) user_s.send({ embeds: [embed] });
-                                                if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1);
-                                            } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
-                                        });
-                                    }
-                                });
-                            } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
-                        } raid_boss_faint_loop();
-                    });
-                }
-
-                // Raid Boss won.
-                function raid_boss_won() {
-                    raid_data.remove().then(() => {
-                        var channel_embed = new Discord.EmbedBuilder();
-                        channel_embed.setTitle(`Raid Boss Won!`);
-                        channel_embed.setDescription(`Raid Boss has defeated you! Try again next time!`);
-                        channel_embed.setColor(interaction.member.displayHexColor);
-                        interaction.channel.send({ embeds: [channel_embed] });
-                        // Send Dm message to all users.
-                        for (var i = 0; i < raid_data.Trainers.length; i++) {
-                            if (raid_data.Trainers[i]) {
-                                if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
-                            }
+                    user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+                        if (err) return;
+                        if (user) {
+                            user.Raids.TotalDamage = user.Raids.TotalDamage ? user.Raids.TotalDamage + current_damage : current_damage;
                         }
+                        user.save();
                     });
+                    raid_data.markModified('Damages');
                 }
+            }
 
-                if (_raid_boss_fainted == false && _raid_boss_won == false) {
+            // Raid Boss fainted.
+            function raid_boss_fainted() {
+                damage_addition();
+                raid_data.remove().then(() => {
+                    var channel_embed = new Discord.EmbedBuilder();
+                    channel_embed.setTitle(`Congratulations!`);
+                    channel_embed.setDescription(`You have defeated the raid boss. Your rewards are sent to your DM.`);
+                    channel_embed.setColor(interaction.member.displayHexColor);
+                    interaction.channel.send({ embeds: [channel_embed] });
+                    function raid_boss_faint_loop(i = 0) {
+                        if (raid_data.Trainers[i]) {
+                            // Get user data.
+                            var user_id = raid_data.Trainers[i];
+                            user_model.findOne({ UserID: user_id }, (err, user) => {
+                                if (err) raid_boss_faint_loop(i++);
+                                if (user) {
+                                    var credits, redeems, wishing_piece, raid_boss_reward;
+                                    credits = Math.floor(_.random(180, 220) * ((raid_data.RaidType + 1) ** 2));
+                                    user.PokeCredits = user.PokeCredits ? user.PokeCredits + credits : credits;
 
-                    // Raid Health and damage
-                    damage_addition();
+                                    // Reward for winning the raid calculation.
+                                    switch (raid_data.RaidType) {
+                                        case 0:
+                                            if (_.random(1, 1000) > 999) redeems = true;
+                                            if (_.random(1, 1000) > 995) wishing_piece = true;
+                                            if (_.random(1, 1000) > 997) raid_boss_reward = true;
+                                            break;
+                                        case 1:
+                                            if (_.random(1, 1000) > 999) redeems = true;
+                                            if (_.random(1, 100) > 99) wishing_piece = true;
+                                            if (_.random(1, 100) > 99) raid_boss_reward = true;
+                                            break;
+                                        case 2:
+                                            if (_.random(1, 1000) > 997) redeems = true;
+                                            if (_.random(1, 100) > 95) wishing_piece = true;
+                                            if (_.random(1, 100) > 95) raid_boss_reward = true;
+                                            break;
+                                        case 3:
+                                            if (_.random(1, 100) > 99) redeems = true;
+                                            if (_.random(1, 100) > 90) wishing_piece = true;
+                                            if (_.random(1, 100) > 90) raid_boss_reward = true;
+                                            break;
+                                        case 4:
+                                            if (_.random(1, 100) > 95) redeems = true;
+                                            if (_.random(1, 100) > 75) wishing_piece = true;
+                                            if (_.random(1, 100) > 75) raid_boss_reward = true;
+                                            break;
+                                    }
 
-                    // Raid save state.
-                    raid_data.Stream = _battlestream.battle.inputLog.join('\n');
+                                    var rewards_string = `**Rewards:**\nCredits: ${credits}`;
+                                    if (redeems) {
+                                        user.Redeems = user.Redeems ? user.Redeems + 1 : 1;
+                                        rewards_string += `\nRedeems: 1`;
+                                    }
+                                    if (wishing_piece) {
+                                        user.WishingPieces = user.WishingPieces ? user.WishingPieces + 1 : 1;
+                                        rewards_string += `\nWishing Piece: 1`;
+                                    }
+                                    if (raid_boss_reward) {
+                                        let pokemon_data = {
+                                            PokemonId: raid_data.RaidPokemon.ID,
+                                            Experience: 0,
+                                            Level: 1,
+                                            Nature: _.random(1, 25),
+                                            IV: [_.random(1, 31), _.random(1, 30), _.random(1, 30), _.random(1, 30), _.random(1, 30), _.random(1, 30)],
+                                            Shiny: false,
+                                            Reason: "Raid"
+                                        }
 
-                    // Add only names in UserStreamPokemons
-                    // Get all name using filter undefined.
-                    raid_data.UserStreamPokemons = _battlestream.battle.sides[0].pokemon.filter(x => x.set.name != undefined).map(x => x.set.name);
+                                        getPokemons.insertpokemon(user_id, pokemon_data).then(result => { });
+                                        rewards_string += `\nLevel 1 ${raid_data.RaidPokemon.Name}`;
+                                    }
 
-                    // Save to database.
-                    raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
-                    raid_data.RaidPokemon.PreviousHealth = _battlestream.battle.sides[1].pokemon[0].hp;
-                    raid_data.RaidPokemon.markModified();
-                    raid_data.save();
-                }
+                                    rewards_string += "\n";
+
+                                    var overview = "**Overview:**";
+                                    var sorted_damages = raid_data.Damages.sort((a, b) => Number(b.Damage) - Number(a.Damage));
+                                    var final_index_number = 0;
+                                    for (var j = 0; j < sorted_damages.length; j++) {
+                                        if (raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)] != undefined) {
+                                            overview += `\n#${j + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID)].slice(0, -5)} -> Damage: ${sorted_damages[j].Damage.toLocaleString()}`;
+                                            if (raid_data.Trainers.findIndex(x => x == sorted_damages[j].UserID) == 0) overview += " :crown:";
+                                            final_index_number = j + 1;
+                                        }
+                                    }
+
+                                    var zero_damage_users = raid_data.Trainers.filter(x => raid_data.Damages.findIndex(y => y.UserID == x) == -1);
+                                    for (var j = 0; j < zero_damage_users.length; j++) {
+                                        overview += `\n#${final_index_number + 1} ${raid_data.TrainersTag[raid_data.Trainers.findIndex(x => x == zero_damage_users[j])].slice(0, -5)} -> Damage: 0`;
+                                        if (raid_data.Trainers.findIndex(x => x == zero_damage_users[j]) == 0) overview += " :crown:";
+                                    }
+
+                                    var description = rewards_string + "\n" + overview;
+
+                                    var difficulty_string = getDifficultyString(raid_data.RaidType);
+                                    if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.Completed.Gigantamax = user.Raids.Completed.Gigantamax ? user.Raids.Completed.Gigantamax + 1 : 1;
+                                    user.Raids.Completed[difficulty_string] = user.Raids.Completed[difficulty_string] ? user.Raids.Completed[difficulty_string] + 1 : 1;
+
+                                    // Add data to raid dex if raid is normal
+                                    if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) var raid_dex = user.Raids.EventDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
+                                    else var raid_dex = user.Raids.RaidDex.filter(x => x.PokemonId == raid_data.RaidPokemon.ID);
+                                    if (raid_dex[0]) {
+                                        raid_dex[0].Completed[difficulty_string] = raid_dex[0].Completed[difficulty_string] ? raid_dex[0].Completed[difficulty_string] + 1 : 1;
+                                    } else {
+                                        var new_dex = {
+                                            PokemonId: raid_data.RaidPokemon.ID,
+                                            Completed: {}
+                                        }
+                                        new_dex.Completed[difficulty_string] = 1;
+                                        if (raid_data.Gigantamax != undefined && raid_data.Gigantamax == true) user.Raids.EventDex.push(new_dex);
+                                        else user.Raids.RaidDex.push(new_dex);
+                                    }
+
+                                    // Raid Dex completed reward
+                                    if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidDexComplete != true) {
+                                        var raid_pokemons = pokemons.filter(it => ((it["Legendary Type"] === "Mythical" || it["Primary Ability"] === "Beast Boost" || it["Legendary Type"] === "Legendary" || it["Legendary Type"] === "Sub-Legendary") && (it["Alternate Form Name"] === "Galar" || it["Alternate Form Name"] === "Alola" || it["Alternate Form Name"] === "Hisuian" || it["Alternate Form Name"] === "NULL") && !config.RAID_EXCEPTIONAL_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"])) || config.RAID_INCLUDE_POKEMON.some(ae => ae[0] == it["Pokemon Name"] && ae[1] == it["Alternate Form Name"]));
+                                        raid_pokemons.forEach(element => {
+                                            var dex_data = user.Raids.RaidDex.filter(it => it.PokemonId == element["Pokemon Id"]);
+                                            dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
+                                            element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
+                                            element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
+                                            element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
+                                            element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
+                                            element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
+                                            element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
+                                        });
+
+                                        var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+                                        if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
+                                            // Give reward
+                                            var raid_dex_complete_reward = {
+                                                Redeems: 1,
+                                                PokeCredits: 15000
+                                            }
+                                            mail.sendmail(user_id, "Pokefort", "Raid Dex completed!", `Well, Who is the boss now ? You have encountered all the bosses in our collection. #SAVEBOSS`, raid_dex_complete_reward, undefined, true);
+                                            user.RewardsCatalog.RaidDexComplete = true;
+                                        }
+                                    }
+
+                                    // Event Raid Dex completed reward
+                                    if (user.RewardsCatalog != undefined && user.RewardsCatalog.RaidEventDexComplete != true) {
+                                        var raid_pokemons = pokemons.filter(it => it["Alternate Form Name"] == "Gigantamax");
+                                        raid_pokemons.forEach(element => {
+                                            var dex_data = user.Raids.EventDex.filter(it => it.PokemonId == element["Pokemon Id"]);
+                                            dex_data = dex_data.length > 0 ? dex_data[0] : { Completed: {} };
+                                            element.easy = dex_data.Completed.Easy ? dex_data.Completed.Easy : 0;
+                                            element.normal = dex_data.Completed.Normal ? dex_data.Completed.Normal : 0;
+                                            element.hard = dex_data.Completed.Hard ? dex_data.Completed.Hard : 0;
+                                            element.challenge = dex_data.Completed.Challenge ? dex_data.Completed.Challenge : 0;
+                                            element.intense = dex_data.Completed.Intense ? dex_data.Completed.Intense : 0;
+                                            element.totaldefeated = element.easy + element.normal + element.hard + element.challenge + element.intense;
+                                        });
+
+                                        var user_defeated_raid_pokemons = raid_pokemons.filter(it => it.totaldefeated > 0);
+                                        if (user_defeated_raid_pokemons.length >= raid_pokemons.length) {
+                                            // Give reward
+                                            var raid_eventdex_complete_reward = {
+                                                Redeems: 1,
+                                                PokeCredits: 15000
+                                            }
+                                            mail.sendmail(user_id, "Pokefort", "Raid Event Dex completed!", `Well, Who is the boss now ? You have encountered all the event bosses in our collection. #SAVEGMAXBOSS`, raid_eventdex_complete_reward, undefined, true);
+                                            user.RewardsCatalog.RaidEventDexComplete = true;
+                                        }
+                                    }
+
+                                    user.markModified('Raids.Completed');
+                                    user.markModified('Raids');
+                                    user.save().then(() => {
+
+                                        // Send Dm message to all users.
+                                        if (!raid_data.MutedTrainers.includes(user_id)) {
+                                            var embed = new Discord.EmbedBuilder();
+                                            embed.setTitle(`You defeated a level ${raid_data.RaidPokemon.Level} ${raid_data.RaidPokemon.Name.replaceAll("_r", "")}!`);
+                                            embed.setDescription(description);
+                                            var user_s = bot.users.cache.get(user_id)
+                                            if (user_s) user_s.send({ embeds: [embed] });
+                                            if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1);
+                                        } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
+                                    });
+                                }
+                            });
+                        } else { if (i < raid_data.Trainers.length) raid_boss_faint_loop(i + 1); }
+                    } raid_boss_faint_loop();
+                });
+            }
+
+            // Raid Boss won.
+            function raid_boss_won() {
+                raid_data.remove().then(() => {
+                    var channel_embed = new Discord.EmbedBuilder();
+                    channel_embed.setTitle(`Raid Boss Won!`);
+                    channel_embed.setDescription(`Raid Boss has defeated you! Try again next time!`);
+                    channel_embed.setColor(interaction.member.displayHexColor);
+                    interaction.channel.send({ embeds: [channel_embed] });
+                    // Send Dm message to all users.
+                    for (var i = 0; i < raid_data.Trainers.length; i++) {
+                        if (raid_data.Trainers[i]) {
+                            if (!raid_data.MutedTrainers.includes(raid_data.Trainers[i])) bot.users.cache.get(raid_data.Trainers[i]).send(`The ${raid_data.RaidPokemon.Name} raid was not completed. Try better next time!`);
+                        }
+                    }
+                });
+            }
+
+            if (_raid_boss_fainted == false && _raid_boss_won == false) {
+
+                // Raid Health and damage
+                damage_addition();
+
+                // Raid save state.
+                raid_data.Stream = _battlestream.battle.inputLog.join('\n');
+
+                // Add only names in UserStreamPokemons
+                // Get all name using filter undefined.
+                raid_data.UserStreamPokemons = _battlestream.battle.sides[0].pokemon.filter(x => x.set.name != undefined).map(x => x.set.name);
+
+                // Save to database.
+                raid_data.RaidPokemon.Health = _battlestream.battle.sides[1].pokemon[0].hp;
+                raid_data.RaidPokemon.PreviousHealth = _battlestream.battle.sides[1].pokemon[0].hp;
+                raid_data.RaidPokemon.markModified();
+                raid_data.save();
             }
         }
         //#endregion
@@ -1023,16 +1013,16 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 }
 
 // Move thinker based on type effectiveness and base power.
-function move_thinker(battle) {
+function move_thinker(battle, current_pokemon) {
     var damages = [];
     var source = battle.sides[1].pokemon[0];
-    var target = battle.sides[0].active[0];
+    var target = battle.sides[0].pokemon[current_pokemon];
     var moves = source.moves;
 
     for (var i = 0; i < moves.length; i++) {
         var dmg = damage_calc(battle, source, target, moves[i]);
         if (dmg) damages.push([dmg[0], dmg[1], moves[i]]);
-        else damages.push([dmg, dmg, moves[i]]);
+        else damages.push([-2, 0, moves[i]]);
     }
     damages = damages.filter(x => x[0] != undefined);
     if (damages.length == 0) return 1;
