@@ -481,7 +481,7 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
     write_data = write_data.replace("[MOVE INDEX]", "move " + move_index);
 
     if (except_five) except_five = false;
-    void streams.omniscient.write(write_data);
+    void streams.omniscient.write(_battlestream.battle.inputLog.join("\n") + "\n" + write_data);
 
     const battle = new Battle(new Generations(Dex));
     const formatter = new LogFormatter('p1', battle);

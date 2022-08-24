@@ -330,6 +330,7 @@ client.on('messageCreate', async (message) => {
         //Getting the data from the user model
         user_model.findOne({ UserID: message.author.id }, (err, user) => {
             if (err) return console.log(err);
+            var user_available = false;
             if (user) { user_available = true; }
             var issuspend = false; // To check if the user is suspended
             // Suspend Protection
@@ -345,7 +346,7 @@ client.on('messageCreate', async (message) => {
         //#region Xp Increase
         //check if user database exists
         function advance_xp(message, user_avl, user) {
-            if (user_avl) {
+            if (user_avl || user) {
                 getPokemons.getallpokemon(message.author.id).then(user_pokemons => {
 
                     var randomxp = getRandomInt(1, 100);
@@ -487,8 +488,10 @@ client.on('guildCreate', guild => {
         GuildName: guild.name
     })
     write_data.save();
-    guild.systemChannel.send(config.BOT_NAME + " Joined this server. Thanks for invitation :smile:")
-    guild.systemChannel.send("Use ``/help`` to view list of commands.")
+    if (guild.systemChannel != null) {
+        guild.systemChannel.send(config.BOT_NAME + " Joined this server. Thanks for invitation :smile:")
+        guild.systemChannel.send("Use ``/help`` to view list of commands.")
+    }
 });
 
 // Pokemon Spawn System
