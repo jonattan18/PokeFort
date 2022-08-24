@@ -19,7 +19,7 @@ exports.Conditions = {
         // Damage reduction is handled directly in the sim/battle.js damage function
         onResidualOrder: 10,
         onResidual(pokemon) {
-            this.damage(pokemon.baseMaxhp / 16);
+            this.damage(pokemon.baseMaxhp / 32);
         },
     },
     par: {
@@ -682,7 +682,7 @@ exports.Conditions = {
                 this.eachEvent('Weather');
         },
         onWeather(target) {
-            this.damage(target.baseMaxhp / 16);
+            this.damage(target.baseMaxhp / 32);
         },
         onFieldEnd() {
             this.add('-weather', 'none:Sandstorm');
@@ -715,7 +715,7 @@ exports.Conditions = {
                 this.eachEvent('Weather');
         },
         onWeather(target) {
-            this.damage(target.baseMaxhp / 16);
+            this.damage(target.baseMaxhp / 32);
         },
         onFieldEnd() {
             this.add('-weather', 'none:Hail');
