@@ -470,10 +470,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
 
     //#endregion
 
-    // Reply interaction
-    var reply_message = !_switch ? "You have made a move!" : _switch ? "You have switched pokemon!" : "Raid Boss is thinking";
-    interaction.reply({ content: reply_message });
-
     var except_first_five_stream_write = parsed_stream.slice(5, parsed_stream.length);
     var move_index = move_thinker(_battlestream.battle, raid_data.CurrentPokemon);
     write_data = write_data.replace("[MOVE INDEX]", "move " + move_index);
@@ -489,6 +485,10 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
             else return;
         }
         else {
+            // Reply interaction
+            var reply_message = !_switch ? "You have made a move!" : _switch ? "You have switched pokemon!" : "Raid Boss is thinking";
+            interaction.reply({ content: reply_message });
+
             var show_str = [];
             var battle_log = _battlestream.battle.log.filter(function (item, pos, arr) { return pos === 0 || item !== arr[pos - 1]; }).join('\n');
             for (const { args, kwArgs } of Protocol.parse(battle_log)) {
