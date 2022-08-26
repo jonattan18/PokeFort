@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
     Redeems: Number,
     Shards: Number,
     DailyStreak: Number,
+    DailyCooldown: Number,
     RaidAlphaAgree: Boolean,
     NoCooldownRaid: Boolean,
     RewardsCatalog: {
