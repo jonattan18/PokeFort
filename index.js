@@ -206,9 +206,6 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.guild === null) return interaction.user.send("This bot don't support DM at the moment.");
 
-    // Remove this
-    if (!config.ALLOWED_GUILDS.includes(interaction.guild.id)) return;
-
     // Initialize variables
     var user_available = false;
 

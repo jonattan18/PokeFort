@@ -562,21 +562,6 @@ function raid(raid_data, bot, interaction, user_available, pokemons, _switch, _d
                 if (show_str[i].startsWith("  ")) {
                     second_user_message.push(show_str[i]);
                 }
-                /* else {
-                     show_str.splice(0, i);
-                     console.log(show_str);
-                    
-                     while (show_str[i] != undefined && show_str[i].startsWith("  ")) {
-                         second_user_message.push("\n" + show_str[i].replace("  ", " "));
-                         i++;
-                     }
-                     var j = 1;
-                     while (show_str[j] != undefined && show_str[j].startsWith("  ")) {
-                         second_user_message.push(show_str[j].replace("  ", " "));
-                         j++;
-                     }
-                     break;
-                 } */
             }
 
             if (first_user_message[0] != undefined && second_user_message[0] != undefined) {

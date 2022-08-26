@@ -119,6 +119,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             spd += percentage(spd, nature_value[5]);
             spe += percentage(spe, nature_value[6]);
 
+            // Shedinja HP exception.
+            if (pokemon_db["Pokemon Id"] == "420") hp = 1;
+
             // Image url
             var form = pokemon_db["Alternate Form Name"];
             var str = "" + pokemon_db["Pokedex Number"];

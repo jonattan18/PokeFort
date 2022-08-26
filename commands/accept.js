@@ -138,6 +138,10 @@ function duel(bot, interaction, prompt, pokemons) {
                     // Turn chooser
                     prompt.Duel.Turn = 1;
 
+                    // Shedinja HP expection
+                    if (user1pokemon.PokemonId == "420") pokemon1_hp = 1;
+                    if (user2pokemon.PokemonId == "420") pokemon2_hp = 1;
+
                     // For pokemon 1
                     prompt.Duel.User1Pokemon.PokemonUserID = user1.Selected;
                     prompt.Duel.User1Pokemon.PokemonXP = user1pokemon.Experience;
