@@ -16,9 +16,9 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
         if (user.DailyCooldown) {
             var current_time = new Date(user.DailyCooldown);
             current_time.setHours(current_time.getHours() + 12);
-            if ((Date.now() - current_time.getTime()) < 0) footer_text = "You can vote using /vote command";
+            if ((current_time.getTime() - Date.now()) < 0) footer_text = "You can vote using /vote command";
             else {
-                var time_left = new Date(Date.now() - current_time.getTime());
+                var time_left = new Date(current_time.getTime() - Date.now());
                 var time_left_string = time_left.getUTCHours().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
                 footer_text = `Time left to be able to daily: ${time_left_string}`;
             }

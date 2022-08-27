@@ -15,28 +15,35 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
         function already_voted() {
             var current_time = new Date(user.DailyCooldown);
             current_time.setHours(current_time.getHours() + 12);
-            var time_left = new Date(Date.now() - current_time.getTime());
+            var time_left = new Date(current_time.getTime() - Date.now());
             var time_left_string = time_left.getUTCHours().toString().padStart(2, "0") + ":" + time_left.getUTCMinutes().toString().padStart(2, "0") + ":" + time_left.getUTCSeconds().toString().padStart(2, "0");
             interaction.reply({ content: `You have already voted in the past 12 hours. Please wait for ${time_left_string} to vote again.` })
         }
 
         // This function will be called if user is going to vote and rewards will be given.
         function set_vote() {
+            var credits_reward_array = [50, 100, 150, 200, 250, 300, 400, 500, 750, 1000];
+            var reward_credits = credits_reward_array[Math.floor(Math.random() * credits_reward_array.length)];
+            var reward_wishing_pieces = Math.floor(Math.random() * (999 - 1)) + 1 > 995 ? 2 : 1;
             var daily_streak = user.DailyStreak + 1 || 1;
-            var embed = new Discord.EmbedBuilder();
-            embed.setTitle("Thank you for voting!");
-            embed.description(`You were given ${reward_credits} credits and ${reward_wishing_pieces} wishing pieces!\nYou have daily streak of ${daily_streak}`);
-            embed.setFooter({ text: "You can vote again after 12 hours!" });
-            interaction.reply({ embeds: [embed] });
+            user.DailyStreak = daily_streak;
+            user.PokeCredits = user.PokeCredits ? user.PokeCredits + reward_credits : reward_credits;
+            user.WishingPieces = user.WishingPieces ? user.WishingPieces + reward_wishing_pieces : reward_wishing_pieces;
+            user.DailyCooldown = Date.now();
+            user.save().then(() => {
+                var embed = new Discord.EmbedBuilder();
+                embed.setTitle("Thank you for voting!");
+                embed.setDescription(`You were given ${reward_credits} credits and ${reward_wishing_pieces} wishing pieces!\nYou have daily streak of ${daily_streak}`);
+                embed.setFooter({ text: "You can vote again after 12 hours!" });
+                interaction.reply({ embeds: [embed] });
+            });
         }
 
         if (user.DailyCooldown) {
             var current_time = new Date(user.DailyCooldown);
             current_time.setHours(current_time.getHours() + 12);
-            if ((Date.now() - current_time.getTime()) < 0) return set_vote();
-            else {
-                return already_voted();
-            }
+            if ((current_time.getTime() - Date.now()) < 0) return set_vote();
+            else return already_voted();
         } else return set_vote();
     });
 }
