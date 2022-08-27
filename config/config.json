@@ -3,6 +3,8 @@
     "BOT_TOKEN": "OTI0MTY4MDIxMTAxMTIxNjQ2.Ycaoig.5EMycrEaNvclZh-xh06ldtmNiNQ",
     "BOT_TOKEN_TEST": "OTgyNjk0NzkzNjk4MjM4NDg0.GO50bu.R1pp23rEuUkfzFvB9b5rkWbyjH72bKCXtWC5Ik",
     "MONGO_URI": "mongodb://jonattan:Jonattan%402004@127.0.0.1:27017/Pokefort?authSource=admin",
+    "INVITE_URL": "https://discord.com/api/oauth2/authorize?client_id=[CLIENTID]&permissions=277025909824&scope=bot%20applications.commands",
+    "OS_INVITE_URL": "https://discord.gg/kHDC5qeJgn",
     "ADMIN_COMMAND_SERVER": "925788851442692176",
     "ERROR_FILE_SAVE_LOCATION": "./error.json",
     "LOAD_BALANCER": false,

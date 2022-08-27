@@ -4340,7 +4340,7 @@ exports.Moves = {
         condition: {
             duration: 3,
             noCopy: true,
-            onStart(target) {
+            onStart(target, source) {
                 const noEncore = [
                     'assist', 'copycat', 'dynamaxcannon', 'encore', 'mefirst', 'metronome', 'mimic', 'mirrormove', 'naturepower', 'sketch', 'sleeptalk', 'struggle', 'transform',
                 ];
@@ -4354,6 +4354,12 @@ exports.Moves = {
                     // it failed
                     return false;
                 }
+
+                // Modified by PokeFort
+                // Reason: Encore move should be used only once.
+                if (source.moveSlots[source.moves.indexOf("encore")].already) return false;
+                source.moveSlots[source.moves.indexOf("encore")].already = true;
+
                 this.effectState.move = move.id;
                 this.effectState.duration = this.random(3, 5);
                 this.add('-start', target, 'Encore', undefined, this.effectState.duration);
