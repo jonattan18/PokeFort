@@ -5,7 +5,6 @@ const config = require("../config/config.json");
 
 module.exports.run = async (bot, interaction, user_available, pokemons) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
-    return interaction.reply({ content: `Only few days more... Invite me after that`, ephemeral: true });
 
     var invite_url = config.INVITE_URL.replace("[CLIENTID]", bot.user.id);
 
@@ -14,7 +13,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
     embed.setTitle("Party Invitation? Count me in!");
     embed.setDescription(`[Click here](${invite_url}) to add me in your precious party.\n\n[👉 👈 Wanna join my party?](${config.OS_INVITE_URL})`);
     embed.setColor("#e5ce1d");
-    embed.setThumbnail(bot.user.displayAvatarURL({ dynamic: true }));
+    embed.setImage("https://bit.ly/3pPJ1Th")
     interaction.reply({ embeds: [embed] });
 }
 
