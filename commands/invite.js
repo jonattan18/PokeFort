@@ -13,7 +13,6 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
     embed.setTitle("Party Invitation? Count me in!");
     embed.setDescription(`[Click here](${invite_url}) to add me in your precious party.\n\n[👉 👈 Wanna join my party?](${config.OS_INVITE_URL})`);
     embed.setColor("#e5ce1d");
-    embed.setImage("https://bit.ly/3pPJ1Th")
     interaction.reply({ embeds: [embed] });
 }
 
