@@ -43,7 +43,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
 
                         var last_raid_time = user.Raids.SpawnTimestamp;
                         // check if 3 hours passed since last raid spawn.
-                        if (interaction.options.get("gmax") != null || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 1800000 || (user.Admin != undefined && user.Admin > 3) || (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true)) {
+                        if (interaction.options.get("gmax") != null || last_raid_time == undefined || (new Date().getTime() - last_raid_time) > 3600000 || (user.Admin != undefined && user.Admin > 3) || (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true)) {
 
                             // Remove me on release...
                             if (user.NoCooldownRaid != undefined && user.NoCooldownRaid == true) {
