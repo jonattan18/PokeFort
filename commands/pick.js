@@ -50,8 +50,8 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             Started: true,
             OrderType: "Number",
             Joined: Date.now(),
-            PokeCredits: 100000,
-            Redeems: 25,
+            PokeCredits: 0,
+            Redeems: 0,
             Shards: 0,
         });
 
@@ -60,7 +60,6 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                 user_model.findOneAndUpdate({ UserID: interaction.user.id }, { $set: { Selected: result.Pokemons[0]._id } }, { new: true }, (err, updated) => {
                     if (err) return console.log(err)
                     interaction.reply({ content: "Congratulations! " + pokemon["Pokemon Name"] + " is your first pokemon! Type ``/info`` to see it!" });
-                    interaction.channel.send({ content: "We welcome you for taking part in beta program of this bot. We have credited you 100,000 PokeCredits and 25 Redeems for testing. Help yourself !" });
                 });
             }, err => { console.log(err) });
         });
