@@ -11531,6 +11531,7 @@
         "Pokemon Id": "242",
         "Pokedex Number": 147,
         "Pokemon Name": "Dratini",
+        "Pseudo": true,
         "Evolution": {
             "Id": "243",
             "Reason": "Level",
@@ -11593,6 +11594,7 @@
         "Pokemon Id": "243",
         "Pokedex Number": 148,
         "Pokemon Name": "Dragonair",
+        "Pseudo": true,
         "Evolution": {
             "Id": "244",
             "Reason": "Level",
@@ -11655,6 +11657,7 @@
         "Pokemon Id": "244",
         "Pokedex Number": 149,
         "Pokemon Name": "Dragonite",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Dragon Pokemon",
         "Alternate Form Name": "NULL",
@@ -17626,6 +17629,7 @@
         "Pokemon Id": "370",
         "Pokedex Number": 246,
         "Pokemon Name": "Larvitar",
+        "Pseudo": true,
         "Evolution": {
             "Id": "371",
             "Reason": "Level",
@@ -17688,6 +17692,7 @@
         "Pokemon Id": "371",
         "Pokedex Number": 247,
         "Pokemon Name": "Pupitar",
+        "Pseudo": true,
         "Evolution": {
             "Id": "372",
             "Reason": "Level",
@@ -17750,6 +17755,7 @@
         "Pokemon Id": "372",
         "Pokedex Number": 248,
         "Pokemon Name": "Tyranitar",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Armor Pokemon",
         "Alternate Form Name": "NULL",
@@ -26000,6 +26006,7 @@
         "Pokemon Id": "499",
         "Pokedex Number": 371,
         "Pokemon Name": "Bagon",
+        "Pseudo": true,
         "Evolution": {
             "Id": "500",
             "Reason": "Level",
@@ -26062,6 +26069,7 @@
         "Pokemon Id": "500",
         "Pokedex Number": 372,
         "Pokemon Name": "Shelgon",
+        "Pseudo": true,
         "Evolution": {
             "Id": "501",
             "Reason": "Level",
@@ -26124,6 +26132,7 @@
         "Pokemon Id": "501",
         "Pokedex Number": 373,
         "Pokemon Name": "Salamence",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Dragon Pokemon",
         "Alternate Form Name": "NULL",
@@ -26234,6 +26243,7 @@
         "Pokemon Id": "502",
         "Pokedex Number": 374,
         "Pokemon Name": "Beldum",
+        "Pseudo": true,
         "Evolution": {
             "Id": "503",
             "Reason": "Level",
@@ -26296,6 +26306,7 @@
         "Pokemon Id": "503",
         "Pokedex Number": 375,
         "Pokemon Name": "Metang",
+        "Pseudo": true,
         "Evolution": {
             "Id": "504",
             "Reason": "Level",
@@ -26358,6 +26369,7 @@
         "Pokemon Id": "504",
         "Pokedex Number": 376,
         "Pokemon Name": "Metagross",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Iron Leg Pokemon",
         "Alternate Form Name": "NULL",
@@ -30815,6 +30827,7 @@
         "Pokemon Id": "641",
         "Pokedex Number": 443,
         "Pokemon Name": "Gible",
+        "Pseudo": true,
         "Evolution": {
             "Id": "642",
             "Reason": "Level",
@@ -30876,6 +30889,7 @@
         "Pokemon Id": "642",
         "Pokedex Number": 444,
         "Pokemon Name": "Gabite",
+        "Pseudo": true,
         "Evolution": {
             "Id": "643",
             "Reason": "Level",
@@ -30938,6 +30952,7 @@
         "Pokemon Id": "643",
         "Pokedex Number": 445,
         "Pokemon Name": "Garchomp",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Mach Pokemon",
         "Alternate Form Name": "NULL",
@@ -42659,6 +42674,7 @@
         "Pokemon Id": "1008",
         "Pokedex Number": 633,
         "Pokemon Name": "Deino",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1009",
             "Reason": "Level",
@@ -42720,6 +42736,7 @@
         "Pokemon Id": "1009",
         "Pokedex Number": 634,
         "Pokemon Name": "Zweilous",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1010",
             "Reason": "Level",
@@ -42782,6 +42799,7 @@
         "Pokemon Id": "1010",
         "Pokedex Number": 635,
         "Pokemon Name": "Hydreigon",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Brutal Pokemon",
         "Alternate Form Name": "NULL",
@@ -47260,6 +47278,7 @@
         "Pokemon Id": "1133",
         "Pokedex Number": 704,
         "Pokemon Name": "Goomy",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1134",
             "Reason": "Level",
@@ -47321,6 +47340,7 @@
         "Pokemon Id": "1134",
         "Pokedex Number": 705,
         "Pokemon Name": "Sliggoo",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1135",
             "Reason": "Level",
@@ -47383,6 +47403,7 @@
         "Pokemon Id": "1135",
         "Pokedex Number": 706,
         "Pokemon Name": "Goodra",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Dragon Pokemon",
         "Alternate Form Name": "NULL",
@@ -52554,6 +52575,7 @@
         "Pokemon Id": "1311",
         "Pokedex Number": 782,
         "Pokemon Name": "Jangmo-o",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1312",
             "Reason": "Level",
@@ -52616,6 +52638,7 @@
         "Pokemon Id": "1312",
         "Pokedex Number": 783,
         "Pokemon Name": "Hakamo-o",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1313",
             "Reason": "Level",
@@ -52678,6 +52701,7 @@
         "Pokemon Id": "1313",
         "Pokedex Number": 784,
         "Pokemon Name": "Kommo-o",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Scaly Pokemon",
         "Alternate Form Name": "NULL",
@@ -59639,6 +59663,7 @@
         "Pokemon Id": "1472",
         "Pokedex Number": 885,
         "Pokemon Name": "Dreepy",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1473",
             "Reason": "Level",
@@ -59700,6 +59725,7 @@
         "Pokemon Id": "1473",
         "Pokedex Number": 886,
         "Pokemon Name": "Drakloak",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1474",
             "Reason": "Level",
@@ -59762,6 +59788,7 @@
         "Pokemon Id": "1474",
         "Pokedex Number": 887,
         "Pokemon Name": "Dragapult",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Stealth Pokemon",
         "Alternate Form Name": "NULL",
@@ -61451,6 +61478,7 @@
         "Pokemon Id": "1619",
         "Pokedex Number": 705,
         "Pokemon Name": "Sliggoo",
+        "Pseudo": true,
         "Evolution": {
             "Id": "1620",
             "Reason": "Level",
@@ -61508,6 +61536,7 @@
         "Pokemon Id": "1620",
         "Pokedex Number": 706,
         "Pokemon Name": "Goodra",
+        "Pseudo": true,
         "Evolution": "NULL",
         "Classication": "Shell Bunker Pokemon",
         "Alternate Form Name": "Hisuian",

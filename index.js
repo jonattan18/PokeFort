@@ -34,6 +34,7 @@ const { default: axios } = require('axios');
 
 // Loading Pokemons Data
 const pokemons = JSON.parse(fs.readFileSync('./assets/pokemons.json').toString());
+const pseudo_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL" && it["Pseudo"] == true);
 const mythical_pokemons = pokemons.filter(it => it["Legendary Type"] === "Mythical" && it["Alternate Form Name"] === "NULL");
 const ultra_beast_pokemons = pokemons.filter(it => it["Primary Ability"] === "Beast Boost" && it["Alternate Form Name"] === "NULL");
 const legendary_pokemons = pokemons.filter(it => it["Legendary Type"] === "Legendary" && it["Alternate Form Name"] === "NULL");
@@ -43,7 +44,7 @@ const mega_pokemons = pokemons.filter(it => it["Alternate Form Name"].includes("
 const galarian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Galar");
 const alolan_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Alola");
 const hisuian_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "Hisuian");
-const normal_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL");
+const normal_pokemons = pokemons.filter(it => it["Alternate Form Name"] === "NULL" && it["Primary Ability"] !== "Beast Boost" && it["Legendary Type"] === "NULL" && it["Pseudo"] != true);
 
 // Channel
 channel_message_cache = {};
@@ -504,7 +505,15 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     if (random > 997) {
         let random_legendary = getRandomInt(0, spawn_legendary_type.length);
         spawn_pokemon = spawn_legendary_type[random_legendary];
-        if (shiny_random = getRandomInt(0, 1000) > 990) {
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
+            is_shiny = true;
+        }
+    }
+    // To Spawn pseudo type.
+    else if (random > 991) {
+        let random_pseudo = getRandomInt(0, pseudo_pokemons.length);
+        spawn_pokemon = pseudo_pokemons[random_pseudo];
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
             is_shiny = true;
         }
     }
@@ -512,7 +521,7 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     else if (random > 994) {
         let random_galarian = getRandomInt(0, galarian_pokemons.length);
         spawn_pokemon = galarian_pokemons[random_galarian];
-        if (shiny_random = getRandomInt(0, 1000) > 990) {
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
             is_shiny = true;
         }
     }
@@ -520,7 +529,7 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     else if (random > 990) {
         let random_hisuian = getRandomInt(0, hisuian_pokemons.length);
         spawn_pokemon = hisuian_pokemons[random_hisuian];
-        if (shiny_random = getRandomInt(0, 1000) > 990) {
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
             is_shiny = true;
         }
     }
@@ -528,7 +537,7 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     else if (random > 986) {
         let random_alolan = getRandomInt(0, alolan_pokemons.length);
         spawn_pokemon = alolan_pokemons[random_alolan];
-        if (shiny_random = getRandomInt(0, 1000) > 990) {
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
             is_shiny = true;
         }
     }
@@ -536,8 +545,8 @@ function spawn_pokemon(message, channel_redirect_spawn) {
     else {
         let random_normal_pokemon = getRandomInt(0, normal_pokemons.length);
         spawn_pokemon = normal_pokemons[random_normal_pokemon];
-        if (shiny_random = getRandomInt(0, 1000) > 990) {
-            if (getRandomInt(0, 1000) > 980) {
+        if (shiny_random = getRandomInt(0, 1000) > 998) {
+            if (getRandomInt(0, 1000) > 990) {
                 is_shiny = true;
             }
         }
