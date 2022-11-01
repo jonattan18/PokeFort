@@ -281,7 +281,7 @@ function buynature(interaction, pokemons) {
                 if (available_nature[selected_pokemon.Nature - 1] == nature_name.toLowerCase()) return interaction.reply({ content: "This pokémon already has this nature!", ephemeral: true });
 
                 // Update database
-                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nature": available_nature.indexOf(nature_name) + 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
+                pokemons_model.findOneAndUpdate({ 'Pokemons._id': _id }, { $set: { "Pokemons.$[elem].Nature": available_nature.indexOf(nature_name.toLowerCase()) + 1 } }, { arrayFilters: [{ 'elem._id': _id }], new: true }, (err, pokemon) => {
                     if (err) return console.log(err);
                     interaction.reply({ content: `You changed the nature of your ${pokemon_name} from ${available_nature[selected_pokemon.Nature - 1].capitalize()} to ${nature_name.capitalize()}.` });
                 });

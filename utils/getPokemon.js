@@ -187,13 +187,6 @@ function get_pokemon_name_from_id(pokemonID, pokemons, shiny, star_shiny = false
     return name;
 }
 
-Object.defineProperty(String.prototype, 'capitalize', {
-    value: function () {
-        return this.charAt(0).toUpperCase() + this.slice(1);
-    },
-    enumerable: false
-});
-
 Number.prototype.pad = function (size) {
     var s = String(this);
     while (s.length < (size || 2)) { s = "0" + s; }
