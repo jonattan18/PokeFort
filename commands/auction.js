@@ -319,7 +319,7 @@ function arg_parsing(interaction, command, pokemons) {
     var showiv = false;
     var request_query = [];
     var order_type = {};
-    var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
+    var args = interaction.options.get("filter") ? interaction.options.get("filter").value.replaceAll("—", "--").split(" ") : [];
 
     var all_search_types = ["--o", "--order", "--showiv", "a", "d", "asc", "ascending", "desc", "descending", "iv", "id", "level", "lvl", "name", "n", "price", "p"];
     if (args.every(r => all_search_types.indexOf(r.toLowerCase()) >= 0)) {

@@ -335,7 +335,7 @@ function remove(bot, interaction, pokemons, prompt) {
 
 function pokemon_filter(interaction, user_pokemons, pokemons) {
 
-    var args = interaction.options.get('filter').value.split(" ");
+    var args = interaction.options.get('filter').value.replaceAll("—", "--").split(" ");
 
     if (onlyNumbers(args)) {
         var filtered_pokemons = user_pokemons.filter((_, index) => args.includes((index + 1).toString()));

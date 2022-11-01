@@ -34,7 +34,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                         getPokemons.getallpokemon(interaction.user.id).then(user_pokemons => {
                             global_user_pokemon = user_pokemons;
 
-                            var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
+                            var args = interaction.options.get("filter") ? interaction.options.get("filter").value.replaceAll("—", "--").split(" ") : [];
 
                             // If no arguments
                             if (args.length == 0) {

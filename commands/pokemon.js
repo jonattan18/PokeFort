@@ -71,7 +71,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons, cmd) => 
 
             if (interaction.options.get("filter") != null) {
                 // Multi commmand controller.
-                var args = interaction.options.get("filter").value.split(" ");
+                var args = interaction.options.get("filter").value.replaceAll("—", "--").split(" ");
                 var error = [];
                 var total_args = args.join(" ").replace(/--/g, ",--").split(",");
                 total_args = _.without(total_args, "", " ");
@@ -561,9 +561,9 @@ function create_pagination(interaction, pokemons, user_pokemons, page = 1) {
             var total_iv = ((chunked_pokemons[a][i].IV[0] + chunked_pokemons[a][i].IV[1] + chunked_pokemons[a][i].IV[2] + chunked_pokemons[a][i].IV[3] + chunked_pokemons[a][i].IV[4] + chunked_pokemons[a][i].IV[5]) / 186 * 100).toFixed(2);
             var pokemon_number = static_user_pokemons.findIndex(x => x === chunked_pokemons[a][i]);
             if (chunked_pokemons[a][i].Nickname != undefined) {
-                description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}% | Nickname: ${chunked_pokemons[a][i].Nickname}   \n`;
+                description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}% | Nickname: ${chunked_pokemons[a][i].Nickname}\n`;
             }
-            else { description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}%   \n`; }
+            else { description += `**${pokemon_name}** | Level: ${chunked_pokemons[a][i].Level} | Number: ${pokemon_number + 1} | IV: ${total_iv}%\n`; }
         }
 
         // Create embed message

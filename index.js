@@ -609,6 +609,14 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
+// Word search normalizer.
+Object.defineProperty(String.prototype, '_normalize', {
+    value: function () {
+        return this.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replaceAll("'", "").toLowerCase();
+    },
+    enumerable: false
+});
+
 // Capitalize property definition
 Object.defineProperty(String.prototype, 'capitalize', {
     value: function () {

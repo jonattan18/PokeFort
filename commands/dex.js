@@ -19,7 +19,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
     getDexes.getalldex(interaction.user.id).then((data) => {
         pokemons_from_database = data;
 
-        var args = interaction.options.get("cmd") ? interaction.options.get("cmd").value.split(" ") : [];
+        var args = interaction.options.get("cmd") ? interaction.options.get("cmd").value.replaceAll("—", "--").split(" ") : [];
 
         //Check if its dex arguements
         if (args.length == 0 || isInt(args[0])) { dex_pokemons(bot, interaction, args, user_available, pokemons); return; }
@@ -612,11 +612,6 @@ function isInt(value) {
     }
     x = parseFloat(value);
     return (x | 0) === x;
-}
-
-// Word search normalizer.
-String.prototype._normalize = function () {
-    return this.valueOf().normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 module.exports.config = {

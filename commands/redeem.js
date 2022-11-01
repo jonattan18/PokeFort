@@ -152,11 +152,6 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
-// Word search normalizer.
-String.prototype._normalize = function () {
-    return this.valueOf().normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
 module.exports.config = {
     name: "redeem",
     description: "Redeem info/pokemon/credits",

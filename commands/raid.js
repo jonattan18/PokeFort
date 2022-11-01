@@ -693,7 +693,7 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             if (interaction.options.getSubcommand() === "eventdex") is_eventdex = true;
 
             // filters
-            var args = interaction.options.get("filter") ? interaction.options.get("filter").value.split(" ") : [];
+            var args = interaction.options.get("filter") ? interaction.options.get("filter").value.replaceAll("—", "--").split(" ") : [];
 
             for (var i = 0; i < raid_pokemons.length; i++) {
                 var dex_data = [];

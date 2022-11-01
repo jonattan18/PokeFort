@@ -1,6 +1,5 @@
 const beta_model = require('../models/beta');
 const user_model = require('../models/user');
-const starter_model = require('../models/starterpack')
 const Discord = require('discord.js');
 
 module.exports.run = async (bot, interaction, user_available, pokemons) => {

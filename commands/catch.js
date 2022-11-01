@@ -249,11 +249,6 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
 
 }
 
-// Word search normalizer.
-String.prototype._normalize = function () {
-    return this.valueOf().normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
 module.exports.config = {
     name: "catch",
     description: "Catch a pokemon.",
