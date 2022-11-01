@@ -19,25 +19,8 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
                 reward.remove();
                 interaction.reply({ content: `We have sent the rewards through your mail, Please claim it.` });
             });
-
-        });
-    } else if (interaction.options.getSubcommand() === "raidpack") {
-        starter_model.findOne({ UserID: interaction.user.id }, (err, reward) => {
-            if (err) return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
-            if (!reward) return interaction.reply({ content: `You are not eligible for raid start pack`, ephemeral: true });
-
-            user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
-                for (i = 0; i < reward.Mails.length; i++) {
-                    user.Mails.push(reward.Mails[i]);
-                }
-                user.save();
-                reward.remove();
-                interaction.reply({ content: `We have sent the pack through your mail, Please claim it.` });
-            });
-
         });
     }
-
 }
 
 module.exports.config = {
@@ -46,10 +29,6 @@ module.exports.config = {
     options: [{
         name: "beta",
         description: "Beta rewards",
-        type: 1
-    }, {
-        name: "raidpack",
-        description: "Raid starter pack",
         type: 1
     }],
     aliases: []
