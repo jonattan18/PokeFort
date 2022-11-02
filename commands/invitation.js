@@ -2,6 +2,9 @@ const Discord = require('discord.js');
 const invitation_model = require('../models/invitation')
 const user_model = require('../models/user');
 
+// Config file
+const config = require("../config/config.json");
+
 module.exports.run = async (bot, interaction, user_available, pokemons) => {
     if (!user_available) return interaction.reply({ content: `You should have started to use this command! Use /start to begin the journey!`, ephemeral: true });
 
@@ -36,12 +39,36 @@ module.exports.run = async (bot, interaction, user_available, pokemons) => {
             }
         });
     } else {
+
+        if (interaction.guild.id != "980822800581406792") {
+            // Create an embed to share invitation link
+            const embed = new Discord.EmbedBuilder()
+            embed.setTitle("Invitation Event");
+            embed.setDescription(`This event is held in official server, Join the server to validate the invitation code.\n[Click here to join](${config.OS_INVITE_URL})`)
+            return interaction.reply({ embeds: [embed] });
+        }
+
+        invitation_model.findOne({ Primary: true }, (err, invitation) => {
+            if (err) return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
+            if (invitation) {
+                user_model.findOne({ UserID: interaction.user.id }, (err, user) => {
+                    if (err) return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
+                    if (user) {
+                        if (user.Joined < invitation.Timestamp) {
+                            return interaction.reply({ content: `Players who joined after this event is eligible for this event.`, ephemeral: true });
+                        }
+                    }
+                });
+            } else return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
+        });
+
         // Join the invitation
         invitation_model.findOne({ UserID: interaction.user.id }, (err, invitation_code) => {
             if (err) return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
             invitation_model.findOne({ InvitationCode: interaction.options.get("code").value }, (err, valid) => {
                 if (err) return interaction.reply({ content: `Something went wrong.`, ephemeral: true });
                 if (!valid) return interaction.reply({ content: `Unable to match the code, Please try again with new code.`, ephemeral: true });
+                if (interaction.user.id == valid.UserID) return interaction.reply({ content: `You can't type your own code.`, ephemeral: true });
                 if (!invitation_code) {
                     invitation_model.create({
                         UserID: interaction.user.id,

@@ -5,7 +5,9 @@ const InvitationSchema = new mongoose.Schema({
     InvitationCode: String,
     NoOfInvitation: Number,
     InvitedPerson: Array,
-    UsedCode: Boolean
+    UsedCode: Boolean,
+    Primary: Boolean,
+    Timestamp: Number
 });
 
 const MessageModel = module.exports = mongoose.model('Invitation', InvitationSchema)

@@ -25,6 +25,7 @@ const pokemons_model = require('./models/pokemons');
 const market_model = require('./models/market');
 const auction_model = require('./models/auction');
 const raid_model = require('./models/raids');
+const invitation_model = require('./models/invitation')
 
 // Utils
 const { loadCommands } = require('./utils/loadCommands');
@@ -73,6 +74,19 @@ else if (myArgs.length == 1) {
     my_slot = parseInt(myArgs[0]);
     i_indentified_as = config.WORKERS[my_slot - 1];
 }
+
+// Invitation Time Setup
+invitation_model.findOne({ Primary: true }, (err, invitation) => {
+    if (err) console.log(err);
+    if (!invitation) {
+        var invitation = new invitation_model({
+            Primary: true,
+            Timestamp: Date.now()
+        });
+        invitation.save();
+    }
+});
+
 
 // Market Initialization
 market_model.findOne({ Primary: true }, (err, market) => {
