@@ -23,5 +23,7 @@ PokeFort is a multiplayer game that can be played in Discord. It offers features
 ## Installation
 This project is powered by **Node.js** and **MongoDB**. In order to run this, you should have knowledge of programming and be familiar with javascript. 
 
+**Disclaimer: Every image in this project belongs to their respective owner including Pokemon images.**
+
 ## Credits
 This project was created by [jonattan](https://github.com/jonattan18) and his friends, It is licensed under the MIT License. Please feel free to contribute to the project by submitting pull requests or reporting issues.
