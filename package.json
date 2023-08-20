@@ -26,7 +26,7 @@
     "fs": "0.0.1-security",
     "lodash": "^4.17.21",
     "mongodb": "^4.3.0",
-    "mongoose": "^6.5.2",
+    "mongoose": "^6.11.3",
     "readdirp": "^3.6.0",
     "sharp": "^0.30.7"
   }
